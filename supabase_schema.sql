@@ -1,1 +1,211 @@
-c
+-- ====================================================================================
+-- CREDITTRACK PRO - SCHÉMA POSTGRESQL SUPABASE 100% INFAILLIBLE (FIX COLUMN USER_ID)
+-- ====================================================================================
+
+-- 1. EXTENSIONS
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- 2. CRÉATION DES TABLES SI ELLES N'EXISTENT PAS ENCORE
+CREATE TABLE IF NOT EXISTS clients (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    cni VARCHAR(100),
+    preferred_payment_method VARCHAR(50) DEFAULT 'Espèces',
+    payment_account VARCHAR(100),
+    reliability_score INT DEFAULT 85,
+    total_due DECIMAL(12, 2) DEFAULT 0,
+    status VARCHAR(50) DEFAULT 'pending',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS credits (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    client_id UUID NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+    amount DECIMAL(12, 2) NOT NULL,
+    due_date DATE NOT NULL,
+    description TEXT,
+    preferred_payment_method VARCHAR(50) DEFAULT 'Espèces',
+    payment_account VARCHAR(100),
+    penalty_rate DECIMAL(5, 2) DEFAULT 0,
+    guarantor_name VARCHAR(255),
+    guarantor_phone VARCHAR(50),
+    status VARCHAR(50) DEFAULT 'active',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    client_id UUID REFERENCES clients(id) ON DELETE SET NULL,
+    client_name VARCHAR(255) NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    payment_method VARCHAR(50) DEFAULT 'Espèces',
+    reference VARCHAR(100),
+    payment_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS accounts (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    code VARCHAR(20) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS transactions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    reference VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    date DATE NOT NULL DEFAULT CURRENT_DATE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS journal_entries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    transaction_id UUID NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
+    account_id UUID NOT NULL REFERENCES accounts(id),
+    entry_type VARCHAR(10) NOT NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS merchants (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
+    business_name VARCHAR(255) NOT NULL,
+    owner_name VARCHAR(255) NOT NULL,
+    phone VARCHAR(50),
+    email VARCHAR(255),
+    plan_tier VARCHAR(20) DEFAULT 'free',
+    subscription_status VARCHAR(20) DEFAULT 'active',
+    current_period_start TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    current_period_end TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS saas_subscription_payments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    merchant_id UUID REFERENCES merchants(id) ON DELETE CASCADE,
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    amount DECIMAL(12, 2) NOT NULL,
+    currency VARCHAR(10) DEFAULT 'XOF',
+    plan_tier VARCHAR(20) NOT NULL,
+    payment_method VARCHAR(50) NOT NULL,
+    transaction_ref VARCHAR(100) UNIQUE NOT NULL,
+    status VARCHAR(20) DEFAULT 'completed',
+    paid_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS admin_license_keys (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    license_key VARCHAR(100) UNIQUE NOT NULL,
+    label VARCHAR(255) NOT NULL,
+    plan_granted VARCHAR(20) DEFAULT 'vip_lifetime',
+    max_uses INT DEFAULT 1,
+    used_count INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 3. AJOUT INFAILLIBLE DES COLONNES MANQUANTES SUR TOUTES LES TABLES
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS preferred_payment_method VARCHAR(50) DEFAULT 'Espèces';
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS payment_account VARCHAR(100);
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS reliability_score INT DEFAULT 85;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS total_due DECIMAL(12, 2) DEFAULT 0;
+ALTER TABLE clients ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'pending';
+
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS preferred_payment_method VARCHAR(50) DEFAULT 'Espèces';
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS payment_account VARCHAR(100);
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS penalty_rate DECIMAL(5, 2) DEFAULT 0;
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS guarantor_name VARCHAR(255);
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS guarantor_phone VARCHAR(50);
+ALTER TABLE credits ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active';
+
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) DEFAULT 'Espèces';
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS reference VARCHAR(100);
+ALTER TABLE payments ADD COLUMN IF NOT EXISTS notes TEXT;
+
+ALTER TABLE accounts ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+ALTER TABLE transactions ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+ALTER TABLE journal_entries ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid();
+
+-- 4. INDEX DE RECHERCHE ET PERFORMANCE
+CREATE INDEX IF NOT EXISTS idx_clients_user_id ON clients(user_id);
+CREATE INDEX IF NOT EXISTS idx_clients_phone ON clients(phone);
+CREATE INDEX IF NOT EXISTS idx_credits_user_id ON credits(user_id);
+CREATE INDEX IF NOT EXISTS idx_credits_client_id ON credits(client_id);
+CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);
+CREATE INDEX IF NOT EXISTS idx_journal_entries_user_id ON journal_entries(user_id);
+CREATE INDEX IF NOT EXISTS idx_merchants_user_id ON merchants(user_id);
+
+-- 5. VUE SOLDE DES COMPTES
+CREATE OR REPLACE VIEW account_balances AS
+SELECT 
+    a.id,
+    a.code,
+    a.name,
+    a.type,
+    COALESCE(SUM(CASE WHEN je.entry_type = 'DEBIT' THEN je.amount ELSE 0 END), 0) as total_debit,
+    COALESCE(SUM(CASE WHEN je.entry_type = 'CREDIT' THEN je.amount ELSE 0 END), 0) as total_credit,
+    CASE 
+        WHEN a.type IN ('ASSET', 'EXPENSE') THEN 
+            COALESCE(SUM(CASE WHEN je.entry_type = 'DEBIT' THEN je.amount ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN je.entry_type = 'CREDIT' THEN je.amount ELSE 0 END), 0)
+        ELSE 
+            COALESCE(SUM(CASE WHEN je.entry_type = 'CREDIT' THEN je.amount ELSE 0 END), 0) - COALESCE(SUM(CASE WHEN je.entry_type = 'DEBIT' THEN je.amount ELSE 0 END), 0)
+    END as balance
+FROM accounts a
+LEFT JOIN journal_entries je ON a.id = je.account_id
+GROUP BY a.id, a.code, a.name, a.type;
+
+-- 6. INSERTION DES DONNÉES PAR DÉFAUT (CLÉS VIP ADMIN & COMPTABILITÉ)
+INSERT INTO admin_license_keys (license_key, label, plan_granted, max_uses) VALUES
+('VIP-SALEM-PRO-2026', 'Licence Fondateur & Proches Salem', 'vip_lifetime', 100),
+('CREDITTRACK-VIP-PASS', 'Pass VIP Spécial Famille', 'vip_lifetime', 50)
+ON CONFLICT (license_key) DO NOTHING;
+
+-- 7. ACTIVATION ROW LEVEL SECURITY (RLS) & POLITIQUES
+ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
+ALTER TABLE credits ENABLE ROW LEVEL SECURITY;
+ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE merchants ENABLE ROW LEVEL SECURITY;
+ALTER TABLE saas_subscription_payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE admin_license_keys ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow all on clients" ON clients;
+CREATE POLICY "Allow all on clients" ON clients FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on credits" ON credits;
+CREATE POLICY "Allow all on credits" ON credits FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on payments" ON payments;
+CREATE POLICY "Allow all on payments" ON payments FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on accounts" ON accounts;
+CREATE POLICY "Allow all on accounts" ON accounts FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on transactions" ON transactions;
+CREATE POLICY "Allow all on transactions" ON transactions FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on journal_entries" ON journal_entries;
+CREATE POLICY "Allow all on journal_entries" ON journal_entries FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on merchants" ON merchants;
+CREATE POLICY "Allow all on merchants" ON merchants FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on saas_subscription_payments" ON saas_subscription_payments;
+CREATE POLICY "Allow all on saas_subscription_payments" ON saas_subscription_payments FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on admin_license_keys" ON admin_license_keys;
+CREATE POLICY "Allow all on admin_license_keys" ON admin_license_keys FOR ALL USING (true) WITH CHECK (true);
