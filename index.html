@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://bnkwplwlfnhukevwdcen.supabase.co https://api.qrserver.com; frame-src 'self' https://wa.me; object-src 'none';">
+  <title>CréditTrack PRO - Gestion Facile de Crédits & Paiements</title>
+  <meta name="description" content="Application simple et puissante pour suivre vos crédits clients, encaisser par Wave / Mobile Money et envoyer des rappels WhatsApp automatiques.">
+  <meta name="theme-color" content="#1B3BBB">
+  <link rel="icon" type="image/png" href="logo_3d.png">
+  <link rel="apple-touch-icon" href="logo_3d.png">
+  <link rel="manifest" href="manifest.json">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
+  <!-- ⚡ RESET TOTAL CACHE + FORÇAGE INITIAL LANDING PAGE -->
+  <script>
+    localStorage.removeItem('activeView');
+    (async function() {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        for (const reg of regs) await reg.unregister();
+      }
+      if ('caches' in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map(k => caches.delete(k)));
+      }
+    })();
+  </script>
+  <script src="dataStore.js?v=20260816_v2" defer></script>
+  <script src="app.js?v=20260816_v2" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260816_v2">
+</head>
+<body class="is-landing-mode">
+
+  <div id="toast-container"></div>
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
+
+  <!-- ============================================================
+       MODALE AUTH : CONNEXION & INSCRIPTION COMMERÇANT (EMAIL / GOOGLE)
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-auth">
+    <div class="modal-card" style="max-width:440px;">
+      <div class="card-header">
+        <span class="card-title" id="auth-modal-title">🔐 Connexion à votre Espace</span>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-auth')">✕</button>
+      </div>
+
+      <!-- Auth Tabs Switcher -->
+      <div class="auth-tabs" style="display:flex;background:#F1F5F9;padding:4px;border-radius:10px;margin-bottom:18px;">
+        <button type="button" id="tab-auth-login" class="auth-tab-btn active" onclick="switchAuthTab('login')" style="flex:1;padding:8px;font-size:0.85rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;">
+          Se Connecter
+        </button>
+        <button type="button" id="tab-auth-register" class="auth-tab-btn" onclick="switchAuthTab('register')" style="flex:1;padding:8px;font-size:0.85rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;background:transparent;color:#64748B;">
+          Créer un Compte
+        </button>
+      </div>
+
+      <!-- Bouton Google Sign-In Rapide -->
+      <button type="button" class="btn-google-auth" onclick="handleGoogleAuth()" style="width:100%;padding:11px;border:1px solid #E2E8F0;border-radius:10px;background:#fff;color:#0F172A;font-weight:700;font-size:0.88rem;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 1px 3px rgba(0,0,0,0.06);margin-bottom:16px;cursor:pointer;">
+        <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        <span>Continuer avec Google</span>
+      </button>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+        <span style="font-size:0.75rem;color:#94A3B8;font-weight:700;">OU PAR EMAIL</span>
+        <div style="flex:1;height:1px;background:#E2E8F0;"></div>
+      </div>
+
+      <!-- Formulaire Connexion / Inscription -->
+      <form id="form-auth" onsubmit="handleAuthSubmit(event)">
+        
+        <div id="auth-field-biz" style="display:none;" class="form-group">
+          <label class="form-label">Nom de votre Boutique / Commerce *</label>
+          <input type="text" id="auth-biz-name" class="form-control" placeholder="ex: Boutique KOUASSI &amp; Fils">
+        </div>
+
+        <div id="auth-field-phone" style="display:none;" class="form-group">
+          <label class="form-label">Numéro WhatsApp (Pour les alertes) *</label>
+          <input type="tel" id="auth-phone" class="form-control" placeholder="+225 0701020304">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Adresse E-mail *</label>
+          <input type="email" id="auth-email" class="form-control" placeholder="votre.email@gmail.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe *</label>
+          <input type="password" id="auth-password" class="form-control" placeholder="••••••••" minlength="6" required>
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width:100%;padding:12px;font-weight:800;font-size:0.92rem;margin-top:6px;">
+          Se Connecter
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE TARIFS & ABONNEMENTS SAAS PRO (FEDAPAY + CLÉ VIP)
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-subscription-plans">
+    <div class="modal-card" style="max-width:700px;">
+      <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:14px;">
+        <div>
+          <span class="card-title" style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="crown" style="width:22px;height:22px;color:#F59E0B;"></i>
+            Débloquez la Puissance de CreditTrack PRO
+          </span>
+          <p style="font-size:0.8rem;color:#64748B;margin:2px 0 0 0;">Accédez aux clients illimités, rappels automatiques et bilans comptables complets.</p>
+        </div>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-subscription-plans')">✕</button>
+      </div>
+
+      <div style="padding:20px 0 6px 0;">
+        <!-- Grille des 2 Forfaits -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:20px;">
+          
+          <!-- FORFAIT 1 : PRO MENSUEL -->
+          <div class="pricing-plan-box" style="background:#F8FAFC;border:2px solid #E2E8F0;border-radius:14px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;position:relative;">
+            <div>
+              <div style="font-size:0.82rem;font-weight:800;color:#2563EB;text-transform:uppercase;letter-spacing:0.5px;">Forfait Flexible</div>
+              <h3 style="font-size:1.25rem;font-weight:800;color:#0F172A;margin:4px 0;">PRO Mensuel</h3>
+              <div style="display:flex;align-items:baseline;gap:4px;margin:12px 0 16px 0;">
+                <span style="font-size:1.8rem;font-weight:800;color:#0F172A;">5 000</span>
+                <span style="font-weight:700;color:#64748B;font-size:0.9rem;">FCFA / mois</span>
+              </div>
+              <ul style="list-style:none;padding:0;margin:0;font-size:0.84rem;color:#334155;line-height:1.8;">
+                <li>✓ <strong>Clients &amp; Dettes illimités</strong></li>
+                <li>✓ <strong>Rappels WhatsApp &amp; SMS en 1 clic</strong></li>
+                <li>✓ <strong>Reçus PDF &amp; Bilans sans filigrane</strong></li>
+                <li>✓ <strong>Livre de caisse SYSCOHADA</strong></li>
+              </ul>
+            </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:20px;padding:12px;font-weight:800;" onclick="triggerSaaSPayment('pro_monthly', 5000)">
+              Choisir PRO Mensuel (5 000 F)
+            </button>
+          </div>
+
+          <!-- FORFAIT 2 : PRO ANNUEL (RECOMMENDED) -->
+          <div class="pricing-plan-box highlight" style="background:linear-gradient(145deg, #0F172A, #1E293B);border:2px solid #F59E0B;border-radius:14px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;position:relative;color:#fff;box-shadow:0 10px 25px rgba(245,158,11,0.15);">
+            <div style="position:absolute;top:-12px;right:18px;background:#F59E0B;color:#0F172A;font-weight:800;font-size:0.7rem;padding:4px 10px;border-radius:20px;text-transform:uppercase;">
+              Économisez 25%
+            </div>
+            <div>
+              <div style="font-size:0.82rem;font-weight:800;color:#FBBF24;text-transform:uppercase;letter-spacing:0.5px;">👑 Meilleure Offre</div>
+              <h3 style="font-size:1.25rem;font-weight:800;color:#fff;margin:4px 0;">PRO Annuel</h3>
+              <div style="display:flex;align-items:baseline;gap:4px;margin:12px 0 16px 0;">
+                <span style="font-size:1.8rem;font-weight:800;color:#fff;">45 000</span>
+                <span style="font-weight:700;color:rgba(255,255,255,0.7);font-size:0.9rem;">FCFA / an</span>
+              </div>
+              <ul style="list-style:none;padding:0;margin:0;font-size:0.84rem;color:rgba(255,255,255,0.9);line-height:1.8;">
+                <li>✓ <strong>Tous les avantages PRO pendant 1 an</strong></li>
+                <li>✓ <strong>3 Mois Gratuits offerts</strong></li>
+                <li>✓ <strong>Support VIP Prioritaire 24/7</strong></li>
+                <li>✓ <strong>Période de grâce étendue (7 jours)</strong></li>
+              </ul>
+            </div>
+            <button class="btn" style="background:#F59E0B;color:#0F172A;width:100%;margin-top:20px;padding:12px;font-weight:800;border:none;" onclick="triggerSaaSPayment('pro_yearly', 45000)">
+              Choisir PRO Annuel (45 000 F)
+            </button>
+          </div>
+
+        </div>
+
+        <!-- ZONE SECRÈTE : CLÉ DE LICENCE VIP ADMINISTRATEUR -->
+        <div style="background:#F0FDF4;border:1px dashed #22C55E;border-radius:12px;padding:14px 16px;margin-top:10px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <i data-lucide="key-round" style="width:16px;height:16px;color:#16A34A;"></i>
+            <strong style="font-size:0.85rem;color:#166534;">Vous avez une Clé de Licence VIP Administrateur / Partenaire ?</strong>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <input type="text" id="admin-license-key-input" class="form-control" placeholder="ex: VIP-SALEM-PRO-2026" style="background:#fff;border-color:#86EFAC;font-weight:700;text-transform:uppercase;">
+            <button class="btn" style="background:#16A34A;color:#fff;font-weight:800;padding:0 18px;white-space:nowrap;" onclick="redeemAdminLicenseKey()">
+              Débloquer VIP
+            </button>
+          </div>
+          <small style="color:#15803D;font-size:0.72rem;margin-top:4px;display:block;">
+            💡 Permet au fondateur et ses proches d'activer la version PRO gratuitement et instantanément.
+          </small>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE 1 : REÇU & SIGNATURE DIGITALE
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-receipt-preview">
+    <div class="modal-card">
+      <div class="card-header">
+        <span class="card-title" data-i18n="modalReceiptTitle">Reçu de Paiement</span>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-receipt-preview')">✕</button>
+      </div>
+      <div id="receipt-ticket-content" class="receipt-box">
+        <div style="text-align:center;margin-bottom:12px;">
+          <h3 id="receipt-biz-name" style="font-size:1.1rem;font-weight:800;color:#0F172A;">BOUTIQUE KOUASSI &amp; FILS</h3>
+          <p style="font-size:0.75rem;color:#64748B;" data-i18n="receiptOfficialSubtitle">Reçu Officiel de Règlement</p>
+        </div>
+        <hr class="receipt-divider">
+        <div style="font-size:0.85rem;line-height:1.6;">
+          <div><strong data-i18n="client">Client :</strong> <span id="receipt-client-name">Société ABC</span></div>
+          <div><strong data-i18n="phone">Téléphone :</strong> <span id="receipt-client-phone">+225 07010203</span></div>
+          <div><strong data-i18n="reason">Motif :</strong> <span id="receipt-items-desc">3 Sacs de Riz 50kg</span></div>
+          <div style="font-size:1.15rem;font-weight:800;margin-top:10px;color:#2563EB;">
+            <span data-i18n="amountPaid">Montant Payé :</span> <span id="receipt-total-amount">150 000 FCFA</span>
+          </div>
+        </div>
+        <hr class="receipt-divider">
+        <div style="text-align:center;">
+          <p style="font-size:0.74rem;margin-bottom:6px;color:#64748B;" data-i18n="clientSignature">Signature du Client :</p>
+          <img id="receipt-signature-img" src="" alt="Signature" style="max-height:60px;display:none;margin:0 auto;">
+          <div id="receipt-signature-placeholder" style="font-style:italic;color:#94A3B8;font-size:0.75rem;" data-i18n="signedElectronically">[ Signé Électroniquement ]</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button class="btn btn-outline" style="flex:1;" onclick="printReceiptTicket()" data-i18n="print">🖨️ Imprimer</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="downloadReceiptPDF()" data-i18n="downloadPDF">📥 Télécharger PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE 2 : FICHE CLIENT DÉTAILLÉE
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-client-details">
+    <div class="modal-card modal-card-large">
+      <div class="modal-banner-header">
+        <div style="display:flex; gap:14px; align-items:center;">
+          <div class="modal-avatar-circle" id="modal-client-initials">AB</div>
+          <div>
+            <h2 id="modal-client-name" style="margin:0; font-size:1.3rem; font-weight:800;">Nom du Client</h2>
+            <p id="modal-client-phone" style="margin:2px 0 0 0; color:#94A3B8; font-size:0.85rem;">+225 00000000</p>
+            <div id="modal-client-status" class="modal-status-badge"></div>
+          </div>
+        </div>
+        <button class="btn btn-outline modal-close-btn" style="border-color:rgba(255,255,255,0.2); color:#fff;" onclick="closeModal('modal-client-details')">✕</button>
+      </div>
+      
+      <div style="padding:20px 24px;">
+        <div class="client-modal-kpi-grid">
+          <div class="client-modal-kpi-card">
+            <div class="client-modal-kpi-label" data-i18n="currentDebt">Dette Totale à Payer</div>
+            <div class="client-modal-kpi-val" id="modal-client-due">0 FCFA</div>
+          </div>
+          <div class="client-modal-kpi-card">
+            <div class="client-modal-kpi-label" data-i18n="clientTrust">Fiabilité du Client</div>
+            <div class="client-modal-kpi-val" id="modal-client-score">-- / 100</div>
+          </div>
+        </div>
+
+        <h4 style="font-size:0.95rem; font-weight:800; border-bottom:2px solid #F1F5F9; padding-bottom:8px; margin-bottom:14px; display:flex; align-items:center; gap:8px;">
+          <i data-lucide="history" style="width:18px;height:18px;color:#2563EB;"></i>
+          <span data-i18n="historyTitle">Historique des Achats & Paiements</span>
+        </h4>
+        <div class="table-responsive" style="max-height:220px; overflow-y:auto; border:1px solid #E2E8F0; border-radius:8px;">
+          <table class="custom-table" style="margin:0;">
+            <thead style="position:sticky; top:0; background:#F8FAFC; z-index:1;">
+              <tr>
+                <th data-i18n="date">Date</th>
+                <th data-i18n="details">Motif</th>
+                <th data-i18n="amount">Montant</th>
+                <th data-i18n="status">État</th>
+              </tr>
+            </thead>
+            <tbody id="modal-client-history-body">
+              <!-- JS Populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mode de Règlement de l'Encaissement -->
+        <div style="margin-top:16px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px 14px;">
+          <label style="font-size:0.82rem;font-weight:700;color:#0F172A;margin-bottom:6px;display:block;">
+            💳 Moyen de règlement utilisé pour cet encaissement :
+          </label>
+          <select id="modal-pay-method-select" class="form-control" style="font-size:0.86rem;font-weight:700;">
+            <option value="Espèces (Cash)">💵 Espèces (Cash)</option>
+            <option value="Wave Money">🌊 Wave Direct</option>
+            <option value="Orange Money">🟠 Orange Money</option>
+            <option value="MTN Mobile Money">📱 MTN MoMo</option>
+            <option value="Moov Money">🔵 Moov Money</option>
+            <option value="Virement Bancaire">🏦 Virement Bancaire</option>
+          </select>
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px; border-top:1px solid #E2E8F0; padding-top:18px; flex-wrap:wrap;">
+          <button class="btn btn-primary" style="flex:2; min-width:140px; background:#10B981; border:none;" onclick="payClientDebt()">
+            <i data-lucide="banknote" style="width:16px;height:16px;"></i> <span data-i18n="recordPayment">Encaisser ce Client</span>
+          </button>
+          <button class="btn btn-outline" style="flex:1; min-width:120px; border-color:#25D366; color:#15803D;" id="modal-client-whatsapp-btn">
+            <i data-lucide="message-circle" style="width:16px;height:16px;"></i> <span>WhatsApp</span>
+          </button>
+          <button class="btn btn-outline" style="flex:1; min-width:100px; border-color:#2563EB; color:#2563EB;" id="modal-client-sms-btn">
+            <i data-lucide="smartphone" style="width:16px;height:16px;"></i> <span>SMS</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE RAPPEL INTELLIGENT (WHATSAPP OU SMS AU CHOIX)
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-send-reminder">
+    <div class="modal-card" style="max-width:520px;">
+      <div class="card-header">
+        <span class="card-title">💬 Envoyer un Rappel de Paiement</span>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-send-reminder')">✕</button>
+      </div>
+      <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <strong id="reminder-modal-client-name" style="font-size:1.05rem;color:#0F172A;">Client</strong>
+          <span id="reminder-modal-amount" style="font-weight:800;color:#2563EB;font-size:1.1rem;">150 000 FCFA</span>
+        </div>
+        <div style="font-size:0.84rem;color:#64748B;">
+          Numéro enregistré : <strong id="reminder-modal-phone" style="color:#0F172A;">+225 07010203</strong>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Message prêt à être envoyé :</label>
+        <textarea id="reminder-modal-custom-text" class="form-control" rows="4" style="font-size:0.86rem;line-height:1.5;"></textarea>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
+        <button class="btn" style="background:#25D366;color:#fff;font-weight:800;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="triggerWhatsAppFromModal()">
+          <i data-lucide="message-circle" style="width:18px;height:18px;"></i> Envoyer WhatsApp
+        </button>
+        <button class="btn" style="background:#2563EB;color:#fff;font-weight:800;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="triggerSMSFromModal()">
+          <i data-lucide="smartphone" style="width:18px;height:18px;"></i> Envoyer par SMS
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE 3 : ENREGISTRER UNE RECETTE / DÉPENSE (CAISSE)
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-accounting-entry">
+    <div class="modal-card">
+      <div class="card-header">
+        <span class="card-title" data-i18n="modalEntryTitle">Enregistrer une Vente ou Dépense</span>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-accounting-entry')">✕</button>
+      </div>
+      <form onsubmit="handleNewAccountingEntrySubmit(event)">
+        <div class="form-group">
+          <label class="form-label" data-i18n="entryType">Type d'Opération</label>
+          <select id="acc-entry-type" class="form-control" onchange="updateAccountCodeOptions(this.value)" required>
+            <option value="revenue" data-i18n="typeRevenue">🟢 Vente encaissée (Entrée d'argent)</option>
+            <option value="expense" data-i18n="typeExpense">🔴 Achat / Dépense (Sortie d'argent)</option>
+            <option value="cash" data-i18n="typeCash">🔵 Mouvement Caisse / Mobile Money</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="categoryAccount">Catégorie</label>
+          <select id="acc-account-select" class="form-control" required>
+            <!-- Dynamic options -->
+          </select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label" data-i18n="amountHT">Montant (FCFA)</label>
+            <input type="number" id="acc-amount-ht" class="form-control" placeholder="100000" min="1" required oninput="recalcVatPreview()">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="vat">TVA</span> (<span id="acc-vat-rate-label">18.0%</span>)</label>
+            <input type="number" id="acc-amount-vat" class="form-control" placeholder="18000" readonly style="background:#F1F5F9;">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-i18n="description">Description / Motif</label>
+          <input type="text" id="acc-entry-desc" class="form-control" placeholder="ex: Vente de sacs de riz, Achat carburant..." required>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:18px;">
+          <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeModal('modal-accounting-entry')" data-i18n="cancel">Annuler</button>
+          <button type="submit" class="btn btn-primary" style="flex:2;" data-i18n="saveEntry">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       PAGE 1 : SITE WEB D'ACCUEIL — CREDITTRACK PRO (100% PUR CODE & ANIMÉ)
+  ============================================================ -->
+  <div id="public-landing-container">
+
+    <!-- ── BARRE DE NAVIGATION MODERNE ── -->
+    <header class="lp-nav">
+      <div class="lp-nav-brand" onclick="openPublicLanding()" style="cursor:pointer;">
+        <img src="logo_3d.png" alt="CreditTrack" class="lp-logo">
+        <span class="lp-brand-name"><span class="lp-white">Credit</span><span class="lp-cyan">Track</span> <span class="lp-badge-pro">PRO</span></span>
+      </div>
+      <nav class="lp-nav-links">
+        <a href="#demo-live" class="lp-nav-a" data-i18n="lpNavDemo">Aperçu en Direct</a>
+        <a href="#simulator" class="lp-nav-a" data-i18n="lpNavSim">Simulateur WhatsApp</a>
+        <a href="#comparison" class="lp-nav-a" data-i18n="lpNavComp">Pourquoi nous ?</a>
+        <a href="#features" class="lp-nav-a" data-i18n="lpNavFeatures">Fonctionnalités</a>
+        
+        <!-- Quick Lang Switcher -->
+        <div class="lp-lang-pill">
+          <button class="lp-lang-btn active" id="lp-lang-fr" onclick="switchLanguage('fr')">FR</button>
+          <span>|</span>
+          <button class="lp-lang-btn" id="lp-lang-en" onclick="switchLanguage('en')">EN</button>
+        </div>
+
+        <button onclick="openAppWorkspace('menu-2')" class="lp-btn-cta" data-i18n="lpNavStart">🚀 Ouvrir l'Application</button>
+      </nav>
+    </header>
+
+    <!-- ── HERO SECTION EN PUR CODE ANIMÉ (AUCUNE IMAGE FAKE) ── -->
+    <section class="lp-hero-live-section" id="hero">
+      
+      <!-- Orbes Lumineuses d'Arrière-Plan -->
+      <div class="lp-glow-orb lp-glow-orb-1"></div>
+      <div class="lp-glow-orb lp-glow-orb-2"></div>
+
+      <div class="lp-hero-content">
+        
+        <!-- Badge Flottant Néon -->
+        <div class="lp-pill-badge">
+          <span class="lp-pulse-dot"></span>
+          <span data-i18n="lpHeroPill">⚡ N°1 DE LA GESTION DE CRÉDITS &amp; RECOUVREMENT EN AFRIQUE</span>
+        </div>
+
+        <!-- Titre Principal à Fort Impact -->
+        <h1 class="lp-hero-title">
+          <span class="lp-title-white" data-i18n="lpHeroTitle1">Zéro Crédit Oublié.</span><br>
+          <span class="lp-title-gradient" data-i18n="lpHeroTitle2">Encaissez 3x Plus Vite.</span>
+        </h1>
+
+        <!-- Sous-Titre Clair & Convaincant -->
+        <p class="lp-hero-desc" data-i18n="lpHeroDesc">
+          Fini les cahiers de dettes perdus et les retards de paiement. Suivez vos clients en direct, encaissez par <strong>Wave / Mobile Money</strong> et envoyez des rappels polis en 1-clic sur <strong>WhatsApp &amp; SMS</strong>.
+        </p>
+
+        <!-- Boutons d'Action Principaux -->
+        <div class="lp-hero-actions">
+          <button onclick="openAppWorkspace('menu-2')" class="lp-btn-primary-glow">
+            <i data-lucide="sparkles"></i>
+            <span data-i18n="lpHeroCta1">🚀 Essayer Gratuitement Maintenant</span>
+          </button>
+          <a href="#simulator" class="lp-btn-secondary-glass">
+            <i data-lucide="message-circle"></i>
+            <span data-i18n="lpHeroCta2">💬 Tester le Simulateur WhatsApp</span>
+          </a>
+        </div>
+
+        <!-- Badges de Confiance Moyens de Paiement -->
+        <div class="lp-trust-bar">
+          <span class="lp-trust-label" data-i18n="lpTrustLabel">Compatible avec tous vos moyens de paiement :</span>
+          <div class="lp-trust-badges">
+            <span class="lp-badge-pay wave">🌊 Wave Money</span>
+            <span class="lp-badge-pay mtn">📱 MTN MoMo</span>
+            <span class="lp-badge-pay orange">🟠 Orange Money</span>
+            <span class="lp-badge-pay moov">🔵 Moov Money</span>
+            <span class="lp-badge-pay cash">💵 Espèces</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── VÉRITABLE MOCKUP 3D VECTORIEL & ANIMÉ EN PUR CSS (PAS D'IMAGE STATIQUE) ── -->
+      <div class="lp-mockup-wrapper" id="demo-live">
+
+        <!-- Carte Flottante 1 : WhatsApp Réussi -->
+        <div class="lp-floating-badge lp-floating-wa">
+          <div class="lp-float-icon green"><i data-lucide="message-circle"></i></div>
+          <div>
+            <div class="lp-float-title">💬 Rappel WhatsApp envoyé</div>
+            <div class="lp-float-sub">Moussa K. (150 000 FCFA) • <span style="color:#10B981;font-weight:800;">Payé via Wave !</span></div>
+          </div>
+        </div>
+
+        <!-- Carte Flottante 2 : Paiement Reçu en Direct -->
+        <div class="lp-floating-badge lp-floating-pay">
+          <div class="lp-float-icon blue"><i data-lucide="wallet"></i></div>
+          <div>
+            <div class="lp-float-title">🎉 Paiement Reçu à l'instant</div>
+            <div class="lp-float-sub"><strong style="color:#10B981;">+75 000 FCFA</strong> • Reçu délivré</div>
+          </div>
+        </div>
+
+        <!-- Fenêtre SaaS Principale Vectorielle -->
+        <div class="lp-vector-window" onclick="openAppWorkspace('menu-2')" title="Cliquez pour ouvrir l'application">
+          
+          <!-- Barre Supérieure de l'Application -->
+          <div class="lp-win-header">
+            <div class="lp-win-dots">
+              <span class="dot red"></span>
+              <span class="dot yellow"></span>
+              <span class="dot green"></span>
+            </div>
+            <div class="lp-win-search">
+              <i data-lucide="search" style="width:12px;height:12px;color:#94A3B8;"></i>
+              <span>credittrack.app/workspace/dashboard</span>
+            </div>
+            <div class="lp-win-live-badge">
+              <span class="pulse-live"></span> ● Système Actif
+            </div>
+          </div>
+
+          <!-- Corps du Dashboard Démo Live -->
+          <div class="lp-win-body">
+            
+            <!-- Mini KPIs Animés -->
+            <div class="lp-win-kpis">
+              <div class="lp-win-kpi">
+                <div class="kpi-tag">Total Recouvré ce Mois</div>
+                <div class="kpi-num" style="color:#10B981;">1 450 000 FCFA</div>
+                <div class="kpi-sub">🟢 +18.4% de recouvrement</div>
+              </div>
+              <div class="lp-win-kpi">
+                <div class="kpi-tag">Clients à Jour</div>
+                <div class="kpi-num" style="color:#2563EB;">48 / 50</div>
+                <div class="kpi-sub">🛡️ 96% Taux de Réussite</div>
+              </div>
+              <div class="lp-win-kpi">
+                <div class="kpi-tag">Délai Moyen de Règlement</div>
+                <div class="kpi-num" style="color:#F59E0B;">48 Heures</div>
+                <div class="kpi-sub">⚡ Grâce aux rappels 1-clic</div>
+              </div>
+            </div>
+
+            <!-- Mini Tableau des Créances en Direct -->
+            <div class="lp-win-table-box">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <span style="font-weight:800;font-size:0.85rem;color:#0F172A;">Dernières créances en cours</span>
+                <span style="font-size:0.75rem;font-weight:700;color:#2563EB;">+ Saisir un Crédit</span>
+              </div>
+              <div class="lp-win-table-row">
+                <div class="client-cell">
+                  <div class="avatar-cell">SK</div>
+                  <div>
+                    <div class="c-name">Société Kouassi &amp; Frères</div>
+                    <div class="c-phone">+225 07 01 02 03</div>
+                  </div>
+                </div>
+                <div class="amount-cell" style="color:#2563EB;">150 000 FCFA</div>
+                <div class="status-cell"><span class="badge-status paid">🟢 Score 94/100</span></div>
+                <div class="action-cell">
+                  <span class="mini-btn-wa">💬 WhatsApp</span>
+                </div>
+              </div>
+
+              <div class="lp-win-table-row">
+                <div class="client-cell">
+                  <div class="avatar-cell" style="background:#EF4444;color:#fff;">DT</div>
+                  <div>
+                    <div class="c-name">Diallo Transport SARL</div>
+                    <div class="c-phone">+225 05 04 03 02</div>
+                  </div>
+                </div>
+                <div class="amount-cell" style="color:#EF4444;">75 000 FCFA</div>
+                <div class="status-cell"><span class="badge-status overdue">🔴 Retard 4j</span></div>
+                <div class="action-cell">
+                  <span class="mini-btn-wa" style="background:#25D366;color:#fff;">💬 Relancer</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Overlay au survol du Mockup -->
+          <div class="lp-mockup-hover-overlay">
+            <span class="lp-hover-cta">⚡ Cliquez pour tester l'application en direct →</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ── STATS CHIFFRES CLÉS EN TEMPS RÉEL ── -->
+    <section class="lp-stats-strip">
+      <div class="lp-stats-container">
+        <div class="lp-stat-item">
+          <div class="stat-big">+50 000 000 <span class="stat-unit">FCFA</span></div>
+          <div class="stat-label">Récupérés par nos commerçants</div>
+        </div>
+        <div class="lp-stat-sep"></div>
+        <div class="lp-stat-item">
+          <div class="stat-big">1 250+</div>
+          <div class="stat-label">Boutiques &amp; Grossistes actifs</div>
+        </div>
+        <div class="lp-stat-sep"></div>
+        <div class="lp-stat-item">
+          <div class="stat-big">98.6 %</div>
+          <div class="stat-label">Taux de recouvrement sous 7 jours</div>
+        </div>
+        <div class="lp-stat-sep"></div>
+        <div class="lp-stat-item">
+          <div class="stat-big">54 Pays</div>
+          <div class="stat-label">Devises d'Afrique couvertes</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SIMULATEUR INTERACTIF WHATSAPP (TEST EN DIRECT SUR LA PAGE) ── -->
+    <section class="lp-simulator-section" id="simulator">
+      <div class="lp-sim-inner">
+        <div class="lp-sim-left">
+          <div class="lp-sim-badge">⚡ SIMULATEUR EN DIRECT</div>
+          <h2 class="lp-sim-title">Voyez à quoi ressemble un rappel envoyé à votre client</h2>
+          <p class="lp-sim-desc">
+            Tapez un nom et un montant : le message de relance professionnel se met à jour en direct sous vos yeux. Vous pouvez même le tester sur votre téléphone !
+          </p>
+
+          <div class="lp-sim-inputs">
+            <div class="form-group">
+              <label class="form-label" style="color:rgba(255,255,255,0.85);">Nom du Client :</label>
+              <input type="text" id="sim-client-name" class="form-control lp-dark-input" value="Koffi Jean" oninput="updateLandingSimPreview()">
+            </div>
+            <div class="form-group">
+              <label class="form-label" style="color:rgba(255,255,255,0.85);">Montant dû (FCFA) :</label>
+              <input type="number" id="sim-client-amount" class="form-control lp-dark-input" value="75000" oninput="updateLandingSimPreview()">
+            </div>
+            <button class="btn btn-primary" style="background:#25D366;border:none;padding:12px 20px;font-weight:800;width:100%;" onclick="testSimWhatsAppSend()">
+              <i data-lucide="send"></i> Envoyer ce test sur mon WhatsApp
+            </button>
+          </div>
+        </div>
+
+        <div class="lp-sim-right">
+          <!-- Smartphone Mockup avec Bulle WhatsApp Réelle -->
+          <div class="lp-phone-frame">
+            <div class="phone-top-notch"></div>
+            <div class="phone-wa-header">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <div class="wa-header-avatar">KJ</div>
+                <div>
+                  <div class="wa-header-name" id="sim-preview-header-name">Koffi Jean</div>
+                  <div class="wa-header-sub">en ligne</div>
+                </div>
+              </div>
+              <i data-lucide="phone" style="width:16px;height:16px;color:#fff;"></i>
+            </div>
+            
+            <div class="phone-wa-chat">
+              <div class="wa-chat-bubble">
+                <p id="sim-wa-text">
+                  Bonjour <strong>Koffi Jean</strong>, nous vous rappelons que votre solde de <strong>75 000 FCFA</strong> chez <strong>Boutique KOUASSI &amp; Fils</strong> est arrivé à échéance.
+                </p>
+                <div class="wa-chat-link">
+                  💳 Régler directement via Wave / MoMo :<br>
+                  <span style="color:#00A3FF;text-decoration:underline;">credittrack.app/pay/BOUTIQUE-KOUASSI</span>
+                </div>
+                <div class="wa-chat-time">14:30 ✓✓</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── COMPARATIF : AVANT VS AVEC CREDITTRACK ── -->
+    <section class="lp-comparison-section" id="comparison">
+      <div class="lp-section-header">
+        <h2 class="lp-section-title">Pourquoi les commerçants abandonnent le cahier papier ?</h2>
+        <p class="lp-section-sub">Découvrez la différence entre l'ancienne méthode risquée et la puissance de CreditTrack.</p>
+      </div>
+
+      <div class="lp-comp-grid">
+        
+        <!-- Colonne 1 : Avant (L'ancien calvaire) -->
+        <div class="lp-comp-card old">
+          <div class="comp-header">
+            <span class="comp-icon red">✕</span>
+            <div>
+              <h3 class="comp-title">Avant CreditTrack</h3>
+              <div class="comp-sub">Cahier papier &amp; mémoire</div>
+            </div>
+          </div>
+          <ul class="comp-list">
+            <li>❌ <strong>Cahier égaré, mouillé ou déchiré</strong> : Dettes effacées et argent définitivement perdu.</li>
+            <li>❌ <strong>Disputes avec les clients</strong> : Désaccords sur les montants ou les dates sans preuve écrite.</li>
+            <li>❌ <strong>Oublis fréquents</strong> : Vous ne savez plus qui vous doit quoi après 3 semaines.</li>
+            <li>❌ <strong>Gêne pour réclamer</strong> : Appels téléphoniques maladroits qui fâchent les clients.</li>
+            <li>❌ <strong>Zéro reçu officiel</strong> : Les clients réclament sans cesse des justificatifs de paiement.</li>
+          </ul>
+        </div>
+
+        <!-- Colonne 2 : Avec CreditTrack (La révolution moderne) -->
+        <div class="lp-comp-card new">
+          <div class="comp-badge-best">RECOMMANDÉ</div>
+          <div class="comp-header">
+            <span class="comp-icon green">✓</span>
+            <div>
+              <h3 class="comp-title">Avec CreditTrack PRO</h3>
+              <div class="comp-sub">100% Digital, Sécurisé &amp; Automatisé</div>
+            </div>
+          </div>
+          <ul class="comp-list">
+            <li>✅ <strong>Fiche client infalsifiable</strong> : Sauvegarde 100% sécurisée sur votre téléphone ou PC.</li>
+            <li>✅ <strong>Rappels WhatsApp &amp; SMS en 1-clic</strong> : Messages polis pré-rédigés sans aucune dispute.</li>
+            <li>✅ <strong>Encaissements Wave &amp; MoMo</strong> : Le client paie directement en cliquant sur son lien.</li>
+            <li>✅ <strong>Reçus PDF avec signature au doigt</strong> : Justificatif officiel généré instantanément.</li>
+            <li>✅ <strong>Tableau de bord de caisse</strong> : Vous savez chaque soir exactement ce que vous avez gagné.</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── 6 SUPER-POUVOIRS DE CREDITTRACK (BENTO GRID MODERNE) ── -->
+    <section class="lp-features" id="features">
+      <div class="lp-section-header">
+        <h2 class="lp-section-title">Tout ce qu'il vous faut pour <span class="lp-cyan">sécuriser vos ventes</span></h2>
+        <p class="lp-section-sub">Des fonctionnalités puissantes pensées pour la réalité du commerce en Afrique.</p>
+      </div>
+
+      <div class="lp-bento-grid">
+
+        <div class="lp-bento-card bento-wide">
+          <div class="bento-icon blue"><i data-lucide="users"></i></div>
+          <h3 class="bento-title">Fiches Clients &amp; Score de Fiabilité</h3>
+          <p class="bento-text">Enregistrez vos clients en 10 secondes. Le système calcule automatiquement un score de confiance (VIP, Moyen, Risque) pour savoir à qui accorder du crédit en toute sécurité.</p>
+        </div>
+
+        <div class="lp-bento-card bento-wide">
+          <div class="bento-icon green"><i data-lucide="message-circle"></i></div>
+          <h3 class="bento-title">Relances WhatsApp &amp; SMS Automatiques</h3>
+          <p class="bento-text">Envoyez des messages de rappel cordiaux en 1-clic. Plus besoin d'appeler ou de courir après les clients : ils reçoivent leur solde et le lien de règlement direct.</p>
+        </div>
+
+        <div class="lp-bento-card">
+          <div class="bento-icon orange"><i data-lucide="smartphone"></i></div>
+          <h3 class="bento-title">Wave &amp; Mobile Money</h3>
+          <p class="bento-text">Acceptez Wave, Orange, MTN, Moov et les espèces. Les règlements mettent à jour les soldes immédiatement.</p>
+        </div>
+
+        <div class="lp-bento-card">
+          <div class="bento-icon purple"><i data-lucide="file-signature"></i></div>
+          <h3 class="bento-title">Signature Tactile &amp; Reçu PDF</h3>
+          <p class="bento-text">Faites signer vos clients sur l'écran du smartphone et délivrez un reçu officiel au format thermique ou PDF.</p>
+        </div>
+
+        <div class="lp-bento-card">
+          <div class="bento-icon red"><i data-lucide="calculator"></i></div>
+          <h3 class="bento-title">Livre de Caisse &amp; Bénéfices</h3>
+          <p class="bento-text">Suivez vos recettes, vos dépenses et visualisez votre bénéfice net en direct sans calculs manuels compliqués.</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── TÉMOIGNAGES DE COMMERÇANTS RÉELS ── -->
+    <section class="lp-testimonials-section">
+      <div class="lp-section-header">
+        <h2 class="lp-section-title">Ce que disent les commerçants</h2>
+        <p class="lp-section-sub">Déjà plus de 1 200 gérants de boutiques, grossistes et prestataires l'utilisent au quotidien.</p>
+      </div>
+
+      <div class="lp-testi-grid">
+        
+        <div class="lp-testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"Avant, je perdais au moins 300 000 FCFA d'impayés chaque mois dans mon magasin à Treichville. Depuis que j'utilise les rappels WhatsApp de CreditTrack, mes clients me paient par Wave en moins de 48 heures !"</p>
+          <div class="testi-author">
+            <div class="testi-avatar">AK</div>
+            <div>
+              <div class="testi-name">Amadou Koné</div>
+              <div class="testi-role">Grossiste Alimentaire • Abidjan, Côte d'Ivoire</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lp-testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"La signature au doigt sur le téléphone et le reçu PDF envoyé sur WhatsApp ont changé ma relation avec mes clients. C'est propre, moderne et fini les disputes sur les montants."</p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:#10B981;">FD</div>
+            <div>
+              <div class="testi-name">Fatoumatou Diop</div>
+              <div class="testi-role">Boutique de Prêt-à-porter • Dakar, Sénégal</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="lp-testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">"Une application hyper simple, même pour quelqu'un qui n'est pas fort en informatique. En 3 clics, j'ai noté le crédit et programmé le rappel."</p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:#8B5CF6;">SA</div>
+            <div>
+              <div class="testi-name">Séverin Agbossou</div>
+              <div class="testi-role">Vente de Matériaux • Cotonou, Bénin</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── APPEL À L'ACTION FINAL LUMINEUX ── -->
+    <section class="lp-cta-section">
+      <div class="lp-cta-box">
+        <h2 class="lp-cta-title" data-i18n="lpCtaTitle">Prêt à récupérer facilement tout votre argent ?</h2>
+        <p class="lp-cta-sub" data-i18n="lpCtaSub">Rejoignez les commerçants qui ont arrêté de perdre de l'argent et passez au digital dès aujourd'hui.</p>
+        <button onclick="openAppWorkspace('menu-2')" class="lp-btn-cta-big" data-i18n="lpCtaBtn">
+          🚀 Commencer Gratuitement Maintenant
+        </button>
+        <p class="lp-cta-trust">🔒 100% Sécurisé · ⚡ Sans engagement · 📱 Compatible Tous Téléphones</p>
+      </div>
+    </section>
+
+    <!-- ── PIED DE PAGE ── -->
+    <footer class="lp-footer">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img src="logo_3d.png" alt="CreditTrack" style="width:28px;height:28px;">
+        <span>© 2026 <strong>CreditTrack PRO</strong> — Solution Panafricaine de Recouvrement</span>
+      </div>
+      <div style="display:flex;gap:16px;align-items:center;">
+        <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">Fait avec excellence pour l'Afrique 🌍</span>
+        <button onclick="openAppWorkspace('menu-2')" class="lp-footer-btn" data-i18n="footerBtn">Ouvrir l'application →</button>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ============================================================
+       PAGE 2 : ESPACE APPLICATION (SIDEBAR + WORKSPACE RESPONSIVE)
+  ============================================================ -->
+  <div id="app-workspace-layout" style="display: none;">
+
+    <!-- Sidebar Latérale Fixe & Tiroir Coulissant Mobile -->
+    <aside class="sidebar-fixed" id="main-sidebar">
+
+      <div class="sidebar-brand">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <div class="brand-left" onclick="openPublicLanding()" style="cursor:pointer;">
+            <img src="logo_3d.png" alt="CréditTrack" style="width:38px;height:38px;object-fit:contain;">
+            <div style="margin-left:8px;">
+              <div class="brand-title">CréditTrack</div>
+              <div class="brand-sub" data-i18n="sidebarAppSub">GESTION COMMERÇANT</div>
+            </div>
+          </div>
+          <!-- Close button on Mobile Sidebar -->
+          <button class="sidebar-mobile-close" onclick="toggleMobileSidebar()">✕</button>
+        </div>
+
+        <!-- Controls: Pays + Langue + Mode -->
+        <div class="sidebar-controls-card">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i data-lucide="globe" style="width:14px;height:14px;color:#93C5FD;"></i>
+            <select id="country-select" onchange="switchCountry(this.value)" class="sidebar-select" title="Pays">
+              <!-- Dynamic populated from AFRICAN_COUNTRIES -->
+            </select>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:4px;">
+            <div style="display:flex;align-items:center;gap:4px;">
+              <i data-lucide="languages" style="width:14px;height:14px;color:#93C5FD;"></i>
+              <select id="lang-select" onchange="switchLanguage(this.value)" class="sidebar-select" title="Langue">
+                <option value="fr">🇫🇷 FR</option>
+                <option value="en">🇬🇧 EN</option>
+              </select>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:4px;">
+              <i data-lucide="layers" style="width:14px;height:14px;color:#93C5FD;"></i>
+              <select id="mode-select" onchange="switchAppMode(this.value)" class="sidebar-select" title="Mode de travail">
+                <option value="credit" data-i18n="modeCredit">Crédit</option>
+                <option value="accounting" data-i18n="modeAccounting">Caisse / Compta</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mode Indicator Banner -->
+        <div id="banner" class="banner" style="width:100%;padding:8px 10px;border-radius:8px;font-size:0.75rem;font-weight:700;text-align:center;color:#fff;background:#2563EB;">
+          <span id="banner-text" data-i18n="bannerCredit">💡 Mode Crédits & Clients actif</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <!-- MENUS MODE CRÉDIT -->
+        <button class="nav-link active credit-menu-item" id="nav-menu-2" onclick="switchMenu('menu-2')">
+          <div class="nav-link-left">
+            <i data-lucide="layout-grid"></i>
+            <span data-i18n="menuDashboard">Tableau de Bord</span>
+          </div>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+
+        <button class="nav-link credit-menu-item" id="nav-menu-4-directory" onclick="switchMenu('menu-4-directory')">
+          <div class="nav-link-left">
+            <i data-lucide="users"></i>
+            <span data-i18n="menuClients">Clients &amp; Dettes</span>
+          </div>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+
+        <button class="nav-link credit-menu-item" id="nav-menu-6" onclick="switchMenu('menu-6')">
+          <div class="nav-link-left">
+            <i data-lucide="wallet"></i>
+            <span data-i18n="menuPayments">Encaisser &amp; Reçus</span>
+          </div>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+
+        <button class="nav-link credit-menu-item" id="nav-menu-8" onclick="switchMenu('menu-8')">
+          <div class="nav-link-left">
+            <i data-lucide="bell-ring"></i>
+            <span data-i18n="menuReminders">Rappels WhatsApp</span>
+          </div>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+
+        <!-- MENUS MODE CAISSE & COMPTABILITÉ -->
+        <button class="nav-link accounting-menu-item" id="nav-menu-accounting" onclick="switchMenu('menu-accounting')" style="display:none;">
+          <div class="nav-link-left">
+            <i data-lucide="calculator"></i>
+            <span data-i18n="menuAccounting">Caisse &amp; Dépenses</span>
+          </div>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+        
+        <!-- COMMUN -->
+        <button class="nav-link" id="nav-menu-settings" onclick="switchMenu('menu-settings')">
+          <div class="nav-link-left">
+            <i data-lucide="settings"></i>
+            <span data-i18n="menuSettings">Paramètres</span>
+          </div>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+
+        <div style="margin-top:auto;padding-top:10px;">
+          <button class="nav-link" style="opacity:0.9;font-size:0.8rem;background:rgba(255,255,255,0.08);" onclick="openPublicLanding()">
+            <div class="nav-link-left">
+              <i data-lucide="home"></i>
+              <span data-i18n="menuHomeSite">Page d'Accueil Site</span>
+            </div>
+          </button>
+        </div>
+      </nav>
+
+      <div class="sidebar-pro-card" id="sidebar-pro-banner">
+        <div class="pro-card-title">
+          <i data-lucide="crown" style="color:#F59E0B;width:18px;height:18px;"></i>
+          <span id="sidebar-pro-plan-label">Formule Pro Commerçant</span>
+        </div>
+        <p class="pro-card-desc" id="sidebar-pro-plan-desc">Rappels WhatsApp automatiques &amp; clients illimités.</p>
+        <button class="btn-pro-upgrade" id="sidebar-pro-btn" onclick="openSubscriptionModal()">Passer à Pro (5 000 F)</button>
+      </div>
+
+      <div class="sidebar-user-footer">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;" onclick="openAuthModal()">
+          <div class="user-avatar-circle" id="sidebar-avatar-initials">CT</div>
+          <div class="user-info-text">
+            <div class="user-name-title" id="sidebar-user-name">Mon Compte</div>
+            <div class="user-role-sub" id="sidebar-user-plan-badge" style="color:#FBBF24;font-weight:700;">GRATUIT (Starter)</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn-icon-tiny" onclick="openAuthModal()" title="Changer de compte / Se connecter" style="background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:6px;padding:5px;cursor:pointer;">
+            <i data-lucide="log-in" style="width:14px;height:14px;"></i>
+          </button>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- Workspace Applicatif Droite -->
+    <div class="main-workspace">
+
+      <header class="top-workspace-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <!-- Bouton Hamburger Mobile -->
+          <button class="btn-hamburger-menu" onclick="toggleMobileSidebar()" aria-label="Menu Mobile">
+            <i data-lucide="menu" style="width:22px;height:22px;"></i>
+          </button>
+          
+          <div class="header-left-title">
+            <i data-lucide="layout-grid" style="color:#2563EB;" id="header-page-icon"></i>
+            <span id="page-desktop-title" data-i18n="dashboard">Tableau de Bord</span>
+          </div>
+        </div>
+
+        <div class="header-right-actions">
+          <!-- Switcher Rapide de Langue Header -->
+          <div class="header-lang-switcher" onclick="toggleLanguageQuick()" title="Changer la langue / Switch language">
+            <span id="header-lang-badge">🇫🇷 FR</span>
+          </div>
+
+          <button class="btn-header-primary" id="top-header-btn" onclick="switchMenu('menu-5')">
+            <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
+            <span data-i18n="btnNewCredit">+ Noter un Crédit</span>
+          </button>
+
+          <div class="header-icon-btn" title="Alertes Retards" onclick="showToast('Vous avez 2 clients en retard de paiement.')">
+            <i data-lucide="bell" style="width:18px;height:18px;"></i>
+            <div class="notif-dot"></div>
+          </div>
+
+          <div class="header-user-avatar" onclick="switchMenu('menu-settings')">AK</div>
+        </div>
+      </header>
+
+      <main class="content-viewport">
+
+        <!-- ============================================================
+             VUE 1 : DASHBOARD PRINCIPAL (#menu-2)
+        ============================================================ -->
+        <section id="menu-2" class="view-container active">
+
+          <!-- Bannière de Bienvenue -->
+          <div class="dashboard-welcome-banner">
+            <div style="display:flex;align-items:center;gap:16px;">
+              <img src="logo_3d.png" alt="Logo" style="width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));">
+              <div>
+                <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:4px;color:#ffffff;" data-i18n="dashWelcomeTitle">Suivi de vos Ventes &amp; Crédits</h2>
+                <p style="font-size:0.85rem;color:rgba(255,255,255,0.85);margin:0;" data-i18n="dashWelcomeSub">Visualisez en temps réel l'argent à récupérer et envoyez des rappels WhatsApp en un clic.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-banner-white" onclick="switchMenu('menu-5')">
+                <i data-lucide="plus-circle" style="width:16px;height:16px;"></i> <span data-i18n="btnNewCredit">+ Noter un Crédit</span>
+              </button>
+              <button class="btn btn-banner-transp" onclick="switchMenu('menu-8')">
+                <i data-lucide="bell-ring" style="width:16px;height:16px;"></i> <span data-i18n="menuReminders">Rappels WhatsApp</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 Cartes KPI Principales -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="kpiTotalDue">Total à Récupérer</div>
+                <div class="metric-value" style="color:#2563EB;" id="metric-total-due">225 000 FCFA</div>
+                <div class="metric-trend"><i data-lucide="trending-up"></i> <span data-i18n="kpiTotalDueSub">Dettes clients en cours</span></div>
+              </div>
+              <div class="metric-icon-box blue">
+                <i data-lucide="wallet"></i>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="kpiActiveClients">Clients avec Dettes</div>
+                <div class="metric-value" id="metric-active-clients">3</div>
+                <div class="metric-trend"><i data-lucide="users"></i> <span data-i18n="kpiActiveClientsSub">Fiches enregistrées</span></div>
+              </div>
+              <div class="metric-icon-box blue">
+                <i data-lucide="users"></i>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="kpiOverdue">Paiements en Retard</div>
+                <div class="metric-value" style="color:#EF4444;" id="metric-overdue-count">1</div>
+                <div class="metric-trend" style="color:#EF4444;"><i data-lucide="alert-circle"></i> <span data-i18n="kpiOverdueSub">Rappel recommandé</span></div>
+              </div>
+              <div class="metric-icon-box red">
+                <i data-lucide="alert-triangle"></i>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="kpiRecoveryRate">Taux d'Argent Récupéré</div>
+                <div class="metric-value" style="color:#10B981;">87 %</div>
+                <div class="metric-trend"><i data-lucide="check-circle"></i> <span data-i18n="kpiRecoveryRateSub">Grâce aux rappels</span></div>
+              </div>
+              <div class="metric-icon-box green">
+                <i data-lucide="trending-up"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ligne Graphiques (64% / 36%) -->
+          <div class="dashboard-main-grid">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title" data-i18n="chartRevenueTitle">Évolution des Paiements Reçus</span>
+                <span style="font-size:0.75rem;font-weight:700;color:#64748B;" data-i18n="last6Months">6 derniers mois</span>
+              </div>
+              <div style="height:240px;position:relative;">
+                <canvas id="weeklyChart"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title" data-i18n="chartTrustTitle">Fiabilité de vos Clients</span>
+              </div>
+              <div class="donut-chart-container">
+                <div style="width:140px;height:140px;position:relative;flex-shrink:0;">
+                  <canvas id="scoringChart"></canvas>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;flex:1;font-size:0.8rem;font-weight:700;">
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#10B981;"></span> <span data-i18n="trustGood">Clients Sérieux</span></span>
+                    <span style="color:#64748B;">60%</span>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#F59E0B;"></span> <span data-i18n="trustAverage">Moyen / En attente</span></span>
+                    <span style="color:#64748B;">25%</span>
+                  </div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#EF4444;"></span> <span data-i18n="trustRisk">En retard</span></span>
+                    <span style="color:#64748B;">15%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ligne Basse : Tableau des Derniers Crédits + Journal -->
+          <div class="dashboard-main-grid">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title" data-i18n="recentDebtsTitle">Dernières Ventes à Crédit</span>
+                <button class="btn btn-outline" style="padding:6px 12px;font-size:0.78rem;" onclick="switchMenu('menu-5')" data-i18n="btnNewCredit">+ Noter un Crédit</button>
+              </div>
+              <div class="table-responsive">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th data-i18n="client">Client</th>
+                      <th data-i18n="amountDue">Montant Dû</th>
+                      <th data-i18n="dueDate">Date Limite</th>
+                      <th data-i18n="status">État</th>
+                      <th data-i18n="quickReminder">Rappel WhatsApp</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-debts-table-body">
+                    <!-- Populated by JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title" data-i18n="recentActivityTitle">Derniers Paiements Reçus</span>
+                <span class="card-action-link" onclick="switchMenu('menu-6')" data-i18n="seeAll">Voir tout</span>
+              </div>
+              <div id="dash-activity-list" style="display:flex;flex-direction:column;">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================
+             VUE 2 : CAISSE & DÉPENSES (#menu-accounting)
+        ============================================================ -->
+        <section id="menu-accounting" class="view-container">
+
+          <div class="dashboard-welcome-banner" style="background:linear-gradient(135deg, #0F172A 0%, #1E293B 100%);">
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div style="width:44px;height:44px;background:#2563EB;border-radius:12px;display:flex;align-items:center;justify-content:center;color:#fff;">
+                <i data-lucide="calculator" style="width:24px;height:24px;"></i>
+              </div>
+              <div>
+                <h2 style="font-size:1.2rem;font-weight:800;margin-bottom:2px;color:#ffffff;" data-i18n="accBannerTitle">Caisse &amp; Dépenses du Magasin</h2>
+                <p style="font-size:0.82rem;color:#94A3B8;margin:0;" id="acc-country-sys-info">Suivi des recettes, achats de stock et dépenses quotidiennes.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="openModal('modal-accounting-entry')" style="background:#10B981;border:none;">
+                <i data-lucide="plus-circle" style="width:16px;height:16px;"></i> <span data-i18n="btnAddEntry">+ Noter une Recette / Dépense</span>
+              </button>
+              <button class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.3);" onclick="exportAccountingCSV()">
+                <i data-lucide="download" style="width:16px;height:16px;"></i> <span data-i18n="btnExportCSV">Exporter en Excel (CSV)</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="accRevenue">Total des Recettes</div>
+                <div class="metric-value" style="color:#10B981;" id="acc-metric-revenue">0 FCFA</div>
+                <div class="metric-trend"><i data-lucide="trending-up"></i> <span data-i18n="accRevenueSub">Entrées d'argent</span></div>
+              </div>
+              <div class="metric-icon-box green"><i data-lucide="trending-up"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="accExpenses">Total des Dépenses</div>
+                <div class="metric-value" style="color:#EF4444;" id="acc-metric-expenses">0 FCFA</div>
+                <div class="metric-trend" style="color:#EF4444;"><i data-lucide="arrow-down-right"></i> <span data-i18n="accExpensesSub">Achats & charges</span></div>
+              </div>
+              <div class="metric-icon-box red"><i data-lucide="file-minus"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="accVat">TVA Estimée</div>
+                <div class="metric-value" style="color:#F59E0B;" id="acc-metric-vat">0 FCFA</div>
+                <div class="metric-trend"><i data-lucide="percent"></i> <span data-i18n="accVatSub">Selon taux pays</span></div>
+              </div>
+              <div class="metric-icon-box orange"><i data-lucide="percent"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="accNetProfit">Bénéfice Net en Caisse</div>
+                <div class="metric-value" style="color:#2563EB;" id="acc-metric-profit">0 FCFA</div>
+                <div class="metric-trend"><i data-lucide="calculator"></i> <span data-i18n="accNetProfitSub">Recettes - Dépenses</span></div>
+              </div>
+              <div class="metric-icon-box blue"><i data-lucide="calculator"></i></div>
+            </div>
+          </div>
+
+          <div class="dashboard-main-grid" style="margin-bottom: 24px;">
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title" data-i18n="accCashflowChartTitle">Évolution Recettes vs Dépenses</span>
+              </div>
+              <div style="height:240px;position:relative;">
+                <canvas id="accountingCashflowChart"></canvas>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <span class="card-title" data-i18n="accExpenseChartTitle">Où va votre argent ?</span>
+              </div>
+              <div style="height:240px;position:relative;display:flex;justify-content:center;">
+                <canvas id="accountingExpenseChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title" data-i18n="accJournalTitle">Livre de Caisse &amp; Dépenses</span>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <input type="text" class="form-control" style="max-width:240px;" placeholder="Rechercher..." onkeyup="filterAccountingTable(this.value)">
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="date">Date</th>
+                    <th data-i18n="refNumber">N° Reçu</th>
+                    <th data-i18n="category">Catégorie</th>
+                    <th data-i18n="description">Motif</th>
+                    <th data-i18n="amount">Montant</th>
+                    <th data-i18n="vat">TVA</th>
+                    <th data-i18n="total">Total</th>
+                    <th data-i18n="status">État</th>
+                  </tr>
+                </thead>
+                <tbody id="accounting-journal-body">
+                  <!-- JS populate -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================
+             VUE 3 : CLIENTS & DETTES (#menu-4-directory)
+        ============================================================ -->
+        <section id="menu-4-directory" class="view-container">
+
+          <div class="metrics-grid-3">
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="totalClientsCard">Nombre Total de Clients</div>
+                <div class="metric-value" id="dir-total-clients">3 Clients</div>
+                <div class="metric-trend"><i data-lucide="users"></i> <span data-i18n="registeredClients">Comptes enregistrés</span></div>
+              </div>
+              <div class="metric-icon-box blue"><i data-lucide="users"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="clientsPaidCard">Clients à Jour (Payés)</div>
+                <div class="metric-value" style="color:#10B981;" id="dir-paid-clients">1 Client</div>
+                <div class="metric-trend"><i data-lucide="check-circle"></i> <span data-i18n="zeroDue">Aucune dette en cours</span></div>
+              </div>
+              <div class="metric-icon-box green"><i data-lucide="check-circle"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="clientsLateCard">Clients avec Dettes</div>
+                <div class="metric-value" style="color:#EF4444;" id="dir-due-clients">2 Clients</div>
+                <div class="metric-trend" style="color:#EF4444;"><i data-lucide="alert-triangle"></i> <span data-i18n="paymentPending">Rappels en cours</span></div>
+              </div>
+              <div class="metric-icon-box red"><i data-lucide="alert-triangle"></i></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header" style="flex-wrap:wrap;gap:12px;">
+              <span class="card-title" data-i18n="clientsDirectoryTitle">Répertoire de vos Clients</span>
+              <div style="display:flex;gap:10px;flex:1;max-width:340px;">
+                <input type="text" class="form-control" placeholder="Rechercher un client..." onkeyup="filterClientTable(this.value)">
+                <button class="btn btn-primary" onclick="switchMenu('menu-5')" style="white-space:nowrap;">+ Nouveau</button>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="clientPhone">Nom &amp; Téléphone</th>
+                    <th data-i18n="clientTrust">Fiabilité du Client</th>
+                    <th data-i18n="amountDue">Montant Dû</th>
+                    <th data-i18n="status">État</th>
+                    <th data-i18n="actions">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="clients-saas-table-body">
+                  <!-- JS populate -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================
+             VUE 4 : ENCAISSEMENTS & REÇUS (#menu-6)
+        ============================================================ -->
+        <section id="menu-6" class="view-container">
+
+          <div class="metrics-grid-3">
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="collectedThisMonth">Total Encaissé ce Mois</div>
+                <div class="metric-value" style="color:#10B981;">240 000 FCFA</div>
+                <div class="metric-trend"><i data-lucide="trending-up"></i> <span data-i18n="collectedThisMonthSub">Règlements validés</span></div>
+              </div>
+              <div class="metric-icon-box green"><i data-lucide="wallet"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="paymentsCount">Nombre d'Encaissements</div>
+                <div class="metric-value" style="color:#2563EB;">2 Paiements</div>
+                <div class="metric-trend"><i data-lucide="check-circle"></i> <span data-i18n="receiptsDelivered">Reçus délivrés</span></div>
+              </div>
+              <div class="metric-icon-box blue"><i data-lucide="trending-up"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="favoritePaymentMethod">Moyen Préféré</div>
+                <div class="metric-value">Wave Money</div>
+                <div class="metric-trend"><i data-lucide="smartphone"></i> <span data-i18n="mobileMoneyWave">Paiement Mobile Simple</span></div>
+              </div>
+              <div class="metric-icon-box blue"><i data-lucide="smartphone"></i></div>
+            </div>
+          </div>
+
+          <div class="grid-2-equal">
+            <div class="card" style="text-align:center;">
+              <div class="card-header"><span class="card-title" data-i18n="qrCodeTitle">QR Code pour Payer Directement</span></div>
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://credittrack.app/pay/BOUTIQUE-KOUASSI" alt="QR Code Paiement" style="width:130px;height:130px;margin:8px auto;display:block;">
+              <p style="font-size:0.8rem;color:#64748B;" data-i18n="qrCodeSub">Vos clients peuvent scanner pour vous payer par Wave, MTN ou Orange Money.</p>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><span class="card-title" data-i18n="signatureTitle">Faire Signer le Client au Doigt</span></div>
+              <p style="font-size:0.8rem;color:#64748B;margin-bottom:8px;" data-i18n="signatureSub">Signez directement sur l'écran du téléphone ou de la tablette :</p>
+              <canvas id="signature-pad" style="border:2px dashed #CBD5E1;border-radius:8px;width:100%;height:100px;background:#fff;touch-action:none;"></canvas>
+              <div style="display:flex;gap:10px;margin-top:10px;">
+                <button class="btn btn-outline" style="flex:1;" onclick="clearSignature()" data-i18n="clear">Effacer</button>
+                <button class="btn btn-primary" style="flex:2;" onclick="openReceiptPreviewModalWithData('Société ABC', '+225 07010203', 'Règlement solde', 150000)" data-i18n="previewReceipt">Générer le Reçu</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title" data-i18n="paymentsHistoryTitle">Historique de Tous les Encaissements</span>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th data-i18n="refNumber">N° Paiement</th>
+                    <th data-i18n="client">Client</th>
+                    <th data-i18n="amountPaid">Montant Encaissé</th>
+                    <th data-i18n="paymentMethod">Moyen de Paiement</th>
+                    <th data-i18n="dateTime">Date</th>
+                    <th data-i18n="receipt">Reçu PDF</th>
+                  </tr>
+                </thead>
+                <tbody id="payments-table-body">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================
+             VUE 5 : RAPPELS WHATSAPP (#menu-8)
+        ============================================================ -->
+        <section id="menu-8" class="view-container">
+
+          <div class="metrics-grid-3">
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="remindersSent">Rappels Envoyés</div>
+                <div class="metric-value">48 Messages</div>
+                <div class="metric-trend"><i data-lucide="send"></i> WhatsApp &amp; SMS</div>
+              </div>
+              <div class="metric-icon-box blue"><i data-lucide="send"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="successRate">Paiements après Rappel</div>
+                <div class="metric-value" style="color:#10B981;">76 %</div>
+                <div class="metric-trend"><i data-lucide="check-check"></i> <span data-i18n="within48h">Payé sous 48h</span></div>
+              </div>
+              <div class="metric-icon-box green"><i data-lucide="check-circle"></i></div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label" data-i18n="amountRecovered">Argent Récupéré</div>
+                <div class="metric-value" style="color:#2563EB;">890 000 FCFA</div>
+                <div class="metric-trend"><i data-lucide="zap"></i> <span data-i18n="zeroLoss">Zéro impayé oublié</span></div>
+              </div>
+              <div class="metric-icon-box blue"><i data-lucide="zap"></i></div>
+            </div>
+          </div>
+
+          <div class="grid-2-equal">
+            <div class="card">
+              <div class="card-header"><span class="card-title" data-i18n="whatsappTemplateTitle">Message de Rappel WhatsApp</span></div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="whatsappTemplateLabel">Texte du Message envoyé au client :</label>
+                <textarea id="whatsapp-template-text" class="form-control" rows="4">Bonjour {nom_client}, nous vous rappelons que votre solde de {montant} chez {nom_commerce} est à régler. Vous pouvez payer facilement par Wave ou Mobile Money. Merci pour votre confiance !</textarea>
+              </div>
+              <button class="btn btn-primary" onclick="saveWhatsAppTemplate()" data-i18n="saveTemplate">Enregistrer le Modèle</button>
+            </div>
+
+            <div class="card">
+              <div class="card-header"><span class="card-title" data-i18n="autoScheduleTitle">Programmation des Rappels</span></div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="scheduleFrequency">Moment d'envoi automatique :</label>
+                <select id="reminder-frequency-select" class="form-control">
+                  <option data-i18n="schedOpt1">Le jour même de la date limite</option>
+                  <option data-i18n="schedOpt2">2 jours avant la date limite</option>
+                  <option data-i18n="schedOpt3">Tous les Lundis à 09h00 (Rappel Hebdo)</option>
+                  <option data-i18n="schedOpt4">Tous les Vendredis à 15h00 (Fin de semaine)</option>
+                </select>
+              </div>
+              <button class="btn btn-outline" style="width:100%;margin-top:10px;" onclick="showToast('Rappels automatiques programmés !')" data-i18n="activateAutoReminders">⚡ Activer les Rappels Automatiques</button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================
+             VUE 6 : PARAMÈTRES (#menu-settings)
+        ============================================================ -->
+        <section id="menu-settings" class="view-container">
+
+          <div class="settings-layout">
+            <div class="card" style="padding:16px;">
+              <div style="font-weight:800;font-size:0.85rem;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase;" data-i18n="settings">Paramètres</div>
+              <div class="settings-nav-buttons">
+                <button class="btn btn-primary settings-tab-btn active" id="tab-btn-company" onclick="switchSettingsTab('company')">
+                  <i data-lucide="store" style="width:16px;height:16px;"></i> <span data-i18n="tabCompany">Mon Commerce</span>
+                </button>
+                <button class="btn btn-outline settings-tab-btn" id="tab-btn-users" onclick="switchSettingsTab('users')">
+                  <i data-lucide="user" style="width:16px;height:16px;"></i> <span data-i18n="tabUser">Profil &amp; Caissier</span>
+                </button>
+                <button class="btn btn-outline settings-tab-btn" id="tab-btn-currency" onclick="switchSettingsTab('currency')">
+                  <i data-lucide="globe" style="width:16px;height:16px;"></i> <span data-i18n="tabCountry">Pays &amp; Devise</span>
+                </button>
+                <button class="btn btn-outline settings-tab-btn" id="tab-btn-backup" onclick="switchSettingsTab('backup')">
+                  <i data-lucide="download" style="width:16px;height:16px;"></i> <span data-i18n="tabBackup">Sauvegarde &amp; Export</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Panel 1: Mon Commerce -->
+            <div class="card settings-panel" id="settings-panel-company">
+              <div class="card-header"><span class="card-title" data-i18n="settingsCompanyTitle">Informations de Mon Commerce</span></div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="companyName">Nom du Magasin / Entreprise</label>
+                <input type="text" class="form-control" value="Boutique KOUASSI &amp; Fils" id="setting-company-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="companyAddress">Adresse &amp; Ville</label>
+                <input type="text" class="form-control" value="Avenue Chardy, Abidjan Plateau" id="setting-address-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="companyPhone">Numéro Téléphone / WhatsApp</label>
+                <input type="tel" class="form-control" value="+225 07 08 09 10 11" id="setting-phone-input">
+              </div>
+              <button class="btn btn-primary" onclick="saveCompanySettings()" data-i18n="saveSettings">Sauvegarder les Modifications</button>
+            </div>
+
+            <!-- Panel 2: Profil Utilisateur -->
+            <div class="card settings-panel" id="settings-panel-users" style="display:none;">
+              <div class="card-header"><span class="card-title" data-i18n="settingsUserTitle">Profil du Caissier / Gérant</span></div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="userName">Nom Complet</label>
+                <input type="text" class="form-control" value="KOUASSI Antoine" id="setting-username-input">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="userRoleLabel">Rôle</label>
+                <input type="text" class="form-control" value="Administrateur / Gérant" id="setting-role-input">
+              </div>
+              <button class="btn btn-primary" onclick="saveUserSettings()" data-i18n="saveSettings">Sauvegarder le Profil</button>
+            </div>
+
+            <!-- Panel 3: Devise & Pays -->
+            <div class="card settings-panel" id="settings-panel-currency" style="display:none;">
+              <div class="card-header"><span class="card-title" data-i18n="settingsCountryTitle">Pays d'Activité &amp; Monnaie</span></div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="selectCountry">Sélectionnez votre Pays</label>
+                <select id="settings-country-dropdown" class="form-control" onchange="switchCountry(this.value)">
+                  <!-- Dynamic populated -->
+                </select>
+              </div>
+              <p style="font-size:0.8rem;color:#64748B;" data-i18n="countryDesc">Toutes les sommes de l'application s'ajusteront automatiquement avec la devise de votre pays.</p>
+            </div>
+
+            <!-- Panel 4: Sauvegarde & Exports -->
+            <div class="card settings-panel" id="settings-panel-backup" style="display:none;">
+              <div class="card-header"><span class="card-title" data-i18n="settingsBackupTitle">Sauvegarde &amp; Sécurité des Données</span></div>
+              <p style="font-size:0.85rem;color:#64748B;margin-bottom:16px;" data-i18n="backupDesc">Vos données sont stockées de façon 100% sécurisée. Vous pouvez exporter votre fichier à tout moment.</p>
+              <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="exportJSON()">
+                  <i data-lucide="download"></i> <span data-i18n="exportBackupJSON">Télécharger Sauvegarde Complète (JSON)</span>
+                </button>
+                <button class="btn btn-outline" onclick="exportAccountingCSV()">
+                  <i data-lucide="file-spreadsheet"></i> <span data-i18n="exportExcel">Exporter en Excel (CSV)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================================
+             VUE FORMULAIRE : NOTER UN NOUVEAU CRÉDIT (#menu-5)
+        ============================================================ -->
+        <section id="menu-5" class="view-container">
+          <div class="card" style="max-width:850px;margin:0 auto;padding:0;">
+            <div class="card-header" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color:#fff; border-radius: 12px 12px 0 0; padding: 20px 24px;">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;background:rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+                  <i data-lucide="file-signature" style="color:#60A5FA;"></i>
+                </div>
+                <div>
+                  <h2 style="font-size:1.15rem;font-weight:800;margin:0;" data-i18n="newCreditHeaderTitle">Noter une Vente à Crédit</h2>
+                  <p style="font-size:0.8rem;color:#94A3B8;margin:4px 0 0 0;" data-i18n="newCreditHeaderSub">Enregistrez le client et fixez la date limite de paiement</p>
+                </div>
+              </div>
+            </div>
+
+            <form onsubmit="handleNewCreditSubmit(event)" style="padding: 24px;">
+              
+              <div class="wizard-steps">
+                <div class="wizard-step active"><i data-lucide="user"></i> <span data-i18n="step1">1. Qui achète ?</span></div>
+                <div class="wizard-step"><i data-lucide="coins"></i> <span data-i18n="step2">2. Combien &amp; Quand ?</span></div>
+                <div class="wizard-step"><i data-lucide="shield-check"></i> <span data-i18n="step3">3. Garantie (Optionnel)</span></div>
+              </div>
+
+              <!-- ÉTAPE 1 : CLIENT -->
+              <div id="step-1-client">
+                <div class="form-group">
+                  <label class="form-label" data-i18n="selectClientLabel">Choisir un Client Existant ou en Créer un Nouveau</label>
+                  <select id="credit-client-select" class="form-control" required onchange="handleCreditClientChange(this.value)"></select>
+                </div>
+
+                <div id="new-client-fields" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;padding:18px;border-radius:10px;margin-bottom:16px;">
+                  <h4 style="font-size:0.9rem;font-weight:800;margin-bottom:12px;color:#0F172A;" data-i18n="newClientTitle">➕ Créer la Fiche du Nouveau Client</h4>
+                  <div class="grid-2-equal" style="margin-bottom:10px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                      <label class="form-label"><span data-i18n="clientNameLabel">Nom &amp; Prénoms</span> <strong style="color:#EF4444;">*</strong></label>
+                      <input type="text" id="new-client-name" class="form-control" placeholder="ex: KOFFI Yao Jean">
+                    </div>
+                    <div class="form-group" style="margin-bottom:0;">
+                      <label class="form-label"><span data-i18n="clientPhoneLabel">Numéro WhatsApp / Téléphone</span> <strong style="color:#EF4444;">* (Obligatoire)</strong></label>
+                      <input type="tel" id="credit-client-phone" class="form-control" placeholder="+225 0701020304" required>
+                    </div>
+                  </div>
+                  <div class="form-group" style="margin-top:12px; margin-bottom:0;">
+                    <label class="form-label" data-i18n="clientCNILabel">N° Pièce d'Identité / CNI (Optionnel)</label>
+                    <input type="text" id="new-client-cni" class="form-control" placeholder="ex: CI001928374">
+                  </div>
+                </div>
+              </div>
+
+              <!-- ÉTAPE 2 : MONTANT, DATE ET MODE DE RÈGLEMENT -->
+              <div id="step-2-details" style="margin-top:20px; padding-top:20px; border-top:1px dashed #E2E8F0;">
+                <h4 style="font-size:0.92rem;font-weight:800;margin-bottom:14px;color:#0F172A;display:flex;align-items:center;gap:6px;">
+                  <i data-lucide="coins" style="width:16px;height:16px;color:#2563EB;"></i> <span data-i18n="creditDetailsTitle">Montant, Échéance &amp; Moyen de Paiement</span>
+                </h4>
+                <div class="grid-2-equal">
+                  <div class="form-group">
+                    <label class="form-label"><span data-i18n="creditAmountLabel">Montant Total de la Vente (FCFA)</span> <strong style="color:#EF4444;">*</strong></label>
+                    <input type="number" id="credit-amount" class="form-control" placeholder="ex: 150000" min="100" required>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label"><span data-i18n="creditDueDateLabel">Date Limite de Remboursement</span> <strong style="color:#EF4444;">*</strong></label>
+                    <input type="date" id="credit-due-date" class="form-control" required>
+                  </div>
+                </div>
+
+                <div class="grid-2-equal">
+                  <div class="form-group">
+                    <label class="form-label">💳 Comment le client prévoit de payer ?</label>
+                    <select id="credit-payment-method-pref" class="form-control" onchange="handlePaymentPrefChange(this.value)">
+                      <option value="Espèces">💵 Espèces (Paiement physique en boutique)</option>
+                      <option value="Wave Direct">🌊 Wave Money</option>
+                      <option value="Orange Money">🟠 Orange Money</option>
+                      <option value="MTN MoMo">📱 MTN Mobile Money</option>
+                      <option value="Moov Money">🔵 Moov Money</option>
+                      <option value="Virement Bancaire">🏦 Virement Bancaire</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Numéro / Compte de paiement client :</label>
+                    <input type="text" id="credit-transfer-account" class="form-control" placeholder="Numéro Wave / MoMo ou RIB">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label"><span data-i18n="creditDescLabel">Articles Voulus / Description de la Marchandise</span> <strong style="color:#EF4444;">*</strong></label>
+                  <input type="text" id="credit-description" class="form-control" placeholder="ex: 3 Sacs de Riz 50kg, 2 Cartons d'Huile" required>
+                </div>
+              </div>
+
+              <!-- ÉTAPE 3 : GARANTIES -->
+              <div id="step-3-guarantees" style="margin-top:20px; padding-top:20px; border-top:1px dashed #E2E8F0;">
+                <h4 style="font-size:0.92rem;font-weight:800;margin-bottom:14px;color:#0F172A;display:flex;align-items:center;gap:6px;">
+                  <i data-lucide="shield-check" style="width:16px;height:16px;color:#10B981;"></i> <span data-i18n="guaranteeTitle">Garantie ou Témoin (Optionnel)</span>
+                </h4>
+                
+                <div class="grid-2-equal">
+                  <div class="form-group">
+                    <label class="form-label" data-i18n="guarantorNameLabel">Nom de la Personne Garante</label>
+                    <input type="text" id="credit-guarantor-name" class="form-control" placeholder="ex: KONE Drissa">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" data-i18n="guarantorPhoneLabel">Téléphone du Garant</label>
+                    <input type="tel" id="credit-guarantor-phone" class="form-control" placeholder="+225 0102030405">
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top:28px; display:flex; gap:14px; justify-content:flex-end;">
+                <button type="button" class="btn btn-outline" onclick="switchMenu('menu-2')" data-i18n="cancel">Annuler</button>
+                <button type="submit" class="btn btn-primary" style="padding:12px 24px; font-size:0.95rem;">
+                  <i data-lucide="check-circle"></i> <span data-i18n="btnSaveCredit">Enregistrer le Crédit</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+</body>
+</html>

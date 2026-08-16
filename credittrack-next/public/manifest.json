@@ -1,0 +1,23 @@
+{
+  "name": "CréditTrack PRO - Solution de Recouvrement Panafricain",
+  "short_name": "CréditTrack",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060A14",
+  "theme_color": "#1B3BBB",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo_3d.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo_3d.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
