@@ -1987,29 +1987,39 @@ function initCharts() {
 }
 
 // --------------------------------------------------------------------------
-// 14. SYSTÈME D'AUTHENTIFICATION & GESTION DES ABONNEMENTS SAAS PRO
+// 14. SYSTÈME D'AUTHENTIFICATION & VÉRIFICATION EMAIL PAR CODE OTP SUPABASE
 // --------------------------------------------------------------------------
-window.openAuthModal = function(tab = 'login') {
+let pendingAuthData = {
+  email: '',
+  bizName: '',
+  phone: '',
+  isRegister: true
+};
+
+window.openAuthModal = function(tab = 'register') {
+  backToAuthStep1();
   switchAuthTab(tab);
   openModal('modal-auth');
 };
 
 window.switchAuthTab = function(tab) {
-  const isLogin = tab === 'login';
+  const isRegister = tab === 'register';
+  pendingAuthData.isRegister = isRegister;
+  
   const tabLogin = document.getElementById('tab-auth-login');
   const tabReg = document.getElementById('tab-auth-register');
   
   if (tabLogin) {
-    tabLogin.classList.toggle('active', isLogin);
-    tabLogin.style.background = isLogin ? '#fff' : 'transparent';
-    tabLogin.style.color = isLogin ? '#0F172A' : '#64748B';
-    tabLogin.style.boxShadow = isLogin ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
+    tabLogin.classList.toggle('active', !isRegister);
+    tabLogin.style.background = !isRegister ? '#fff' : 'transparent';
+    tabLogin.style.color = !isRegister ? '#0F172A' : '#64748B';
+    tabLogin.style.boxShadow = !isRegister ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
   }
   if (tabReg) {
-    tabReg.classList.toggle('active', !isLogin);
-    tabReg.style.background = !isLogin ? '#fff' : 'transparent';
-    tabReg.style.color = !isLogin ? '#0F172A' : '#64748B';
-    tabReg.style.boxShadow = !isLogin ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
+    tabReg.classList.toggle('active', isRegister);
+    tabReg.style.background = isRegister ? '#fff' : 'transparent';
+    tabReg.style.color = isRegister ? '#0F172A' : '#64748B';
+    tabReg.style.boxShadow = isRegister ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
   }
   
   const bizField = document.getElementById('auth-field-biz');
@@ -2017,77 +2027,185 @@ window.switchAuthTab = function(tab) {
   const submitBtn = document.getElementById('auth-submit-btn');
   const title = document.getElementById('auth-modal-title');
 
-  if (isLogin) {
-    if (bizField) bizField.style.display = 'none';
-    if (phoneField) phoneField.style.display = 'none';
-    if (submitBtn) submitBtn.textContent = 'Se Connecter';
-    if (title) title.textContent = '🔐 Connexion à votre Espace';
-  } else {
+  if (isRegister) {
     if (bizField) bizField.style.display = 'block';
     if (phoneField) phoneField.style.display = 'block';
-    if (submitBtn) submitBtn.textContent = 'Créer mon Compte Commerçant';
-    if (title) title.textContent = '✨ Créer un Compte Gratuit';
+    if (submitBtn) submitBtn.innerHTML = `<span>Envoyer mon Code de Vérification</span> ➔`;
+    if (title) title.textContent = '✨ Inscription (Essai 3 Mois Offert)';
+  } else {
+    if (bizField) bizField.style.display = 'none';
+    if (phoneField) phoneField.style.display = 'none';
+    if (submitBtn) submitBtn.innerHTML = `<span>Recevoir mon Code de Connexion</span> ➔`;
+    if (title) title.textContent = '🔐 Connexion Sécurisée par Email';
   }
 };
 
-window.handleAuthSubmit = async function(e) {
+window.backToAuthStep1 = function() {
+  const step1 = document.getElementById('auth-step-1');
+  const step2 = document.getElementById('auth-step-2');
+  const tabs = document.getElementById('auth-tabs-container');
+  if (step1) step1.style.display = 'block';
+  if (step2) step2.style.display = 'none';
+  if (tabs) tabs.style.display = 'flex';
+};
+
+window.handleSendEmailOtp = async function(e) {
   e.preventDefault();
-  const email = (document.getElementById('auth-email')?.value || '').trim();
-  const password = document.getElementById('auth-password')?.value || '';
-  const isRegister = document.getElementById('tab-auth-register')?.classList.contains('active');
+  const email = (document.getElementById('auth-email')?.value || '').trim().toLowerCase();
   const bizName = (document.getElementById('auth-biz-name')?.value || '').trim() || 'Mon Commerce';
   const phone = (document.getElementById('auth-phone')?.value || '').trim();
+  const isRegister = pendingAuthData.isRegister;
 
-  if (!email || !password) {
-    showToast("⚠️ Veuillez remplir votre e-mail et mot de passe.");
+  // Validation d'adresse email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    showToast("⚠️ Veuillez renseigner une adresse email valide.");
+    document.getElementById('auth-email')?.focus();
     return;
   }
 
-  // 1. Supabase Auth if available
-  if (window.supabaseClient) {
-    try {
-      if (isRegister) {
-        const { data, error } = await window.supabaseClient.auth.signUp({
-          email, password,
-          options: { data: { business_name: bizName, phone } }
-        });
-        if (error) throw error;
-        showToast("🎉 Compte créé avec succès !");
-      } else {
-        const { data, error } = await window.supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        showToast("✅ Connexion réussie !");
-      }
-    } catch (err) {
-      console.warn("Supabase auth local session:", err.message);
-      showToast(isRegister ? "🎉 Compte créé avec succès !" : "✅ Connexion réussie !");
-    }
-  } else {
-    showToast(isRegister ? "🎉 Compte créé !" : "✅ Connecté !");
+  pendingAuthData.email = email;
+  pendingAuthData.bizName = bizName;
+  pendingAuthData.phone = phone;
+
+  const submitBtn = document.getElementById('auth-submit-btn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi du code en cours...`;
   }
 
-  AppState.user.email = email;
-  AppState.user.businessName = bizName;
-  localStorage.setItem('userEmail', email);
-  localStorage.setItem('bizName', bizName);
-
-  updateUserPlanBadgeUI();
-  closeModal('modal-auth');
-};
-
-window.handleGoogleAuth = async function() {
-  if (window.supabaseClient) {
-    try {
-      const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin }
+  try {
+    if (window.supabaseClient) {
+      const { data, error } = await window.supabaseClient.auth.signInWithOtp({
+        email,
+        options: {
+          data: {
+            business_name: bizName,
+            phone: phone,
+            plan_tier: 'trial_3_months'
+          },
+          shouldCreateUser: true
+        }
       });
       if (error) throw error;
-    } catch (err) {
-      showToast("⚠️ Authentification Google en cours d'initialisation sur Supabase.");
     }
-  } else {
-    showToast("⚠️ Connexion Google configurée pour le domaine de production.");
+
+    // Basculer vers l'étape 2 (Saisie du code OTP)
+    const targetDisplay = document.getElementById('auth-target-email-display');
+    if (targetDisplay) targetDisplay.textContent = email;
+
+    const step1 = document.getElementById('auth-step-1');
+    const step2 = document.getElementById('auth-step-2');
+    const tabs = document.getElementById('auth-tabs-container');
+    if (step1) step1.style.display = 'none';
+    if (step2) step2.style.display = 'block';
+    if (tabs) tabs.style.display = 'none';
+
+    const otpInput = document.getElementById('auth-otp-code');
+    if (otpInput) {
+      otpInput.value = '';
+      otpInput.focus();
+    }
+
+    showToast(`📧 Code de sécurité envoyé à ${email} !`);
+  } catch (err) {
+    console.error("Erreur Supabase OTP:", err);
+    showToast(`⚠️ Erreur : ${err.message || "Impossible d'envoyer le code"}`);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>${isRegister ? 'Envoyer le Code de Vérification' : 'Recevoir mon Code de Connexion'}</span> ➔`;
+    }
+  }
+};
+
+window.handleVerifyEmailOtp = async function(e) {
+  e.preventDefault();
+  const rawCode = (document.getElementById('auth-otp-code')?.value || '').trim();
+  const otpCode = rawCode.replace(/[^0-9]/g, '');
+
+  if (!otpCode || otpCode.length < 6) {
+    showToast("⚠️ Veuillez entrer le code de sécurité à 6 chiffres reçu par mail.");
+    document.getElementById('auth-otp-code')?.focus();
+    return;
+  }
+
+  const verifyBtn = document.getElementById('auth-verify-btn');
+  if (verifyBtn) {
+    verifyBtn.disabled = true;
+    verifyBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Vérification en cours...`;
+  }
+
+  try {
+    let userId = 'usr_' + Date.now();
+    let userEmail = pendingAuthData.email;
+
+    if (window.supabaseClient) {
+      const { data, error } = await window.supabaseClient.auth.verifyOtp({
+        email: pendingAuthData.email,
+        token: otpCode,
+        type: 'email'
+      });
+
+      if (error) throw error;
+
+      if (data && data.user) {
+        userId = data.user.id;
+        userEmail = data.user.email || userEmail;
+      }
+    }
+
+    // Initialisation session utilisateur avec 3 mois d'essai offerts
+    AppState.user.id = userId;
+    AppState.user.email = userEmail;
+    AppState.user.businessName = pendingAuthData.bizName || AppState.businessName;
+    AppState.user.planTier = 'trial_3_months';
+    AppState.user.status = 'active';
+    AppState.businessName = AppState.user.businessName;
+    AppState.userName = userEmail.split('@')[0];
+
+    localStorage.setItem('user_id', userId);
+    localStorage.setItem('userEmail', userEmail);
+    localStorage.setItem('bizName', AppState.user.businessName);
+    localStorage.setItem('userPlan', 'trial_3_months');
+    localStorage.setItem('userName', AppState.userName);
+
+    updateUserPlanBadgeUI();
+    closeModal('modal-auth');
+
+    // Ouvrir directement l'espace de travail
+    openAppWorkspace('menu-2');
+
+    showToast(`🎉 Bienvenue ${AppState.user.businessName} ! Compte vérifié & 3 Mois d'Essai activés ! 🚀`);
+  } catch (err) {
+    console.error("Erreur validation OTP:", err);
+    showToast("❌ Code incorrect ou expiré. Veuillez vérifier votre boîte mail.");
+    const otpInput = document.getElementById('auth-otp-code');
+    if (otpInput) {
+      otpInput.style.borderColor = '#EF4444';
+      setTimeout(() => { otpInput.style.borderColor = ''; }, 3500);
+    }
+  } finally {
+    if (verifyBtn) {
+      verifyBtn.disabled = false;
+      verifyBtn.innerHTML = `✅ Valider &amp; Activer mon Compte`;
+    }
+  }
+};
+
+window.resendEmailOtp = async function() {
+  if (!pendingAuthData.email) return;
+  showToast("⏳ Envoi d'un nouveau code...");
+  try {
+    if (window.supabaseClient) {
+      await window.supabaseClient.auth.signInWithOtp({
+        email: pendingAuthData.email,
+        options: { shouldCreateUser: true }
+      });
+    }
+    showToast(`📧 Nouveau code renvoyé à ${pendingAuthData.email} !`);
+  } catch (e) {
+    showToast("⚠️ Veuillez patienter quelques secondes avant de renvoyer.");
   }
 };
 
@@ -2095,12 +2213,15 @@ window.handleSignOut = async function() {
   if (window.supabaseClient) {
     try { await window.supabaseClient.auth.signOut(); } catch(e) {}
   }
-  AppState.user = { email: '', businessName: 'Boutique KOUASSI & Fils', planTier: 'free', status: 'active', isVip: false };
+  AppState.user = { id: '', email: '', businessName: 'Mon Commerce', planTier: 'free', status: 'active', isVip: false };
+  localStorage.removeItem('user_id');
   localStorage.removeItem('userEmail');
   localStorage.removeItem('userPlan');
   localStorage.removeItem('isVip');
+  
   updateUserPlanBadgeUI();
-  showToast("👋 Déconnexion réussie.");
+  openPublicLanding();
+  showToast("👋 Vous êtes déconnecté.");
 };
 
 window.openSubscriptionModal = function() {
@@ -2207,7 +2328,7 @@ function activateProPlan(planTier, amount, method) {
 }
 
 window.checkPlanAccess = function(actionType = 'add_client') {
-  const isPro = AppState.user.planTier === 'pro_monthly' || AppState.user.planTier === 'pro_yearly' || AppState.user.planTier === 'vip_lifetime';
+  const isPro = AppState.user.planTier === 'trial_3_months' || AppState.user.planTier === 'pro_monthly' || AppState.user.planTier === 'pro_yearly' || AppState.user.planTier === 'vip_lifetime';
   
   if (actionType === 'add_client') {
     const maxFree = 10;
@@ -2221,18 +2342,21 @@ window.checkPlanAccess = function(actionType = 'add_client') {
 };
 
 function updateUserPlanBadgeUI() {
-  const isPro = AppState.user.planTier === 'pro_monthly' || AppState.user.planTier === 'pro_yearly' || AppState.user.planTier === 'vip_lifetime';
+  const isPro = AppState.user.planTier === 'trial_3_months' || AppState.user.planTier === 'pro_monthly' || AppState.user.planTier === 'pro_yearly' || AppState.user.planTier === 'vip_lifetime';
   const badge = document.getElementById('sidebar-user-plan-badge');
   const proBanner = document.getElementById('sidebar-pro-banner');
   const userName = document.getElementById('sidebar-user-name');
 
   if (userName) {
-    userName.textContent = AppState.user.businessName || 'Boutique KOUASSI & Fils';
+    userName.textContent = AppState.user.businessName || 'Mon Commerce';
   }
 
   if (badge) {
     if (AppState.user.planTier === 'vip_lifetime') {
       badge.textContent = '👑 VIP Fondateur';
+      badge.style.color = '#10B981';
+    } else if (AppState.user.planTier === 'trial_3_months') {
+      badge.textContent = '🎁 Essai 3 Mois Actif';
       badge.style.color = '#10B981';
     } else if (isPro) {
       badge.textContent = '👑 PRO ACTIF';
