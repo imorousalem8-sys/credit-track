@@ -799,7 +799,7 @@ window.testSimWhatsAppSend = function() {
   const clientName = document.getElementById('sim-client-name')?.value || 'Client';
   const amount = parseInt(document.getElementById('sim-client-amount')?.value) || 75000;
   
-  let msg = `Bonjour ${clientName}, nous vous rappelons que votre solde de ${formatCurrency(amount)} chez ${AppState.businessName} est arrivé à échéance. Merci pour votre confiance ! 💳 Paiement direct Wave: https://credittrack.app/pay/BOUTIQUE-KOUASSI`;
+  let msg = `Bonjour ${clientName}, nous vous rappelons que votre solde de ${formatCurrency(amount)} chez ${AppState.businessName} est arrivé à échéance. Merci pour votre confiance !`;
   
   // Ouvre WhatsApp avec le message de démonstration
   const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
@@ -1395,19 +1395,22 @@ window.triggerSMSFromModal = function() {
 
 window.sendWhatsAppReminder = function(name, phone, amount) {
   const cleanPhone = sanitizePhoneNumber(phone);
+  const bizPhone = AppState.businessPhone ? ` (Contact: ${AppState.businessPhone})` : '';
   const template = localStorage.getItem('whatsappTemplate') || 
     (AppState.lang === 'en' ? 
-      "Hello {nom_client}, this is a friendly reminder that your balance of {montant} at {nom_commerce} is due. Thank you!" : 
-      "Bonjour {nom_client}, nous vous rappelons que votre solde de {montant} chez {nom_commerce} est à régler. Merci pour votre confiance !");
+      "Bonjour {nom_client}, nous vous rappelons amicalement que votre solde de {montant} chez {nom_commerce} est à régler. Merci pour votre confiance !" : 
+      "Bonjour {nom_client}, nous vous rappelons amicalement que votre solde de {montant} chez {nom_commerce} est à régler. Merci pour votre confiance !");
   
   let msg = template
     .replace(/{nom_client}/g, name)
     .replace(/{montant}/g, formatCurrency(amount))
     .replace(/{nom_commerce}/g, AppState.businessName);
 
-  msg += " 💳 Paiement direct: https://credittrack.app/pay/BOUTIQUE-KOUASSI";
+  if (AppState.businessPhone) {
+    msg += `\n\n📱 Règlement possible en espèces ou par Mobile Money / Wave au : ${AppState.businessPhone}`;
+  }
 
-  // Ouvre directement WhatsApp avec le numéro de téléphone et le message
+  // Ouvre directement WhatsApp avec le numéro de téléphone et le message propre
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
   showToast(`💬 WhatsApp ouvert avec le numéro de ${name} (+${cleanPhone}) !`);
