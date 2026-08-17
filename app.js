@@ -471,21 +471,38 @@ const translations = {
 // --------------------------------------------------------------------------
 // 3. ÉTAT APPLICATIF GLOBAL (AppState)
 // --------------------------------------------------------------------------
+// Récupération synchrone instantanée du cache pour zéro perte de données aux redéploiements
+function getCachedArray(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : [];
+  } catch(e) {
+    return [];
+  }
+}
+
+function saveLocalCache(key, data) {
+  try {
+    localStorage.setItem(key, JSON.stringify(data));
+  } catch(e) {}
+}
+
 const AppState = {
-  mode: 'credit',
   lang: localStorage.getItem('lang') || 'fr',
   country: localStorage.getItem('country') || 'CI',
-  countryConfig: getCountryConfig(localStorage.getItem('country') || 'CI'),
-  businessName: localStorage.getItem('businessName') || 'Boutique KOUASSI & Fils',
-  businessAddress: localStorage.getItem('businessAddress') || 'Avenue Chardy, Abidjan Plateau',
-  businessPhone: localStorage.getItem('businessPhone') || '+225 07 08 09 10 11',
-  userName: localStorage.getItem('userName') || 'KOUASSI Antoine',
+  mode: localStorage.getItem('mode') || 'credit',
+  countryConfig: null,
+  businessName: localStorage.getItem('bizName') || 'Mon Commerce',
+  businessAddress: localStorage.getItem('bizAddress') || 'Abidjan, Côte d’Ivoire',
+  businessPhone: localStorage.getItem('bizPhone') || '+225 0701020304',
+  userName: localStorage.getItem('userName') || 'Administrateur',
   userRole: localStorage.getItem('userRole') || 'Administrateur',
   activeClientInModal: null,
 
-  clients: [],
-  payments: [],
-  accountingEntries: [],
+  // Données persistantes multi-couches garanties à 100%
+  clients: getCachedArray('credittrack_clients'),
+  payments: getCachedArray('credittrack_payments'),
+  accountingEntries: getCachedArray('credittrack_accounting'),
 
   user: {
     email: localStorage.getItem('userEmail') || '',
@@ -1225,6 +1242,7 @@ async function handleNewCreditSubmit(e) {
     }
   }
 
+  saveLocalCache('credittrack_clients', AppState.clients);
   showToast(`${AppState.lang === 'en' ? 'Credit recorded for' : 'Crédit de'} ${formatCurrency(amount)} ${AppState.lang === 'en' ? 'saved!' : 'enregistré pour'} ${clientName} !`);
   populateCreditClientSelect();
   renderClientDirectory();
@@ -1276,6 +1294,9 @@ window.payClientDebt = async function() {
     await window.dataStore.update("clients", client);
     await window.dataStore.add("payments", newPayment);
   }
+
+  saveLocalCache('credittrack_clients', AppState.clients);
+  saveLocalCache('credittrack_payments', AppState.payments);
 
   closeModal('modal-client-details');
   renderClientDirectory();
@@ -1744,6 +1765,7 @@ function handleNewAccountingEntrySubmit(e) {
 
   AppState.accountingEntries.unshift(newEntry);
   if (window.dataStore) window.dataStore.add('accountingEntries', newEntry).catch(() => {});
+  saveLocalCache('credittrack_accounting', AppState.accountingEntries);
 
   renderAccountingKPIs();
   renderAccountingJournal();

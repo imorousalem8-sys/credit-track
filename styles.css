@@ -2037,7 +2037,7 @@ body.is-app-mode #app-workspace-layout {
     box-sizing: border-box !important;
   }
 
-  /* 1. SIDEBAR OFF-CANVAS RESPONSIVE */
+  /* 1. SIDEBAR OFF-CANVAS RESPONSIVE SANS AUCUN BLOCAGE DE CLICS */
   .app-sidebar-left {
     position: fixed !important;
     left: 0 !important;
@@ -2049,10 +2049,14 @@ body.is-app-mode #app-workspace-layout {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
     z-index: 1050 !important;
     box-shadow: 0 0 40px rgba(0,0,0,0.5) !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
   }
 
   body.mobile-sidebar-open .app-sidebar-left {
     transform: translateX(0) !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
   }
 
   .sidebar-overlay {
@@ -2061,10 +2065,10 @@ body.is-app-mode #app-workspace-layout {
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
     z-index: 1040;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    display: none !important;
     transition: opacity 0.3s ease;
-    display: none;
   }
 
   body.mobile-sidebar-open .sidebar-overlay {
