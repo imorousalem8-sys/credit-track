@@ -471,10 +471,16 @@ const translations = {
 // --------------------------------------------------------------------------
 // 3. ÉTAT APPLICATIF GLOBAL (AppState)
 // --------------------------------------------------------------------------
-// Récupération synchrone instantanée du cache pour zéro perte de données aux redéploiements
+// Partitionnement étanche des clés par utilisateur pour zéro fuite de données
+function getUserCacheKey(baseKey) {
+  const uid = (typeof AppState !== 'undefined' && AppState.user && AppState.user.id) ? AppState.user.id : (localStorage.getItem('user_id') || '');
+  return uid ? `${baseKey}_${uid}` : baseKey;
+}
+
 function getCachedArray(key) {
   try {
-    const raw = localStorage.getItem(key);
+    const fullKey = getUserCacheKey(key);
+    const raw = localStorage.getItem(fullKey);
     return raw ? JSON.parse(raw) : [];
   } catch(e) {
     return [];
@@ -483,7 +489,8 @@ function getCachedArray(key) {
 
 function saveLocalCache(key, data) {
   try {
-    localStorage.setItem(key, JSON.stringify(data));
+    const fullKey = getUserCacheKey(key);
+    localStorage.setItem(fullKey, JSON.stringify(data));
   } catch(e) {}
 }
 
@@ -499,15 +506,16 @@ const AppState = {
   userRole: localStorage.getItem('userRole') || 'Administrateur',
   activeClientInModal: null,
 
-  // Données persistantes multi-couches garanties à 100%
+  // Données persistantes multi-couches garanties à 100% et isolées par commerçant
   clients: getCachedArray('credittrack_clients'),
   payments: getCachedArray('credittrack_payments'),
   accountingEntries: getCachedArray('credittrack_accounting'),
 
   user: {
+    id: localStorage.getItem('user_id') || '',
     email: localStorage.getItem('userEmail') || '',
-    businessName: localStorage.getItem('bizName') || 'Boutique KOUASSI & Fils',
-    planTier: localStorage.getItem('userPlan') || 'free', // 'free', 'pro_monthly', 'pro_yearly', 'vip_lifetime'
+    businessName: localStorage.getItem('bizName') || 'Mon Commerce',
+    planTier: localStorage.getItem('userPlan') || 'free',
     status: 'active',
     isVip: localStorage.getItem('isVip') === 'true'
   }
@@ -2174,6 +2182,22 @@ window.handleVerifyEmailOtp = async function(e) {
     localStorage.setItem('bizName', AppState.user.businessName);
     localStorage.setItem('userPlan', 'trial_3_months');
     localStorage.setItem('userName', AppState.userName);
+
+    // Charger immédiatement le jeu de données isolé propre à cet utilisateur
+    AppState.clients = getCachedArray('credittrack_clients');
+    AppState.payments = getCachedArray('credittrack_payments');
+    AppState.accountingEntries = getCachedArray('credittrack_accounting');
+
+    if (window.dataStore) {
+      try {
+        await window.dataStore.syncFromSupabase();
+      } catch(e) {}
+    }
+
+    renderClientDirectory();
+    renderPaymentsTable();
+    renderAccountingKPIs();
+    renderCreditKPIs();
 
     updateUserPlanBadgeUI();
     closeModal('modal-auth');

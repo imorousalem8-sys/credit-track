@@ -70,8 +70,13 @@ function sanitizeRecord(val) {
   return clean;
 }
 
+function getCurrentUserId() {
+  return (window.AppState && window.AppState.user && window.AppState.user.id) ? window.AppState.user.id : (localStorage.getItem('user_id') || '');
+}
+
 async function add(storeName, value) {
-  const sanitized = sanitizeRecord(value);
+  const currentUserId = getCurrentUserId();
+  const sanitized = sanitizeRecord({ ...value, user_id: currentUserId || null });
   const db = await openDB();
   
   // 1. Sauvegarde locale IndexedDB
@@ -83,12 +88,13 @@ async function add(storeName, value) {
     req.onerror = () => reject(req.error);
   });
 
-  // 2. Synchronisation Cloud Supabase sécurisée en arrière-plan
+  // 2. Synchronisation Cloud Supabase sécurisée en arrière-plan avec user_id
   const client = initSupabase();
-  if (client) {
+  if (client && currentUserId) {
     try {
       if (storeName === 'clients') {
         client.from('clients').upsert({
+          user_id: currentUserId,
           name: sanitized.name,
           phone: sanitized.phone,
           cni: sanitized.cni || null,
@@ -97,13 +103,10 @@ async function add(storeName, value) {
           reliability_score: Number(sanitized.reliabilityScore) || 85,
           total_due: Math.max(0, Number(sanitized.totalDue) || 0),
           status: sanitized.status || 'pending'
-        }).then(({ error }) => {
-          if (error && error.code !== 'PGRST116') {
-            // Log sécurisé sans fuite de structure
-          }
-        });
+        }).then(({ error }) => {});
       } else if (storeName === 'payments') {
         client.from('payments').insert({
+          user_id: currentUserId,
           client_name: sanitized.clientName,
           amount: Math.max(0, Number(sanitized.amount) || 0),
           payment_method: sanitized.method || 'Espèces',
@@ -120,12 +123,20 @@ async function add(storeName, value) {
 }
 
 async function getAll(storeName) {
+  const currentUserId = getCurrentUserId();
+  if (!currentUserId) return [];
+
   const db = await openDB();
   return new Promise((resolve, reject) => {
     const tx = db.transaction(storeName, "readonly");
     const store = tx.objectStore(storeName);
     const req = store.getAll();
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      const results = req.result || [];
+      // Filtrage strict par utilisateur connecté
+      const filtered = results.filter(item => !item.user_id || item.user_id === currentUserId);
+      resolve(filtered);
+    };
     req.onerror = () => reject(req.error);
   });
 }
@@ -156,20 +167,25 @@ async function remove(storeName, id) {
   });
 }
 
-// Récupération Cloud Supabase au démarrage
+// Récupération Cloud Supabase au démarrage filtrée strictement par user_id
 async function syncFromSupabase() {
+  const currentUserId = getCurrentUserId();
+  if (!currentUserId) return;
+
   const client = initSupabase();
   if (!client) return;
 
   try {
     const { data: clientsData, error: clientsError } = await client
       .from('clients')
-      .select('id, name, phone, cni, preferred_payment_method, payment_account, total_due, status, reliability_score, created_at')
+      .select('id, name, phone, cni, preferred_payment_method, payment_account, total_due, status, reliability_score, created_at, user_id')
+      .eq('user_id', currentUserId)
       .limit(100);
 
     if (!clientsError && Array.isArray(clientsData) && clientsData.length > 0) {
       const mapped = clientsData.map(c => ({
         id: c.id,
+        user_id: c.user_id,
         name: c.name || 'Client',
         phone: c.phone || '',
         cni: c.cni || '',
