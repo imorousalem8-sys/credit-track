@@ -121,8 +121,8 @@ export default function NewCreditWizard() {
               <input type="number" name="penaltyRate" value={formData.penaltyRate} onChange={handleChange} className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500" placeholder="0" />
             </div>
             <div className="md:col-span-3">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Description des marchandises / motif *</label>
-              <input required type="text" name="description" value={formData.description} onChange={handleChange} className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500" placeholder="Ex: 3 sacs de ciment + 1 tonne de fer" />
+              <label className="block text-sm font-bold text-slate-700 mb-2">Articles Voulus / Description de la Marchandise *</label>
+              <textarea required rows={4} name="description" value={formData.description} onChange={handleChange} className="w-full p-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 font-sans" placeholder="• 3 sacs de ciment&#10;• 1 tonne de fer 12&#10;• 2 paquets de pointes" />
             </div>
           </div>
         </div>
