@@ -832,15 +832,23 @@ window.testSimWhatsAppSend = function() {
 };
 
 window.toggleMobileSidebar = function() {
+  const sidebar = document.getElementById('main-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
   document.body.classList.toggle('mobile-sidebar-open');
+  if (sidebar) sidebar.classList.toggle('active');
+  if (overlay) overlay.classList.toggle('active');
 };
 
 window.closeMobileSidebar = function() {
+  const sidebar = document.getElementById('main-sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
   document.body.classList.remove('mobile-sidebar-open');
+  if (sidebar) sidebar.classList.remove('active');
+  if (overlay) overlay.classList.remove('active');
 };
 
 function closeMobileSidebarIfOpen() {
-  document.body.classList.remove('mobile-sidebar-open');
+  window.closeMobileSidebar();
 }
 
 function openAppWorkspace(menuId = 'menu-2') {
@@ -872,12 +880,16 @@ function switchMenu(menuId) {
 
   document.querySelectorAll('.view-container').forEach(view => view.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
 
   const targetView = document.getElementById(menuId);
   if (targetView) targetView.classList.add('active');
 
   const activeBtn = document.getElementById(`nav-${menuId}`);
   if (activeBtn) activeBtn.classList.add('active');
+
+  const mobBtn = document.getElementById(`mob-nav-${menuId}`);
+  if (mobBtn) mobBtn.classList.add('active');
 
   const pageTitles = {
     'menu-2': AppState.lang === 'en' ? 'Dashboard' : 'Tableau de Bord',
