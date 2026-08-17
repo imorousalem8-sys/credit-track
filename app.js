@@ -2011,6 +2011,29 @@ let pendingAuthData = {
 let resendTimerInterval = null;
 let resendSecondsLeft = 0;
 
+// Validation stricte et robuste du format e-mail (RFC 5322)
+function isValidEmailStrict(email) {
+  if (!email || typeof email !== 'string') return false;
+  const trimmed = email.trim();
+  if (trimmed.length < 5 || trimmed.length > 254) return false;
+  
+  // Regex standard robuste RFC 5322
+  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+  if (!emailRegex.test(trimmed)) return false;
+  
+  const parts = trimmed.split('@');
+  if (parts.length !== 2) return false;
+  const [local, domain] = parts;
+  if (!local || !domain || local.startsWith('.') || local.endsWith('.')) return false;
+  
+  const domainParts = domain.split('.');
+  if (domainParts.length < 2) return false;
+  const tld = domainParts[domainParts.length - 1];
+  if (!tld || tld.length < 2 || !/^[a-zA-Z]+$/.test(tld)) return false;
+  
+  return true;
+}
+
 // Masquage sécurisé de l'adresse e-mail pour l'affichage (ex: u**********r@gmail.com)
 function maskEmail(email) {
   if (!email || !email.includes('@')) return email || '';
@@ -2111,10 +2134,15 @@ window.backToAuthRegister = function() {
 };
 
 window.promptPendingVerification = function() {
-  const email = prompt("Veuillez saisir votre adresse e-mail pour valider le code OTP reçu :");
-  if (email && email.trim()) {
-    pendingAuthData.email = email.trim().toLowerCase();
-    showOtpVerificationView(pendingAuthData.email);
+  const emailInput = prompt("Veuillez saisir votre adresse e-mail pour valider le code OTP reçu :");
+  if (emailInput) {
+    const clean = emailInput.trim().toLowerCase();
+    if (!isValidEmailStrict(clean)) {
+      showToast("⚠️ Veuillez entrer une adresse e-mail valide.");
+      return;
+    }
+    pendingAuthData.email = clean;
+    showOtpVerificationView(clean);
   }
 };
 
@@ -2144,28 +2172,59 @@ function showOtpVerificationView(email) {
 
 window.handleRegisterSubmit = async function(e) {
   e.preventDefault();
-  const bizName = (document.getElementById('auth-reg-biz-name')?.value || '').trim() || 'Mon Commerce';
-  const phone = (document.getElementById('auth-reg-phone')?.value || '').trim();
-  const email = (document.getElementById('auth-reg-email')?.value || '').trim().toLowerCase();
-  const password = document.getElementById('auth-reg-password')?.value || '';
-  const passwordConfirm = document.getElementById('auth-reg-password-confirm')?.value || '';
+  const bizInput = document.getElementById('auth-reg-biz-name');
+  const phoneInput = document.getElementById('auth-reg-phone');
+  const emailInput = document.getElementById('auth-reg-email');
+  const passInput = document.getElementById('auth-reg-password');
+  const passConfInput = document.getElementById('auth-reg-password-confirm');
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || !emailRegex.test(email)) {
-    showToast("⚠️ Veuillez renseigner une adresse email valide.");
-    document.getElementById('auth-reg-email')?.focus();
+  const bizName = (bizInput?.value || '').trim() || 'Mon Commerce';
+  const phone = (phoneInput?.value || '').trim();
+  const email = (emailInput?.value || '').trim().toLowerCase();
+  const password = passInput?.value || '';
+  const passwordConfirm = passConfInput?.value || '';
+
+  // 1. Validation de champ vide
+  if (!email) {
+    showToast("⚠️ Veuillez entrer votre adresse e-mail.");
+    if (emailInput) {
+      emailInput.style.borderColor = '#EF4444';
+      emailInput.focus();
+      setTimeout(() => { emailInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
-  if (password.length < 6) {
+  // 2. Validation réelle et stricte du format e-mail
+  if (!isValidEmailStrict(email)) {
+    showToast("⚠️ Veuillez entrer une adresse e-mail valide (ex: contact@gmail.com).");
+    if (emailInput) {
+      emailInput.style.borderColor = '#EF4444';
+      emailInput.focus();
+      setTimeout(() => { emailInput.style.borderColor = ''; }, 3000);
+    }
+    return;
+  }
+
+  // 3. Validation de mot de passe
+  if (!password || password.length < 6) {
     showToast("⚠️ Le mot de passe doit comporter au moins 6 caractères.");
-    document.getElementById('auth-reg-password')?.focus();
+    if (passInput) {
+      passInput.style.borderColor = '#EF4444';
+      passInput.focus();
+      setTimeout(() => { passInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
+  // 4. Validation de correspondance des mots de passe
   if (password !== passwordConfirm) {
     showToast("❌ Les mots de passe ne correspondent pas.");
-    document.getElementById('auth-reg-password-confirm')?.focus();
+    if (passConfInput) {
+      passConfInput.style.borderColor = '#EF4444';
+      passConfInput.focus();
+      setTimeout(() => { passConfInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
@@ -2181,7 +2240,7 @@ window.handleRegisterSubmit = async function(e) {
 
   try {
     if (window.supabaseClient) {
-      // 1. Inscription côté serveur Supabase avec hachage et envoi du code par e-mail
+      // Inscription côté serveur Supabase avec hachage et déclenchement du code OTP réel par e-mail
       const { data, error } = await window.supabaseClient.auth.signUp({
         email,
         password,
@@ -2214,12 +2273,12 @@ window.handleRegisterSubmit = async function(e) {
       }
     }
 
-    // Basculer vers l'écran de saisie du code OTP
+    // Basculer vers l'écran de saisie du code OTP avec email masqué
     showOtpVerificationView(email);
     showToast(`📬 Un vrai code de sécurité à 6 chiffres a été envoyé à ${maskEmail(email)} !`);
   } catch (err) {
     console.error("Erreur Inscription Supabase:", err);
-    showToast(`⚠️ Erreur : ${err.message || "Impossible d'initier l'inscription"}`);
+    showToast(`⚠️ Erreur : ${err.message || "Impossible d'envoyer le code de vérification"}`);
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -2230,12 +2289,17 @@ window.handleRegisterSubmit = async function(e) {
 
 window.handleVerifyOtpSubmit = async function(e) {
   e.preventDefault();
-  const rawCode = (document.getElementById('auth-otp-code')?.value || '').trim();
+  const otpInput = document.getElementById('auth-otp-code');
+  const rawCode = (otpInput?.value || '').trim();
   const otpCode = rawCode.replace(/[^0-9]/g, '');
 
   if (!otpCode || otpCode.length < 6) {
     showToast("⚠️ Veuillez entrer le code de sécurité à 6 chiffres reçu par mail.");
-    document.getElementById('auth-otp-code')?.focus();
+    if (otpInput) {
+      otpInput.style.borderColor = '#EF4444';
+      otpInput.focus();
+      setTimeout(() => { otpInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
@@ -2315,7 +2379,6 @@ window.handleVerifyOtpSubmit = async function(e) {
   } catch (err) {
     console.error("Erreur validation OTP:", err);
     showToast("❌ Code incorrect ou expiré. Veuillez vérifier votre boîte mail.");
-    const otpInput = document.getElementById('auth-otp-code');
     if (otpInput) {
       otpInput.style.borderColor = '#EF4444';
       setTimeout(() => { otpInput.style.borderColor = ''; }, 3500);
@@ -2330,19 +2393,42 @@ window.handleVerifyOtpSubmit = async function(e) {
 
 window.handleLoginSubmit = async function(e) {
   e.preventDefault();
-  const email = (document.getElementById('auth-login-email')?.value || '').trim().toLowerCase();
-  const password = document.getElementById('auth-login-password')?.value || '';
+  const emailInput = document.getElementById('auth-login-email');
+  const passInput = document.getElementById('auth-login-password');
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || !emailRegex.test(email)) {
-    showToast("⚠️ Veuillez renseigner une adresse email valide.");
-    document.getElementById('auth-login-email')?.focus();
+  const email = (emailInput?.value || '').trim().toLowerCase();
+  const password = passInput?.value || '';
+
+  // 1. Validation de champ vide
+  if (!email) {
+    showToast("⚠️ Veuillez entrer votre adresse e-mail.");
+    if (emailInput) {
+      emailInput.style.borderColor = '#EF4444';
+      emailInput.focus();
+      setTimeout(() => { emailInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
+  // 2. Validation réelle du format e-mail
+  if (!isValidEmailStrict(email)) {
+    showToast("⚠️ Veuillez entrer une adresse e-mail valide (ex: contact@gmail.com).");
+    if (emailInput) {
+      emailInput.style.borderColor = '#EF4444';
+      emailInput.focus();
+      setTimeout(() => { emailInput.style.borderColor = ''; }, 3000);
+    }
+    return;
+  }
+
+  // 3. Validation mot de passe
   if (!password) {
     showToast("⚠️ Veuillez saisir votre mot de passe.");
-    document.getElementById('auth-login-password')?.focus();
+    if (passInput) {
+      passInput.style.borderColor = '#EF4444';
+      passInput.focus();
+      setTimeout(() => { passInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
@@ -2364,8 +2450,9 @@ window.handleLoginSubmit = async function(e) {
       });
 
       if (error) {
+        // Détecter si l'email n'est pas encore vérifié
         if (error.message && (error.message.includes('Email not confirmed') || error.message.includes('not confirmed'))) {
-          showToast("⚠️ Votre adresse email n'est pas encore confirmée. Un code vous a été envoyé.");
+          showToast("⚠️ Votre adresse e-mail n'a pas encore été vérifiée. Un code vous a été envoyé.");
           pendingAuthData.email = email;
           try {
             await window.supabaseClient.auth.resend({ type: 'signup', email });
@@ -2373,7 +2460,8 @@ window.handleLoginSubmit = async function(e) {
           showOtpVerificationView(email);
           return;
         }
-        throw error;
+        // Message d'erreur sécurisé anti-énumération
+        throw new Error("Adresse e-mail ou mot de passe incorrect.");
       }
 
       if (data && data.user) {
@@ -2419,7 +2507,7 @@ window.handleLoginSubmit = async function(e) {
     showToast(`✅ Heureux de vous revoir ${AppState.businessName} !`);
   } catch (err) {
     console.error("Erreur Connexion:", err);
-    showToast("❌ Adresse email ou mot de passe incorrect.");
+    showToast("❌ " + (err.message || "Adresse e-mail ou mot de passe incorrect."));
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
