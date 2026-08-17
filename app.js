@@ -483,54 +483,9 @@ const AppState = {
   userRole: localStorage.getItem('userRole') || 'Administrateur',
   activeClientInModal: null,
 
-  clients: [
-    {
-      id: 1,
-      name: 'Société ABC',
-      phone: '+225 07010203',
-      totalDue: 150000,
-      status: 'pending',
-      reliabilityScore: 92,
-      addedDate: '2026-08-01',
-      transactions: [
-        { id: 101, date: '2026-08-01', desc: '3 Sacs de Riz 50kg', amount: 150000, status: 'pending', dueDate: '2026-08-20' }
-      ]
-    },
-    {
-      id: 2,
-      name: 'Entreprise XYZ',
-      phone: '+225 05040302',
-      totalDue: 75000,
-      status: 'overdue',
-      reliabilityScore: 42,
-      addedDate: '2026-07-15',
-      transactions: [
-        { id: 102, date: '2026-07-15', desc: 'Matériaux & Fournitures', amount: 75000, status: 'overdue', dueDate: '2026-08-05' }
-      ]
-    },
-    {
-      id: 3,
-      name: 'KOFFI Yao Jean',
-      phone: '+225 01020304',
-      totalDue: 0,
-      status: 'paid',
-      reliabilityScore: 98,
-      addedDate: '2026-08-01',
-      transactions: [
-        { id: 103, date: '2026-08-01', desc: 'Versement Intégral', amount: 90000, status: 'paid', dueDate: '2026-08-01' }
-      ]
-    }
-  ],
-
-  payments: [
-    { id: 201, ref: 'PAY-2026-881', clientName: 'Société ABC', amount: 150000, date: 'Aujourd\'hui, 09:45', method: 'Wave Direct Mobile' },
-    { id: 202, ref: 'PAY-2026-880', clientName: 'KOFFI Yao Jean', amount: 90000, date: '01 Août 2026, 14:20', method: 'MTN Mobile Money' }
-  ],
-
-  accountingEntries: [
-    { id: 1, date: '2026-08-10', ref: 'FAC-2026-001', code: '701', label: 'Vente 3 Sacs de Riz', type: 'revenue', amountHT: 150000, vatAmount: 27000, status: 'Validé' },
-    { id: 2, date: '2026-08-08', ref: 'ACH-2026-044', code: '601', label: 'Achat Réapprovisionnement Stock', type: 'expense', amountHT: 85000, vatAmount: 15300, status: 'Validé' }
-  ],
+  clients: [],
+  payments: [],
+  accountingEntries: [],
 
   user: {
     email: localStorage.getItem('userEmail') || '',
@@ -938,7 +893,17 @@ function renderClientDirectory() {
   if (!tbody) return;
 
   if (AppState.clients.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:24px;color:#94A3B8;">${AppState.lang === 'en' ? 'No clients recorded yet.' : 'Aucun client enregistré pour le moment.'}</td></tr>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;padding:45px 20px;color:#64748B;">
+          <div style="font-size:1.8rem;margin-bottom:8px;">👥</div>
+          <strong style="font-size:0.95rem;color:#0F172A;display:block;">${AppState.lang === 'en' ? 'No clients recorded yet' : 'Aucun client enregistré pour le moment'}</strong>
+          <p style="margin:6px 0 14px 0;font-size:0.84rem;color:#94A3B8;">${AppState.lang === 'en' ? 'Click on "+ New Credit" to add your first customer or credit sale.' : 'Cliquez sur « + Nouveau Crédit » pour ajouter votre premier client ou vente.'}</p>
+          <button class="btn btn-primary" style="padding:6px 14px;font-size:0.8rem;" onclick="switchMenu('menu-5')">+ ${AppState.lang === 'en' ? 'New Credit' : 'Nouveau Crédit'}</button>
+        </td>
+      </tr>
+    `;
+    updateClientDirectoryCounts();
     return;
   }
 
@@ -969,7 +934,10 @@ function renderClientDirectory() {
     `;
   }).join('');
 
-  // Mettre à jour les KPIs de l'annuaire
+  updateClientDirectoryCounts();
+}
+
+function updateClientDirectoryCounts() {
   const dirTotal = document.getElementById('dir-total-clients');
   const dirPaid = document.getElementById('dir-paid-clients');
   const dirDue = document.getElementById('dir-due-clients');
@@ -990,7 +958,15 @@ function renderDashboardDebtsTable() {
 
   const dueClients = AppState.clients.filter(c => c.totalDue > 0);
   if (dueClients.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:18px;color:#10B981;font-weight:700;">🎉 ${AppState.lang === 'en' ? 'All debts are fully paid!' : 'Toutes les dettes sont réglées !'}</td></tr>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;padding:35px 20px;color:#64748B;">
+          <div style="font-size:1.6rem;margin-bottom:6px;">✨</div>
+          <strong style="color:#0F172A;display:block;">${AppState.lang === 'en' ? 'No pending debts' : 'Aucune dette en cours'}</strong>
+          <p style="margin:4px 0 0 0;font-size:0.82rem;color:#94A3B8;">${AppState.lang === 'en' ? 'All credits are settled or no credit sales recorded yet.' : 'Toutes vos créances sont à jour ou aucune vente à crédit n\'a été saisie.'}</p>
+        </td>
+      </tr>
+    `;
     return;
   }
 
@@ -1025,33 +1001,54 @@ function renderPaymentsTable() {
   const activityList = document.getElementById('dash-activity-list');
 
   if (tbody) {
-    tbody.innerHTML = AppState.payments.map(p => `
-      <tr>
-        <td style="font-weight:800;">${escapeHTML(p.ref)}</td>
-        <td style="font-weight:700;">${escapeHTML(p.clientName)}</td>
-        <td style="font-weight:800;color:#10B981;">${formatCurrency(p.amount)}</td>
-        <td>${escapeHTML(p.method)}</td>
-        <td style="color:#64748B;">${escapeHTML(p.date)}</td>
-        <td><button class="btn btn-outline" style="padding:4px 8px;font-size:0.72rem;" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName)}', '+225 00000000', 'Paiement ${escapeHTML(p.ref)}', ${p.amount})">📄 ${AppState.lang === 'en' ? 'Receipt' : 'Reçu'}</button></td>
-      </tr>
-    `).join('');
+    if (AppState.payments.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6" style="text-align:center;padding:45px 20px;color:#64748B;">
+            <div style="font-size:1.8rem;margin-bottom:8px;">💳</div>
+            <strong style="font-size:0.95rem;color:#0F172A;display:block;">${AppState.lang === 'en' ? 'No collections recorded yet' : 'Aucun encaissement pour le moment'}</strong>
+            <p style="margin:6px 0 0 0;font-size:0.84rem;color:#94A3B8;">${AppState.lang === 'en' ? 'Customer payments and receipts will appear here automatically.' : 'Les règlements clients (Espèces, Wave, Orange, MTN, Moov) apparaîtront ici.'}</p>
+          </td>
+        </tr>
+      `;
+    } else {
+      tbody.innerHTML = AppState.payments.map(p => `
+        <tr>
+          <td style="font-weight:800;">${escapeHTML(p.ref)}</td>
+          <td style="font-weight:700;">${escapeHTML(p.clientName)}</td>
+          <td style="font-weight:800;color:#10B981;">${formatCurrency(p.amount)}</td>
+          <td>${escapeHTML(p.method)}</td>
+          <td style="color:#64748B;">${escapeHTML(p.date)}</td>
+          <td><button class="btn btn-outline" style="padding:4px 8px;font-size:0.72rem;" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName)}', '+225 00000000', 'Paiement ${escapeHTML(p.ref)}', ${p.amount})">📄 ${AppState.lang === 'en' ? 'Receipt' : 'Reçu'}</button></td>
+        </tr>
+      `).join('');
+    }
   }
 
   if (activityList) {
-    activityList.innerHTML = AppState.payments.slice(0, 4).map(p => `
-      <div class="activity-item">
-        <div class="activity-left">
-          <div class="activity-icon green">
-            <i data-lucide="download"></i>
-          </div>
-          <div>
-            <div class="activity-text">${AppState.lang === 'en' ? 'Payment from' : 'Paiement reçu de'} ${escapeHTML(p.clientName)}</div>
-            <div class="activity-time">${escapeHTML(p.date)} via ${escapeHTML(p.method)}</div>
-          </div>
+    if (AppState.payments.length === 0) {
+      activityList.innerHTML = `
+        <div style="text-align:center;padding:35px 15px;color:#94A3B8;font-size:0.85rem;">
+          <div style="font-size:1.5rem;margin-bottom:6px;">⏱️</div>
+          ${AppState.lang === 'en' ? 'No recent activity.' : 'Aucune activité récente.'}
         </div>
-        <div class="activity-amount" style="color:#10B981;">${formatCurrency(p.amount)}</div>
-      </div>
-    `).join('');
+      `;
+    } else {
+      activityList.innerHTML = AppState.payments.slice(0, 4).map(p => `
+        <div class="activity-item">
+          <div class="activity-left">
+            <div class="activity-icon green">
+              <i data-lucide="download"></i>
+            </div>
+            <div>
+              <div class="activity-text">${AppState.lang === 'en' ? 'Payment from' : 'Paiement reçu de'} ${escapeHTML(p.clientName)}</div>
+              <div class="activity-time">${escapeHTML(p.date)} via ${escapeHTML(p.method)}</div>
+            </div>
+          </div>
+          <div class="activity-amount" style="color:#10B981;">${formatCurrency(p.amount)}</div>
+        </div>
+      `).join('');
+    }
   }
 }
 
@@ -1780,13 +1777,16 @@ function initCharts() {
     gradient.addColorStop(0, 'rgba(37, 99, 235, 0.22)');
     gradient.addColorStop(1, 'rgba(37, 99, 235, 0.01)');
 
+    const hasPayments = AppState.payments.length > 0;
+    const chartData = hasPayments ? [0, 0, 0, 0, 0, AppState.payments.reduce((acc, p) => acc + (p.amount || 0), 0)] : [0, 0, 0, 0, 0, 0];
+
     weeklyChartInstance = new Chart(ctxWeekly, {
       type: 'line',
       data: {
         labels: ['Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août'],
         datasets: [{
           label: AppState.lang === 'en' ? 'Collections' : 'Paiements Reçus',
-          data: [180000, 250000, 210000, 290000, 340000, 420000],
+          data: chartData,
           borderColor: '#2563EB',
           borderWidth: 3,
           pointBackgroundColor: '#2563EB',
@@ -1817,13 +1817,26 @@ function initCharts() {
   const ctxScoring = document.getElementById('scoringChart');
   if (ctxScoring && window.Chart) {
     if (scoringChartInstance) scoringChartInstance.destroy();
+    
+    let reliable = 0, average = 0, atRisk = 0;
+    AppState.clients.forEach(c => {
+      if (c.reliabilityScore >= 80) reliable++;
+      else if (c.reliabilityScore >= 50) average++;
+      else atRisk++;
+    });
+
+    const hasClients = AppState.clients.length > 0;
+    const scoringData = hasClients ? [reliable, average, atRisk] : [1];
+    const scoringColors = hasClients ? ['#10B981', '#F59E0B', '#EF4444'] : ['#E2E8F0'];
+    const scoringLabels = hasClients ? ['Sérieux', 'Moyen', 'En retard'] : ['En attente de clients'];
+
     scoringChartInstance = new Chart(ctxScoring, {
       type: 'doughnut',
       data: {
-        labels: ['Sérieux', 'Moyen', 'En retard'],
+        labels: scoringLabels,
         datasets: [{
-          data: [60, 25, 15],
-          backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+          data: scoringData,
+          backgroundColor: scoringColors,
           borderWidth: 0,
           hoverOffset: 4
         }]
@@ -1845,6 +1858,10 @@ function initCharts() {
     gradRevenue.addColorStop(0, 'rgba(16, 185, 129, 0.2)');
     gradRevenue.addColorStop(1, 'rgba(16, 185, 129, 0.01)');
 
+    const hasAccounting = AppState.accountingEntries.length > 0;
+    const revData = hasAccounting ? [0, 0, 0, 0, AppState.accountingEntries.filter(e => e.type === 'revenue').reduce((acc, e) => acc + (e.amountHT || 0), 0)] : [0, 0, 0, 0, 0];
+    const expData = hasAccounting ? [0, 0, 0, 0, AppState.accountingEntries.filter(e => e.type === 'expense').reduce((acc, e) => acc + (e.amountHT || 0), 0)] : [0, 0, 0, 0, 0];
+
     accountingCashflowChartInstance = new Chart(ctxAccCashflow, {
       type: 'line',
       data: {
@@ -1852,13 +1869,13 @@ function initCharts() {
         datasets: [
           {
             label: AppState.lang === 'en' ? 'Revenue' : 'Recettes (Ventes)',
-            data: [200000, 220000, 250000, 310000, 380000],
+            data: revData,
             borderColor: '#10B981', borderWidth: 2.5, pointBackgroundColor: '#10B981',
             pointRadius: 3, tension: 0.35, fill: true, backgroundColor: gradRevenue
           },
           {
             label: AppState.lang === 'en' ? 'Expenses' : 'Dépenses',
-            data: [110000, 130000, 140000, 170000, 190000],
+            data: expData,
             borderColor: '#EF4444', borderWidth: 2.5, pointBackgroundColor: '#EF4444',
             pointRadius: 3, tension: 0.35
           }
@@ -1883,8 +1900,8 @@ function initCharts() {
       data: {
         labels: ['Achats Stock', 'Charges & Transport', 'Frais MoMo'],
         datasets: [{
-          data: [65, 25, 10],
-          backgroundColor: ['#2563EB', '#F59E0B', '#8B5CF6'],
+          data: AppState.accountingEntries.length > 0 ? [65, 25, 10] : [1],
+          backgroundColor: AppState.accountingEntries.length > 0 ? ['#2563EB', '#F59E0B', '#8B5CF6'] : ['#E2E8F0'],
           borderWidth: 0, hoverOffset: 4
         }]
       },
