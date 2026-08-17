@@ -48,50 +48,92 @@
           ✨ Créer un Compte (Essai 3 Mois)
         </button>
         <button type="button" id="tab-auth-login" class="auth-tab-btn" onclick="switchAuthTab('login')" style="flex:1;padding:8px;font-size:0.85rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;background:transparent;color:#64748B;">
-          🔐 Déjà Inscrit (Connexion)
+          🔐 Se Connecter
         </button>
       </div>
 
-      <!-- ÉTAPE 1 : FORMULAIRE INSCRIPTION / CONNEXION EMAIL -->
-      <div id="auth-step-1">
-        <form id="form-auth-email" onsubmit="handleSendEmailOtp(event)">
-          <div id="auth-field-biz" class="form-group">
+      <!-- VUE 1 : FORMULAIRE D'INSCRIPTION SÉCURISÉ -->
+      <div id="auth-view-register">
+        <form id="form-auth-register" onsubmit="handleRegisterSubmit(event)">
+          <div class="form-group" style="margin-bottom:12px;">
             <label class="form-label">Nom de votre Boutique / Commerce *</label>
-            <input type="text" id="auth-biz-name" class="form-control" placeholder="ex: Boutique KOUASSI &amp; Fils" required>
+            <input type="text" id="auth-reg-biz-name" class="form-control" placeholder="ex: Boutique KOUASSI &amp; Fils" required>
           </div>
 
-          <div id="auth-field-phone" class="form-group">
+          <div class="form-group" style="margin-bottom:12px;">
             <label class="form-label">Numéro de Téléphone / WhatsApp *</label>
-            <input type="tel" id="auth-phone" class="form-control" placeholder="+225 0701020304" required>
+            <input type="tel" id="auth-reg-phone" class="form-control" placeholder="+225 0701020304" required>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" style="margin-bottom:12px;">
             <label class="form-label">Adresse E-mail Professionnelle *</label>
-            <input type="email" id="auth-email" class="form-control" placeholder="votre.nom@gmail.com" required>
-            <small style="color:#64748B;font-size:0.75rem;margin-top:4px;display:block;">📧 Un vrai code de sécurité à 6 chiffres vous sera envoyé pour valider votre compte.</small>
+            <input type="email" id="auth-reg-email" class="form-control" placeholder="votre.nom@gmail.com" required autocomplete="email">
+            <small style="color:#64748B;font-size:0.73rem;margin-top:3px;display:block;">📧 Un vrai code de sécurité à 6 chiffres vous sera envoyé sur cette boîte mail pour activer votre compte.</small>
           </div>
 
-          <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:800;font-size:0.92rem;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <span>Envoyer le Code de Vérification</span> ➔
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Mot de passe * (min. 6 caractères)</label>
+            <input type="password" id="auth-reg-password" class="form-control" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Confirmez votre Mot de passe *</label>
+            <input type="password" id="auth-reg-password-confirm" class="form-control" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+          </div>
+
+          <button type="submit" id="auth-reg-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:800;font-size:0.92rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>Créer mon Compte &amp; Recevoir le Code</span> ➔
           </button>
         </form>
+
+        <div style="text-align:center;margin-top:14px;font-size:0.8rem;color:#64748B;">
+          Vous avez déjà un compte ? <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:#2563EB;font-weight:700;text-decoration:none;">Connectez-vous ici</a>
+        </div>
       </div>
 
-      <!-- ÉTAPE 2 : SAISIE DU CODE OTP REÇU PAR EMAIL -->
-      <div id="auth-step-2" style="display:none;text-align:center;padding:10px 0;">
+      <!-- VUE 2 : FORMULAIRE DE CONNEXION SÉCURISÉ (EMAIL + MOT DE PASSE) -->
+      <div id="auth-view-login" style="display:none;">
+        <form id="form-auth-login" onsubmit="handleLoginSubmit(event)">
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Adresse E-mail Professionnelle *</label>
+            <input type="email" id="auth-login-email" class="form-control" placeholder="votre.nom@gmail.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group" style="margin-bottom:18px;">
+            <label class="form-label">Mot de passe *</label>
+            <input type="password" id="auth-login-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" id="auth-login-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:800;font-size:0.92rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>🔐 Se Connecter</span>
+          </button>
+        </form>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:0.8rem;">
+          <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#2563EB;font-weight:700;text-decoration:none;">
+            ✨ Créer un nouveau compte
+          </a>
+          <a href="javascript:void(0)" onclick="promptPendingVerification()" style="color:#64748B;text-decoration:underline;">
+            Code OTP non validé ?
+          </a>
+        </div>
+      </div>
+
+      <!-- VUE 3 : ÉCRAN DE VÉRIFICATION OTP SÉCURISÉ -->
+      <div id="auth-view-otp" style="display:none;text-align:center;padding:10px 0;">
         <div style="width:52px;height:52px;background:#EFF6FF;color:#2563EB;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.5rem;">
           📬
         </div>
         <h4 style="font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:6px;">Vérifiez votre Boîte Mail</h4>
         <p style="font-size:0.84rem;color:#64748B;margin-bottom:18px;line-height:1.5;">
-          Un code de sécurité à 6 chiffres a été envoyé à :<br>
-          <strong id="auth-target-email-display" style="color:#2563EB;font-size:0.92rem;">email@example.com</strong>
+          Un code de sécurité à 6 chiffres a été envoyé par le serveur à :<br>
+          <strong id="auth-target-email-display" style="color:#2563EB;font-size:0.95rem;word-break:break-all;">u******@gmail.com</strong>
         </p>
 
-        <form id="form-auth-verify-otp" onsubmit="handleVerifyEmailOtp(event)">
+        <form id="form-auth-verify-otp" onsubmit="handleVerifyOtpSubmit(event)">
           <div class="form-group" style="margin-bottom:18px;">
-            <label class="form-label" style="text-align:center;display:block;margin-bottom:8px;">Entrez le Code à 6 Chiffres :</label>
-            <input type="text" id="auth-otp-code" class="form-control" placeholder="1 2 3 4 5 6" maxlength="8" style="text-align:center;font-size:1.6rem;letter-spacing:6px;font-weight:800;padding:12px;max-width:260px;margin:0 auto;" required autofocus>
+            <label class="form-label" style="text-align:center;display:block;margin-bottom:8px;font-size:0.85rem;">Saisissez le Code à 6 Chiffres reçu :</label>
+            <input type="text" id="auth-otp-code" class="form-control" placeholder="• • • • • •" maxlength="8" pattern="[0-9\s]{6,8}" style="text-align:center;font-size:1.7rem;letter-spacing:8px;font-weight:800;padding:12px;max-width:260px;margin:0 auto;" required autocomplete="one-time-code" autofocus>
           </div>
 
           <button type="submit" id="auth-verify-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:800;font-size:0.95rem;">
@@ -99,12 +141,12 @@
           </button>
         </form>
 
-        <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;">
-          <button type="button" class="btn btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="backToAuthStep1()">
+        <div style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;gap:10px;">
+          <button type="button" class="btn btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="backToAuthRegister()">
             ← Modifier l'e-mail
           </button>
-          <button type="button" style="background:none;border:none;color:#2563EB;font-weight:700;cursor:pointer;font-size:0.78rem;" onclick="resendEmailOtp()">
-            🔄 Renvoyer le code
+          <button type="button" id="auth-resend-btn" style="background:none;border:none;color:#2563EB;font-weight:700;cursor:pointer;font-size:0.78rem;" onclick="handleResendOtp()">
+            🔄 Renvoyer le code <span id="auth-resend-timer"></span>
           </button>
         </div>
       </div>
@@ -824,15 +866,28 @@
       </div>
     </section>
 
-    <!-- ── PIED DE PAGE ── -->
-    <footer class="lp-footer">
-      <div style="display:flex;align-items:center;gap:10px;">
-        <img src="logo_3d.png" alt="CreditTrack" style="width:28px;height:28px;">
-        <span>© 2026 <strong>CreditTrack PRO</strong> — Solution Panafricaine de Recouvrement</span>
+    <!-- ── PIED DE PAGE PROFESSIONNEL ── -->
+    <footer class="lp-footer" style="padding:32px 24px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <img src="logo_3d.png" alt="CreditTrack" style="width:30px;height:30px;">
+        <span style="font-size:0.95rem;font-weight:700;color:#FFFFFF;">© 2026 <strong>CreditTrack PRO</strong> — Solution Panafricaine Sécurisée de Recouvrement</span>
       </div>
-      <div style="display:flex;gap:16px;align-items:center;">
-        <span style="color:rgba(255,255,255,0.5);font-size:0.75rem;">Fait avec excellence pour l'Afrique 🌍</span>
-        <button onclick="openAppWorkspace('menu-2')" class="lp-footer-btn" data-i18n="footerBtn">Ouvrir l'application →</button>
+
+      <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;font-size:0.82rem;">
+        <button type="button" onclick="openPrivacyModal()" style="background:none;border:none;color:#94A3B8;cursor:pointer;text-decoration:underline;font-size:0.82rem;">
+          📜 Politique de Confidentialité &amp; Cookies
+        </button>
+        <button type="button" onclick="openSecurityModal()" style="background:none;border:none;color:#94A3B8;cursor:pointer;text-decoration:underline;font-size:0.82rem;">
+          🛡️ Sécurité &amp; Protection des Données (RGPD/APDP)
+        </button>
+        <button type="button" onclick="openSupportModal()" style="background:none;border:none;color:#38BDF8;font-weight:700;cursor:pointer;text-decoration:underline;font-size:0.82rem;">
+          💬 Contacter le Support Technique &amp; Commercial
+        </button>
+      </div>
+
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+        <span style="color:rgba(255,255,255,0.6);font-size:0.75rem;">🔒 Données Chiffrées &amp; Hébergement Cloud Haute Sécurité</span>
+        <button onclick="openAuthModal('register')" class="lp-footer-btn" data-i18n="footerBtn">Créer un Compte Commerçant →</button>
       </div>
     </footer>
 

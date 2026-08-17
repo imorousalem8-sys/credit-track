@@ -2000,80 +2000,172 @@ function initCharts() {
 }
 
 // --------------------------------------------------------------------------
-// 14. SYSTÈME D'AUTHENTIFICATION & VÉRIFICATION EMAIL PAR CODE OTP SUPABASE
+// 14. SYSTÈME D'AUTHENTIFICATION & VÉRIFICATION EMAIL PAR CODE OTP SERVEUR
 // --------------------------------------------------------------------------
 let pendingAuthData = {
   email: '',
   bizName: '',
-  phone: '',
-  isRegister: true
+  phone: ''
 };
 
+let resendTimerInterval = null;
+let resendSecondsLeft = 0;
+
+// Masquage sécurisé de l'adresse e-mail pour l'affichage (ex: u**********r@gmail.com)
+function maskEmail(email) {
+  if (!email || !email.includes('@')) return email || '';
+  const [username, domain] = email.split('@');
+  if (username.length <= 2) {
+    return `${username[0]}*@${domain}`;
+  }
+  const first = username[0];
+  const last = username[username.length - 1];
+  const stars = '*'.repeat(Math.min(10, Math.max(3, username.length - 2)));
+  return `${first}${stars}${last}@${domain}`;
+}
+
+function startResendCooldown(seconds = 60) {
+  resendSecondsLeft = seconds;
+  const resendBtn = document.getElementById('auth-resend-btn');
+  const timerSpan = document.getElementById('auth-resend-timer');
+  
+  if (resendTimerInterval) clearInterval(resendTimerInterval);
+  
+  if (resendBtn) {
+    resendBtn.style.pointerEvents = 'none';
+    resendBtn.style.opacity = '0.5';
+  }
+  if (timerSpan) timerSpan.textContent = `(${resendSecondsLeft}s)`;
+  
+  resendTimerInterval = setInterval(() => {
+    resendSecondsLeft--;
+    if (resendSecondsLeft <= 0) {
+      clearInterval(resendTimerInterval);
+      resendTimerInterval = null;
+      if (resendBtn) {
+        resendBtn.style.pointerEvents = 'auto';
+        resendBtn.style.opacity = '1';
+      }
+      if (timerSpan) timerSpan.textContent = '';
+    } else {
+      if (timerSpan) timerSpan.textContent = `(${resendSecondsLeft}s)`;
+    }
+  }, 1000);
+}
+
 window.openAuthModal = function(tab = 'register') {
-  backToAuthStep1();
   switchAuthTab(tab);
   openModal('modal-auth');
 };
 
 window.switchAuthTab = function(tab) {
   const isRegister = tab === 'register';
-  pendingAuthData.isRegister = isRegister;
-  
   const tabLogin = document.getElementById('tab-auth-login');
   const tabReg = document.getElementById('tab-auth-register');
-  
-  if (tabLogin) {
-    tabLogin.classList.toggle('active', !isRegister);
-    tabLogin.style.background = !isRegister ? '#fff' : 'transparent';
-    tabLogin.style.color = !isRegister ? '#0F172A' : '#64748B';
-    tabLogin.style.boxShadow = !isRegister ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
-  }
-  if (tabReg) {
-    tabReg.classList.toggle('active', isRegister);
-    tabReg.style.background = isRegister ? '#fff' : 'transparent';
-    tabReg.style.color = isRegister ? '#0F172A' : '#64748B';
-    tabReg.style.boxShadow = isRegister ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
-  }
-  
-  const bizField = document.getElementById('auth-field-biz');
-  const phoneField = document.getElementById('auth-field-phone');
-  const submitBtn = document.getElementById('auth-submit-btn');
-  const title = document.getElementById('auth-modal-title');
+  const viewReg = document.getElementById('auth-view-register');
+  const viewLogin = document.getElementById('auth-view-login');
+  const viewOtp = document.getElementById('auth-view-otp');
+  const tabsContainer = document.getElementById('auth-tabs-container');
+  const modalTitle = document.getElementById('auth-modal-title');
+
+  if (tabsContainer) tabsContainer.style.display = 'flex';
+  if (viewOtp) viewOtp.style.display = 'none';
 
   if (isRegister) {
-    if (bizField) bizField.style.display = 'block';
-    if (phoneField) phoneField.style.display = 'block';
-    if (submitBtn) submitBtn.innerHTML = `<span>Envoyer mon Code de Vérification</span> ➔`;
-    if (title) title.textContent = '✨ Inscription (Essai 3 Mois Offert)';
+    if (viewReg) viewReg.style.display = 'block';
+    if (viewLogin) viewLogin.style.display = 'none';
+    if (modalTitle) modalTitle.textContent = '✨ Créer un Compte (Essai 3 Mois Offert)';
+    if (tabReg) {
+      tabReg.classList.add('active');
+      tabReg.style.background = '#fff';
+      tabReg.style.color = '#0F172A';
+      tabReg.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    }
+    if (tabLogin) {
+      tabLogin.classList.remove('active');
+      tabLogin.style.background = 'transparent';
+      tabLogin.style.color = '#64748B';
+      tabLogin.style.boxShadow = 'none';
+    }
   } else {
-    if (bizField) bizField.style.display = 'none';
-    if (phoneField) phoneField.style.display = 'none';
-    if (submitBtn) submitBtn.innerHTML = `<span>Recevoir mon Code de Connexion</span> ➔`;
-    if (title) title.textContent = '🔐 Connexion Sécurisée par Email';
+    if (viewReg) viewReg.style.display = 'none';
+    if (viewLogin) viewLogin.style.display = 'block';
+    if (modalTitle) modalTitle.textContent = '🔐 Connexion à votre Espace';
+    if (tabLogin) {
+      tabLogin.classList.add('active');
+      tabLogin.style.background = '#fff';
+      tabLogin.style.color = '#0F172A';
+      tabLogin.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    }
+    if (tabReg) {
+      tabReg.classList.remove('active');
+      tabReg.style.background = 'transparent';
+      tabReg.style.color = '#64748B';
+      tabReg.style.boxShadow = 'none';
+    }
   }
 };
 
-window.backToAuthStep1 = function() {
-  const step1 = document.getElementById('auth-step-1');
-  const step2 = document.getElementById('auth-step-2');
-  const tabs = document.getElementById('auth-tabs-container');
-  if (step1) step1.style.display = 'block';
-  if (step2) step2.style.display = 'none';
-  if (tabs) tabs.style.display = 'flex';
+window.backToAuthRegister = function() {
+  switchAuthTab('register');
 };
 
-window.handleSendEmailOtp = async function(e) {
-  e.preventDefault();
-  const email = (document.getElementById('auth-email')?.value || '').trim().toLowerCase();
-  const bizName = (document.getElementById('auth-biz-name')?.value || '').trim() || 'Mon Commerce';
-  const phone = (document.getElementById('auth-phone')?.value || '').trim();
-  const isRegister = pendingAuthData.isRegister;
+window.promptPendingVerification = function() {
+  const email = prompt("Veuillez saisir votre adresse e-mail pour valider le code OTP reçu :");
+  if (email && email.trim()) {
+    pendingAuthData.email = email.trim().toLowerCase();
+    showOtpVerificationView(pendingAuthData.email);
+  }
+};
 
-  // Validation d'adresse email
+function showOtpVerificationView(email) {
+  const viewReg = document.getElementById('auth-view-register');
+  const viewLogin = document.getElementById('auth-view-login');
+  const viewOtp = document.getElementById('auth-view-otp');
+  const tabsContainer = document.getElementById('auth-tabs-container');
+  const targetDisplay = document.getElementById('auth-target-email-display');
+  const modalTitle = document.getElementById('auth-modal-title');
+
+  if (tabsContainer) tabsContainer.style.display = 'none';
+  if (viewReg) viewReg.style.display = 'none';
+  if (viewLogin) viewLogin.style.display = 'none';
+  if (viewOtp) viewOtp.style.display = 'block';
+  if (modalTitle) modalTitle.textContent = '📬 Vérification de votre E-mail';
+  if (targetDisplay) targetDisplay.textContent = maskEmail(email);
+
+  const otpInput = document.getElementById('auth-otp-code');
+  if (otpInput) {
+    otpInput.value = '';
+    otpInput.focus();
+  }
+
+  startResendCooldown(60);
+}
+
+window.handleRegisterSubmit = async function(e) {
+  e.preventDefault();
+  const bizName = (document.getElementById('auth-reg-biz-name')?.value || '').trim() || 'Mon Commerce';
+  const phone = (document.getElementById('auth-reg-phone')?.value || '').trim();
+  const email = (document.getElementById('auth-reg-email')?.value || '').trim().toLowerCase();
+  const password = document.getElementById('auth-reg-password')?.value || '';
+  const passwordConfirm = document.getElementById('auth-reg-password-confirm')?.value || '';
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!email || !emailRegex.test(email)) {
     showToast("⚠️ Veuillez renseigner une adresse email valide.");
-    document.getElementById('auth-email')?.focus();
+    document.getElementById('auth-reg-email')?.focus();
+    return;
+  }
+
+  if (password.length < 6) {
+    showToast("⚠️ Le mot de passe doit comporter au moins 6 caractères.");
+    document.getElementById('auth-reg-password')?.focus();
+    return;
+  }
+
+  if (password !== passwordConfirm) {
+    showToast("❌ Les mots de passe ne correspondent pas.");
+    document.getElementById('auth-reg-password-confirm')?.focus();
     return;
   }
 
@@ -2081,58 +2173,62 @@ window.handleSendEmailOtp = async function(e) {
   pendingAuthData.bizName = bizName;
   pendingAuthData.phone = phone;
 
-  const submitBtn = document.getElementById('auth-submit-btn');
+  const submitBtn = document.getElementById('auth-reg-submit-btn');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi du code en cours...`;
+    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi sécurisé du code...`;
   }
 
   try {
     if (window.supabaseClient) {
-      const { data, error } = await window.supabaseClient.auth.signInWithOtp({
+      // 1. Inscription côté serveur Supabase avec hachage et envoi du code par e-mail
+      const { data, error } = await window.supabaseClient.auth.signUp({
         email,
+        password,
         options: {
           data: {
             business_name: bizName,
             phone: phone,
             plan_tier: 'trial_3_months'
-          },
-          shouldCreateUser: true
+          }
         }
       });
-      if (error) throw error;
+
+      if (error) {
+        if (error.message && (error.message.includes('already registered') || error.message.includes('already exists') || error.status === 422)) {
+          showToast("ℹ️ Un compte existe déjà avec cette adresse email. Veuillez vous connecter.");
+          switchAuthTab('login');
+          const loginEmail = document.getElementById('auth-login-email');
+          if (loginEmail) loginEmail.value = email;
+          return;
+        }
+        throw error;
+      }
+
+      if (data && data.user && data.user.identities && data.user.identities.length === 0) {
+        showToast("ℹ️ Cette adresse email est déjà enregistrée. Veuillez vous connecter.");
+        switchAuthTab('login');
+        const loginEmail = document.getElementById('auth-login-email');
+        if (loginEmail) loginEmail.value = email;
+        return;
+      }
     }
 
-    // Basculer vers l'étape 2 (Saisie du code OTP)
-    const targetDisplay = document.getElementById('auth-target-email-display');
-    if (targetDisplay) targetDisplay.textContent = email;
-
-    const step1 = document.getElementById('auth-step-1');
-    const step2 = document.getElementById('auth-step-2');
-    const tabs = document.getElementById('auth-tabs-container');
-    if (step1) step1.style.display = 'none';
-    if (step2) step2.style.display = 'block';
-    if (tabs) tabs.style.display = 'none';
-
-    const otpInput = document.getElementById('auth-otp-code');
-    if (otpInput) {
-      otpInput.value = '';
-      otpInput.focus();
-    }
-
-    showToast(`📧 Code de sécurité envoyé à ${email} !`);
+    // Basculer vers l'écran de saisie du code OTP
+    showOtpVerificationView(email);
+    showToast(`📬 Un vrai code de sécurité à 6 chiffres a été envoyé à ${maskEmail(email)} !`);
   } catch (err) {
-    console.error("Erreur Supabase OTP:", err);
-    showToast(`⚠️ Erreur : ${err.message || "Impossible d'envoyer le code"}`);
+    console.error("Erreur Inscription Supabase:", err);
+    showToast(`⚠️ Erreur : ${err.message || "Impossible d'initier l'inscription"}`);
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>${isRegister ? 'Envoyer le Code de Vérification' : 'Recevoir mon Code de Connexion'}</span> ➔`;
+      submitBtn.innerHTML = `<span>Créer mon Compte &amp; Recevoir le Code</span> ➔`;
     }
   }
 };
 
-window.handleVerifyEmailOtp = async function(e) {
+window.handleVerifyOtpSubmit = async function(e) {
   e.preventDefault();
   const rawCode = (document.getElementById('auth-otp-code')?.value || '').trim();
   const otpCode = rawCode.replace(/[^0-9]/g, '');
@@ -2146,7 +2242,7 @@ window.handleVerifyEmailOtp = async function(e) {
   const verifyBtn = document.getElementById('auth-verify-btn');
   if (verifyBtn) {
     verifyBtn.disabled = true;
-    verifyBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Vérification en cours...`;
+    verifyBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Vérification serveur...`;
   }
 
   try {
@@ -2154,17 +2250,27 @@ window.handleVerifyEmailOtp = async function(e) {
     let userEmail = pendingAuthData.email;
 
     if (window.supabaseClient) {
-      const { data, error } = await window.supabaseClient.auth.verifyOtp({
+      // Vérification côté serveur par Supabase Auth
+      let verifyRes = await window.supabaseClient.auth.verifyOtp({
         email: pendingAuthData.email,
         token: otpCode,
-        type: 'email'
+        type: 'signup'
       });
 
-      if (error) throw error;
+      // Fallback si le type de confirmation est 'email'
+      if (verifyRes.error) {
+        verifyRes = await window.supabaseClient.auth.verifyOtp({
+          email: pendingAuthData.email,
+          token: otpCode,
+          type: 'email'
+        });
+      }
 
-      if (data && data.user) {
-        userId = data.user.id;
-        userEmail = data.user.email || userEmail;
+      if (verifyRes.error) throw verifyRes.error;
+
+      if (verifyRes.data && verifyRes.data.user) {
+        userId = verifyRes.data.user.id;
+        userEmail = verifyRes.data.user.email || userEmail;
       }
     }
 
@@ -2202,7 +2308,7 @@ window.handleVerifyEmailOtp = async function(e) {
     updateUserPlanBadgeUI();
     closeModal('modal-auth');
 
-    // Ouvrir directement l'espace de travail
+    // Ouvrir directement l'espace de travail sécurisé
     openAppWorkspace('menu-2');
 
     showToast(`🎉 Bienvenue ${AppState.user.businessName} ! Compte vérifié & 3 Mois d'Essai activés ! 🚀`);
@@ -2222,19 +2328,136 @@ window.handleVerifyEmailOtp = async function(e) {
   }
 };
 
-window.resendEmailOtp = async function() {
-  if (!pendingAuthData.email) return;
-  showToast("⏳ Envoi d'un nouveau code...");
+window.handleLoginSubmit = async function(e) {
+  e.preventDefault();
+  const email = (document.getElementById('auth-login-email')?.value || '').trim().toLowerCase();
+  const password = document.getElementById('auth-login-password')?.value || '';
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    showToast("⚠️ Veuillez renseigner une adresse email valide.");
+    document.getElementById('auth-login-email')?.focus();
+    return;
+  }
+
+  if (!password) {
+    showToast("⚠️ Veuillez saisir votre mot de passe.");
+    document.getElementById('auth-login-password')?.focus();
+    return;
+  }
+
+  const submitBtn = document.getElementById('auth-login-submit-btn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Connexion en cours...`;
+  }
+
+  try {
+    let userId = 'usr_' + Date.now();
+    let userEmail = email;
+    let bizName = 'Mon Commerce';
+
+    if (window.supabaseClient) {
+      const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        if (error.message && (error.message.includes('Email not confirmed') || error.message.includes('not confirmed'))) {
+          showToast("⚠️ Votre adresse email n'est pas encore confirmée. Un code vous a été envoyé.");
+          pendingAuthData.email = email;
+          try {
+            await window.supabaseClient.auth.resend({ type: 'signup', email });
+          } catch(re) {}
+          showOtpVerificationView(email);
+          return;
+        }
+        throw error;
+      }
+
+      if (data && data.user) {
+        userId = data.user.id;
+        userEmail = data.user.email || email;
+        bizName = data.user.user_metadata?.business_name || bizName;
+      }
+    }
+
+    AppState.user.id = userId;
+    AppState.user.email = userEmail;
+    AppState.user.businessName = bizName;
+    AppState.user.planTier = localStorage.getItem('userPlan') || 'trial_3_months';
+    AppState.user.status = 'active';
+    AppState.businessName = bizName;
+    AppState.userName = userEmail.split('@')[0];
+
+    localStorage.setItem('user_id', userId);
+    localStorage.setItem('userEmail', userEmail);
+    localStorage.setItem('bizName', bizName);
+    localStorage.setItem('userName', AppState.userName);
+
+    // Charger les données isolées propres à ce commerçant
+    AppState.clients = getCachedArray('credittrack_clients');
+    AppState.payments = getCachedArray('credittrack_payments');
+    AppState.accountingEntries = getCachedArray('credittrack_accounting');
+
+    if (window.dataStore) {
+      try {
+        await window.dataStore.syncFromSupabase();
+      } catch(e) {}
+    }
+
+    renderClientDirectory();
+    renderPaymentsTable();
+    renderAccountingKPIs();
+    renderCreditKPIs();
+
+    updateUserPlanBadgeUI();
+    closeModal('modal-auth');
+
+    openAppWorkspace('menu-2');
+    showToast(`✅ Heureux de vous revoir ${AppState.businessName} !`);
+  } catch (err) {
+    console.error("Erreur Connexion:", err);
+    showToast("❌ Adresse email ou mot de passe incorrect.");
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>🔐 Se Connecter</span>`;
+    }
+  }
+};
+
+window.handleResendOtp = async function() {
+  if (!pendingAuthData.email) {
+    showToast("⚠️ Aucune adresse e-mail en attente de vérification.");
+    return;
+  }
+
+  if (resendSecondsLeft > 0) {
+    showToast(`⏳ Veuillez patienter encore ${resendSecondsLeft} secondes avant de renvoyer un code.`);
+    return;
+  }
+
+  showToast("⏳ Envoi d'un nouveau code par le serveur...");
   try {
     if (window.supabaseClient) {
-      await window.supabaseClient.auth.signInWithOtp({
-        email: pendingAuthData.email,
-        options: { shouldCreateUser: true }
+      const { error } = await window.supabaseClient.auth.resend({
+        type: 'signup',
+        email: pendingAuthData.email
       });
+      if (error) {
+        await window.supabaseClient.auth.signInWithOtp({
+          email: pendingAuthData.email,
+          options: { shouldCreateUser: false }
+        });
+      }
     }
-    showToast(`📧 Nouveau code renvoyé à ${pendingAuthData.email} !`);
+    startResendCooldown(60);
+    showToast(`📧 Nouveau code renvoyé avec succès à ${maskEmail(pendingAuthData.email)} !`);
   } catch (e) {
-    showToast("⚠️ Veuillez patienter quelques secondes avant de renvoyer.");
+    console.warn("Erreur renvoi OTP:", e);
+    showToast("⚠️ Impossible de renvoyer le code pour le moment. Veuillez patienter.");
   }
 };
 
