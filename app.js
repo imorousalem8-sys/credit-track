@@ -675,19 +675,18 @@ function restoreSavedState() {
   const addrInp = document.getElementById('setting-address-input');
   if (addrInp && AppState.businessAddress) addrInp.value = AppState.businessAddress;
 
-  const phoneInp = document.getElementById('setting-phone-input');
-  if (phoneInp && AppState.businessPhone) phoneInp.value = AppState.businessPhone;
-
-  const userInp = document.getElementById('setting-username-input');
-  if (userInp && AppState.userName) userInp.value = AppState.userName;
-
-  const sbName = document.getElementById('sidebar-user-name');
-  if (sbName && AppState.userName) sbName.textContent = AppState.userName;
-
-  const activeView = localStorage.getItem('activeView') || 'landing';
+  const savedUserId = localStorage.getItem('user_id');
+  const savedEmail = localStorage.getItem('userEmail');
+  const activeView = localStorage.getItem('activeView');
   const activeMenu = localStorage.getItem('activeMenu') || 'menu-2';
 
-  if (activeView === 'workspace') {
+  if (savedUserId && savedEmail && activeView === 'workspace') {
+    AppState.user.id = savedUserId;
+    AppState.user.email = savedEmail;
+    AppState.user.businessName = localStorage.getItem('bizName') || 'Mon Commerce';
+    AppState.user.planTier = localStorage.getItem('userPlan') || 'trial_3_months';
+    AppState.userName = savedEmail.split('@')[0];
+    updateUserPlanBadgeUI();
     openAppWorkspace(activeMenu);
   } else {
     openPublicLanding();
@@ -742,34 +741,31 @@ function switchAppMode(mode, notify = true) {
 
   const banner = document.getElementById('banner');
   const bannerText = document.getElementById('banner-text');
-
-  if (banner && bannerText) {
-    if (mode === 'accounting') {
-      banner.style.background = '#0F172A';
-      bannerText.textContent = AppState.lang === 'en' ? '📊 Cash & Expense mode active' : '📊 Mode Caisse & Dépenses actif';
-    } else {
-      banner.style.background = '#2563EB';
-      bannerText.textContent = AppState.lang === 'en' ? '💡 Credit & Client mode active' : '💡 Mode Crédits & Clients actif';
-    }
-  }
-
-  const modeSelect = document.getElementById('mode-select');
-  if (modeSelect) modeSelect.value = mode;
-
   const creditItems = document.querySelectorAll('.credit-menu-item');
-  const accountingItems = document.querySelectorAll('.accounting-menu-item');
-  
+  const accItems = document.querySelectorAll('.accounting-menu-item');
+
   if (mode === 'accounting') {
+    if (banner) {
+      banner.style.background = '#10B981';
+      if (bannerText) bannerText.textContent = AppState.lang === 'en' ? '💡 Cash & Accounting Mode Active' : '💡 Mode Caisse & Compta actif';
+    }
     creditItems.forEach(el => el.style.display = 'none');
-    accountingItems.forEach(el => el.style.display = 'flex');
+    accItems.forEach(el => el.style.display = 'flex');
+    switchMenu('menu-accounting');
   } else {
+    if (banner) {
+      banner.style.background = '#2563EB';
+      if (bannerText) bannerText.textContent = AppState.lang === 'en' ? '💡 Credits & Clients Mode Active' : '💡 Mode Crédits & Clients actif';
+    }
     creditItems.forEach(el => el.style.display = 'flex');
-    accountingItems.forEach(el => el.style.display = 'none');
+    accItems.forEach(el => el.style.display = 'none');
+    switchMenu('menu-2');
   }
 
   if (notify) {
-    showToast(mode === 'accounting' ? '📊 Basculé en Mode Caisse & Dépenses' : '💡 Basculé en Mode Crédits & Clients');
-    switchMenu(mode === 'accounting' ? 'menu-accounting' : 'menu-2');
+    showToast(mode === 'accounting' ? 
+      (AppState.lang === 'en' ? 'Switched to Cash & Expenses Mode' : 'Basculé en Mode Caisse & Compta') : 
+      (AppState.lang === 'en' ? 'Switched to Credit Sales Mode' : 'Basculé en Mode Ventes à Crédit'));
   }
 }
 
@@ -853,6 +849,15 @@ function closeMobileSidebarIfOpen() {
 
 function openAppWorkspace(menuId = 'menu-2') {
   closeMobileSidebarIfOpen();
+
+  // 🔒 AUTH GUARD STRICT : Seul un commerçant avec session validée peut entrer
+  const isAuth = AppState.user && AppState.user.id && AppState.user.email;
+  if (!isAuth) {
+    openAuthModal('register');
+    showToast("🔒 Veuillez créer ou vous connecter à votre compte pour accéder au tableau de bord.");
+    return;
+  }
+
   localStorage.setItem('activeView', 'workspace');
   const landing = document.getElementById('public-landing-container');
   const appLayout = document.getElementById('app-workspace-layout');
@@ -2214,14 +2219,28 @@ window.handleSignOut = async function() {
     try { await window.supabaseClient.auth.signOut(); } catch(e) {}
   }
   AppState.user = { id: '', email: '', businessName: 'Mon Commerce', planTier: 'free', status: 'active', isVip: false };
+  AppState.clients = [];
+  AppState.payments = [];
+  AppState.accountingEntries = [];
+
   localStorage.removeItem('user_id');
   localStorage.removeItem('userEmail');
   localStorage.removeItem('userPlan');
   localStorage.removeItem('isVip');
+  localStorage.removeItem('activeView');
+  localStorage.removeItem('credittrack_clients');
+  localStorage.removeItem('credittrack_payments');
+  localStorage.removeItem('credittrack_accounting');
   
   updateUserPlanBadgeUI();
+  renderClientDirectory();
+  renderPaymentsTable();
+  renderAccountingKPIs();
+  renderAccountingJournal();
+  renderCreditKPIs();
+  
   openPublicLanding();
-  showToast("👋 Vous êtes déconnecté.");
+  showToast("👋 Déconnexion réussie. L'espace commerçant a été verrouillé.");
 };
 
 window.openSubscriptionModal = function() {

@@ -965,16 +965,16 @@
       </div>
 
       <div class="sidebar-user-footer">
-        <div style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;" onclick="openAuthModal()">
+        <div style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;" onclick="openAuthModal('register')">
           <div class="user-avatar-circle" id="sidebar-avatar-initials">CT</div>
           <div class="user-info-text">
             <div class="user-name-title" id="sidebar-user-name">Mon Compte</div>
-            <div class="user-role-sub" id="sidebar-user-plan-badge" style="color:#FBBF24;font-weight:700;">GRATUIT (Starter)</div>
+            <div class="user-role-sub" id="sidebar-user-plan-badge" style="color:#10B981;font-weight:700;">🎁 Essai 3 Mois Actif</div>
           </div>
         </div>
         <div style="display:flex;gap:6px;">
-          <button class="btn-icon-tiny" onclick="openAuthModal()" title="Changer de compte / Se connecter" style="background:rgba(255,255,255,0.1);border:none;color:#fff;border-radius:6px;padding:5px;cursor:pointer;">
-            <i data-lucide="log-in" style="width:14px;height:14px;"></i>
+          <button class="btn-icon-tiny" onclick="handleSignOut()" title="Se Déconnecter" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#FCA5A5;border-radius:6px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="log-out" style="width:15px;height:15px;"></i>
           </button>
         </div>
       </div>
