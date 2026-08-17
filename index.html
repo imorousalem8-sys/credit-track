@@ -23,23 +23,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
-  <!-- ⚡ RESET TOTAL CACHE + FORÇAGE INITIAL LANDING PAGE -->
-  <script>
-    localStorage.removeItem('activeView');
-    (async function() {
-      if ('serviceWorker' in navigator) {
-        const regs = await navigator.serviceWorker.getRegistrations();
-        for (const reg of regs) await reg.unregister();
-      }
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.map(k => caches.delete(k)));
-      }
-    })();
-  </script>
-  <script src="dataStore.js?v=20260816_v2" defer></script>
-  <script src="app.js?v=20260816_v2" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260816_v2">
+  <script src="dataStore.js?v=20260817_v1" defer></script>
+  <script src="app.js?v=20260817_v1" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260817_v1">
 </head>
 <body class="is-landing-mode">
 

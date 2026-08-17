@@ -667,7 +667,14 @@ function restoreSavedState() {
   const sbName = document.getElementById('sidebar-user-name');
   if (sbName && AppState.userName) sbName.textContent = AppState.userName;
 
-  openPublicLanding();
+  const activeView = localStorage.getItem('activeView') || 'landing';
+  const activeMenu = localStorage.getItem('activeMenu') || 'menu-2';
+
+  if (activeView === 'workspace') {
+    openAppWorkspace(activeMenu);
+  } else {
+    openPublicLanding();
+  }
 }
 
 function populateCountrySelect() {
@@ -824,6 +831,9 @@ function openAppWorkspace(menuId = 'menu-2') {
 
 function switchMenu(menuId) {
   closeMobileSidebarIfOpen();
+
+  localStorage.setItem('activeMenu', menuId);
+  localStorage.setItem('activeView', 'workspace');
 
   const landing = document.getElementById('public-landing-container');
   const appLayout = document.getElementById('app-workspace-layout');
@@ -1395,7 +1405,16 @@ window.triggerSMSFromModal = function() {
 
 window.sendWhatsAppReminder = function(name, phone, amount) {
   const cleanPhone = sanitizePhoneNumber(phone);
-  const bizPhone = AppState.businessPhone ? ` (Contact: ${AppState.businessPhone})` : '';
+  const client = AppState.clients.find(c => c.name === name || c.phone === phone);
+  
+  // Extraire la liste détaillée des articles achetés à crédit
+  let itemsSummary = '';
+  if (client && client.transactions && client.transactions.length > 0) {
+    const unpaidTxs = client.transactions.filter(t => t.status !== 'paid');
+    const txsToUse = unpaidTxs.length > 0 ? unpaidTxs : client.transactions;
+    itemsSummary = txsToUse.map(t => `• ${t.desc} (${formatCurrency(t.amount)})`).join('\n');
+  }
+
   const template = localStorage.getItem('whatsappTemplate') || 
     (AppState.lang === 'en' ? 
       "Bonjour {nom_client}, nous vous rappelons amicalement que votre solde de {montant} chez {nom_commerce} est à régler. Merci pour votre confiance !" : 
@@ -1406,6 +1425,10 @@ window.sendWhatsAppReminder = function(name, phone, amount) {
     .replace(/{montant}/g, formatCurrency(amount))
     .replace(/{nom_commerce}/g, AppState.businessName);
 
+  if (itemsSummary) {
+    msg += `\n\n📦 Détail de vos achats à régler :\n${itemsSummary}`;
+  }
+
   if (AppState.businessPhone) {
     msg += `\n\n📱 Règlement possible en espèces ou par Mobile Money / Wave au : ${AppState.businessPhone}`;
   }
@@ -1413,7 +1436,7 @@ window.sendWhatsAppReminder = function(name, phone, amount) {
   // Ouvre directement WhatsApp avec le numéro de téléphone et le message propre
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
-  showToast(`💬 WhatsApp ouvert avec le numéro de ${name} (+${cleanPhone}) !`);
+  showToast(`💬 WhatsApp ouvert avec le détail des achats pour ${name} (+${cleanPhone}) !`);
 };
 
 window.sendSMSReminder = function(name, phone, amount) {
