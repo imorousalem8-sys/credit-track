@@ -286,14 +286,43 @@ export default function DashboardPage() {
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
-                        <button 
-                          type="button"
-                          className="btn btn-outline" 
-                          style={{ padding: '4px 10px', fontSize: '0.75rem', borderColor: '#2563EB', color: '#2563EB' }}
-                          onClick={() => setSelectedClient(c)}
-                        >
-                          <Eye size={12} /> Fiche
-                        </button>
+                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          <button 
+                            type="button"
+                            className="btn btn-outline" 
+                            style={{ padding: '5px 8px', fontSize: '0.74rem', borderColor: '#2563EB', color: '#2563EB' }}
+                            onClick={() => setSelectedClient(c)}
+                            title="Voir la Fiche"
+                          >
+                            <Eye size={13} />
+                          </button>
+                          <button 
+                            type="button"
+                            className="btn" 
+                            style={{ background: '#25D366', color: '#fff', padding: '5px 9px', fontSize: '0.74rem', fontWeight: 700, border: 'none', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => {
+                              const cleanPhone = c.phone.replace(/[^0-9]/g, '');
+                              const msg = `Bonjour ${c.name}, nous vous rappelons amicalement que votre solde de ${formatAmount(c.totalDue)} est à régler. Merci pour votre confiance !`;
+                              window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+                            }}
+                            title="Relancer par WhatsApp"
+                          >
+                            <MessageSquare size={13} /> WhatsApp
+                          </button>
+                          <button 
+                            type="button"
+                            className="btn" 
+                            style={{ background: '#2563EB', color: '#fff', padding: '5px 9px', fontSize: '0.74rem', fontWeight: 700, border: 'none', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            onClick={() => {
+                              const cleanPhone = c.phone.replace(/[^0-9]/g, '');
+                              const msg = `Bonjour ${c.name}, rappel de votre solde de ${formatAmount(c.totalDue)}. Merci de régler dès que possible.`;
+                              window.location.href = `sms:${cleanPhone}?body=${encodeURIComponent(msg)}`;
+                            }}
+                            title="Relancer par SMS"
+                          >
+                            📱 SMS
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );

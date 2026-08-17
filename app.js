@@ -814,7 +814,20 @@ window.testSimWhatsAppSend = function() {
   showToast("💬 Simulateur : Démonstration WhatsApp lancée avec succès !");
 };
 
+window.toggleMobileSidebar = function() {
+  document.body.classList.toggle('mobile-sidebar-open');
+};
+
+window.closeMobileSidebar = function() {
+  document.body.classList.remove('mobile-sidebar-open');
+};
+
+function closeMobileSidebarIfOpen() {
+  document.body.classList.remove('mobile-sidebar-open');
+}
+
 function openAppWorkspace(menuId = 'menu-2') {
+  closeMobileSidebarIfOpen();
   localStorage.setItem('activeView', 'workspace');
   const landing = document.getElementById('public-landing-container');
   const appLayout = document.getElementById('app-workspace-layout');
