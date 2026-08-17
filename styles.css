@@ -2029,6 +2029,13 @@ body.is-app-mode #app-workspace-layout {
   }
 }
 
+/* --------------------------------------------------------------------------
+   BARRE DE NAVIGATION MOBILE (MASQUÉE PAR DÉFAUT SUR ORDINATEUR)
+-------------------------------------------------------------------------- */
+.mobile-bottom-nav {
+  display: none !important;
+}
+
 /* SMARTPHONES (< 768px) */
 @media (max-width: 767px) {
   html, body, .public-landing, .main-workspace, .content-viewport {
