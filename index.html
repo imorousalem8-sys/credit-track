@@ -485,9 +485,9 @@
       </div>
       <nav class="lp-nav-links">
         <a href="#demo-live" class="lp-nav-a" data-i18n="lpNavDemo">Aperçu en Direct</a>
-        <a href="#simulator" class="lp-nav-a" data-i18n="lpNavSim">Simulateur WhatsApp</a>
-        <a href="#comparison" class="lp-nav-a" data-i18n="lpNavComp">Pourquoi nous ?</a>
         <a href="#features" class="lp-nav-a" data-i18n="lpNavFeatures">Fonctionnalités</a>
+        <a href="#comparison" class="lp-nav-a" data-i18n="lpNavComp">Pourquoi nous ?</a>
+        <a href="#pricing" class="lp-nav-a">Tarifs</a>
         
         <!-- Quick Lang Switcher -->
         <div class="lp-lang-pill">
@@ -528,9 +528,9 @@
             <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
             <span data-i18n="lpHeroCta1">Créer un Compte Commerçant</span>
           </button>
-          <a href="#simulator" class="lp-btn-secondary-glass" style="display:flex;align-items:center;gap:8px;">
-            <i data-lucide="message-square" style="width:18px;height:18px;"></i>
-            <span data-i18n="lpHeroCta2">Simulateur WhatsApp</span>
+          <a href="#demo-live" class="lp-btn-secondary-glass" style="display:flex;align-items:center;gap:8px;" onclick="switchHeroView('3d')">
+            <i data-lucide="sparkles" style="width:18px;height:18px;"></i>
+            <span>Aperçu du Dashboard 3D</span>
           </a>
         </div>
 
@@ -716,62 +716,6 @@
         <div class="lp-stat-item">
           <div class="stat-big">15+</div>
           <div class="stat-label">Pays et devises couverts</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ── SIMULATEUR WHATSAPP ── -->
-    <section class="lp-simulator-section" id="simulator">
-      <div class="lp-sim-inner">
-        <div class="lp-sim-left">
-          <div class="lp-sim-badge">MODULE DE RAPPEL CLIENT</div>
-          <h2 class="lp-sim-title">Aperçu d'un message de rappel transmis au client</h2>
-          <p class="lp-sim-desc">
-            Saisissez un nom et un montant : le modèle de message professionnel s'ajuste instantanément.
-          </p>
-
-          <div class="lp-sim-inputs">
-            <div class="form-group">
-              <label class="form-label" style="color:rgba(255,255,255,0.85);">Nom du Client :</label>
-              <input type="text" id="sim-client-name" class="form-control lp-dark-input" value="Koffi Jean" oninput="updateLandingSimPreview()">
-            </div>
-            <div class="form-group">
-              <label class="form-label" style="color:rgba(255,255,255,0.85);">Montant dû (FCFA) :</label>
-              <input type="number" id="sim-client-amount" class="form-control lp-dark-input" value="75000" oninput="updateLandingSimPreview()">
-            </div>
-            <button class="btn btn-primary" style="background:#2563EB;border:none;padding:12px 20px;font-weight:700;width:100%;" onclick="testSimWhatsAppSend()">
-              <i data-lucide="send" style="width:16px;height:16px;"></i> Tester l'envoi WhatsApp
-            </button>
-          </div>
-        </div>
-
-        <div class="lp-sim-right">
-          <!-- Smartphone Mockup -->
-          <div class="lp-phone-frame">
-            <div class="phone-top-notch"></div>
-            <div class="phone-wa-header">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <div class="wa-header-avatar">KJ</div>
-                <div>
-                  <div class="wa-header-name" id="sim-preview-header-name">Koffi Jean</div>
-                  <div class="wa-header-sub">En ligne</div>
-                </div>
-              </div>
-              <i data-lucide="phone" style="width:16px;height:16px;color:#fff;"></i>
-            </div>
-            
-            <div class="phone-wa-chat">
-              <div class="wa-chat-bubble">
-                <p id="sim-wa-text">
-                  Bonjour <strong>Koffi Jean</strong>, nous vous informons que votre solde de <strong>75 000 FCFA</strong> chez <strong>Établissements KOUASSI</strong> est arrivé à échéance.
-                </p>
-                <div class="wa-chat-link">
-                  Règlement par Wave, Mobile Money ou en magasin.
-                </div>
-                <div class="wa-chat-time">14:30 ✓✓</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
