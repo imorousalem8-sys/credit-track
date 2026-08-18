@@ -3015,9 +3015,10 @@ window.openSupportModal = function() {
   if (window.lucide) lucide.createIcons();
 };
 
+// Adresse e-mail publique dédiée au support (Isolée du compte administrateur/fondateur)
+const SUPPORT_EMAIL = 'support@credittrack.pro';
+
 window.directEmailSupport = function() {
-  const supportEmail = 'imorousalem8@gmail.com';
-  const ccEmail = 'support@credittrack.pro';
   const subject = encodeURIComponent('[CréditTrack PRO] Demande d\'Assistance / Support Commercial');
   const body = encodeURIComponent(
     `Bonjour l'équipe CréditTrack PRO,\n\n` +
@@ -3028,7 +3029,7 @@ window.directEmailSupport = function() {
     `Ma demande :\n`
   );
 
-  window.location.href = `mailto:${supportEmail}?cc=${ccEmail}&subject=${subject}&body=${body}`;
+  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
 };
 
 window.handleSupportSubmit = function(e) {
@@ -3048,8 +3049,6 @@ window.handleSupportSubmit = function(e) {
     return;
   }
 
-  const supportEmail = 'imorousalem8@gmail.com';
-  const ccEmail = 'support@credittrack.pro';
   const subject = encodeURIComponent(`[CréditTrack PRO] ${subjectText} - ${name}`);
   const body = encodeURIComponent(
     `Bonjour l'équipe Support CréditTrack PRO,\n\n` +
@@ -3061,7 +3060,7 @@ window.handleSupportSubmit = function(e) {
   );
 
   // Ouvre le client e-mail par défaut du smartphone ou de l'ordinateur
-  window.location.href = `mailto:${supportEmail}?cc=${ccEmail}&subject=${subject}&body=${body}`;
+  window.location.href = `mailto:${SUPPORT_EMAIL}?subject=${subject}&body=${body}`;
 
   closeModal('modal-support');
   showToast("Ouverture de votre messagerie pour transmettre votre demande...");
