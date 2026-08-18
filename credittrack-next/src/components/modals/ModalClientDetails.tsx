@@ -104,7 +104,7 @@ export default function ModalClientDetails() {
                 {formatAmount(selectedClient.totalDue)}
               </div>
               <div style={{ fontSize: '0.75rem', color: '#94A3B8', marginTop: '4px' }}>
-                Statut : {selectedClient.totalDue === 0 ? '🟢 À Jour' : '🟠 Paiement en attente'}
+                Statut : {selectedClient.totalDue === 0 ? 'À Jour' : 'Paiement en attente'}
               </div>
             </div>
 

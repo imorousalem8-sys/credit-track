@@ -203,7 +203,7 @@
               Économisez 25%
             </div>
             <div>
-              <div style="font-size:0.82rem;font-weight:800;color:#FBBF24;text-transform:uppercase;letter-spacing:0.5px;">👑 Meilleure Offre</div>
+              <div style="font-size:0.82rem;font-weight:700;color:#FBBF24;text-transform:uppercase;letter-spacing:0.5px;">Forfait Recommandé</div>
               <h3 style="font-size:1.25rem;font-weight:800;color:#fff;margin:4px 0;">PRO Annuel</h3>
               <div style="display:flex;align-items:baseline;gap:4px;margin:12px 0 16px 0;">
                 <span style="font-size:1.8rem;font-weight:800;color:#fff;">45 000</span>
@@ -227,16 +227,16 @@
         <div style="background:#F0FDF4;border:1px dashed #22C55E;border-radius:12px;padding:14px 16px;margin-top:10px;">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
             <i data-lucide="key-round" style="width:16px;height:16px;color:#16A34A;"></i>
-            <strong style="font-size:0.85rem;color:#166534;">Vous avez une Clé de Licence VIP Administrateur / Partenaire ?</strong>
+            <strong style="font-size:0.85rem;color:#166534;">Vous avez une Clé de Licence Partenaire ?</strong>
           </div>
           <div style="display:flex;gap:8px;margin-top:8px;">
             <input type="text" id="admin-license-key-input" class="form-control" placeholder="ex: VIP-SALEM-PRO-2026" style="background:#fff;border-color:#86EFAC;font-weight:700;text-transform:uppercase;">
             <button class="btn" style="background:#16A34A;color:#fff;font-weight:800;padding:0 18px;white-space:nowrap;" onclick="redeemAdminLicenseKey()">
-              Débloquer VIP
+              Activer la Licence
             </button>
           </div>
           <small style="color:#15803D;font-size:0.72rem;margin-top:4px;display:block;">
-            💡 Permet au fondateur et ses proches d'activer la version PRO gratuitement et instantanément.
+            Activation instantanée réservée aux partenaires et administrateurs.
           </small>
         </div>
 
@@ -248,24 +248,35 @@
        MODALE 1 : REÇU & SIGNATURE DIGITALE
   ============================================================ -->
   <div class="modal-overlay" id="modal-receipt-preview">
-    <div class="modal-card">
+    <div class="modal-card modal-card-ticket">
       <div class="card-header">
-        <span class="card-title" data-i18n="modalReceiptTitle">Reçu de Paiement</span>
+        <span class="card-title" data-i18n="officialReceipt">Reçu Officiel d'Encaissement</span>
         <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-receipt-preview')">✕</button>
       </div>
-      <div id="receipt-ticket-content" class="receipt-box">
+      <div class="receipt-ticket-body" id="receipt-printable-area">
         <div style="text-align:center;margin-bottom:12px;">
-          <h3 id="receipt-biz-name" style="font-size:1.1rem;font-weight:800;color:#0F172A;">BOUTIQUE KOUASSI &amp; FILS</h3>
-          <p style="font-size:0.75rem;color:#64748B;" data-i18n="receiptOfficialSubtitle">Reçu Officiel de Règlement</p>
+          <h3 id="receipt-biz-name" style="margin:0;font-size:1.1rem;font-weight:800;text-transform:uppercase;color:#0F172A;">MON COMMERCE</h3>
+          <p id="receipt-biz-sub" style="margin:2px 0 0 0;font-size:0.75rem;color:#64748B;">Reçu de Paiement Sécurisé</p>
         </div>
         <hr class="receipt-divider">
-        <div style="font-size:0.85rem;line-height:1.6;">
-          <div><strong data-i18n="client">Client :</strong> <span id="receipt-client-name">Société ABC</span></div>
-          <div><strong data-i18n="phone">Téléphone :</strong> <span id="receipt-client-phone">+225 07010203</span></div>
-          <div><strong data-i18n="reason">Motif :</strong> <span id="receipt-items-desc">3 Sacs de Riz 50kg</span></div>
-          <div style="font-size:1.15rem;font-weight:800;margin-top:10px;color:#2563EB;">
-            <span data-i18n="amountPaid">Montant Payé :</span> <span id="receipt-total-amount">150 000 FCFA</span>
-          </div>
+        <div style="font-size:0.82rem;line-height:1.6;color:#334155;">
+          <div><strong data-i18n="receiptNo">Réf Reçu :</strong> <span id="receipt-id" style="font-family:monospace;font-weight:700;">#REC-000</span></div>
+          <div><strong data-i18n="date">Date &amp; Heure :</strong> <span id="receipt-date">--/--/----</span></div>
+          <div><strong data-i18n="client">Client :</strong> <span id="receipt-client" style="font-weight:700;">--</span></div>
+          <div><strong data-i18n="phone">Téléphone :</strong> <span id="receipt-phone">--</span></div>
+        </div>
+        <hr class="receipt-divider">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0;">
+          <span style="font-size:0.9rem;font-weight:700;color:#0F172A;" data-i18n="paidAmount">MONTANT ENCAISSÉ</span>
+          <span id="receipt-amount" style="font-size:1.3rem;font-weight:800;color:#10B981;">0 FCFA</span>
+        </div>
+        <div style="font-size:0.8rem;color:#64748B;display:flex;justify-content:space-between;">
+          <span data-i18n="remainingDebt">Solde Restant Dû :</span>
+          <span id="receipt-remaining" style="font-weight:700;color:#EF4444;">0 FCFA</span>
+        </div>
+        <div style="font-size:0.8rem;color:#64748B;display:flex;justify-content:space-between;margin-top:4px;">
+          <span>Moyen de paiement :</span>
+          <span id="receipt-pay-method" style="font-weight:700;color:#0F172A;">Espèces</span>
         </div>
         <hr class="receipt-divider">
         <div style="text-align:center;">
@@ -275,8 +286,8 @@
         </div>
       </div>
       <div style="display:flex;gap:10px;margin-top:16px;">
-        <button class="btn btn-outline" style="flex:1;" onclick="printReceiptTicket()" data-i18n="print">🖨️ Imprimer</button>
-        <button class="btn btn-primary" style="flex:1;" onclick="downloadReceiptPDF()" data-i18n="downloadPDF">📥 Télécharger PDF</button>
+        <button class="btn btn-outline" style="flex:1;" onclick="printReceiptTicket()" data-i18n="print">Imprimer</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="downloadReceiptPDF()" data-i18n="downloadPDF">Télécharger PDF</button>
       </div>
     </div>
   </div>
@@ -333,15 +344,15 @@
         <!-- Mode de Règlement de l'Encaissement -->
         <div style="margin-top:16px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px 14px;">
           <label style="font-size:0.82rem;font-weight:700;color:#0F172A;margin-bottom:6px;display:block;">
-            💳 Moyen de règlement utilisé pour cet encaissement :
+            Moyen de règlement utilisé pour cet encaissement :
           </label>
           <select id="modal-pay-method-select" class="form-control" style="font-size:0.86rem;font-weight:700;">
-            <option value="Espèces (Cash)">💵 Espèces (Cash)</option>
-            <option value="Wave Money">🌊 Wave Direct</option>
-            <option value="Orange Money">🟠 Orange Money</option>
-            <option value="MTN Mobile Money">📱 MTN MoMo</option>
-            <option value="Moov Money">🔵 Moov Money</option>
-            <option value="Virement Bancaire">🏦 Virement Bancaire</option>
+            <option value="Espèces (Cash)">Espèces (Cash)</option>
+            <option value="Wave Money">Wave Direct</option>
+            <option value="Orange Money">Orange Money</option>
+            <option value="MTN Mobile Money">MTN MoMo</option>
+            <option value="Moov Money">Moov Money</option>
+            <option value="Virement Bancaire">Virement Bancaire</option>
           </select>
         </div>
 
@@ -366,7 +377,7 @@
   <div class="modal-overlay" id="modal-send-reminder">
     <div class="modal-card" style="max-width:520px;">
       <div class="card-header">
-        <span class="card-title">💬 Envoyer un Rappel de Paiement</span>
+        <span class="card-title">Transmettre un Rappel de Paiement</span>
         <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-send-reminder')">✕</button>
       </div>
       <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
@@ -385,10 +396,10 @@
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;">
-        <button class="btn" style="background:#25D366;color:#fff;font-weight:800;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="triggerWhatsAppFromModal()">
+        <button class="btn" style="background:#25D366;color:#fff;font-weight:700;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="triggerWhatsAppFromModal()">
           <i data-lucide="message-circle" style="width:18px;height:18px;"></i> Envoyer WhatsApp
         </button>
-        <button class="btn" style="background:#2563EB;color:#fff;font-weight:800;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="triggerSMSFromModal()">
+        <button class="btn" style="background:#2563EB;color:#fff;font-weight:700;padding:12px;display:flex;align-items:center;justify-content:center;gap:8px;" onclick="triggerSMSFromModal()">
           <i data-lucide="smartphone" style="width:18px;height:18px;"></i> Envoyer par SMS
         </button>
       </div>
@@ -408,9 +419,9 @@
         <div class="form-group">
           <label class="form-label" data-i18n="entryType">Type d'Opération</label>
           <select id="acc-entry-type" class="form-control" onchange="updateAccountCodeOptions(this.value)" required>
-            <option value="revenue" data-i18n="typeRevenue">🟢 Vente encaissée (Entrée d'argent)</option>
-            <option value="expense" data-i18n="typeExpense">🔴 Achat / Dépense (Sortie d'argent)</option>
-            <option value="cash" data-i18n="typeCash">🔵 Mouvement Caisse / Mobile Money</option>
+            <option value="revenue" data-i18n="typeRevenue">Vente encaissée (Entrée de fonds)</option>
+            <option value="expense" data-i18n="typeExpense">Achat / Dépense (Sortie de fonds)</option>
+            <option value="cash" data-i18n="typeCash">Mouvement Caisse / Trésorerie</option>
           </select>
         </div>
 
@@ -939,7 +950,7 @@
 
         <!-- Mode Indicator Banner -->
         <div id="banner" class="banner" style="width:100%;padding:8px 10px;border-radius:8px;font-size:0.75rem;font-weight:700;text-align:center;color:#fff;background:#2563EB;">
-          <span id="banner-text" data-i18n="bannerCredit">💡 Mode Crédits & Clients actif</span>
+          <span id="banner-text" data-i18n="bannerCredit">Mode Crédits &amp; Clients actif</span>
         </div>
       </div>
 
@@ -1019,7 +1030,7 @@
           <div class="user-avatar-circle" id="sidebar-avatar-initials">CT</div>
           <div class="user-info-text">
             <div class="user-name-title" id="sidebar-user-name">Mon Compte</div>
-            <div class="user-role-sub" id="sidebar-user-plan-badge" style="color:#10B981;font-weight:700;">🎁 Essai 3 Mois Actif</div>
+            <div class="user-role-sub" id="sidebar-user-plan-badge" style="color:#10B981;font-weight:700;">Essai 3 Mois Actif</div>
           </div>
         </div>
         <div style="display:flex;gap:6px;">
@@ -1682,14 +1693,14 @@
 
                 <div class="grid-2-equal">
                   <div class="form-group">
-                    <label class="form-label">💳 Comment le client prévoit de payer ?</label>
+                    <label class="form-label">Comment le client prévoit de payer ?</label>
                     <select id="credit-payment-method-pref" class="form-control" onchange="handlePaymentPrefChange(this.value)">
-                      <option value="Espèces">💵 Espèces (Paiement physique en boutique)</option>
-                      <option value="Wave Direct">🌊 Wave Money</option>
-                      <option value="Orange Money">🟠 Orange Money</option>
-                      <option value="MTN MoMo">📱 MTN Mobile Money</option>
-                      <option value="Moov Money">🔵 Moov Money</option>
-                      <option value="Virement Bancaire">🏦 Virement Bancaire</option>
+                      <option value="Espèces">Espèces (Paiement physique en boutique)</option>
+                      <option value="Wave Direct">Wave Money</option>
+                      <option value="Orange Money">Orange Money</option>
+                      <option value="MTN MoMo">MTN Mobile Money</option>
+                      <option value="Moov Money">Moov Money</option>
+                      <option value="Virement Bancaire">Virement Bancaire</option>
                     </select>
                   </div>
                   <div class="form-group">
@@ -1701,7 +1712,7 @@
                 <div class="form-group">
                   <label class="form-label"><span data-i18n="creditDescLabel">Articles Voulus / Description de la Marchandise</span> <strong style="color:#EF4444;">*</strong></label>
                   <textarea id="credit-description" class="form-control" rows="4" style="min-height:105px;resize:vertical;font-family:inherit;line-height:1.6;padding:12px;border-radius:10px;border:1px solid #CBD5E1;" placeholder="• 3 Sacs de Riz 50kg&#10;• 2 Cartons d'Huile 5L&#10;• 1 Carton de Lait Bonnet Rouge" required></textarea>
-                  <small style="color:#64748B;font-size:0.75rem;margin-top:5px;display:block;">💡 Vous pouvez taper la touche <strong>Entrée</strong> pour aller à la ligne et lister chaque article acheté.</small>
+                  <small style="color:#64748B;font-size:0.75rem;margin-top:5px;display:block;">Vous pouvez taper la touche <strong>Entrée</strong> pour aller à la ligne et lister chaque article acheté.</small>
                 </div>
               </div>
 
@@ -1736,7 +1747,7 @@
       </main>
     </div>
 
-    <!-- 📱 BARRE DE NAVIGATION MOBILE RAPIDE AU BAS DE L'ÉCRAN -->
+    <!-- BARRE DE NAVIGATION MOBILE RAPIDE AU BAS DE L'ÉCRAN -->
     <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
       <button class="mobile-nav-btn active" id="mob-nav-menu-2" onclick="switchMenu('menu-2')">
         <i data-lucide="layout-grid"></i>

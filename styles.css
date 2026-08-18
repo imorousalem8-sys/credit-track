@@ -238,43 +238,13 @@ body.is-app-mode #app-workspace-layout {
 /* ── HERO SECTION EN PUR CODE ANIMÉ ── */
 .lp-hero-live-section {
   position: relative;
-  padding: 80px 24px 60px;
-  max-width: 1240px;
-  margin: 0 auto;
+  padding: 80px 24px 70px;
+  background: #0B132B;
   text-align: center;
-  overflow: visible;
 }
 
 .lp-glow-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.45;
-}
-
-.lp-glow-orb-1 {
-  width: 450px;
-  height: 450px;
-  background: #0070F3;
-  top: 0;
-  left: 10%;
-  animation: orbPulse 8s infinite alternate ease-in-out;
-}
-
-.lp-glow-orb-2 {
-  width: 400px;
-  height: 400px;
-  background: #10B981;
-  top: 150px;
-  right: 10%;
-  animation: orbPulse 6s infinite alternate-reverse ease-in-out;
-}
-
-@keyframes orbPulse {
-  0% { transform: scale(0.9) translate(0, 0); opacity: 0.35; }
-  100% { transform: scale(1.15) translate(20px, 30px); opacity: 0.6; }
+  display: none !important;
 }
 
 .lp-hero-content {
@@ -288,16 +258,15 @@ body.is-app-mode #app-workspace-layout {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(0, 163, 255, 0.12);
-  border: 1px solid rgba(0, 163, 255, 0.3);
+  background: rgba(37, 99, 235, 0.1);
+  border: 1px solid rgba(37, 99, 235, 0.3);
   padding: 6px 16px;
   border-radius: 9999px;
-  color: #00A3FF;
+  color: #38BDF8;
   font-size: 0.8rem;
-  font-weight: 800;
+  font-weight: 700;
   letter-spacing: 0.5px;
   margin-bottom: 24px;
-  backdrop-filter: blur(10px);
 }
 
 .lp-pulse-dot {
@@ -305,21 +274,13 @@ body.is-app-mode #app-workspace-layout {
   height: 8px;
   border-radius: 50%;
   background: #10B981;
-  box-shadow: 0 0 10px #10B981;
-  animation: pulseDot 1.5s infinite;
-}
-
-@keyframes pulseDot {
-  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-  70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
 }
 
 .lp-hero-title {
-  font-size: 3.4rem;
-  font-weight: 900;
-  line-height: 1.15;
-  letter-spacing: -1.5px;
+  font-size: 3.2rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -1px;
   margin-bottom: 20px;
 }
 
@@ -328,15 +289,13 @@ body.is-app-mode #app-workspace-layout {
 }
 
 .lp-title-gradient {
-  background: linear-gradient(135deg, #00A3FF 0%, #38BDF8 40%, #10B981 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #38BDF8;
 }
 
 .lp-hero-desc {
-  font-size: 1.18rem;
-  color: rgba(255,255,255,0.78);
-  line-height: 1.65;
+  font-size: 1.15rem;
+  color: #94A3B8;
+  line-height: 1.6;
   max-width: 720px;
   margin: 0 auto 34px;
 }

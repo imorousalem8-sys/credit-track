@@ -214,7 +214,7 @@ export default function DashboardPage() {
                 fontSize: '0.85rem',
                 fontWeight: 700
               }}>
-                ✅ Aucun impayé critique aujourd'hui. Tous les comptes sont suivis !
+                Aucun impayé critique aujourd'hui. Tous les comptes sont suivis.
               </div>
             )}
 
@@ -282,7 +282,7 @@ export default function DashboardPage() {
                       </td>
                       <td>
                         <span className={`badge-status ${c.status}`}>
-                          {c.status === 'paid' ? '🟢 À Jour' : c.status === 'overdue' ? '🔴 Impayé' : '🟠 En cours'}
+                          {c.status === 'paid' ? 'À Jour' : c.status === 'overdue' ? 'Impayé' : 'En cours'}
                         </span>
                       </td>
                       <td style={{ textAlign: 'right' }}>
@@ -320,7 +320,7 @@ export default function DashboardPage() {
                             }}
                             title="Relancer par SMS"
                           >
-                            📱 SMS
+                            SMS
                           </button>
                         </div>
                       </td>

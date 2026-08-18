@@ -89,7 +89,7 @@ export default function CreditDashboard() {
                         client.status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 
                         client.status === 'overdue' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
                       }`}>
-                        {client.status === 'paid' ? '🟢 À Jour' : client.status === 'overdue' ? '🔴 Impayé' : '🟠 En Cours'}
+                        {client.status === 'paid' ? 'À Jour' : client.status === 'overdue' ? 'Impayé' : 'En Cours'}
                       </span>
                     </td>
                     <td className="p-4">

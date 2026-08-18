@@ -98,8 +98,8 @@ export default function ComptabilitePage() {
             <div>
               <label className="form-label" style={{ fontSize: '0.78rem' }}>Type de Flux</label>
               <select className="form-control" value={type} onChange={e => setType(e.target.value as any)}>
-                <option value="revenue">📈 Produit / Vente (Crédit)</option>
-                <option value="expense">📉 Charge / Achat (Débit)</option>
+                <option value="revenue">Produit / Vente (Crédit)</option>
+                <option value="expense">Charge / Achat (Débit)</option>
               </select>
             </div>
 
@@ -149,7 +149,7 @@ export default function ComptabilitePage() {
               {formatAmount(netResult)}
             </div>
             <div className="metric-trend" style={{ color: netResult >= 0 ? '#2563EB' : '#EF4444' }}>
-              {netResult >= 0 ? '🟢 Bénéficiaire' : '🔴 Déficitaire'}
+              {netResult >= 0 ? 'Bénéficiaire' : 'Déficitaire'}
             </div>
           </div>
           <div className="metric-icon-box blue"><DollarSign size={22} /></div>

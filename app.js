@@ -61,8 +61,8 @@ const translations = {
     sidebarAppSub: "GESTION COMMERÇANT",
     modeCredit: "Crédit",
     modeAccounting: "Caisse / Compta",
-    bannerCredit: "💡 Mode Crédits & Clients actif",
-    bannerAccounting: "📊 Mode Caisse & Dépenses actif",
+    bannerCredit: "Mode Crédits & Clients actif",
+    bannerAccounting: "Mode Caisse & Dépenses actif",
     menuDashboard: "Tableau de Bord",
     menuClients: "Clients & Dettes",
     menuPayments: "Encaisser & Reçus",
@@ -82,18 +82,18 @@ const translations = {
     lpNavComp: "Pourquoi nous ?",
     lpNavFeatures: "Fonctionnalités",
     lpNavHow: "Comment ça marche",
-    lpNavStart: "🚀 Ouvrir l'Application",
-    lpHeroPill: "⚡ N°1 DE LA GESTION DE CRÉDITS & RECOUVREMENT EN AFRIQUE",
-    lpHeroTitle1: "Zéro Crédit Oublié.",
-    lpHeroTitle2: "Encaissez 3x Plus Vite.",
-    lpHeroDesc: "Fini les cahiers de dettes perdus et les retards de paiement. Suivez vos clients en direct, encaissez par Wave / Mobile Money et envoyez des rappels polis en 1-clic sur WhatsApp & SMS.",
-    lpHeroCta1: "🚀 Essayer Gratuitement Maintenant",
-    lpHeroCta2: "💬 Tester le Simulateur WhatsApp",
-    lpTrustLabel: "Compatible avec tous vos moyens de paiement :",
-    lpCtaTitle: "Prêt à récupérer facilement tout votre argent ?",
-    lpCtaSub: "Rejoignez les commerçants qui ont arrêté de perdre de l'argent et passez au digital dès aujourd'hui.",
-    lpCtaBtn: "🚀 Commencer Gratuitement Maintenant",
-    footerText: "Solution Panafricaine de Recouvrement",
+    lpNavStart: "Accéder à l'Espace",
+    lpHeroPill: "GESTION DES CRÉANCES CLIENTS & RECOUVREMENT B2B",
+    lpHeroTitle1: "Zéro Créance Oubliée.",
+    lpHeroTitle2: "Recouvrez Vos Factures 3x Plus Vite.",
+    lpHeroDesc: "Remplacez les carnets manuels et sécurisez votre trésorerie. Suivez vos clients en direct, encaissez par Wave et Mobile Money et envoyez des rappels en un clic sur WhatsApp & SMS.",
+    lpHeroCta1: "Créer un Compte Commerçant",
+    lpHeroCta2: "Simulateur WhatsApp",
+    lpTrustLabel: "Règlements supportés :",
+    lpCtaTitle: "Prêt à optimiser le recouvrement de vos créances ?",
+    lpCtaSub: "Activez votre espace commerçant sécurisé dès aujourd'hui.",
+    lpCtaBtn: "Démarrer Maintenant (3 Mois Gratuits)",
+    footerText: "Solution Professionnelle de Recouvrement",
     footerBtn: "Ouvrir l'application →",
 
     // Dashboard
@@ -166,7 +166,7 @@ const translations = {
     schedOpt2: "2 jours avant la date limite",
     schedOpt3: "Tous les Lundis à 09h00 (Rappel Hebdo)",
     schedOpt4: "Tous les Vendredis à 15h00 (Fin de semaine)",
-    activateAutoReminders: "⚡ Activer les Rappels Automatiques",
+    activateAutoReminders: "Activer les Rappels Automatiques",
 
     // Accounting View
     accBannerTitle: "Caisse & Dépenses du Magasin",
@@ -214,7 +214,7 @@ const translations = {
     step2: "2. Combien & Quand ?",
     step3: "3. Garantie (Optionnel)",
     selectClientLabel: "Choisir un Client Existant ou en Créer un Nouveau",
-    newClientTitle: "➕ Créer la Fiche du Nouveau Client",
+    newClientTitle: "Créer la Fiche du Nouveau Client",
     clientNameLabel: "Nom & Prénoms",
     clientPhoneLabel: "Numéro WhatsApp (Pour les rappels)",
     clientCNILabel: "N° Pièce d'Identité / CNI (Optionnel)",
@@ -236,8 +236,8 @@ const translations = {
     reason: "Motif",
     clientSignature: "Signature du Client :",
     signedElectronically: "[ Signé Électroniquement ]",
-    print: "🖨️ Imprimer",
-    downloadPDF: "📥 Télécharger PDF",
+    print: "Imprimer",
+    downloadPDF: "Télécharger PDF",
     currentDebt: "Dette Totale à Payer",
     historyTitle: "Historique des Achats & Paiements",
     date: "Date",
@@ -247,9 +247,9 @@ const translations = {
     sendWhatsApp: "Rappel WhatsApp",
     modalEntryTitle: "Enregistrer une Vente ou Dépense",
     entryType: "Type d'Opération",
-    typeRevenue: "🟢 Vente encaissée (Entrée d'argent)",
-    typeExpense: "🔴 Achat / Dépense (Sortie d'argent)",
-    typeCash: "🔵 Mouvement Caisse / Mobile Money",
+    typeRevenue: "Vente encaissée (Entrée de fonds)",
+    typeExpense: "Achat / Dépense (Sortie de fonds)",
+    typeCash: "Mouvement Caisse / Trésorerie",
     categoryAccount: "Catégorie",
     amountHT: "Montant (FCFA)",
     vat: "TVA",
@@ -269,8 +269,8 @@ const translations = {
     sidebarAppSub: "MERCHANT PRO",
     modeCredit: "Credit",
     modeAccounting: "Cash / Accounting",
-    bannerCredit: "💡 Credit & Client mode active",
-    bannerAccounting: "📊 Cash & Expense mode active",
+    bannerCredit: "Credit & Client mode active",
+    bannerAccounting: "Cash & Expense mode active",
     menuDashboard: "Dashboard",
     menuClients: "Clients & Debts",
     menuPayments: "Payments & Receipts",
@@ -290,18 +290,18 @@ const translations = {
     lpNavComp: "Why us?",
     lpNavFeatures: "Features",
     lpNavHow: "How it works",
-    lpNavStart: "🚀 Launch App",
-    lpHeroPill: "⚡ #1 CREDIT & DEBT RECOVERY PLATFORM IN AFRICA",
+    lpNavStart: "Access Workspace",
+    lpHeroPill: "CLIENT DEBT TRACKING & RECOVERY PLATFORM",
     lpHeroTitle1: "Zero Forgotten Debts.",
     lpHeroTitle2: "Collect Cash 3x Faster.",
     lpHeroDesc: "Say goodbye to lost debt books and overdue accounts. Track clients in real time, collect payments via Wave / Mobile Money, and send polite 1-click reminders on WhatsApp & SMS.",
-    lpHeroCta1: "🚀 Start Free Now",
-    lpHeroCta2: "💬 Test WhatsApp Simulator",
+    lpHeroCta1: "Create Merchant Account",
+    lpHeroCta2: "WhatsApp Simulator",
     lpTrustLabel: "Compatible with all your payment methods:",
     lpCtaTitle: "Ready to effortlessly collect all your money?",
     lpCtaSub: "Join the merchants who stopped losing money and switch to digital today.",
-    lpCtaBtn: "🚀 Start Free Now",
-    footerText: "Pan-African Credit Recovery Solution",
+    lpCtaBtn: "Start Free Now (3 Months Free)",
+    footerText: "Professional Debt Recovery Solution",
     footerBtn: "Open application →",
 
     // Dashboard
@@ -374,7 +374,7 @@ const translations = {
     schedOpt2: "2 days before due date",
     schedOpt3: "Every Monday at 09:00 AM",
     schedOpt4: "Every Friday at 03:00 PM",
-    activateAutoReminders: "⚡ Enable Auto Reminders",
+    activateAutoReminders: "Enable Auto Reminders",
 
     // Accounting View
     accBannerTitle: "Store Cash & Expenses",
@@ -422,7 +422,7 @@ const translations = {
     step2: "2. How much & When?",
     step3: "3. Guarantee (Optional)",
     selectClientLabel: "Select Existing Customer or Create New",
-    newClientTitle: "➕ Create New Customer Profile",
+    newClientTitle: "Create New Customer Profile",
     clientNameLabel: "Full Name",
     clientPhoneLabel: "WhatsApp Number (For reminders)",
     clientCNILabel: "ID Card / Passport No. (Optional)",
@@ -444,8 +444,8 @@ const translations = {
     reason: "Details",
     clientSignature: "Customer Signature:",
     signedElectronically: "[ Electronically Signed ]",
-    print: "🖨️ Print",
-    downloadPDF: "📥 Download PDF",
+    print: "Print",
+    downloadPDF: "Download PDF",
     currentDebt: "Total Debt Outstanding",
     historyTitle: "Purchase & Payment History",
     date: "Date",
@@ -455,9 +455,9 @@ const translations = {
     sendWhatsApp: "WhatsApp Reminder",
     modalEntryTitle: "Record Sale or Expense",
     entryType: "Operation Type",
-    typeRevenue: "🟢 Collected Sale (Money In)",
-    typeExpense: "🔴 Purchase / Expense (Money Out)",
-    typeCash: "🔵 Cash / Mobile Money Transfer",
+    typeRevenue: "Collected Sale (Money In)",
+    typeExpense: "Purchase / Expense (Money Out)",
+    typeCash: "Cash / Mobile Money Transfer",
     categoryAccount: "Category",
     amountHT: "Amount",
     vat: "Tax",
@@ -848,7 +848,7 @@ function switchAppMode(mode, notify = true) {
   if (mode === 'accounting') {
     if (banner) {
       banner.style.background = '#10B981';
-      if (bannerText) bannerText.textContent = AppState.lang === 'en' ? '💡 Cash & Accounting Mode Active' : '💡 Mode Caisse & Compta actif';
+      if (bannerText) bannerText.textContent = AppState.lang === 'en' ? 'Cash & Accounting Mode Active' : 'Mode Caisse & Compta actif';
     }
     creditItems.forEach(el => el.style.display = 'none');
     accItems.forEach(el => el.style.display = 'flex');
@@ -856,7 +856,7 @@ function switchAppMode(mode, notify = true) {
   } else {
     if (banner) {
       banner.style.background = '#2563EB';
-      if (bannerText) bannerText.textContent = AppState.lang === 'en' ? '💡 Credits & Clients Mode Active' : '💡 Mode Crédits & Clients actif';
+      if (bannerText) bannerText.textContent = AppState.lang === 'en' ? 'Credits & Clients Mode Active' : 'Mode Crédits & Clients actif';
     }
     creditItems.forEach(el => el.style.display = 'flex');
     accItems.forEach(el => el.style.display = 'none');
@@ -925,7 +925,7 @@ window.testSimWhatsAppSend = function() {
   // Ouvre WhatsApp avec le message de démonstration
   const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
-  showToast("💬 Simulateur : Démonstration WhatsApp lancée avec succès !");
+  showToast("Simulateur : Démonstration WhatsApp lancée avec succès.");
 };
 
 window.toggleMobileSidebar = function() {
@@ -951,11 +951,11 @@ function closeMobileSidebarIfOpen() {
 function openAppWorkspace(menuId = 'menu-2') {
   closeMobileSidebarIfOpen();
 
-  // 🔒 AUTH GUARD STRICT : Seul un commerçant avec session validée peut entrer
+  // AUTH GUARD STRICT : Seul un commerçant avec session validée peut entrer
   const isAuth = AppState.user && AppState.user.id && AppState.user.email;
   if (!isAuth) {
     openAuthModal('register');
-    showToast("🔒 Veuillez créer ou vous connecter à votre compte pour accéder au tableau de bord.");
+    showToast("Veuillez créer ou vous connecter à votre compte pour accéder au tableau de bord.");
     return;
   }
 
@@ -1054,7 +1054,6 @@ function renderClientDirectory() {
     tbody.innerHTML = `
       <tr>
         <td colspan="5" style="text-align:center;padding:45px 20px;color:#64748B;">
-          <div style="font-size:1.8rem;margin-bottom:8px;">👥</div>
           <strong style="font-size:0.95rem;color:#0F172A;display:block;">${AppState.lang === 'en' ? 'No clients recorded yet' : 'Aucun client enregistré pour le moment'}</strong>
           <p style="margin:6px 0 14px 0;font-size:0.84rem;color:#94A3B8;">${AppState.lang === 'en' ? 'Click on "+ New Credit" to add your first customer or credit sale.' : 'Cliquez sur « + Nouveau Crédit » pour ajouter votre premier client ou vente.'}</p>
           <button class="btn btn-primary" style="padding:6px 14px;font-size:0.8rem;" onclick="switchMenu('menu-5')">+ ${AppState.lang === 'en' ? 'New Credit' : 'Nouveau Crédit'}</button>
@@ -1070,9 +1069,9 @@ function renderClientDirectory() {
     let scoreText = c.reliabilityScore >= 80 ? (AppState.lang === 'en' ? 'Reliable' : 'Très Fiable') : 
                     (c.reliabilityScore >= 50 ? (AppState.lang === 'en' ? 'Average' : 'Moyen') : (AppState.lang === 'en' ? 'At Risk' : 'Risqué'));
     
-    let statusBadge = c.totalDue <= 0 ? `<span class="badge-status paid">🟢 ${AppState.lang === 'en' ? 'Settled' : 'À Jour'}</span>` :
-                      (c.status === 'overdue' ? `<span class="badge-status overdue">🔴 ${AppState.lang === 'en' ? 'Overdue' : 'En Retard'}</span>` : 
-                      `<span class="badge-status pending">🟠 ${AppState.lang === 'en' ? 'Pending' : 'En Cours'}</span>`);
+    let statusBadge = c.totalDue <= 0 ? `<span class="badge-status paid">${AppState.lang === 'en' ? 'Settled' : 'À Jour'}</span>` :
+                      (c.status === 'overdue' ? `<span class="badge-status overdue">${AppState.lang === 'en' ? 'Overdue' : 'En Retard'}</span>` : 
+                      `<span class="badge-status pending">${AppState.lang === 'en' ? 'Pending' : 'En Cours'}</span>`);
 
     return `
       <tr>
@@ -1084,9 +1083,9 @@ function renderClientDirectory() {
         <td style="font-weight:800;color:#2563EB;">${formatCurrency(c.totalDue)}</td>
         <td>${statusBadge}</td>
         <td>
-          <button class="btn btn-outline" style="padding:4px 7px;font-size:0.74rem;border-color:#2563EB;color:#2563EB;margin-right:2px;" onclick="viewClientDetails(${c.id})">🔍 ${AppState.lang === 'en' ? 'Profile' : 'Fiche'}</button>
-          <button class="btn btn-outline" style="padding:4px 7px;font-size:0.74rem;border-color:#25D366;color:#15803D;margin-right:2px;" onclick="sendWhatsAppReminder('${escapeHTML(c.name)}', '${escapeHTML(c.phone)}', ${c.totalDue})" title="Envoyer par WhatsApp">💬 WhatsApp</button>
-          <button class="btn btn-outline" style="padding:4px 7px;font-size:0.74rem;border-color:#2563EB;color:#2563EB;" onclick="sendSMSReminder('${escapeHTML(c.name)}', '${escapeHTML(c.phone)}', ${c.totalDue})" title="Envoyer par SMS">📱 SMS</button>
+          <button class="btn btn-outline" style="padding:4px 7px;font-size:0.74rem;border-color:#2563EB;color:#2563EB;margin-right:2px;" onclick="viewClientDetails(${c.id})">${AppState.lang === 'en' ? 'Profile' : 'Fiche'}</button>
+          <button class="btn btn-outline" style="padding:4px 7px;font-size:0.74rem;border-color:#25D366;color:#15803D;margin-right:2px;" onclick="sendWhatsAppReminder('${escapeHTML(c.name)}', '${escapeHTML(c.phone)}', ${c.totalDue})" title="Envoyer par WhatsApp">WhatsApp</button>
+          <button class="btn btn-outline" style="padding:4px 7px;font-size:0.74rem;border-color:#2563EB;color:#2563EB;" onclick="sendSMSReminder('${escapeHTML(c.name)}', '${escapeHTML(c.phone)}', ${c.totalDue})" title="Envoyer par SMS">SMS</button>
         </td>
       </tr>
     `;
@@ -1119,7 +1118,6 @@ function renderDashboardDebtsTable() {
     tbody.innerHTML = `
       <tr>
         <td colspan="5" style="text-align:center;padding:35px 20px;color:#64748B;">
-          <div style="font-size:1.6rem;margin-bottom:6px;">✨</div>
           <strong style="color:#0F172A;display:block;">${AppState.lang === 'en' ? 'No pending debts' : 'Aucune dette en cours'}</strong>
           <p style="margin:4px 0 0 0;font-size:0.82rem;color:#94A3B8;">${AppState.lang === 'en' ? 'All credits are settled or no credit sales recorded yet.' : 'Toutes vos créances sont à jour ou aucune vente à crédit n\'a été saisie.'}</p>
         </td>
@@ -1142,10 +1140,10 @@ function renderDashboardDebtsTable() {
         <td>
           <div style="display:flex;gap:4px;">
             <button class="btn btn-outline" style="padding:4px 7px;font-size:0.74rem;border-color:#25D366;color:#15803D;" onclick="sendWhatsAppReminder('${escapeHTML(c.name)}', '${escapeHTML(c.phone)}', ${c.totalDue})">
-              💬 WhatsApp
+              WhatsApp
             </button>
             <button class="btn btn-outline" style="padding:4px 7px;font-size:0.74rem;border-color:#2563EB;color:#2563EB;" onclick="sendSMSReminder('${escapeHTML(c.name)}', '${escapeHTML(c.phone)}', ${c.totalDue})">
-              📱 SMS
+              SMS
             </button>
           </div>
         </td>
@@ -1163,7 +1161,6 @@ function renderPaymentsTable() {
       tbody.innerHTML = `
         <tr>
           <td colspan="6" style="text-align:center;padding:45px 20px;color:#64748B;">
-            <div style="font-size:1.8rem;margin-bottom:8px;">💳</div>
             <strong style="font-size:0.95rem;color:#0F172A;display:block;">${AppState.lang === 'en' ? 'No collections recorded yet' : 'Aucun encaissement pour le moment'}</strong>
             <p style="margin:6px 0 0 0;font-size:0.84rem;color:#94A3B8;">${AppState.lang === 'en' ? 'Customer payments and receipts will appear here automatically.' : 'Les règlements clients (Espèces, Wave, Orange, MTN, Moov) apparaîtront ici.'}</p>
           </td>
@@ -1177,7 +1174,7 @@ function renderPaymentsTable() {
           <td style="font-weight:800;color:#10B981;">${formatCurrency(p.amount)}</td>
           <td>${escapeHTML(p.method)}</td>
           <td style="color:#64748B;">${escapeHTML(p.date)}</td>
-          <td><button class="btn btn-outline" style="padding:4px 8px;font-size:0.72rem;" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName)}', '+225 00000000', 'Paiement ${escapeHTML(p.ref)}', ${p.amount})">📄 ${AppState.lang === 'en' ? 'Receipt' : 'Reçu'}</button></td>
+          <td><button class="btn btn-outline" style="padding:4px 8px;font-size:0.72rem;" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName)}', '+225 00000000', 'Paiement ${escapeHTML(p.ref)}', ${p.amount})">${AppState.lang === 'en' ? 'Receipt' : 'Reçu'}</button></td>
         </tr>
       `).join('');
     }
@@ -1187,7 +1184,6 @@ function renderPaymentsTable() {
     if (AppState.payments.length === 0) {
       activityList.innerHTML = `
         <div style="text-align:center;padding:35px 15px;color:#94A3B8;font-size:0.85rem;">
-          <div style="font-size:1.5rem;margin-bottom:6px;">⏱️</div>
           ${AppState.lang === 'en' ? 'No recent activity.' : 'Aucune activité récente.'}
         </div>
       `;
@@ -1282,9 +1278,9 @@ async function handleNewCreditSubmit(e) {
   const guarantorName = document.getElementById('credit-guarantor-name') ? document.getElementById('credit-guarantor-name').value : '';
   const guarantorPhone = document.getElementById('credit-guarantor-phone') ? document.getElementById('credit-guarantor-phone').value : '';
 
-  // ⚠️ VALIDATION STRICTE : Le numéro de téléphone est OBLIGATOIRE
+  // VALIDATION STRICTE : Le numéro de téléphone est OBLIGATOIRE
   if (!clientPhone || clientPhone.replace(/[^0-9]/g, '').length < 8) {
-    showToast(AppState.lang === 'en' ? "⚠️ The client's phone number is mandatory to send WhatsApp/SMS reminders!" : "⚠️ Le numéro de téléphone/WhatsApp du client est OBLIGATOIRE pour pouvoir le relancer !");
+    showToast(AppState.lang === 'en' ? "The client's phone number is mandatory to send WhatsApp/SMS reminders." : "Le numéro de téléphone/WhatsApp du client est obligatoire pour le relancer.");
     const phoneInput = document.getElementById('credit-client-phone');
     if (phoneInput) {
       phoneInput.focus();
@@ -1306,7 +1302,7 @@ async function handleNewCreditSubmit(e) {
 
     clientName = (document.getElementById('new-client-name')?.value || '').trim();
     if (!clientName) {
-      showToast(AppState.lang === 'en' ? "⚠️ Please enter the client's full name." : "⚠️ Veuillez renseigner le nom complet du client.");
+      showToast(AppState.lang === 'en' ? "Please enter the client's full name." : "Veuillez renseigner le nom complet du client.");
       document.getElementById('new-client-name')?.focus();
       return;
     }
@@ -1421,7 +1417,7 @@ window.payClientDebt = async function() {
   renderPaymentsTable();
   renderCreditKPIs();
 
-  showToast(`✅ ${AppState.lang === 'en' ? 'Payment of' : 'Paiement de'} ${formatCurrency(amountToPay)} (${selectedMethod}) ${AppState.lang === 'en' ? 'recorded for' : 'enregistré pour'} ${client.name} !`);
+  showToast(`${AppState.lang === 'en' ? 'Payment of' : 'Paiement de'} ${formatCurrency(amountToPay)} (${selectedMethod}) ${AppState.lang === 'en' ? 'recorded for' : 'enregistré pour'} ${client.name}.`);
   openReceiptPreviewModalWithData(client.name, client.phone, `Règlement solde (${selectedMethod})`, amountToPay);
 };
 
@@ -1441,8 +1437,8 @@ window.viewClientDetails = function(clientId) {
   let scoreColor = client.reliabilityScore >= 80 ? '#10B981' : (client.reliabilityScore >= 50 ? '#F59E0B' : '#EF4444');
   document.getElementById('modal-client-score').style.color = scoreColor;
 
-  let statusText = client.totalDue <= 0 ? `🟢 ${AppState.lang === 'en' ? 'Settled' : 'À Jour'}` :
-                   (client.status === 'overdue' ? `🔴 ${AppState.lang === 'en' ? 'Overdue' : 'En Retard'}` : `🟠 ${AppState.lang === 'en' ? 'Pending' : 'En Cours'}`);
+  let statusText = client.totalDue <= 0 ? (AppState.lang === 'en' ? 'Settled' : 'À Jour') :
+                   (client.status === 'overdue' ? (AppState.lang === 'en' ? 'Overdue' : 'En Retard') : (AppState.lang === 'en' ? 'Pending' : 'En Cours'));
   document.getElementById('modal-client-status').innerHTML = statusText;
 
   const historyBody = document.getElementById('modal-client-history-body');
@@ -1541,7 +1537,7 @@ window.triggerWhatsAppFromModal = function() {
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
   window.open(url, '_blank');
   closeModal('modal-send-reminder');
-  showToast(`💬 WhatsApp ouvert avec le numéro de ${currentReminderTarget.name} (+${cleanPhone}) !`);
+  showToast(`WhatsApp ouvert avec le numéro de ${currentReminderTarget.name} (+${cleanPhone}).`);
 };
 
 window.triggerSMSFromModal = function() {
@@ -1552,7 +1548,7 @@ window.triggerSMSFromModal = function() {
   const url = `sms:${cleanPhone}${separator}body=${encodeURIComponent(text)}`;
   window.location.href = url;
   closeModal('modal-send-reminder');
-  showToast(`📱 SMS ouvert avec le numéro de ${currentReminderTarget.name} (+${cleanPhone}) !`);
+  showToast(`SMS ouvert avec le numéro de ${currentReminderTarget.name} (+${cleanPhone}).`);
 };
 
 window.sendWhatsAppReminder = function(name, phone, amount) {
@@ -1578,17 +1574,17 @@ window.sendWhatsAppReminder = function(name, phone, amount) {
     .replace(/{nom_commerce}/g, AppState.businessName);
 
   if (itemsSummary) {
-    msg += `\n\n📦 Détail de vos achats à régler :\n${itemsSummary}`;
+    msg += `\n\nDétail de vos achats à régler :\n${itemsSummary}`;
   }
 
   if (AppState.businessPhone) {
-    msg += `\n\n📱 Règlement possible en espèces ou par Mobile Money / Wave au : ${AppState.businessPhone}`;
+    msg += `\n\nRèglement possible en espèces ou par Mobile Money / Wave au : ${AppState.businessPhone}`;
   }
 
   // Ouvre directement WhatsApp avec le numéro de téléphone et le message propre
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
-  showToast(`💬 WhatsApp ouvert avec le détail des achats pour ${name} (+${cleanPhone}) !`);
+  showToast(`WhatsApp ouvert avec le détail des achats pour ${name} (+${cleanPhone}).`);
 };
 
 window.sendSMSReminder = function(name, phone, amount) {
@@ -1607,7 +1603,7 @@ window.sendSMSReminder = function(name, phone, amount) {
   const separator = isIOS ? '&' : '?';
   const url = `sms:${cleanPhone}${separator}body=${encodeURIComponent(msg)}`;
   window.location.href = url;
-  showToast(`📱 Application SMS ouverte avec le numéro de ${name} (+${cleanPhone}) !`);
+  showToast(`Application SMS ouverte avec le numéro de ${name} (+${cleanPhone}).`);
 };
 
 window.saveWhatsAppTemplate = function() {
@@ -2190,7 +2186,7 @@ window.switchAuthTab = function(tab) {
   if (isRegister) {
     if (viewReg) viewReg.style.display = 'block';
     if (viewLogin) viewLogin.style.display = 'none';
-    if (modalTitle) modalTitle.textContent = '✨ Créer un Compte (Essai 3 Mois Offert)';
+    if (modalTitle) modalTitle.textContent = 'Créer un Compte (Essai 3 Mois Offert)';
     if (tabReg) {
       tabReg.classList.add('active');
       tabReg.style.background = '#fff';
@@ -2206,7 +2202,7 @@ window.switchAuthTab = function(tab) {
   } else {
     if (viewReg) viewReg.style.display = 'none';
     if (viewLogin) viewLogin.style.display = 'block';
-    if (modalTitle) modalTitle.textContent = '🔐 Connexion à votre Espace';
+    if (modalTitle) modalTitle.textContent = 'Connexion à votre Espace';
     if (tabLogin) {
       tabLogin.classList.add('active');
       tabLogin.style.background = '#fff';
@@ -2231,7 +2227,7 @@ window.promptPendingVerification = function() {
   if (emailInput) {
     const clean = emailInput.trim().toLowerCase();
     if (!isValidEmailStrict(clean)) {
-      showToast("⚠️ Veuillez entrer une adresse e-mail valide.");
+      showToast("Veuillez entrer une adresse e-mail valide.");
       return;
     }
     pendingAuthData.email = clean;
@@ -2251,7 +2247,7 @@ function showOtpVerificationView(email) {
   if (viewReg) viewReg.style.display = 'none';
   if (viewLogin) viewLogin.style.display = 'none';
   if (viewOtp) viewOtp.style.display = 'block';
-  if (modalTitle) modalTitle.textContent = '📬 Vérification de votre E-mail';
+  if (modalTitle) modalTitle.textContent = 'Vérification de votre E-mail';
   if (targetDisplay) targetDisplay.textContent = maskEmail(email);
 
   const otpInput = document.getElementById('auth-otp-code');
@@ -2279,7 +2275,7 @@ window.handleRegisterSubmit = async function(e) {
 
   // 1. Validation de champ vide
   if (!email) {
-    showToast("⚠️ Veuillez entrer votre adresse e-mail.");
+    showToast("Veuillez entrer votre adresse e-mail.");
     if (emailInput) {
       emailInput.style.borderColor = '#EF4444';
       emailInput.focus();
@@ -2290,7 +2286,7 @@ window.handleRegisterSubmit = async function(e) {
 
   // 2. Validation réelle et stricte du format e-mail
   if (!isValidEmailStrict(email)) {
-    showToast("⚠️ Veuillez entrer une adresse e-mail valide (ex: contact@gmail.com).");
+    showToast("Veuillez entrer une adresse e-mail valide.");
     if (emailInput) {
       emailInput.style.borderColor = '#EF4444';
       emailInput.focus();
@@ -2301,7 +2297,7 @@ window.handleRegisterSubmit = async function(e) {
 
   // 3. Validation de mot de passe
   if (!password || password.length < 6) {
-    showToast("⚠️ Le mot de passe doit comporter au moins 6 caractères.");
+    showToast("Le mot de passe doit comporter au moins 6 caractères.");
     if (passInput) {
       passInput.style.borderColor = '#EF4444';
       passInput.focus();
@@ -2312,7 +2308,7 @@ window.handleRegisterSubmit = async function(e) {
 
   // 4. Validation de correspondance des mots de passe
   if (password !== passwordConfirm) {
-    showToast("❌ Les mots de passe ne correspondent pas.");
+    showToast("Les mots de passe ne correspondent pas.");
     if (passConfInput) {
       passConfInput.style.borderColor = '#EF4444';
       passConfInput.focus();
@@ -2328,7 +2324,7 @@ window.handleRegisterSubmit = async function(e) {
   const submitBtn = document.getElementById('auth-reg-submit-btn');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi sécurisé du code...`;
+    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi du code...`;
   }
 
   try {
@@ -2348,7 +2344,7 @@ window.handleRegisterSubmit = async function(e) {
 
       if (error) {
         if (error.message && (error.message.includes('already registered') || error.message.includes('already exists') || error.status === 422)) {
-          showToast("ℹ️ Un compte existe déjà avec cette adresse email. Veuillez vous connecter.");
+          showToast("Un compte existe déjà avec cette adresse email. Veuillez vous connecter.");
           switchAuthTab('login');
           const loginEmail = document.getElementById('auth-login-email');
           if (loginEmail) loginEmail.value = email;
@@ -2358,7 +2354,7 @@ window.handleRegisterSubmit = async function(e) {
       }
 
       if (data && data.user && data.user.identities && data.user.identities.length === 0) {
-        showToast("ℹ️ Cette adresse email est déjà enregistrée. Veuillez vous connecter.");
+        showToast("Cette adresse email est déjà enregistrée. Veuillez vous connecter.");
         switchAuthTab('login');
         const loginEmail = document.getElementById('auth-login-email');
         if (loginEmail) loginEmail.value = email;
@@ -2368,14 +2364,14 @@ window.handleRegisterSubmit = async function(e) {
 
     // Basculer vers l'écran de saisie du code OTP avec email masqué
     showOtpVerificationView(email);
-    showToast(`📬 Un vrai code de sécurité à 6 chiffres a été envoyé à ${maskEmail(email)} !`);
+    showToast(`Un code de sécurité à 6 chiffres a été envoyé à ${maskEmail(email)} !`);
   } catch (err) {
     console.error("Erreur Inscription Supabase:", err);
-    showToast(`⚠️ Erreur : ${err.message || "Impossible d'envoyer le code de vérification"}`);
+    showToast(`Erreur : ${err.message || "Impossible d'envoyer le code de vérification"}`);
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>Créer mon Compte &amp; Recevoir le Code</span> ➔`;
+      submitBtn.innerHTML = `<span>Créer mon Compte & Recevoir le Code</span> ➔`;
     }
   }
 };
@@ -2387,7 +2383,7 @@ window.handleVerifyOtpSubmit = async function(e) {
   const otpCode = rawCode.replace(/[^0-9]/g, '');
 
   if (!otpCode || otpCode.length < 6) {
-    showToast("⚠️ Veuillez entrer le code de sécurité à 6 chiffres reçu par mail.");
+    showToast("Veuillez entrer le code de sécurité à 6 chiffres reçu par mail.");
     if (otpInput) {
       otpInput.style.borderColor = '#EF4444';
       otpInput.focus();
@@ -2468,10 +2464,10 @@ window.handleVerifyOtpSubmit = async function(e) {
     // Ouvrir directement l'espace de travail sécurisé
     openAppWorkspace('menu-2');
 
-    showToast(`🎉 Bienvenue ${AppState.user.businessName} ! Compte vérifié & 3 Mois d'Essai activés ! 🚀`);
+    showToast(`Bienvenue ${AppState.user.businessName} ! Compte vérifié & 3 Mois d'Essai activés !`);
   } catch (err) {
     console.error("Erreur validation OTP:", err);
-    showToast("❌ Code incorrect ou expiré. Veuillez vérifier votre boîte mail.");
+    showToast("Code incorrect ou expiré. Veuillez vérifier votre boîte mail.");
     if (otpInput) {
       otpInput.style.borderColor = '#EF4444';
       setTimeout(() => { otpInput.style.borderColor = ''; }, 3500);
@@ -2479,7 +2475,7 @@ window.handleVerifyOtpSubmit = async function(e) {
   } finally {
     if (verifyBtn) {
       verifyBtn.disabled = false;
-      verifyBtn.innerHTML = `✅ Valider &amp; Activer mon Compte`;
+      verifyBtn.innerHTML = `Valider & Activer mon Compte`;
     }
   }
 };
@@ -2494,7 +2490,7 @@ window.handleLoginSubmit = async function(e) {
 
   // 1. Validation de champ vide
   if (!email) {
-    showToast("⚠️ Veuillez entrer votre adresse e-mail.");
+    showToast("Veuillez entrer votre adresse e-mail.");
     if (emailInput) {
       emailInput.style.borderColor = '#EF4444';
       emailInput.focus();
@@ -2505,7 +2501,7 @@ window.handleLoginSubmit = async function(e) {
 
   // 2. Validation réelle du format e-mail
   if (!isValidEmailStrict(email)) {
-    showToast("⚠️ Veuillez entrer une adresse e-mail valide (ex: contact@gmail.com).");
+    showToast("Veuillez entrer une adresse e-mail valide.");
     if (emailInput) {
       emailInput.style.borderColor = '#EF4444';
       emailInput.focus();
@@ -2516,7 +2512,7 @@ window.handleLoginSubmit = async function(e) {
 
   // 3. Validation mot de passe
   if (!password) {
-    showToast("⚠️ Veuillez saisir votre mot de passe.");
+    showToast("Veuillez saisir votre mot de passe.");
     if (passInput) {
       passInput.style.borderColor = '#EF4444';
       passInput.focus();
@@ -2545,7 +2541,7 @@ window.handleLoginSubmit = async function(e) {
       if (error) {
         // Détecter si l'email n'est pas encore vérifié
         if (error.message && (error.message.includes('Email not confirmed') || error.message.includes('not confirmed'))) {
-          showToast("⚠️ Votre adresse e-mail n'a pas encore été vérifiée. Un code vous a été envoyé.");
+          showToast("Votre adresse e-mail n'a pas encore été vérifiée. Un code vous a été envoyé.");
           pendingAuthData.email = email;
           try {
             await window.supabaseClient.auth.resend({ type: 'signup', email });
@@ -2597,30 +2593,30 @@ window.handleLoginSubmit = async function(e) {
     closeModal('modal-auth');
 
     openAppWorkspace('menu-2');
-    showToast(`✅ Heureux de vous revoir ${AppState.businessName} !`);
+    showToast(`Heureux de vous revoir ${AppState.businessName} !`);
   } catch (err) {
     console.error("Erreur Connexion:", err);
-    showToast("❌ " + (err.message || "Adresse e-mail ou mot de passe incorrect."));
+    showToast((err.message || "Adresse e-mail ou mot de passe incorrect."));
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>🔐 Se Connecter</span>`;
+      submitBtn.innerHTML = `<span>Se Connecter</span>`;
     }
   }
 };
 
 window.handleResendOtp = async function() {
   if (!pendingAuthData.email) {
-    showToast("⚠️ Aucune adresse e-mail en attente de vérification.");
+    showToast("Aucune adresse e-mail en attente de vérification.");
     return;
   }
 
   if (resendSecondsLeft > 0) {
-    showToast(`⏳ Veuillez patienter encore ${resendSecondsLeft} secondes avant de renvoyer un code.`);
+    showToast(`Veuillez patienter encore ${resendSecondsLeft} secondes avant de renvoyer un code.`);
     return;
   }
 
-  showToast("⏳ Envoi d'un nouveau code par le serveur...");
+  showToast("Envoi d'un nouveau code par le serveur...");
   try {
     if (window.supabaseClient) {
       const { error } = await window.supabaseClient.auth.resend({
@@ -2635,10 +2631,10 @@ window.handleResendOtp = async function() {
       }
     }
     startResendCooldown(60);
-    showToast(`📧 Nouveau code renvoyé avec succès à ${maskEmail(pendingAuthData.email)} !`);
+    showToast(`Nouveau code renvoyé avec succès à ${maskEmail(pendingAuthData.email)} !`);
   } catch (e) {
     console.warn("Erreur renvoi OTP:", e);
-    showToast("⚠️ Impossible de renvoyer le code pour le moment. Veuillez patienter.");
+    showToast("Impossible de renvoyer le code pour le moment. Veuillez patienter.");
   }
 };
 
@@ -2668,7 +2664,7 @@ window.handleSignOut = async function() {
   renderCreditKPIs();
   
   openPublicLanding();
-  showToast("👋 Déconnexion réussie. L'espace commerçant a été verrouillé.");
+  showToast("Déconnexion réussie. L'espace commerçant a été verrouillé.");
 };
 
 window.openSubscriptionModal = function() {
@@ -2698,14 +2694,14 @@ window.redeemAdminLicenseKey = function() {
 
     updateUserPlanBadgeUI();
     closeModal('modal-subscription-plans');
-    showToast("👑 Clé VIP Validée ! Accès PRO Illimité à Vie activé avec succès ! 🚀");
+    showToast("Clé VIP Validée ! Accès PRO Illimité à Vie activé avec succès !");
     
     // Save to local IndexedDB & Supabase
     if (window.dataStore) {
       window.dataStore.add("settings", { key: "active_license", value: key, plan: "vip_lifetime", date: new Date().toISOString() });
     }
   } else {
-    showToast("❌ Clé de licence VIP invalide ou expirée.");
+    showToast("Clé de licence VIP invalide ou expirée.");
     input.style.borderColor = '#EF4444';
     setTimeout(() => { input.style.borderColor = ''; }, 3000);
   }
@@ -2771,7 +2767,7 @@ function activateProPlan(planTier, amount, method) {
 
   updateUserPlanBadgeUI();
   closeModal('modal-subscription-plans');
-  showToast(`🎉 Félicitations ! Votre Forfait ${planTier === 'pro_yearly' ? 'PRO Annuel' : 'PRO Mensuel'} est ACTIF ! Toutes les fonctionnalités sont débloquées ! 🚀`);
+  showToast(`Félicitations ! Votre Forfait ${planTier === 'pro_yearly' ? 'PRO Annuel' : 'PRO Mensuel'} est ACTIF ! Toutes les fonctionnalités sont débloquées !`);
 }
 
 window.checkPlanAccess = function(actionType = 'add_client') {
@@ -2780,7 +2776,7 @@ window.checkPlanAccess = function(actionType = 'add_client') {
   if (actionType === 'add_client') {
     const maxFree = 10;
     if (!isPro && AppState.clients.length >= maxFree) {
-      showToast(`⚠️ Limite de ${maxFree} clients atteinte en version Gratuite. Passez en PRO pour des clients illimités !`);
+      showToast(`Limite de ${maxFree} clients atteinte en version Gratuite. Passez en PRO pour des clients illimités !`);
       openSubscriptionModal();
       return false;
     }
@@ -2800,13 +2796,13 @@ function updateUserPlanBadgeUI() {
 
   if (badge) {
     if (AppState.user.planTier === 'vip_lifetime') {
-      badge.textContent = '👑 VIP Fondateur';
+      badge.textContent = 'VIP Fondateur';
       badge.style.color = '#10B981';
     } else if (AppState.user.planTier === 'trial_3_months') {
-      badge.textContent = '🎁 Essai 3 Mois Actif';
+      badge.textContent = 'Essai 3 Mois Actif';
       badge.style.color = '#10B981';
     } else if (isPro) {
-      badge.textContent = '👑 PRO ACTIF';
+      badge.textContent = 'PRO ACTIF';
       badge.style.color = '#10B981';
     } else {
       badge.textContent = 'GRATUIT (Starter)';
@@ -2821,7 +2817,7 @@ function updateUserPlanBadgeUI() {
       const label = document.getElementById('sidebar-pro-plan-label');
       const desc = document.getElementById('sidebar-pro-plan-desc');
       const btn = document.getElementById('sidebar-pro-btn');
-      if (label) label.textContent = 'Forfait PRO Actif 👑';
+      if (label) label.textContent = 'Forfait PRO Actif';
       if (desc) desc.textContent = 'Accès illimité débloqué pour votre boutique.';
       if (btn) {
         btn.textContent = 'Gérer mon Abonnement';

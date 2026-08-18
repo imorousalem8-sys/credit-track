@@ -149,7 +149,7 @@ export default function ClientsPage() {
                       </td>
                       <td style={{ padding: '16px 20px' }}>
                         <span className={`badge-status ${client.status}`}>
-                          {client.status === 'paid' ? '🟢 À Jour' : client.status === 'overdue' ? '🔴 Impayé' : '🟠 En cours'}
+                          {client.status === 'paid' ? 'À Jour' : client.status === 'overdue' ? 'Impayé' : 'En cours'}
                         </span>
                       </td>
                       <td style={{ padding: '16px 20px', textAlign: 'right' }}>
