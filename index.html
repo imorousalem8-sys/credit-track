@@ -844,6 +844,15 @@
           <i data-lucide="chevron-right" class="nav-arrow"></i>
         </button>
 
+        <!-- NOUVEAU : CAHIER DES VENTES DU JOUR (24H) & MULTI-BOUTIQUES -->
+        <button class="nav-link" id="nav-menu-salesbook" onclick="switchMenu('menu-salesbook')">
+          <div class="nav-link-left">
+            <i data-lucide="book-open"></i>
+            <span>Cahier des Ventes (24h)</span>
+          </div>
+          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+
         <button class="nav-link credit-menu-item" id="nav-menu-8" onclick="switchMenu('menu-8')">
           <div class="nav-link-left">
             <i data-lucide="bell-ring"></i>
@@ -910,7 +919,7 @@
     <div class="main-workspace">
 
       <header class="top-workspace-header">
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
           <!-- Bouton Hamburger Mobile -->
           <button class="btn-hamburger-menu" onclick="toggleMobileSidebar()" aria-label="Menu Mobile">
             <i data-lucide="menu" style="width:22px;height:22px;"></i>
@@ -919,6 +928,17 @@
           <div class="header-left-title">
             <i data-lucide="layout-grid" style="color:#2563EB;" id="header-page-icon"></i>
             <span id="page-desktop-title" data-i18n="dashboard">Tableau de Bord</span>
+          </div>
+
+          <!-- SÉLECTEUR MULTI-BOUTIQUES EN DIRECT -->
+          <div class="header-branch-pill">
+            <i data-lucide="store" style="width:16px;height:16px;color:#2563EB;"></i>
+            <select id="top-branch-selector" class="header-branch-select" onchange="handleBranchFilterChange(this.value)">
+              <option value="all">🏢 Toutes les Boutiques (Consolidé)</option>
+              <option value="Boutique Principale (Siège)">📍 Boutique Principale (Siège)</option>
+              <option value="Boutique 2 (Succursale)">📍 Boutique 2 (Succursale)</option>
+              <option value="Point de Vente Marché">📍 Point de Vente Marché</option>
+            </select>
           </div>
         </div>
 
@@ -1700,6 +1720,151 @@
           </div>
         </section>
 
+        <!-- ============================================================
+             VUE : CAHIER DES VENTES DU JOUR (24H) & MULTI-BOUTIQUES (#menu-salesbook)
+        ============================================================ -->
+        <section id="menu-salesbook" class="view-container">
+          
+          <!-- Bannière Synthèse Quotidienne 24h & Clôture Patron -->
+          <div class="daily-closing-banner">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                <span style="background:rgba(56,189,248,0.2);color:#38BDF8;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;letter-spacing:0.5px;">JOURNAL DE VENTE 24H</span>
+                <span id="salesbook-date-label" style="font-size:0.85rem;color:#94A3B8;">Aujourd'hui</span>
+              </div>
+              <h2 style="font-size:1.35rem;font-weight:900;margin:0 0 4px 0;">Cahier des Ventes &amp; Recettes du Jour</h2>
+              <p style="font-size:0.82rem;color:#94A3B8;margin:0;">Enregistrez chaque article vendu en boutique. Le patron reçoit la synthèse consolidée toutes les 24h.</p>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <div class="daily-closing-kpis">
+                <div class="daily-kpi-item">
+                  <span class="daily-kpi-label">Ventes du Jour</span>
+                  <span id="daily-kpi-total-sales" class="daily-kpi-val">0 FCFA</span>
+                </div>
+                <div class="daily-kpi-item">
+                  <span class="daily-kpi-label">Articles Vendus</span>
+                  <span id="daily-kpi-count" class="daily-kpi-val" style="color:#10B981;">0</span>
+                </div>
+                <div class="daily-kpi-item">
+                  <span class="daily-kpi-label">Espèces en Caisse</span>
+                  <span id="daily-kpi-cash" class="daily-kpi-val" style="color:#F59E0B;">0 FCFA</span>
+                </div>
+              </div>
+
+              <button type="button" class="btn-closing-action" onclick="openDailyClosingModal()">
+                <i data-lucide="send" style="width:16px;height:16px;"></i>
+                <span>Clôturer &amp; Transmettre au Patron</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;align-items:start;" class="grid-salesbook-layout">
+            
+            <!-- Formulaire Saisie Rapide d'un Article Vendu -->
+            <div class="card" style="padding:20px;">
+              <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:12px;margin-bottom:16px;">
+                <span class="card-title" style="display:flex;align-items:center;gap:8px;">
+                  <i data-lucide="shopping-cart" style="width:18px;height:18px;color:#2563EB;"></i>
+                  Noter un Article Vendu
+                </span>
+              </div>
+
+              <form id="form-quick-sale" onsubmit="handleQuickSaleSubmit(event)">
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Article / Marchandise *</label>
+                  <input type="text" id="sale-item-name" class="form-control" placeholder="ex: Sac de Riz 50kg, Huile Dinor 5L..." required>
+                </div>
+
+                <div class="grid-2-equal" style="gap:10px;margin-bottom:12px;">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Quantité *</label>
+                    <input type="number" id="sale-item-qty" class="form-control" value="1" min="1" required oninput="calculateSaleTotal()">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label">Prix Unitaire (FCFA) *</label>
+                    <input type="number" id="sale-item-unitprice" class="form-control" placeholder="ex: 22500" min="50" required oninput="calculateSaleTotal()">
+                  </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Montant Total :</label>
+                  <input type="text" id="sale-item-total" class="form-control" readonly value="0 FCFA" style="background:#F1F5F9;font-weight:900;color:#2563EB;font-size:1.05rem;">
+                </div>
+
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Mode de Règlement *</label>
+                  <select id="sale-payment-method" class="form-control">
+                    <option value="Espèces">💵 Espèces (Cash en boutique)</option>
+                    <option value="Wave Direct">🌊 Wave Money</option>
+                    <option value="Orange Money">🟠 Orange Money</option>
+                    <option value="MTN MoMo">🟡 MTN Mobile Money</option>
+                    <option value="Moov Money">🔵 Moov Money</option>
+                  </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Boutique de Vente *</label>
+                  <select id="sale-branch-select" class="form-control">
+                    <option value="Boutique Principale (Siège)">📍 Boutique Principale (Siège)</option>
+                    <option value="Boutique 2 (Succursale)">📍 Boutique 2 (Succursale)</option>
+                    <option value="Point de Vente Marché">📍 Point de Vente Marché</option>
+                  </select>
+                </div>
+
+                <div class="form-group" style="margin-bottom:16px;">
+                  <label class="form-label">Nom du Client (Optionnel)</label>
+                  <input type="text" id="sale-client-name" class="form-control" placeholder="Client Comptoir / Nom">
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;">
+                  <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
+                  <span>Enregistrer la Vente</span>
+                </button>
+              </form>
+            </div>
+
+            <!-- Liste des Ventes Enregistrées Aujourd'hui -->
+            <div class="card" style="padding:20px;">
+              <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+                <div>
+                  <span class="card-title" style="display:flex;align-items:center;gap:8px;">
+                    <i data-lucide="receipt" style="width:18px;height:18px;color:#10B981;"></i>
+                    Articles Vendus Aujourd'hui
+                  </span>
+                  <span style="font-size:0.75rem;color:#64748B;">Mise à jour instantanée en temps réel</span>
+                </div>
+
+                <button type="button" class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px;" onclick="renderDailySalesBook()">
+                  <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Actualiser
+                </button>
+              </div>
+
+              <!-- Tableau du Journal -->
+              <div style="overflow-x:auto;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.84rem;">
+                  <thead>
+                    <tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0;text-align:left;">
+                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Heure</th>
+                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Article</th>
+                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Qté</th>
+                      <th style="padding:10px 12px;color:#64748B;font-weight:700;text-align:right;">Montant</th>
+                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Paiement</th>
+                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Boutique</th>
+                      <th style="padding:10px 12px;color:#64748B;font-weight:700;text-align:center;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="daily-sales-table-body">
+                    <!-- Dynamic populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
       </main>
     </div>
 
@@ -2127,6 +2292,77 @@
         </button>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE DE CLÔTURE JOURNALIÈRE (24H) & TRANSMISSION AU PATRON
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-daily-closing-summary">
+    <div class="modal-card" style="max-width:620px;">
+      <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:12px;">
+        <div>
+          <span class="card-title" style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="send" style="width:20px;height:20px;color:#10B981;"></i>
+            Clôture Journalière (24h) &amp; Bilan Patron
+          </span>
+          <p style="font-size:0.8rem;color:#64748B;margin:2px 0 0 0;">Synthèse consolidée des recettes de la journée par boutique.</p>
+        </div>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-daily-closing-summary')">✕</button>
+      </div>
+
+      <div style="padding:16px 0;">
+        
+        <!-- Cartouche Synthèse 24h -->
+        <div style="background:#0F172A;color:#FFFFFF;border-radius:12px;padding:18px;margin-bottom:18px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:8px;">
+            <span style="font-weight:700;font-size:0.88rem;color:#38BDF8;" id="closing-modal-date">Synthèse du Jour</span>
+            <span style="background:#10B981;color:#fff;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:800;">CLÔTURE 24H PRÊTE</span>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;">
+            <div>
+              <div style="font-size:0.75rem;color:#94A3B8;">Total Encaissé Aujourd'hui</div>
+              <div id="closing-modal-total-amount" style="font-size:1.4rem;font-weight:900;color:#10B981;">0 FCFA</div>
+            </div>
+            <div>
+              <div style="font-size:0.75rem;color:#94A3B8;">Nombre d'Articles Vendus</div>
+              <div id="closing-modal-total-count" style="font-size:1.4rem;font-weight:900;color:#38BDF8;">0 articles</div>
+            </div>
+          </div>
+
+          <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:10px 12px;font-size:0.78rem;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span>💵 Espèces en Caisse :</span>
+              <strong id="closing-modal-cash">0 FCFA</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+              <span>🌊 Wave Money :</span>
+              <strong id="closing-modal-wave">0 FCFA</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;">
+              <span>📱 Mobile Money (Orange/MTN/Moov) :</span>
+              <strong id="closing-modal-momo">0 FCFA</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ventilation par Boutique -->
+        <div style="margin-bottom:18px;">
+          <div style="font-weight:800;font-size:0.85rem;color:#0F172A;margin-bottom:8px;">Ventilation par Boutique / Point de Vente :</div>
+          <div id="closing-modal-branch-breakdown" style="display:flex;flex-direction:column;gap:6px;">
+            <!-- Dynamic populated -->
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-daily-closing-summary')">Fermer</button>
+          <button type="button" class="btn btn-primary" style="background:#25D366;border-color:#25D366;color:#fff;font-weight:800;" onclick="sendDailyClosingWhatsApp()">
+            <i data-lucide="message-square"></i> <span>Transmettre au Patron sur WhatsApp</span>
+          </button>
+        </div>
+
+      </div>
     </div>
   </div>
 

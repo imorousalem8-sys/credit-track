@@ -1002,6 +1002,7 @@ function switchMenu(menuId) {
     'menu-accounting': AppState.lang === 'en' ? 'Cash & Expenses' : 'Caisse & Dépenses',
     'menu-4-directory': AppState.lang === 'en' ? 'Clients & Debts' : 'Clients & Dettes',
     'menu-6': AppState.lang === 'en' ? 'Payments & Receipts' : 'Encaisser & Reçus',
+    'menu-salesbook': AppState.lang === 'en' ? 'Daily Sales Book (24h)' : 'Cahier des Ventes (24h)',
     'menu-8': AppState.lang === 'en' ? 'WhatsApp Reminders' : 'Rappels WhatsApp',
     'menu-settings': AppState.lang === 'en' ? 'Settings' : 'Paramètres',
     'menu-5': AppState.lang === 'en' ? 'Record Credit Sale' : 'Noter un Nouveau Crédit'
@@ -1012,6 +1013,7 @@ function switchMenu(menuId) {
     'menu-accounting': 'calculator',
     'menu-4-directory': 'users',
     'menu-6': 'wallet',
+    'menu-salesbook': 'book-open',
     'menu-8': 'bell-ring',
     'menu-settings': 'settings',
     'menu-5': 'plus-circle'
@@ -1030,6 +1032,9 @@ function switchMenu(menuId) {
     if (menuId === 'menu-accounting') {
       headerBtn.setAttribute('onclick', "openModal('modal-accounting-entry')");
       headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Entry' : '+ Noter Dépense'}</span>`;
+    } else if (menuId === 'menu-salesbook') {
+      headerBtn.setAttribute('onclick', "document.getElementById('sale-item-name')?.focus()");
+      headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Sale' : '+ Vendre un Article'}</span>`;
     } else {
       headerBtn.setAttribute('onclick', "switchMenu('menu-5')");
       headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Credit' : '+ Noter un Crédit'}</span>`;
@@ -1040,6 +1045,9 @@ function switchMenu(menuId) {
 
   if (menuId === 'menu-2' || menuId === 'menu-accounting') {
     setTimeout(initCharts, 60);
+  }
+  if (menuId === 'menu-salesbook') {
+    renderDailySalesBook();
   }
 }
 
@@ -3492,12 +3500,319 @@ window.downloadOfficialReportPDF = function() {
   }
 };
 
+// --------------------------------------------------------------------------
+// 18. MOTEUR MULTI-BOUTIQUES & CAHIER DES VENTES DU JOUR (24H)
+// --------------------------------------------------------------------------
+AppState.selectedBranch = localStorage.getItem('ct_selected_branch') || 'all';
+
+// Initialisation des ventes du jour (stockées dans ct_daily_sales)
+AppState.sales = JSON.parse(localStorage.getItem('ct_daily_sales') || 'null') || [
+  { id: 'sale_1', item: 'Sac de Riz Parfumé 50kg', qty: 2, unitPrice: 24000, total: 48000, method: 'Espèces', branch: 'Boutique Principale (Siège)', client: 'Client Comptoir', cashier: 'Mamadou DIOP', time: '09:15', date: new Date().toISOString().split('T')[0] },
+  { id: 'sale_2', item: 'Carton Huile Végétale Dinor 5L', qty: 1, unitPrice: 16500, total: 16500, method: 'Wave Direct', branch: 'Boutique Principale (Siège)', client: 'Mme Bamba', cashier: 'Mamadou DIOP', time: '11:30', date: new Date().toISOString().split('T')[0] },
+  { id: 'sale_3', item: 'Carton Lait Bonnet Rouge', qty: 1, unitPrice: 22000, total: 22000, method: 'Orange Money', branch: 'Boutique 2 (Succursale)', client: 'Koffi Paul', cashier: 'Gérant (Patron)', time: '14:20', date: new Date().toISOString().split('T')[0] }
+];
+
+function saveSalesToStorage() {
+  localStorage.setItem('ct_daily_sales', JSON.stringify(AppState.sales));
+}
+
+// Calcul automatique du total dans le formulaire de vente rapide
+window.calculateSaleTotal = function() {
+  const qtyInput = document.getElementById('sale-item-qty');
+  const unitPriceInput = document.getElementById('sale-item-unitprice');
+  const totalInput = document.getElementById('sale-item-total');
+
+  const qty = parseFloat(qtyInput?.value || 0);
+  const unitPrice = parseFloat(unitPriceInput?.value || 0);
+  const total = qty * unitPrice;
+
+  if (totalInput) {
+    totalInput.value = formatCurrency(total);
+  }
+};
+
+// Gestionnaire du filtre multi-boutiques
+window.handleBranchFilterChange = function(branch) {
+  AppState.selectedBranch = branch;
+  localStorage.setItem('ct_selected_branch', branch);
+  
+  // Synchroniser le sélecteur du header et de la modale
+  const topSel = document.getElementById('top-branch-selector');
+  if (topSel && topSel.value !== branch) topSel.value = branch;
+
+  showToast(branch === 'all' ? "Affichage consolidé de toutes les boutiques." : `Filtre appliqué : ${branch}`);
+  
+  renderDailySalesBook();
+  if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
+};
+
+// Enregistrement d'une vente d'article
+window.handleQuickSaleSubmit = function(e) {
+  e.preventDefault();
+  const itemNameInput = document.getElementById('sale-item-name');
+  const qtyInput = document.getElementById('sale-item-qty');
+  const unitPriceInput = document.getElementById('sale-item-unitprice');
+  const methodSelect = document.getElementById('sale-payment-method');
+  const branchSelect = document.getElementById('sale-branch-select');
+  const clientInput = document.getElementById('sale-client-name');
+
+  const item = (itemNameInput?.value || '').trim();
+  const qty = parseInt(qtyInput?.value || 1, 10);
+  const unitPrice = parseFloat(unitPriceInput?.value || 0);
+  const method = methodSelect?.value || 'Espèces';
+  const branch = branchSelect?.value || 'Boutique Principale (Siège)';
+  const client = (clientInput?.value || 'Client Comptoir').trim();
+
+  if (!item || unitPrice <= 0 || qty <= 0) {
+    showToast("Veuillez renseigner un article et un prix unitaire valide.");
+    return;
+  }
+
+  const total = qty * unitPrice;
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const dateStr = now.toISOString().split('T')[0];
+
+  const newSale = {
+    id: 'sale_' + Date.now(),
+    item: item,
+    qty: qty,
+    unitPrice: unitPrice,
+    total: total,
+    method: method,
+    branch: branch,
+    client: client,
+    cashier: AppState.activeCashierName || 'Gérant (Patron)',
+    time: timeStr,
+    date: dateStr
+  };
+
+  AppState.sales.unshift(newSale);
+  saveSalesToStorage();
+
+  // Mettre à jour les stats du caissier actif
+  if (AppState.team && AppState.activeCashierName) {
+    const cashierObj = AppState.team.find(c => c.name === AppState.activeCashierName);
+    if (cashierObj) {
+      cashierObj.totalCollected = (cashierObj.totalCollected || 0) + total;
+      saveTeamToStorage();
+      renderTeamCashiers();
+    }
+  }
+
+  // Réinitialiser formulaire
+  if (itemNameInput) itemNameInput.value = '';
+  if (qtyInput) qtyInput.value = '1';
+  if (unitPriceInput) unitPriceInput.value = '';
+  calculateSaleTotal();
+  if (clientInput) clientInput.value = '';
+
+  renderDailySalesBook();
+  showToast(`Vente « ${item} » (${formatCurrency(total)}) enregistrée avec succès !`);
+};
+
+// Suppression d'un article du journal
+window.deleteSaleItem = function(saleId) {
+  if (!confirm("Voulez-vous annuler et supprimer cette vente du cahier ?")) return;
+  AppState.sales = AppState.sales.filter(s => s.id !== saleId);
+  saveSalesToStorage();
+  renderDailySalesBook();
+  showToast("Vente supprimée du journal.");
+};
+
+// Rendu du cahier des ventes du jour
+window.renderDailySalesBook = function() {
+  const tableBody = document.getElementById('daily-sales-table-body');
+  if (!tableBody) return;
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const filteredSales = AppState.sales.filter(s => {
+    const isToday = s.date === todayStr;
+    const matchesBranch = AppState.selectedBranch === 'all' || s.branch === AppState.selectedBranch;
+    return isToday && matchesBranch;
+  });
+
+  // Calcul des totaux de la journée
+  let totalSales = 0;
+  let totalCount = 0;
+  let totalCash = 0;
+  let totalWave = 0;
+  let totalMoMo = 0;
+
+  filteredSales.forEach(s => {
+    totalSales += (s.total || 0);
+    totalCount += (s.qty || 1);
+    if (s.method === 'Espèces') totalCash += s.total;
+    else if (s.method === 'Wave Direct') totalWave += s.total;
+    else totalMoMo += s.total;
+  });
+
+  // Mise à jour des KPIs
+  const kpiTotal = document.getElementById('daily-kpi-total-sales');
+  const kpiCount = document.getElementById('daily-kpi-count');
+  const kpiCash = document.getElementById('daily-kpi-cash');
+
+  if (kpiTotal) kpiTotal.textContent = formatCurrency(totalSales);
+  if (kpiCount) kpiCount.textContent = `${totalCount} article${totalCount > 1 ? 's' : ''}`;
+  if (kpiCash) kpiCash.textContent = formatCurrency(totalCash);
+
+  if (filteredSales.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;padding:32px 16px;color:#64748B;">
+          <i data-lucide="shopping-bag" style="width:32px;height:32px;color:#CBD5E1;display:block;margin:0 auto 8px auto;"></i>
+          <strong>Aucune vente enregistrée aujourd'hui ${AppState.selectedBranch !== 'all' ? `pour ${AppState.selectedBranch}` : ''}</strong>
+          <p style="font-size:0.8rem;margin:4px 0 0 0;">Utilisez le formulaire à gauche pour noter votre premier article vendu.</p>
+        </td>
+      </tr>
+    `;
+  } else {
+    tableBody.innerHTML = filteredSales.map(s => {
+      let badgeClass = 'sales-badge-cash';
+      if (s.method === 'Wave Direct') badgeClass = 'sales-badge-wave';
+      else if (s.method !== 'Espèces') badgeClass = 'sales-badge-momo';
+
+      return `
+        <tr style="border-bottom:1px solid #F1F5F9;">
+          <td style="padding:10px 12px;font-weight:700;color:#64748B;font-family:monospace;">${escapeHTML(s.time || '12:00')}</td>
+          <td style="padding:10px 12px;font-weight:700;color:#0F172A;">
+            ${escapeHTML(s.item)}
+            ${s.client && s.client !== 'Client Comptoir' ? `<div style="font-size:0.72rem;color:#64748B;">Client: ${escapeHTML(s.client)}</div>` : ''}
+          </td>
+          <td style="padding:10px 12px;font-weight:800;color:#0F172A;">${s.qty}</td>
+          <td style="padding:10px 12px;text-align:right;font-weight:900;color:#2563EB;">${formatCurrency(s.total)}</td>
+          <td style="padding:10px 12px;">
+            <span class="sales-badge-payment ${badgeClass}">${escapeHTML(s.method)}</span>
+          </td>
+          <td style="padding:10px 12px;font-size:0.78rem;color:#475569;">
+            ${escapeHTML(s.branch)}
+            <div style="font-size:0.7rem;color:#94A3B8;">Par: ${escapeHTML(s.cashier || 'Caissier')}</div>
+          </td>
+          <td style="padding:10px 12px;text-align:center;">
+            <button type="button" class="btn btn-outline" style="padding:3px 7px;font-size:0.72rem;color:#EF4444;border-color:#FCA5A5;" onclick="deleteSaleItem('${s.id}')" title="Supprimer">
+              ✕
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  if (window.lucide) lucide.createIcons();
+};
+
+// Ouverture de la modale de clôture journalière 24h
+window.openDailyClosingModal = function() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const dateFormatted = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const dateEl = document.getElementById('closing-modal-date');
+  if (dateEl) dateEl.textContent = `Bilan du ${dateFormatted}`;
+
+  // Totaux toutes boutiques confondues
+  let totalSales = 0;
+  let totalCount = 0;
+  let totalCash = 0;
+  let totalWave = 0;
+  let totalMoMo = 0;
+
+  const branchTotals = {};
+
+  AppState.sales.filter(s => s.date === todayStr).forEach(s => {
+    totalSales += (s.total || 0);
+    totalCount += (s.qty || 1);
+    if (s.method === 'Espèces') totalCash += s.total;
+    else if (s.method === 'Wave Direct') totalWave += s.total;
+    else totalMoMo += s.total;
+
+    const b = s.branch || 'Boutique Principale (Siège)';
+    branchTotals[b] = (branchTotals[b] || 0) + s.total;
+  });
+
+  const totalAmountEl = document.getElementById('closing-modal-total-amount');
+  const totalCountEl = document.getElementById('closing-modal-total-count');
+  const cashEl = document.getElementById('closing-modal-cash');
+  const waveEl = document.getElementById('closing-modal-wave');
+  const momoEl = document.getElementById('closing-modal-momo');
+  const branchBreakdownEl = document.getElementById('closing-modal-branch-breakdown');
+
+  if (totalAmountEl) totalAmountEl.textContent = formatCurrency(totalSales);
+  if (totalCountEl) totalCountEl.textContent = `${totalCount} article${totalCount > 1 ? 's' : ''}`;
+  if (cashEl) cashEl.textContent = formatCurrency(totalCash);
+  if (waveEl) waveEl.textContent = formatCurrency(totalWave);
+  if (momoEl) momoEl.textContent = formatCurrency(totalMoMo);
+
+  if (branchBreakdownEl) {
+    const branchKeys = Object.keys(branchTotals);
+    if (branchKeys.length === 0) {
+      branchBreakdownEl.innerHTML = `<div style="font-size:0.8rem;color:#64748B;">Aucune vente enregistrée pour le moment aujourd'hui.</div>`;
+    } else {
+      branchBreakdownEl.innerHTML = branchKeys.map(b => `
+        <div style="display:flex;justify-content:space-between;align-items:center;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:8px 12px;font-size:0.82rem;">
+          <strong style="color:#0F172A;">📍 ${escapeHTML(b)}</strong>
+          <span style="font-weight:900;color:#2563EB;">${formatCurrency(branchTotals[b])}</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  openModal('modal-daily-closing-summary');
+  if (window.lucide) lucide.createIcons();
+};
+
+// Transmission du rapport 24h au Patron via WhatsApp
+window.sendDailyClosingWhatsApp = function() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const dateFormatted = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  let totalSales = 0;
+  let totalCash = 0;
+  let totalWave = 0;
+  let totalMoMo = 0;
+  const branchTotals = {};
+
+  const todaySales = AppState.sales.filter(s => s.date === todayStr);
+  todaySales.forEach(s => {
+    totalSales += (s.total || 0);
+    if (s.method === 'Espèces') totalCash += s.total;
+    else if (s.method === 'Wave Direct') totalWave += s.total;
+    else totalMoMo += s.total;
+
+    const b = s.branch || 'Boutique Principale (Siège)';
+    branchTotals[b] = (branchTotals[b] || 0) + s.total;
+  });
+
+  const branchSummaryLines = Object.keys(branchTotals).map(b => `• ${b} : *${formatCurrency(branchTotals[b])}*`).join('\n');
+
+  const text = `📊 *BILAN JOURNALIER (24H) — CREDITTRACK PRO*\n` +
+    `🏢 *Entreprise :* ${AppState.businessName || 'Boutique KOUASSI & Fils'}\n` +
+    `📅 *Date :* ${dateFormatted}\n\n` +
+    `💰 *TOTAL ENCAISSÉ AUJOURD'HUI :* *${formatCurrency(totalSales)}*\n\n` +
+    `💵 *Détail par Caisse :*\n` +
+    `- Espèces en main : ${formatCurrency(totalCash)}\n` +
+    `- Wave Money : ${formatCurrency(totalWave)}\n` +
+    `- Mobile Money : ${formatCurrency(totalMoMo)}\n\n` +
+    `📍 *Recettes par Boutique :*\n` +
+    (branchSummaryLines || 'Aucune vente.') + `\n\n` +
+    `👤 *Rapport transmis par :* ${AppState.activeCashierName || 'Responsable de Caisse'}\n` +
+    `✅ _Données certifiées et archivées automatiquement._`;
+
+  const encoded = encodeURIComponent(text);
+  const patronPhone = (document.getElementById('setting-phone-input')?.value || '').replace(/[^0-9]/g, '');
+  const url = patronPhone ? `https://wa.me/${patronPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+
+  window.open(url, '_blank');
+  showToast("Synthèse 24h transmise sur WhatsApp !");
+  closeModal('modal-daily-closing-summary');
+};
+
 // Initialisation au chargement
 window.addEventListener('DOMContentLoaded', () => {
   setupOtpInputsListeners();
   setTimeout(() => {
     renderTeamCashiers();
     renderMorningAlerts();
+    renderDailySalesBook();
     updateSessionUI();
   }, 1000);
 });
