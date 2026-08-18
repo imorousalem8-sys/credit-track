@@ -2842,5 +2842,231 @@ function updateUserPlanBadgeUI() {
 // Initialisation UI plan badge au chargement
 window.addEventListener('DOMContentLoaded', () => {
   setTimeout(updateUserPlanBadgeUI, 600);
+  setTimeout(initCookieConsent, 900);
 });
+
+// --------------------------------------------------------------------------
+// 16. SYSTÈME DE GESTION DES COOKIES, RGPD & SUPPORT CLIENT DIRECT
+// --------------------------------------------------------------------------
+
+// 1. Initialisation du consentement aux cookies
+window.initCookieConsent = function() {
+  const consentRaw = localStorage.getItem('ct_privacy_consent');
+  const banner = document.getElementById('cookie-consent-banner');
+  
+  if (!consentRaw) {
+    if (banner) {
+      banner.classList.add('show');
+      if (window.lucide) lucide.createIcons();
+    }
+  } else {
+    try {
+      const consent = JSON.parse(consentRaw);
+      applyCookiePreferencesToUI(consent);
+    } catch(e) {}
+  }
+};
+
+function applyCookiePreferencesToUI(consent) {
+  const prefInput = document.getElementById('cookie-pref-preferences');
+  const anaInput = document.getElementById('cookie-pref-analytics');
+  const statusBadge = document.getElementById('settings-privacy-status-badge');
+  const statusDesc = document.getElementById('settings-privacy-status-desc');
+
+  if (prefInput && consent.preferences !== undefined) {
+    prefInput.checked = Boolean(consent.preferences);
+  }
+  if (anaInput && consent.analytics !== undefined) {
+    anaInput.checked = Boolean(consent.analytics);
+  }
+
+  if (statusBadge) {
+    if (consent.preferences && consent.analytics) {
+      statusBadge.textContent = 'Tout Accepté';
+      statusBadge.style.background = '#ECFDF5';
+      statusBadge.style.color = '#10B981';
+    } else if (!consent.preferences && !consent.analytics) {
+      statusBadge.textContent = 'Essentiel Uniquement';
+      statusBadge.style.background = '#F1F5F9';
+      statusBadge.style.color = '#64748B';
+    } else {
+      statusBadge.textContent = 'Personnalisé';
+      statusBadge.style.background = '#EFF6FF';
+      statusBadge.style.color = '#2563EB';
+    }
+  }
+
+  if (statusDesc) {
+    statusDesc.textContent = `Préférences enregistrées le ${new Date(consent.updatedAt || Date.now()).toLocaleDateString('fr-FR')}. Aucun traceur publicitaire tiers actif.`;
+  }
+}
+
+// 2. Accepter tous les cookies
+window.acceptAllCookies = function() {
+  const consent = {
+    necessary: true,
+    preferences: true,
+    analytics: true,
+    marketing: false,
+    version: '2026.1',
+    updatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem('ct_privacy_consent', JSON.stringify(consent));
+  
+  const banner = document.getElementById('cookie-consent-banner');
+  if (banner) banner.classList.remove('show');
+
+  applyCookiePreferencesToUI(consent);
+  showToast("Vos préférences de confidentialité ont été enregistrées avec succès.");
+};
+
+// 3. Refuser les cookies non essentiels
+window.refuseOptionalCookies = function() {
+  const consent = {
+    necessary: true,
+    preferences: false,
+    analytics: false,
+    marketing: false,
+    version: '2026.1',
+    updatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem('ct_privacy_consent', JSON.stringify(consent));
+
+  const banner = document.getElementById('cookie-consent-banner');
+  if (banner) banner.classList.remove('show');
+
+  closeModal('modal-privacy-preferences');
+  applyCookiePreferencesToUI(consent);
+  showToast("Seuls les cookies strictement nécessaires au service restent actifs.");
+};
+
+// 4. Enregistrer les préférences personnalisées
+window.saveCustomCookiePreferences = function() {
+  const prefInput = document.getElementById('cookie-pref-preferences');
+  const anaInput = document.getElementById('cookie-pref-analytics');
+
+  const consent = {
+    necessary: true,
+    preferences: Boolean(prefInput?.checked),
+    analytics: Boolean(anaInput?.checked),
+    marketing: false,
+    version: '2026.1',
+    updatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem('ct_privacy_consent', JSON.stringify(consent));
+
+  const banner = document.getElementById('cookie-consent-banner');
+  if (banner) banner.classList.remove('show');
+
+  closeModal('modal-privacy-preferences');
+  applyCookiePreferencesToUI(consent);
+  showToast("Vos préférences de confidentialité personnalisées sont enregistrées.");
+};
+
+// 5. Ouverture et navigation dans le centre de confidentialité
+window.openPrivacyModal = function(tab = 'preferences') {
+  const consentRaw = localStorage.getItem('ct_privacy_consent');
+  if (consentRaw) {
+    try {
+      const consent = JSON.parse(consentRaw);
+      applyCookiePreferencesToUI(consent);
+    } catch(e) {}
+  }
+
+  switchPrivacyTab(tab);
+  openModal('modal-privacy-preferences');
+  if (window.lucide) lucide.createIcons();
+};
+
+window.openSecurityModal = function() {
+  openPrivacyModal('security');
+};
+
+window.switchPrivacyTab = function(tabName) {
+  const viewPref = document.getElementById('privacy-view-preferences');
+  const viewPolicy = document.getElementById('privacy-view-policy');
+  const viewSec = document.getElementById('privacy-view-security');
+
+  const btnPref = document.getElementById('privacy-tab-btn-pref');
+  const btnPolicy = document.getElementById('privacy-tab-btn-policy');
+  const btnSec = document.getElementById('privacy-tab-btn-sec');
+
+  if (viewPref) viewPref.style.display = tabName === 'preferences' ? 'block' : 'none';
+  if (viewPolicy) viewPolicy.style.display = tabName === 'policy' ? 'block' : 'none';
+  if (viewSec) viewSec.style.display = tabName === 'security' ? 'block' : 'none';
+
+  if (btnPref) {
+    btnPref.className = tabName === 'preferences' ? 'btn btn-primary' : 'btn btn-outline';
+  }
+  if (btnPolicy) {
+    btnPolicy.className = tabName === 'policy' ? 'btn btn-primary' : 'btn btn-outline';
+  }
+  if (btnSec) {
+    btnSec.className = tabName === 'security' ? 'btn btn-primary' : 'btn btn-outline';
+  }
+};
+
+// 6. Gestion du support et redirection e-mail
+window.openSupportModal = function() {
+  openModal('modal-support');
+  if (window.lucide) lucide.createIcons();
+};
+
+window.directEmailSupport = function() {
+  const supportEmail = 'imorousalem8@gmail.com';
+  const ccEmail = 'support@credittrack.pro';
+  const subject = encodeURIComponent('[CréditTrack PRO] Demande d\'Assistance / Support Commercial');
+  const body = encodeURIComponent(
+    `Bonjour l'équipe CréditTrack PRO,\n\n` +
+    `Je vous contacte au sujet de mon espace commerçant :\n` +
+    `- Nom / Commerce : ${AppState.user.businessName || 'Commerçant'}\n` +
+    `- E-mail : ${AppState.user.email || ''}\n` +
+    `- Pays : ${AppState.country.nameFr || 'Bénin'}\n\n` +
+    `Ma demande :\n`
+  );
+
+  window.location.href = `mailto:${supportEmail}?cc=${ccEmail}&subject=${subject}&body=${body}`;
+};
+
+window.handleSupportSubmit = function(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('support-input-name');
+  const emailInput = document.getElementById('support-input-email');
+  const subjectInput = document.getElementById('support-input-subject');
+  const messageInput = document.getElementById('support-input-message');
+
+  const name = (nameInput?.value || '').trim();
+  const email = (emailInput?.value || '').trim();
+  const subjectText = (subjectInput?.value || 'Assistance Technique').trim();
+  const message = (messageInput?.value || '').trim();
+
+  if (!name || !email || !message) {
+    showToast("Veuillez remplir tous les champs obligatoires.");
+    return;
+  }
+
+  const supportEmail = 'imorousalem8@gmail.com';
+  const ccEmail = 'support@credittrack.pro';
+  const subject = encodeURIComponent(`[CréditTrack PRO] ${subjectText} - ${name}`);
+  const body = encodeURIComponent(
+    `Bonjour l'équipe Support CréditTrack PRO,\n\n` +
+    `Message de : ${name} (${email})\n` +
+    `Commerce : ${AppState.user.businessName || 'Mon Commerce'}\n` +
+    `Objet : ${subjectText}\n\n` +
+    `Contenu du message :\n${message}\n\n` +
+    `Envoyé depuis l'application CréditTrack PRO.`
+  );
+
+  // Ouvre le client e-mail par défaut du smartphone ou de l'ordinateur
+  window.location.href = `mailto:${supportEmail}?cc=${ccEmail}&subject=${subject}&body=${body}`;
+
+  closeModal('modal-support');
+  showToast("Ouverture de votre messagerie pour transmettre votre demande...");
+  
+  if (e.target && e.target.reset) e.target.reset();
+};
+
 
