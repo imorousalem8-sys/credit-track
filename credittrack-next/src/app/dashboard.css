@@ -70,9 +70,11 @@
   background-color: var(--bg-card, #FFFFFF);
   border-radius: var(--r-md, 14px);
   border: 1px solid var(--border, #E2E8F0);
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
   margin-top: 24px;
+  width: 100%;
 }
 
 .data-table-header {

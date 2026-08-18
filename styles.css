@@ -1983,29 +1983,44 @@ body.is-app-mode #app-workspace-layout {
    BARRE DE NAVIGATION MOBILE (MASQUÉE PAR DÉFAUT SUR ORDINATEUR)
 -------------------------------------------------------------------------- */
 .mobile-bottom-nav {
-  display: none !important;
+  display: none;
 }
 
-/* SMARTPHONES (< 768px) */
-@media (max-width: 767px) {
-  html, body, .public-landing, .main-workspace, .content-viewport {
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM — SMARTPHONES & TABLETTES (100% FLUIDE)
+   ========================================================================== */
+
+/* TABLETTES ET PETITS ÉCRANS (< 1024px) */
+@media (max-width: 1024px) {
+  .dashboard-main-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .metrics-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* SMARTPHONES ET PETITES TABLETTES (< 768px) */
+@media (max-width: 768px) {
+  html, body {
     overflow-x: hidden !important;
     max-width: 100vw !important;
-    box-sizing: border-box !important;
+    width: 100% !important;
+    font-size: 14px;
   }
 
-  /* 1. SIDEBAR OFF-CANVAS RESPONSIVE SANS AUCUN BLOCAGE DE CLICS */
+  /* 1. SIDEBAR MOBILE TIROIR COULISSANT */
   .sidebar-fixed, .app-sidebar-left {
     position: fixed !important;
     left: 0 !important;
     top: 0 !important;
     bottom: 0 !important;
-    width: 280px !important;
+    width: 290px !important;
     max-width: 85vw !important;
     transform: translateX(-100%) !important;
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: 2000 !important;
-    box-shadow: 0 0 40px rgba(0,0,0,0.5) !important;
+    z-index: 99999 !important;
+    box-shadow: 0 0 50px rgba(0,0,0,0.6) !important;
     pointer-events: none !important;
     visibility: hidden !important;
   }
@@ -2019,15 +2034,15 @@ body.is-app-mode #app-workspace-layout {
   }
 
   .sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 1900;
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(15, 23, 42, 0.75) !important;
+    backdrop-filter: blur(4px) !important;
+    z-index: 99990 !important;
     opacity: 0 !important;
     pointer-events: none !important;
     display: none !important;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease !important;
   }
 
   body.mobile-sidebar-open .sidebar-overlay,
@@ -2037,11 +2052,21 @@ body.is-app-mode #app-workspace-layout {
     pointer-events: auto !important;
   }
 
-  /* 2. WORKSPACE ADAPTÉ 100% SANS MARGE */
+  /* 2. WORKSPACE ADAPTÉ 100% LARGEUR PLEINE */
   .main-workspace {
     margin-left: 0 !important;
     width: 100% !important;
+    max-width: 100vw !important;
     min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  .top-workspace-header {
+    padding: 0 14px !important;
+    height: 56px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .btn-hamburger-menu {
@@ -2050,273 +2075,318 @@ body.is-app-mode #app-workspace-layout {
     justify-content: center;
   }
 
-  .top-workspace-header {
-    padding: 0 12px;
-    height: 58px;
-  }
-
   .header-left-title {
-    font-size: 0.9rem;
+    font-size: 0.88rem !important;
   }
 
+  .btn-header-primary {
+    padding: 6px 10px !important;
+    font-size: 0.78rem !important;
+  }
   .btn-header-primary span {
     display: none;
   }
 
-  .btn-header-primary {
-    padding: 8px 12px;
-    font-size: 0.82rem;
-  }
-
-  .header-date-dropdown {
-    display: none;
+  .header-lang-switcher {
+    padding: 4px 8px !important;
+    font-size: 0.74rem !important;
   }
 
   .content-viewport {
-    padding: 12px;
-    padding-bottom: 86px !important;
+    padding: 12px 10px 90px 10px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  /* 2b. MOBILE BOTTOM BAR TACTILE */
-  .mobile-bottom-nav {
-    display: flex !important;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 62px;
-    background: #FFFFFF;
-    border-top: 1px solid #E2E8F0;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-    z-index: 1000;
-    align-items: center;
-    justify-content: space-around;
-    padding: 0 6px;
-  }
-
-  .mobile-nav-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    color: #64748B;
-    font-size: 0.68rem;
-    font-weight: 700;
-    gap: 3px;
-    cursor: pointer;
-    padding: 6px 8px;
-    border-radius: 8px;
-  }
-
-  .mobile-nav-btn i, .mobile-nav-btn svg {
-    width: 19px;
-    height: 19px;
-  }
-
-  .mobile-nav-btn.active {
-    color: #2563EB;
-  }
-
-  .mobile-nav-btn-plus {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: #2563EB;
-    color: #FFFFFF;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
-    cursor: pointer;
-    transform: translateY(-8px);
-  }
-
-  .mobile-nav-btn-plus i, .mobile-nav-btn-plus svg {
-    width: 22px;
-    height: 22px;
-  }
-
-  /* 3. GRILLES & CARTES MOBILE */
+  /* 3. GRILLES & CARTES KPI ADAPTÉES */
   .metrics-grid, .metrics-grid-3, .grid-2-equal, .dashboard-main-grid {
+    display: grid !important;
     grid-template-columns: 1fr !important;
     gap: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  .donut-chart-container {
-    flex-direction: column;
-    height: auto;
-    gap: 16px;
+  .metric-card {
+    padding: 16px 14px !important;
+  }
+
+  .metric-value {
+    font-size: 1.35rem !important;
   }
 
   .dashboard-welcome-banner {
-    padding: 14px;
-    border-radius: 12px;
+    padding: 16px 12px !important;
+    border-radius: 12px !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
   }
 
   .dashboard-welcome-banner h2 {
-    font-size: 1rem !important;
+    font-size: 1.05rem !important;
   }
 
-  .wizard-steps {
-    flex-direction: column;
-    gap: 6px;
+  .card {
+    padding: 16px 12px !important;
+    border-radius: 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  /* 4. TABLES DÉROULANTES TACTILES */
+  /* 4. FORMULAIRES FLUIDES */
+  .form-group {
+    margin-bottom: 14px !important;
+    width: 100% !important;
+  }
+
+  .form-control {
+    width: 100% !important;
+    font-size: 0.88rem !important;
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 5. TABLES DÉROULANTES TACTILES SANS COUPURE */
   .table-responsive {
     width: 100% !important;
+    max-width: 100% !important;
     overflow-x: auto !important;
     -webkit-overflow-scrolling: touch !important;
     display: block !important;
-    margin-bottom: 12px;
+    margin-bottom: 12px !important;
+    border-radius: 8px !important;
+    border: 1px solid #E2E8F0 !important;
   }
 
   .custom-table {
-    min-width: 580px !important;
+    min-width: 520px !important;
+    width: 100% !important;
   }
 
   .custom-table th, .custom-table td {
     padding: 10px 8px !important;
+    font-size: 0.78rem !important;
+    white-space: nowrap !important;
+  }
+
+  /* 6. BARRE DE NAVIGATION MOBILE FLOTTANTE */
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 60px !important;
+    background: #FFFFFF !important;
+    border-top: 1px solid #E2E8F0 !important;
+    box-shadow: 0 -4px 25px rgba(0,0,0,0.1) !important;
+    z-index: 1000 !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    padding: 0 4px !important;
+  }
+
+  .mobile-nav-btn {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: none !important;
+    border: none !important;
+    color: #64748B !important;
+    font-size: 0.65rem !important;
+    font-weight: 700 !important;
+    gap: 3px !important;
+    cursor: pointer !important;
+    padding: 6px 6px !important;
+  }
+
+  .mobile-nav-btn i, .mobile-nav-btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .mobile-nav-btn.active {
+    color: #2563EB !important;
+  }
+
+  .mobile-nav-btn-plus {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 50% !important;
+    background: #2563EB !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+    cursor: pointer !important;
+    transform: translateY(-8px) !important;
+  }
+
+  /* 7. LANDING PAGE 100% FLUIDE SUR SMARTPHONE */
+  #public-landing-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .lp-nav {
+    padding: 0 12px !important;
+    height: 56px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .lp-nav-links {
+    display: none !important;
+  }
+
+  .lp-btn-nav {
+    padding: 8px 14px !important;
     font-size: 0.8rem !important;
   }
 
-  /* 5. BOUTONS RELANCES WHATSAPP & SMS TACTILES PROÉMINENTS */
-  .btn-wa-touch {
-    background: #25D366 !important;
-    color: #fff !important;
-    border: none !important;
-    padding: 7px 11px !important;
-    border-radius: 8px !important;
-    font-weight: 800 !important;
-    font-size: 0.76rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 5px !important;
-    white-space: nowrap !important;
-  }
-
-  .btn-sms-touch {
-    background: #2563EB !important;
-    color: #fff !important;
-    border: none !important;
-    padding: 7px 11px !important;
-    border-radius: 8px !important;
-    font-weight: 800 !important;
-    font-size: 0.76rem !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 5px !important;
-    white-space: nowrap !important;
-  }
-
-  /* 6. LANDING PAGE SANS DÉBORDEMENT */
   .lp-hero-live-section {
-    padding: 30px 12px 20px !important;
+    padding: 24px 12px 20px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .lp-hero-title {
-    font-size: 1.8rem !important;
-    letter-spacing: -0.5px;
+    font-size: 1.65rem !important;
     line-height: 1.25 !important;
+    letter-spacing: -0.5px !important;
   }
 
   .lp-hero-desc {
-    font-size: 0.88rem !important;
+    font-size: 0.85rem !important;
+    line-height: 1.5 !important;
+    padding: 0 !important;
   }
 
   .lp-hero-actions {
-    flex-direction: column;
-    width: 100%;
-    gap: 10px;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important;
   }
 
   .lp-btn-primary-glow, .lp-btn-secondary-glass {
-    width: 100%;
-    justify-content: center;
-    padding: 13px 18px !important;
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 12px 16px !important;
     font-size: 0.88rem !important;
+    box-sizing: border-box !important;
   }
 
   .lp-cards-grid, .lp-bento-grid, .lp-testi-grid, .lp-comp-grid {
     grid-template-columns: 1fr !important;
     gap: 14px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .lp-bento-card.bento-wide {
     grid-column: span 1 !important;
   }
 
-  .lp-nav-links .lp-nav-a {
-    display: none;
-  }
-
-  .lp-nav {
-    padding: 0 12px;
-    height: 58px;
-  }
-
   .lp-win-kpis {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .lp-win-search {
-    width: 140px;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
   }
 
   .lp-stats-container {
-    flex-direction: column;
-    gap: 20px;
+    flex-direction: column !important;
+    gap: 18px !important;
   }
 
   .lp-stat-sep {
-    display: none;
+    display: none !important;
   }
 
   .lp-sim-inner {
-    grid-template-columns: 1fr;
-    padding: 20px 12px;
-    gap: 20px;
+    grid-template-columns: 1fr !important;
+    padding: 16px 12px !important;
+    gap: 18px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .lp-sim-title {
-    font-size: 1.3rem !important;
+    font-size: 1.2rem !important;
   }
 
   .lp-section-title {
-    font-size: 1.4rem !important;
+    font-size: 1.35rem !important;
   }
 
   .lp-cta-box {
-    padding: 24px 14px;
+    padding: 20px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .lp-cta-title {
-    font-size: 1.3rem;
+    font-size: 1.25rem !important;
   }
 
   .lp-btn-cta-big {
-    width: 100%;
-    padding: 14px 18px;
+    width: 100% !important;
+    padding: 13px 16px !important;
+    font-size: 0.9rem !important;
+    box-sizing: border-box !important;
   }
 
   .lp-footer {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-    padding: 20px 12px;
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 12px !important;
+    padding: 20px 12px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
-  .client-modal-kpi-grid {
-    grid-template-columns: 1fr;
+  /* 8. MODALES FLUIDES & CENTRÉES SUR SMARTPHONE */
+  .modal-overlay {
+    padding: 10px !important;
   }
 
   .modal-card {
-    padding: 14px;
-    width: 94vw !important;
-    max-height: 90vh !important;
+    padding: 16px 12px !important;
+    width: 95vw !important;
+    max-width: 95vw !important;
+    max-height: 88vh !important;
+    overflow-y: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .modal-card .card-header {
+    margin-bottom: 12px !important;
+  }
+
+  .modal-card .form-group {
+    margin-bottom: 10px !important;
   }
 }
+
+/* SMARTPHONES COMPACTS (< 480px) */
+@media (max-width: 480px) {
+  .lp-hero-title {
+    font-size: 1.45rem !important;
+  }
+  .lp-hero-pill {
+    font-size: 0.65rem !important;
+    padding: 4px 8px !important;
+  }
+  .metric-value {
+    font-size: 1.2rem !important;
+  }
+  .live-clock-badge {
+    display: none !important;
+  }
+}
+
