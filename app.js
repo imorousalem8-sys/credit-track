@@ -3016,7 +3016,7 @@ window.openSupportModal = function() {
 };
 
 // Adresse e-mail publique dédiée au support (Isolée du compte administrateur/fondateur)
-const SUPPORT_EMAIL = 'support@credittrack.pro';
+const SUPPORT_EMAIL = 'salemimorou129@gmail.com';
 
 window.directEmailSupport = function() {
   const subject = encodeURIComponent('[CréditTrack PRO] Demande d\'Assistance / Support Commercial');
