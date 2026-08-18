@@ -1,80 +1,124 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { validatePasswordStrength, isValidEmailStrict, filterAllowedFields, escapeXSS, sanitizePhone } from '@/lib/security/validation';
+import { checkRateLimit, RateLimitProfiles, getClientIp } from '@/lib/security/rateLimit';
+import { logSecurityEvent } from '@/lib/security/logger';
 
-function isValidEmailStrict(email: string): boolean {
-  if (!email || typeof email !== 'string') return false;
-  const trimmed = email.trim();
-  if (trimmed.length < 5 || trimmed.length > 254) return false;
-  
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-  if (!emailRegex.test(trimmed)) return false;
-  
-  const parts = trimmed.split('@');
-  if (parts.length !== 2) return false;
-  const [local, domain] = parts;
-  if (!local || !domain || local.startsWith('.') || local.endsWith('.')) return false;
-  
-  const domainParts = domain.split('.');
-  if (domainParts.length < 2) return false;
-  const tld = domainParts[domainParts.length - 1];
-  if (!tld || tld.length < 2 || !/^[a-zA-Z]+$/.test(tld)) return false;
-  
-  return true;
+interface RegisterPayload {
+  email: string;
+  password: string;
+  passwordConfirm: string;
+  businessName?: string;
+  phone?: string;
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+
+  // 1. Rate Limiting Côté Serveur (3 inscriptions par tranche de 10 minutes par IP)
+  const rateCheck = checkRateLimit(ip, RateLimitProfiles.REGISTER);
+  if (!rateCheck.success) {
+    logSecurityEvent({
+      eventType: 'RATE_LIMIT_BLOCKED',
+      ip,
+      route: '/api/auth/register',
+      details: { retryAfter: rateCheck.retryAfterSeconds }
+    });
+    return NextResponse.json(
+      { error: `Trop de tentatives d'inscription. Veuillez patienter ${rateCheck.retryAfterSeconds} secondes.` },
+      { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) } }
+    );
+  }
+
   try {
-    const body = await request.json();
+    const rawBody = await request.json();
+
+    // 2. Protection Mass Assignment : Whitelist stricte des champs autorisés
+    const body = filterAllowedFields<RegisterPayload>(rawBody, ['email', 'password', 'passwordConfirm', 'businessName', 'phone']);
     const { email, password, passwordConfirm, businessName, phone } = body;
 
-    // 1. Validation de champ vide
-    if (!email || !email.trim()) {
+    // 3. Validation de champ vide pour l'e-mail
+    if (!email || typeof email !== 'string' || !email.trim()) {
       return NextResponse.json({ error: 'Veuillez entrer votre adresse e-mail.' }, { status: 400 });
     }
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // 2. Validation stricte du format (ex: ioviegiu.com, abc, test@, test@gmail -> rejetés)
+    // 4. Validation réelle et stricte du format e-mail (RFC 5322)
     if (!isValidEmailStrict(cleanEmail)) {
       return NextResponse.json({ error: 'Veuillez entrer une adresse e-mail valide.' }, { status: 400 });
     }
 
-    // 3. Validation mot de passe
-    if (!password || password.length < 6) {
-      return NextResponse.json({ error: 'Le mot de passe doit comporter au moins 6 caractères.' }, { status: 400 });
+    if (!password || typeof password !== 'string') {
+      return NextResponse.json({ error: 'Le mot de passe est obligatoire.' }, { status: 400 });
+    }
+
+    // 5. Politique de mot de passe robuste (Minimum 12 car., Maj, Min, Chiffre, Caractère Spécial)
+    const passValidation = validatePasswordStrength(password);
+    if (!passValidation.valid) {
+      return NextResponse.json({ error: passValidation.error }, { status: 400 });
     }
 
     if (password !== passwordConfirm) {
       return NextResponse.json({ error: 'Les mots de passe ne correspondent pas.' }, { status: 400 });
     }
 
-    // 4. Appel serveur Supabase Auth
+    // 6. Assainissement des données textuelles (XSS / Téléphone)
+    const safeBusinessName = escapeXSS((businessName || 'Mon Commerce').trim().substring(0, 100));
+    const safePhone = sanitizePhone(phone || '').substring(0, 20);
+
+    // 7. Appel sécurisé au service d'authentification Supabase
     const { data, error } = await supabase.auth.signUp({
       email: cleanEmail,
       password,
       options: {
         data: {
-          business_name: businessName || 'Mon Commerce',
-          phone: phone || '',
+          business_name: safeBusinessName,
+          phone: safePhone,
           plan_tier: 'trial_3_months'
         }
       }
     });
 
     if (error) {
+      logSecurityEvent({
+        eventType: 'AUTH_FAILED',
+        ip,
+        email: cleanEmail,
+        route: '/api/auth/register',
+        details: { message: error.message }
+      });
+
       if (error.message && (error.message.includes('already registered') || error.message.includes('already exists'))) {
-        return NextResponse.json({ error: 'Un compte existe déjà avec cette adresse e-mail.', code: 'USER_EXISTS' }, { status: 409 });
+        return NextResponse.json(
+          { error: 'Un compte existe déjà avec cette adresse e-mail.', code: 'USER_EXISTS' },
+          { status: 409 }
+        );
       }
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      return NextResponse.json({ error: 'Impossible de créer le compte pour le moment.' }, { status: 400 });
     }
 
-    // 5. Réponse sécurisée sans OTP
+    logSecurityEvent({
+      eventType: 'REGISTRATION',
+      ip,
+      email: cleanEmail,
+      userId: data.user?.id,
+      route: '/api/auth/register'
+    });
+
+    // 8. Réponse sécurisée sans exposer de secrets ou de tokens
     return NextResponse.json({
       success: true,
       message: 'Un code de sécurité à 6 chiffres a été envoyé à votre adresse e-mail.'
     });
 
   } catch (err: any) {
-    return NextResponse.json({ error: 'Erreur interne du serveur.' }, { status: 500 });
+    logSecurityEvent({
+      eventType: 'SECURITY_WARNING',
+      ip,
+      route: '/api/auth/register',
+      details: { error: 'Payload invalide ou erreur interne' }
+    });
+    return NextResponse.json({ error: 'Une erreur interne est survenue.' }, { status: 500 });
   }
 }

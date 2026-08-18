@@ -181,17 +181,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const addClient = (clientData: Omit<Client, 'id' | 'reliabilityScore' | 'addedDate'>) => {
+    const safeName = (clientData.name || '').trim().substring(0, 100);
+    const safePhone = (clientData.phone || '').trim().substring(0, 30);
+    const validDue = Math.max(0, Number(clientData.totalDue) || 0);
+
     const newClient: Client = {
       ...clientData,
+      name: safeName || 'Nouveau Client',
+      phone: safePhone,
+      totalDue: validDue,
       id: Date.now(),
       reliabilityScore: 85,
       addedDate: new Date().toISOString().split('T')[0],
-      transactions: clientData.totalDue > 0 ? [
+      transactions: validDue > 0 ? [
         {
           id: Date.now() + 1,
           date: new Date().toISOString().split('T')[0],
           desc: 'Créance Initiale',
-          amount: clientData.totalDue,
+          amount: validDue,
           status: 'pending',
           dueDate: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0]
         }
@@ -205,9 +212,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   };
 
   const updateClientPayment = (clientId: number | string, amountPaid: number, receiptData: Partial<PaymentReceipt>) => {
+    const validAmount = Math.max(0, Number(amountPaid) || 0);
+    if (validAmount <= 0) {
+      showToast("Veuillez saisir un montant d'encaissement valide.");
+      return;
+    }
+
     const updatedClients = clients.map(c => {
       if (c.id === clientId) {
-        const newDue = Math.max(0, c.totalDue - amountPaid);
+        const newDue = Math.max(0, c.totalDue - validAmount);
         return {
           ...c,
           totalDue: newDue,
@@ -224,10 +237,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newReceipt: PaymentReceipt = {
       id: Date.now(),
       ref: `REC-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
-      clientName: receiptData.clientName || 'Client',
-      clientPhone: receiptData.clientPhone || '',
-      itemsDesc: receiptData.itemsDesc || 'Règlement Créance',
-      amount: amountPaid,
+      clientName: (receiptData.clientName || 'Client').trim().substring(0, 100),
+      clientPhone: (receiptData.clientPhone || '').trim().substring(0, 30),
+      itemsDesc: (receiptData.itemsDesc || 'Règlement Créance').trim().substring(0, 255),
+      amount: validAmount,
       date: new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
       method: receiptData.method || 'Espèces',
       signatureImg: receiptData.signatureImg
@@ -245,8 +258,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       code: '521',
       label: `Encaissement ${newReceipt.clientName} (${newReceipt.method})`,
       type: 'revenue',
-      amountHT: amountPaid,
-      vatAmount: Math.round(amountPaid * (country.vatRate / 100)),
+      amountHT: validAmount,
+      vatAmount: Math.round(validAmount * (country.vatRate / 100)),
       status: 'Validé'
     };
 
@@ -255,12 +268,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('ct_entries', JSON.stringify(updatedEntries));
 
     setActiveReceipt(newReceipt);
-    showToast(`Paiement de ${formatAfricanCurrency(amountPaid, currency)} enregistré et reçu généré !`);
+    showToast(`Paiement de ${formatAfricanCurrency(validAmount, currency)} enregistré et reçu généré !`);
   };
 
   const addAccountingEntry = (entryData: Omit<AccountingEntry, 'id' | 'ref' | 'status'>) => {
+    const validHT = Math.max(0, Number(entryData.amountHT) || 0);
+    const validVat = Math.max(0, Number(entryData.vatAmount) || 0);
+
     const newEntry: AccountingEntry = {
       ...entryData,
+      amountHT: validHT,
+      vatAmount: validVat,
+      label: (entryData.label || '').trim().substring(0, 150),
       id: Date.now(),
       ref: `ECR-${new Date().getFullYear()}-${Math.floor(100 + Math.random() * 900)}`,
       status: 'Validé'

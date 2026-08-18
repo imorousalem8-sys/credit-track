@@ -1,58 +1,87 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { isValidEmailStrict, filterAllowedFields } from '@/lib/security/validation';
+import { checkRateLimit, RateLimitProfiles, getClientIp } from '@/lib/security/rateLimit';
+import { logSecurityEvent } from '@/lib/security/logger';
 
-function isValidEmailStrict(email: string): boolean {
-  if (!email || typeof email !== 'string') return false;
-  const trimmed = email.trim();
-  if (trimmed.length < 5 || trimmed.length > 254) return false;
-  const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-  if (!emailRegex.test(trimmed)) return false;
-  const parts = trimmed.split('@');
-  if (parts.length !== 2) return false;
-  const [local, domain] = parts;
-  if (!local || !domain) return false;
-  const domainParts = domain.split('.');
-  if (domainParts.length < 2) return false;
-  const tld = domainParts[domainParts.length - 1];
-  return Boolean(tld && tld.length >= 2 && /^[a-zA-Z]+$/.test(tld));
+interface LoginPayload {
+  email: string;
+  password: string;
 }
 
 export async function POST(request: Request) {
+  const ip = getClientIp(request);
+
+  // 1. Rate Limiting Côté Serveur Anti-Brute Force (5 tentatives par minute par IP)
+  const rateCheck = checkRateLimit(ip, RateLimitProfiles.LOGIN);
+  if (!rateCheck.success) {
+    logSecurityEvent({
+      eventType: 'RATE_LIMIT_BLOCKED',
+      ip,
+      route: '/api/auth/login',
+      details: { retryAfter: rateCheck.retryAfterSeconds }
+    });
+    return NextResponse.json(
+      { error: `Trop de tentatives de connexion échouées. Veuillez patienter ${rateCheck.retryAfterSeconds} secondes.` },
+      { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds) } }
+    );
+  }
+
   try {
-    const body = await request.json();
+    const rawBody = await request.json();
+    const body = filterAllowedFields<LoginPayload>(rawBody, ['email', 'password']);
     const { email, password } = body;
 
-    // 1. Validation champ vide
-    if (!email || !email.trim()) {
+    // 2. Validation champ vide
+    if (!email || typeof email !== 'string' || !email.trim()) {
       return NextResponse.json({ error: 'Veuillez entrer votre adresse e-mail.' }, { status: 400 });
     }
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // 2. Validation format e-mail
+    // 3. Validation format e-mail
     if (!isValidEmailStrict(cleanEmail)) {
       return NextResponse.json({ error: 'Veuillez entrer une adresse e-mail valide.' }, { status: 400 });
     }
 
-    if (!password) {
+    if (!password || typeof password !== 'string') {
       return NextResponse.json({ error: 'Veuillez entrer votre mot de passe.' }, { status: 400 });
     }
 
+    // 4. Authentification serveur avec Supabase Auth
     const { data, error } = await supabase.auth.signInWithPassword({
       email: cleanEmail,
       password
     });
 
     if (error) {
+      logSecurityEvent({
+        eventType: 'AUTH_FAILED',
+        ip,
+        email: cleanEmail,
+        route: '/api/auth/login',
+        details: { reason: error.message }
+      });
+
+      // Gestion spécifique email non vérifié
       if (error.message && (error.message.includes('Email not confirmed') || error.message.includes('not confirmed'))) {
         return NextResponse.json({
-          error: 'Votre adresse e-mail n\'a pas encore été vérifiée.',
+          error: 'Votre adresse e-mail n\'a pas encore été vérifiée. Un code de confirmation est requis.',
           code: 'EMAIL_NOT_CONFIRMED'
         }, { status: 403 });
       }
-      // Réponse sécurisée générique contre l'énumération de comptes
+
+      // Message générique anti-énumération (ne révèle pas si l'email existe ou non)
       return NextResponse.json({ error: 'Adresse e-mail ou mot de passe incorrect.' }, { status: 401 });
     }
+
+    logSecurityEvent({
+      eventType: 'AUTH_SUCCESS',
+      ip,
+      email: cleanEmail,
+      userId: data.user?.id,
+      route: '/api/auth/login'
+    });
 
     return NextResponse.json({
       success: true,
@@ -65,6 +94,12 @@ export async function POST(request: Request) {
     });
 
   } catch (err: any) {
-    return NextResponse.json({ error: 'Erreur interne du serveur.' }, { status: 500 });
+    logSecurityEvent({
+      eventType: 'SECURITY_WARNING',
+      ip,
+      route: '/api/auth/login',
+      details: { error: 'Erreur interne de traitement' }
+    });
+    return NextResponse.json({ error: 'Une erreur interne est survenue.' }, { status: 500 });
   }
 }
