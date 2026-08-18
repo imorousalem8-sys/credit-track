@@ -38,17 +38,20 @@
   <div class="modal-overlay" id="modal-auth">
     <div class="modal-card" style="max-width:440px;">
       <div class="card-header">
-        <span class="card-title" id="auth-modal-title">🔐 Connexion à votre Espace</span>
+        <span class="card-title" id="auth-modal-title" style="display:flex;align-items:center;gap:8px;">
+          <i data-lucide="lock" style="width:18px;height:18px;color:#2563EB;"></i>
+          <span>Connexion à votre Espace</span>
+        </span>
         <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-auth')">✕</button>
       </div>
 
       <!-- Auth Tabs Switcher -->
       <div class="auth-tabs" id="auth-tabs-container" style="display:flex;background:#F1F5F9;padding:4px;border-radius:10px;margin-bottom:18px;">
         <button type="button" id="tab-auth-register" class="auth-tab-btn active" onclick="switchAuthTab('register')" style="flex:1;padding:8px;font-size:0.85rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;background:#fff;color:#0F172A;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
-          ✨ Créer un Compte (Essai 3 Mois)
+          Créer un Compte
         </button>
         <button type="button" id="tab-auth-login" class="auth-tab-btn" onclick="switchAuthTab('login')" style="flex:1;padding:8px;font-size:0.85rem;font-weight:700;border:none;border-radius:8px;cursor:pointer;background:transparent;color:#64748B;">
-          🔐 Se Connecter
+          Se Connecter
         </button>
       </div>
 
@@ -56,19 +59,19 @@
       <div id="auth-view-register">
         <form id="form-auth-register" onsubmit="handleRegisterSubmit(event)">
           <div class="form-group" style="margin-bottom:12px;">
-            <label class="form-label">Nom de votre Boutique / Commerce *</label>
-            <input type="text" id="auth-reg-biz-name" class="form-control" placeholder="ex: Boutique KOUASSI &amp; Fils" required>
+            <label class="form-label">Nom de l'Entreprise / Commerce *</label>
+            <input type="text" id="auth-reg-biz-name" class="form-control" placeholder="ex: Établissements KOUASSI" required>
           </div>
 
           <div class="form-group" style="margin-bottom:12px;">
-            <label class="form-label">Numéro de Téléphone / WhatsApp *</label>
+            <label class="form-label">Numéro de Téléphone Professionnel *</label>
             <input type="tel" id="auth-reg-phone" class="form-control" placeholder="+225 0701020304" required>
           </div>
 
           <div class="form-group" style="margin-bottom:12px;">
             <label class="form-label">Adresse E-mail Professionnelle *</label>
-            <input type="email" id="auth-reg-email" class="form-control" placeholder="votre.nom@gmail.com" required autocomplete="email">
-            <small style="color:#64748B;font-size:0.73rem;margin-top:3px;display:block;">📧 Un vrai code de sécurité à 6 chiffres vous sera envoyé sur cette boîte mail pour activer votre compte.</small>
+            <input type="email" id="auth-reg-email" class="form-control" placeholder="contact@entreprise.com" required autocomplete="email">
+            <small style="color:#64748B;font-size:0.73rem;margin-top:3px;display:block;">Un lien d'activation sécurisé et un code de confirmation seront envoyés à cette adresse.</small>
           </div>
 
           <div class="form-group" style="margin-bottom:12px;">
@@ -77,17 +80,17 @@
           </div>
 
           <div class="form-group" style="margin-bottom:16px;">
-            <label class="form-label">Confirmez votre Mot de passe *</label>
+            <label class="form-label">Confirmez le Mot de passe *</label>
             <input type="password" id="auth-reg-password-confirm" class="form-control" placeholder="••••••••" minlength="6" required autocomplete="new-password">
           </div>
 
-          <button type="submit" id="auth-reg-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:800;font-size:0.92rem;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <span>Créer mon Compte &amp; Recevoir le Code</span> ➔
+          <button type="submit" id="auth-reg-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.92rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>Créer mon Compte</span>
           </button>
         </form>
 
         <div style="text-align:center;margin-top:14px;font-size:0.8rem;color:#64748B;">
-          Vous avez déjà un compte ? <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:#2563EB;font-weight:700;text-decoration:none;">Connectez-vous ici</a>
+          Vous disposez déjà d'un compte ? <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:#2563EB;font-weight:700;text-decoration:none;">Se connecter</a>
         </div>
       </div>
 
@@ -96,7 +99,7 @@
         <form id="form-auth-login" onsubmit="handleLoginSubmit(event)">
           <div class="form-group" style="margin-bottom:14px;">
             <label class="form-label">Adresse E-mail Professionnelle *</label>
-            <input type="email" id="auth-login-email" class="form-control" placeholder="votre.nom@gmail.com" required autocomplete="email">
+            <input type="email" id="auth-login-email" class="form-control" placeholder="contact@entreprise.com" required autocomplete="email">
           </div>
 
           <div class="form-group" style="margin-bottom:18px;">
@@ -104,14 +107,14 @@
             <input type="password" id="auth-login-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
           </div>
 
-          <button type="submit" id="auth-login-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:800;font-size:0.92rem;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <span>🔐 Se Connecter</span>
+          <button type="submit" id="auth-login-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.92rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>Se Connecter</span>
           </button>
         </form>
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:0.8rem;">
           <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#2563EB;font-weight:700;text-decoration:none;">
-            ✨ Créer un nouveau compte
+            Créer un nouveau compte
           </a>
           <a href="javascript:void(0)" onclick="promptPendingVerification()" style="color:#64748B;text-decoration:underline;">
             Code OTP non validé ?
@@ -121,32 +124,32 @@
 
       <!-- VUE 3 : ÉCRAN DE VÉRIFICATION OTP SÉCURISÉ -->
       <div id="auth-view-otp" style="display:none;text-align:center;padding:10px 0;">
-        <div style="width:52px;height:52px;background:#EFF6FF;color:#2563EB;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:1.5rem;">
-          📬
+        <div style="width:48px;height:48px;background:#EFF6FF;color:#2563EB;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+          <i data-lucide="mail-check" style="width:24px;height:24px;"></i>
         </div>
-        <h4 style="font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:6px;">Vérifiez votre Boîte Mail</h4>
+        <h4 style="font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:6px;">Vérification de votre adresse e-mail</h4>
         <p style="font-size:0.84rem;color:#64748B;margin-bottom:18px;line-height:1.5;">
-          Un code de sécurité à 6 chiffres a été envoyé par le serveur à :<br>
+          Un code de confirmation et un lien d'activation ont été envoyés à :<br>
           <strong id="auth-target-email-display" style="color:#2563EB;font-size:0.95rem;word-break:break-all;">u******@gmail.com</strong>
         </p>
 
         <form id="form-auth-verify-otp" onsubmit="handleVerifyOtpSubmit(event)">
           <div class="form-group" style="margin-bottom:18px;">
-            <label class="form-label" style="text-align:center;display:block;margin-bottom:8px;font-size:0.85rem;">Saisissez le Code à 6 Chiffres reçu :</label>
+            <label class="form-label" style="text-align:center;display:block;margin-bottom:8px;font-size:0.85rem;">Saisissez le code à 6 chiffres ou cliquez sur le lien reçu par e-mail :</label>
             <input type="text" id="auth-otp-code" class="form-control" placeholder="• • • • • •" maxlength="8" pattern="[0-9\s]{6,8}" style="text-align:center;font-size:1.7rem;letter-spacing:8px;font-weight:800;padding:12px;max-width:260px;margin:0 auto;" required autocomplete="one-time-code" autofocus>
           </div>
 
-          <button type="submit" id="auth-verify-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:800;font-size:0.95rem;">
-            ✅ Valider &amp; Activer mon Compte
+          <button type="submit" id="auth-verify-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.95rem;">
+            Valider et Activer mon Compte
           </button>
         </form>
 
         <div style="margin-top:18px;display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;gap:10px;">
           <button type="button" class="btn btn-outline" style="padding:6px 12px;font-size:0.75rem;" onclick="backToAuthRegister()">
-            ← Modifier l'e-mail
+            ← Modifier l'adresse e-mail
           </button>
           <button type="button" id="auth-resend-btn" style="background:none;border:none;color:#2563EB;font-weight:700;cursor:pointer;font-size:0.78rem;" onclick="handleResendOtp()">
-            🔄 Renvoyer le code <span id="auth-resend-timer"></span>
+            Renvoyer le code <span id="auth-resend-timer"></span>
           </button>
         </div>
       </div>
@@ -466,79 +469,75 @@
           <button class="lp-lang-btn" id="lp-lang-en" onclick="switchLanguage('en')">EN</button>
         </div>
 
-        <button onclick="openAppWorkspace('menu-2')" class="lp-btn-cta" data-i18n="lpNavStart">🚀 Ouvrir l'Application</button>
+        <button onclick="openAppWorkspace('menu-2')" class="lp-btn-cta" data-i18n="lpNavStart">Accéder à l'Espace</button>
       </nav>
     </header>
 
-    <!-- ── HERO SECTION EN PUR CODE ANIMÉ (AUCUNE IMAGE FAKE) ── -->
+    <!-- ── HERO SECTION SOBRE & PROFESSIONNELLE ── -->
     <section class="lp-hero-live-section" id="hero">
       
-      <!-- Orbes Lumineuses d'Arrière-Plan -->
-      <div class="lp-glow-orb lp-glow-orb-1"></div>
-      <div class="lp-glow-orb lp-glow-orb-2"></div>
-
       <div class="lp-hero-content">
         
-        <!-- Badge Flottant Néon -->
-        <div class="lp-pill-badge">
-          <span class="lp-pulse-dot"></span>
-          <span data-i18n="lpHeroPill">⚡ N°1 DE LA GESTION DE CRÉDITS &amp; RECOUVREMENT EN AFRIQUE</span>
+        <!-- Badge Statut B2B -->
+        <div class="lp-pill-badge" style="border:1px solid rgba(56,189,248,0.3);background:rgba(15,23,42,0.6);">
+          <span class="lp-pulse-dot" style="background:#38BDF8;"></span>
+          <span data-i18n="lpHeroPill" style="letter-spacing:0.5px;">GESTION DES CRÉANCES CLIENTS &amp; RECOUVREMENT B2B</span>
         </div>
 
         <!-- Titre Principal à Fort Impact -->
         <h1 class="lp-hero-title">
-          <span class="lp-title-white" data-i18n="lpHeroTitle1">Zéro Crédit Oublié.</span><br>
-          <span class="lp-title-gradient" data-i18n="lpHeroTitle2">Encaissez 3x Plus Vite.</span>
+          <span class="lp-title-white" data-i18n="lpHeroTitle1">Zéro Créance Oubliée.</span><br>
+          <span class="lp-title-gradient" data-i18n="lpHeroTitle2">Recouvrez Vos Factures 3x Plus Vite.</span>
         </h1>
 
-        <!-- Sous-Titre Clair & Convaincant -->
+        <!-- Sous-Titre Clair & Sobre -->
         <p class="lp-hero-desc" data-i18n="lpHeroDesc">
-          Fini les cahiers de dettes perdus et les retards de paiement. Suivez vos clients en direct, encaissez par <strong>Wave / Mobile Money</strong> et envoyez des rappels polis en 1-clic sur <strong>WhatsApp &amp; SMS</strong>.
+          Remplacez les carnets manuels et sécurisez votre trésorerie. Suivez vos clients en temps réel, encaissez par <strong>Wave et Mobile Money</strong> et délivrez des reçus officiels certifiés.
         </p>
 
         <!-- Boutons d'Action Principaux -->
         <div class="lp-hero-actions">
-          <button onclick="openAuthModal('register')" class="lp-btn-primary-glow">
-            <i data-lucide="sparkles"></i>
-            <span data-i18n="lpHeroCta1">🚀 Créer mon Compte (Essai 3 Mois)</span>
+          <button onclick="openAuthModal('register')" class="lp-btn-primary-glow" style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="user-plus" style="width:18px;height:18px;"></i>
+            <span data-i18n="lpHeroCta1">Créer un Compte Commerçant</span>
           </button>
-          <a href="#simulator" class="lp-btn-secondary-glass">
-            <i data-lucide="message-circle"></i>
-            <span data-i18n="lpHeroCta2">💬 Tester le Simulateur WhatsApp</span>
+          <a href="#simulator" class="lp-btn-secondary-glass" style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="message-square" style="width:18px;height:18px;"></i>
+            <span data-i18n="lpHeroCta2">Simulateur WhatsApp</span>
           </a>
         </div>
 
-        <!-- Badges de Confiance Moyens de Paiement -->
+        <!-- Badges Moyens de Paiement -->
         <div class="lp-trust-bar">
-          <span class="lp-trust-label" data-i18n="lpTrustLabel">Compatible avec tous vos moyens de paiement :</span>
+          <span class="lp-trust-label" data-i18n="lpTrustLabel">Règlements supportés :</span>
           <div class="lp-trust-badges">
-            <span class="lp-badge-pay wave">🌊 Wave Money</span>
-            <span class="lp-badge-pay mtn">📱 MTN MoMo</span>
-            <span class="lp-badge-pay orange">🟠 Orange Money</span>
-            <span class="lp-badge-pay moov">🔵 Moov Money</span>
-            <span class="lp-badge-pay cash">💵 Espèces</span>
+            <span class="lp-badge-pay">Wave Money</span>
+            <span class="lp-badge-pay">MTN MoMo</span>
+            <span class="lp-badge-pay">Orange Money</span>
+            <span class="lp-badge-pay">Moov Money</span>
+            <span class="lp-badge-pay">Espèces &amp; Virement</span>
           </div>
         </div>
 
       </div>
 
-      <!-- ── VÉRITABLE MOCKUP 3D VECTORIEL & ANIMÉ EN PUR CSS (PAS D'IMAGE STATIQUE) ── -->
+      <!-- ── MOCKUP APPLICATIF VECTORIEL ÉPURÉ ── -->
       <div class="lp-mockup-wrapper" id="demo-live">
 
-        <!-- Carte Flottante 1 : WhatsApp Réussi -->
+        <!-- Carte Flottante 1 : Notification WhatsApp -->
         <div class="lp-floating-badge lp-floating-wa">
-          <div class="lp-float-icon green"><i data-lucide="message-circle"></i></div>
+          <div class="lp-float-icon green"><i data-lucide="message-square"></i></div>
           <div>
-            <div class="lp-float-title">💬 Rappel WhatsApp envoyé</div>
-            <div class="lp-float-sub">Moussa K. (150 000 FCFA) • <span style="color:#10B981;font-weight:800;">Payé via Wave !</span></div>
+            <div class="lp-float-title">Rappel WhatsApp transmis</div>
+            <div class="lp-float-sub">Moussa K. (150 000 FCFA) • <span style="color:#10B981;font-weight:700;">Règlement Wave</span></div>
           </div>
         </div>
 
-        <!-- Carte Flottante 2 : Paiement Reçu en Direct -->
+        <!-- Carte Flottante 2 : Encaissement Validé -->
         <div class="lp-floating-badge lp-floating-pay">
-          <div class="lp-float-icon blue"><i data-lucide="wallet"></i></div>
+          <div class="lp-float-icon blue"><i data-lucide="check-circle-2"></i></div>
           <div>
-            <div class="lp-float-title">🎉 Paiement Reçu à l'instant</div>
+            <div class="lp-float-title">Paiement Enregistré</div>
             <div class="lp-float-sub"><strong style="color:#10B981;">+75 000 FCFA</strong> • Reçu délivré</div>
           </div>
         </div>
@@ -555,39 +554,39 @@
             </div>
             <div class="lp-win-search">
               <i data-lucide="search" style="width:12px;height:12px;color:#94A3B8;"></i>
-              <span>credittrack.app/workspace/dashboard</span>
+              <span>credittrack.pro/workspace/dashboard</span>
             </div>
             <div class="lp-win-live-badge">
-              <span class="pulse-live"></span> ● Système Actif
+              <span class="pulse-live"></span> Système Actif
             </div>
           </div>
 
           <!-- Corps du Dashboard Démo Live -->
           <div class="lp-win-body">
             
-            <!-- Mini KPIs Animés -->
+            <!-- Mini KPIs -->
             <div class="lp-win-kpis">
               <div class="lp-win-kpi">
                 <div class="kpi-tag">Total Recouvré ce Mois</div>
                 <div class="kpi-num" style="color:#10B981;">1 450 000 FCFA</div>
-                <div class="kpi-sub">🟢 +18.4% de recouvrement</div>
+                <div class="kpi-sub">+18.4% ce mois</div>
               </div>
               <div class="lp-win-kpi">
                 <div class="kpi-tag">Clients à Jour</div>
                 <div class="kpi-num" style="color:#2563EB;">48 / 50</div>
-                <div class="kpi-sub">🛡️ 96% Taux de Réussite</div>
+                <div class="kpi-sub">96% de taux de recouvrement</div>
               </div>
               <div class="lp-win-kpi">
                 <div class="kpi-tag">Délai Moyen de Règlement</div>
                 <div class="kpi-num" style="color:#F59E0B;">48 Heures</div>
-                <div class="kpi-sub">⚡ Grâce aux rappels 1-clic</div>
+                <div class="kpi-sub">Règlement sous 48h</div>
               </div>
             </div>
 
             <!-- Mini Tableau des Créances en Direct -->
             <div class="lp-win-table-box">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                <span style="font-weight:800;font-size:0.85rem;color:#0F172A;">Dernières créances en cours</span>
+                <span style="font-weight:700;font-size:0.85rem;color:#0F172A;">Dernières créances en cours</span>
                 <span style="font-size:0.75rem;font-weight:700;color:#2563EB;">+ Saisir un Crédit</span>
               </div>
               <div class="lp-win-table-row">
@@ -599,9 +598,9 @@
                   </div>
                 </div>
                 <div class="amount-cell" style="color:#2563EB;">150 000 FCFA</div>
-                <div class="status-cell"><span class="badge-status paid">🟢 Score 94/100</span></div>
+                <div class="status-cell"><span class="badge-status paid">Score 94/100</span></div>
                 <div class="action-cell">
-                  <span class="mini-btn-wa">💬 WhatsApp</span>
+                  <span class="mini-btn-wa">WhatsApp</span>
                 </div>
               </div>
 
@@ -614,9 +613,9 @@
                   </div>
                 </div>
                 <div class="amount-cell" style="color:#EF4444;">75 000 FCFA</div>
-                <div class="status-cell"><span class="badge-status overdue">🔴 Retard 4j</span></div>
+                <div class="status-cell"><span class="badge-status overdue">Retard 4 jours</span></div>
                 <div class="action-cell">
-                  <span class="mini-btn-wa" style="background:#25D366;color:#fff;">💬 Relancer</span>
+                  <span class="mini-btn-wa" style="background:#2563EB;color:#fff;">Relancer</span>
                 </div>
               </div>
             </div>
@@ -625,7 +624,7 @@
 
           <!-- Overlay au survol du Mockup -->
           <div class="lp-mockup-hover-overlay">
-            <span class="lp-hover-cta">⚡ Cliquez pour tester l'application en direct →</span>
+            <span class="lp-hover-cta">Accéder à la démonstration en direct →</span>
           </div>
 
         </div>
@@ -634,39 +633,39 @@
 
     </section>
 
-    <!-- ── STATS CHIFFRES CLÉS EN TEMPS RÉEL ── -->
+    <!-- ── CHIFFRES CLÉS ── -->
     <section class="lp-stats-strip">
       <div class="lp-stats-container">
         <div class="lp-stat-item">
           <div class="stat-big">+50 000 000 <span class="stat-unit">FCFA</span></div>
-          <div class="stat-label">Récupérés par nos commerçants</div>
+          <div class="stat-label">Recouvrés par nos commerçants partenaires</div>
         </div>
         <div class="lp-stat-sep"></div>
         <div class="lp-stat-item">
           <div class="stat-big">1 250+</div>
-          <div class="stat-label">Boutiques &amp; Grossistes actifs</div>
+          <div class="stat-label">Comptes d'entreprises et grossistes actifs</div>
         </div>
         <div class="lp-stat-sep"></div>
         <div class="lp-stat-item">
           <div class="stat-big">98.6 %</div>
-          <div class="stat-label">Taux de recouvrement sous 7 jours</div>
+          <div class="stat-label">Taux de règlement à échéance</div>
         </div>
         <div class="lp-stat-sep"></div>
         <div class="lp-stat-item">
-          <div class="stat-big">54 Pays</div>
-          <div class="stat-label">Devises d'Afrique couvertes</div>
+          <div class="stat-big">15+</div>
+          <div class="stat-label">Pays et devises couverts</div>
         </div>
       </div>
     </section>
 
-    <!-- ── SIMULATEUR INTERACTIF WHATSAPP (TEST EN DIRECT SUR LA PAGE) ── -->
+    <!-- ── SIMULATEUR WHATSAPP ── -->
     <section class="lp-simulator-section" id="simulator">
       <div class="lp-sim-inner">
         <div class="lp-sim-left">
-          <div class="lp-sim-badge">⚡ SIMULATEUR EN DIRECT</div>
-          <h2 class="lp-sim-title">Voyez à quoi ressemble un rappel envoyé à votre client</h2>
+          <div class="lp-sim-badge">MODULE DE RAPPEL CLIENT</div>
+          <h2 class="lp-sim-title">Aperçu d'un message de rappel transmis au client</h2>
           <p class="lp-sim-desc">
-            Tapez un nom et un montant : le message de relance professionnel se met à jour en direct sous vos yeux. Vous pouvez même le tester sur votre téléphone !
+            Saisissez un nom et un montant : le modèle de message professionnel s'ajuste instantanément.
           </p>
 
           <div class="lp-sim-inputs">
@@ -678,14 +677,14 @@
               <label class="form-label" style="color:rgba(255,255,255,0.85);">Montant dû (FCFA) :</label>
               <input type="number" id="sim-client-amount" class="form-control lp-dark-input" value="75000" oninput="updateLandingSimPreview()">
             </div>
-            <button class="btn btn-primary" style="background:#25D366;border:none;padding:12px 20px;font-weight:800;width:100%;" onclick="testSimWhatsAppSend()">
-              <i data-lucide="send"></i> Envoyer ce test sur mon WhatsApp
+            <button class="btn btn-primary" style="background:#2563EB;border:none;padding:12px 20px;font-weight:700;width:100%;" onclick="testSimWhatsAppSend()">
+              <i data-lucide="send" style="width:16px;height:16px;"></i> Tester l'envoi WhatsApp
             </button>
           </div>
         </div>
 
         <div class="lp-sim-right">
-          <!-- Smartphone Mockup avec Bulle WhatsApp Réelle -->
+          <!-- Smartphone Mockup -->
           <div class="lp-phone-frame">
             <div class="phone-top-notch"></div>
             <div class="phone-wa-header">
@@ -693,7 +692,7 @@
                 <div class="wa-header-avatar">KJ</div>
                 <div>
                   <div class="wa-header-name" id="sim-preview-header-name">Koffi Jean</div>
-                  <div class="wa-header-sub">en ligne</div>
+                  <div class="wa-header-sub">En ligne</div>
                 </div>
               </div>
               <i data-lucide="phone" style="width:16px;height:16px;color:#fff;"></i>
@@ -702,10 +701,10 @@
             <div class="phone-wa-chat">
               <div class="wa-chat-bubble">
                 <p id="sim-wa-text">
-                  Bonjour <strong>Koffi Jean</strong>, nous vous rappelons que votre solde de <strong>75 000 FCFA</strong> chez <strong>Boutique KOUASSI &amp; Fils</strong> est arrivé à échéance.
+                  Bonjour <strong>Koffi Jean</strong>, nous vous informons que votre solde de <strong>75 000 FCFA</strong> chez <strong>Établissements KOUASSI</strong> est arrivé à échéance.
                 </p>
                 <div class="wa-chat-link">
-                  📱 Règlement par Wave / Mobile Money ou en boutique
+                  Règlement par Wave, Mobile Money ou en magasin.
                 </div>
                 <div class="wa-chat-time">14:30 ✓✓</div>
               </div>
@@ -715,138 +714,134 @@
       </div>
     </section>
 
-    <!-- ── COMPARATIF : AVANT VS AVEC CREDITTRACK ── -->
+    <!-- ── COMPARATIF B2B ── -->
     <section class="lp-comparison-section" id="comparison">
       <div class="lp-section-header">
-        <h2 class="lp-section-title">Pourquoi les commerçants abandonnent le cahier papier ?</h2>
-        <p class="lp-section-sub">Découvrez la différence entre l'ancienne méthode risquée et la puissance de CreditTrack.</p>
+        <h2 class="lp-section-title">Gestion Manuelle vs Solution CreditTrack PRO</h2>
+        <p class="lp-section-sub">Comparatif des risques de gestion et des gains de productivité.</p>
       </div>
 
       <div class="lp-comp-grid">
         
-        <!-- Colonne 1 : Avant (L'ancien calvaire) -->
         <div class="lp-comp-card old">
           <div class="comp-header">
             <span class="comp-icon red">✕</span>
             <div>
-              <h3 class="comp-title">Avant CreditTrack</h3>
-              <div class="comp-sub">Cahier papier &amp; mémoire</div>
+              <h3 class="comp-title">Gestion Traditionnelle (Cahier papier)</h3>
+              <div class="comp-sub">Risques d'erreurs et de pertes</div>
             </div>
           </div>
           <ul class="comp-list">
-            <li>❌ <strong>Cahier égaré, mouillé ou déchiré</strong> : Dettes effacées et argent définitivement perdu.</li>
-            <li>❌ <strong>Disputes avec les clients</strong> : Désaccords sur les montants ou les dates sans preuve écrite.</li>
-            <li>❌ <strong>Oublis fréquents</strong> : Vous ne savez plus qui vous doit quoi après 3 semaines.</li>
-            <li>❌ <strong>Gêne pour réclamer</strong> : Appels téléphoniques maladroits qui fâchent les clients.</li>
-            <li>❌ <strong>Zéro reçu officiel</strong> : Les clients réclament sans cesse des justificatifs de paiement.</li>
+            <li><strong>Perte ou détérioration des registres</strong> : Impossibilité de justifier les montants.</li>
+            <li><strong>Litiges sur les montants</strong> : Absence d'historique certifié des règlements.</li>
+            <li><strong>Absence de relances cadrées</strong> : Retards de paiement prolongés.</li>
+            <li><strong>Manque de justificatifs officiels</strong> : Absence de reçus certifiés.</li>
           </ul>
         </div>
 
-        <!-- Colonne 2 : Avec CreditTrack (La révolution moderne) -->
         <div class="lp-comp-card new">
-          <div class="comp-badge-best">RECOMMANDÉ</div>
+          <div class="comp-badge-best">CONFORME</div>
           <div class="comp-header">
             <span class="comp-icon green">✓</span>
             <div>
-              <h3 class="comp-title">Avec CreditTrack PRO</h3>
-              <div class="comp-sub">100% Digital, Sécurisé &amp; Automatisé</div>
+              <h3 class="comp-title">CreditTrack PRO</h3>
+              <div class="comp-sub">Plateforme Sécurisée &amp; Traçabilité Complète</div>
             </div>
           </div>
           <ul class="comp-list">
-            <li>✅ <strong>Fiche client infalsifiable</strong> : Sauvegarde 100% sécurisée sur votre téléphone ou PC.</li>
-            <li>✅ <strong>Rappels WhatsApp &amp; SMS en 1-clic</strong> : Messages polis pré-rédigés sans aucune dispute.</li>
-            <li>✅ <strong>Encaissements Wave &amp; MoMo</strong> : Le client paie directement en cliquant sur son lien.</li>
-            <li>✅ <strong>Reçus PDF avec signature au doigt</strong> : Justificatif officiel généré instantanément.</li>
-            <li>✅ <strong>Tableau de bord de caisse</strong> : Vous savez chaque soir exactement ce que vous avez gagné.</li>
+            <li><strong>Base de données chiffrée et sauvegardée</strong> : Disponibilité permanente et hors-ligne.</li>
+            <li><strong>Relances WhatsApp &amp; SMS cadrées</strong> : Messages pré-rédigés et détaillés.</li>
+            <li><strong>Règlements multi-moyens</strong> : Wave, Mobile Money, Espèces et Virements.</li>
+            <li><strong>Reçus numériques horodatés</strong> : Signature tactile et téléchargement PDF.</li>
           </ul>
         </div>
 
       </div>
     </section>
 
-    <!-- ── 6 SUPER-POUVOIRS DE CREDITTRACK (BENTO GRID MODERNE) ── -->
+    <!-- ── FONCTIONNALITÉS ── -->
     <section class="lp-features" id="features">
       <div class="lp-section-header">
-        <h2 class="lp-section-title">Tout ce qu'il vous faut pour <span class="lp-cyan">sécuriser vos ventes</span></h2>
-        <p class="lp-section-sub">Des fonctionnalités puissantes pensées pour la réalité du commerce en Afrique.</p>
+        <h2 class="lp-section-title">Fonctionnalités Métier Intégrées</h2>
+        <p class="lp-section-sub">Outils conçus pour la gestion commerciale et financière quotidienne.</p>
       </div>
 
       <div class="lp-bento-grid">
 
         <div class="lp-bento-card bento-wide">
           <div class="bento-icon blue"><i data-lucide="users"></i></div>
-          <h3 class="bento-title">Fiches Clients &amp; Score de Fiabilité</h3>
-          <p class="bento-text">Enregistrez vos clients en 10 secondes. Le système calcule automatiquement un score de confiance (VIP, Moyen, Risque) pour savoir à qui accorder du crédit en toute sécurité.</p>
+          <h3 class="bento-title">Gestion de Répertoire &amp; Scoring Client</h3>
+          <p class="bento-text">Centralisez vos fiches clients et évaluez leur solvabilité selon la ponctualité des règlements constatés.</p>
         </div>
 
         <div class="lp-bento-card bento-wide">
-          <div class="bento-icon green"><i data-lucide="message-circle"></i></div>
-          <h3 class="bento-title">Relances WhatsApp &amp; SMS Automatiques</h3>
-          <p class="bento-text">Envoyez des messages de rappel cordiaux en 1-clic. Plus besoin d'appeler ou de courir après les clients : ils reçoivent leur solde et le lien de règlement direct.</p>
+          <div class="bento-icon green"><i data-lucide="message-square"></i></div>
+          <h3 class="bento-title">Notifications WhatsApp &amp; SMS</h3>
+          <p class="bento-text">Délivrez des avis d'échéance précis avec la ventilation des articles facturés en un clic.</p>
         </div>
 
         <div class="lp-bento-card">
-          <div class="bento-icon orange"><i data-lucide="smartphone"></i></div>
-          <h3 class="bento-title">Wave &amp; Mobile Money</h3>
-          <p class="bento-text">Acceptez Wave, Orange, MTN, Moov et les espèces. Les règlements mettent à jour les soldes immédiatement.</p>
+          <div class="bento-icon orange"><i data-lucide="wallet"></i></div>
+          <h3 class="bento-title">Multi-Moyens d'Encaissement</h3>
+          <p class="bento-text">Prise en charge de Wave, Orange Money, MTN MoMo, Moov Money et flux de caisse espèces.</p>
         </div>
 
         <div class="lp-bento-card">
-          <div class="bento-icon purple"><i data-lucide="file-signature"></i></div>
-          <h3 class="bento-title">Signature Tactile &amp; Reçu PDF</h3>
-          <p class="bento-text">Faites signer vos clients sur l'écran du smartphone et délivrez un reçu officiel au format thermique ou PDF.</p>
+          <div class="bento-icon purple"><i data-lucide="file-text"></i></div>
+          <h3 class="bento-title">Signature Tactile &amp; Reçus PDF</h3>
+          <p class="bento-text">Émargement numérique direct sur écran et délivrance de reçus conformes au format PDF ou thermique.</p>
         </div>
 
         <div class="lp-bento-card">
-          <div class="bento-icon red"><i data-lucide="calculator"></i></div>
-          <h3 class="bento-title">Livre de Caisse &amp; Bénéfices</h3>
-          <p class="bento-text">Suivez vos recettes, vos dépenses et visualisez votre bénéfice net en direct sans calculs manuels compliqués.</p>
+          <div class="bento-icon red"><i data-lucide="bar-chart-3"></i></div>
+          <h3 class="bento-title">Livre de Caisse &amp; Comptabilité</h3>
+          <p class="bento-text">Suivi rigoureux des flux de recettes et dépenses avec calcul dynamique de la TVA selon le référentiel fiscal SYSCOHADA.</p>
         </div>
 
       </div>
     </section>
 
-    <!-- ── TÉMOIGNAGES DE COMMERÇANTS RÉELS ── -->
+    <!-- ── TÉMOIGNAGES CLIENTS ── -->
     <section class="lp-testimonials-section">
       <div class="lp-section-header">
-        <h2 class="lp-section-title">Ce que disent les commerçants</h2>
-        <p class="lp-section-sub">Déjà plus de 1 200 gérants de boutiques, grossistes et prestataires l'utilisent au quotidien.</p>
+        <h2 class="lp-section-title">Retours d'Expérience Entreprises</h2>
+        <p class="lp-section-sub">Utilisé par des distributeurs, grossistes et gérants de commerces.</p>
       </div>
 
       <div class="lp-testi-grid">
         
         <div class="lp-testi-card">
           <div class="testi-stars">★★★★★</div>
-          <p class="testi-quote">"Avant, je perdais au moins 300 000 FCFA d'impayés chaque mois dans mon magasin à Treichville. Depuis que j'utilise les rappels WhatsApp de CreditTrack, mes clients me paient par Wave en moins de 48 heures !"</p>
+          <p class="testi-quote">"Le suivi rigoureux des encaissements et la clarté des reçus délivrés sur WhatsApp ont fluidifié le recouvrement de nos factures clients."</p>
           <div class="testi-author">
             <div class="testi-avatar">AK</div>
             <div>
               <div class="testi-name">Amadou Koné</div>
-              <div class="testi-role">Grossiste Alimentaire • Abidjan, Côte d'Ivoire</div>
+              <div class="testi-role">Grossiste Alimentaire • Abidjan</div>
             </div>
           </div>
         </div>
 
         <div class="lp-testi-card">
           <div class="testi-stars">★★★★★</div>
-          <p class="testi-quote">"La signature au doigt sur le téléphone et le reçu PDF envoyé sur WhatsApp ont changé ma relation avec mes clients. C'est propre, moderne et fini les disputes sur les montants."</p>
+          <p class="testi-quote">"La signature électronique au doigt et l'export PDF ont éliminé les contestations de montants lors des livraisons."</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background:#10B981;">FD</div>
             <div>
               <div class="testi-name">Fatoumatou Diop</div>
-              <div class="testi-role">Boutique de Prêt-à-porter • Dakar, Sénégal</div>
+              <div class="testi-role">Directrice Commerciale • Dakar</div>
             </div>
           </div>
         </div>
 
         <div class="lp-testi-card">
           <div class="testi-stars">★★★★★</div>
-          <p class="testi-quote">"Une application hyper simple, même pour quelqu'un qui n'est pas fort en informatique. En 3 clics, j'ai noté le crédit et programmé le rappel."</p>
+          <p class="testi-quote">"La disponibilité hors-ligne combinée à la synchronisation cloud garantit la continuité de nos opérations en magasin."</p>
           <div class="testi-author">
             <div class="testi-avatar" style="background:#8B5CF6;">SA</div>
             <div>
               <div class="testi-name">Séverin Agbossou</div>
-              <div class="testi-role">Vente de Matériaux • Cotonou, Bénin</div>
+              <div class="testi-role">Vente de Matériaux • Cotonou</div>
             </div>
           </div>
         </div>
@@ -854,15 +849,15 @@
       </div>
     </section>
 
-    <!-- ── APPEL À L'ACTION FINAL LUMINEUX ── -->
+    <!-- ── APPEL À L'ACTION FINAL SOBRE ── -->
     <section class="lp-cta-section">
       <div class="lp-cta-box">
-        <h2 class="lp-cta-title" data-i18n="lpCtaTitle">Prêt à récupérer facilement tout votre argent ?</h2>
-        <p class="lp-cta-sub" data-i18n="lpCtaSub">Rejoignez les commerçants qui ont arrêté de perdre de l'argent et passez au digital dès aujourd'hui.</p>
+        <h2 class="lp-cta-title" data-i18n="lpCtaTitle">Prêt à optimiser le recouvrement de vos créances ?</h2>
+        <p class="lp-cta-sub" data-i18n="lpCtaSub">Activez votre espace commerçant sécurisé dès aujourd'hui.</p>
         <button onclick="openAuthModal('register')" class="lp-btn-cta-big" data-i18n="lpCtaBtn">
-          🚀 Commencer Maintenant (3 Mois Gratuits)
+          Démarrer Maintenant (3 Mois Gratuits)
         </button>
-        <p class="lp-cta-trust">🔒 100% Sécurisé · ⚡ Sans engagement · 📱 Compatible Tous Téléphones</p>
+        <p class="lp-cta-trust">Données Chiffrées · Sans engagement · Compatible Web &amp; Mobile</p>
       </div>
     </section>
 
@@ -870,23 +865,23 @@
     <footer class="lp-footer" style="padding:32px 24px;border-top:1px solid rgba(255,255,255,0.1);display:flex;flex-direction:column;gap:18px;align-items:center;text-align:center;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;">
         <img src="logo_3d.png" alt="CreditTrack" style="width:30px;height:30px;">
-        <span style="font-size:0.95rem;font-weight:700;color:#FFFFFF;">© 2026 <strong>CreditTrack PRO</strong> — Solution Panafricaine Sécurisée de Recouvrement</span>
+        <span style="font-size:0.95rem;font-weight:700;color:#FFFFFF;">© 2026 <strong>CreditTrack PRO</strong> — Solution Professionnelle de Recouvrement</span>
       </div>
 
       <div style="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;font-size:0.82rem;">
         <button type="button" onclick="openPrivacyModal()" style="background:none;border:none;color:#94A3B8;cursor:pointer;text-decoration:underline;font-size:0.82rem;">
-          📜 Politique de Confidentialité &amp; Cookies
+          Politique de Confidentialité &amp; Cookies
         </button>
         <button type="button" onclick="openSecurityModal()" style="background:none;border:none;color:#94A3B8;cursor:pointer;text-decoration:underline;font-size:0.82rem;">
-          🛡️ Sécurité &amp; Protection des Données (RGPD/APDP)
+          Sécurité &amp; Protection des Données (RGPD/APDP)
         </button>
         <button type="button" onclick="openSupportModal()" style="background:none;border:none;color:#38BDF8;font-weight:700;cursor:pointer;text-decoration:underline;font-size:0.82rem;">
-          💬 Contacter le Support Technique &amp; Commercial
+          Contacter le Support Technique &amp; Commercial
         </button>
       </div>
 
       <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center;margin-top:4px;">
-        <span style="color:rgba(255,255,255,0.6);font-size:0.75rem;">🔒 Données Chiffrées &amp; Hébergement Cloud Haute Sécurité</span>
+        <span style="color:rgba(255,255,255,0.6);font-size:0.75rem;">Hébergement Cloud Haute Disponibilité &amp; Chiffrement RLS</span>
         <button onclick="openAuthModal('register')" class="lp-footer-btn" data-i18n="footerBtn">Créer un Compte Commerçant →</button>
       </div>
     </footer>

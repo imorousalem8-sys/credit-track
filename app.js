@@ -628,11 +628,104 @@ window.toggleLanguageQuick = function() {
 };
 
 // --------------------------------------------------------------------------
-// 6. INITIALISATION AU CHARGEMENT DU DOM
+// 6. INITIALISATION AU CHARGEMENT DU DOM & CALLBACK AUTH SUPABASE
 // --------------------------------------------------------------------------
+async function activateUserSession(user, notify = true) {
+  if (!user) return;
+  const userId = user.id;
+  const userEmail = user.email || '';
+  const bizName = user.user_metadata?.business_name || localStorage.getItem('bizName') || 'Mon Commerce';
+
+  AppState.user.id = userId;
+  AppState.user.email = userEmail;
+  AppState.user.businessName = bizName;
+  AppState.user.planTier = 'trial_3_months';
+  AppState.user.status = 'active';
+  AppState.businessName = bizName;
+  AppState.userName = userEmail.split('@')[0] || 'Administrateur';
+
+  localStorage.setItem('user_id', userId);
+  localStorage.setItem('userEmail', userEmail);
+  localStorage.setItem('bizName', bizName);
+  localStorage.setItem('userPlan', 'trial_3_months');
+  localStorage.setItem('userName', AppState.userName);
+
+  // Charger immédiatement les données isolées du commerçant
+  AppState.clients = getCachedArray('credittrack_clients');
+  AppState.payments = getCachedArray('credittrack_payments');
+  AppState.accountingEntries = getCachedArray('credittrack_accounting');
+
+  if (window.dataStore) {
+    try {
+      await window.dataStore.syncFromSupabase();
+    } catch(e) {}
+  }
+
+  renderClientDirectory();
+  renderPaymentsTable();
+  renderAccountingKPIs();
+  renderAccountingJournal();
+  renderCreditKPIs();
+
+  updateUserPlanBadgeUI();
+  closeModal('modal-auth');
+
+  // Nettoyer l'URL sans recharger
+  if (window.location.hash || window.location.search) {
+    const cleanUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, cleanUrl);
+  }
+
+  openAppWorkspace('menu-2');
+  if (notify) {
+    showToast(`Compte vérifié et activé avec succès. Bienvenue dans votre espace.`);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   populateCountrySelect();
   restoreSavedState();
+
+  // Gestion automatique du lien d'activation reçu par e-mail (Supabase Magic Link / Token Callback)
+  if (window.supabaseClient) {
+    try {
+      // 1. Écouteur global des événements d'authentification (redirection lien e-mail)
+      window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (session && session.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
+          await activateUserSession(session.user, true);
+        }
+      });
+
+      // 2. Traitement des paramètres URL de confirmation (code ou token_hash)
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const tokenHash = params.get('token_hash');
+      const type = params.get('type') || 'signup';
+
+      if (code) {
+        const { data, error } = await window.supabaseClient.auth.exchangeCodeForSession(code);
+        if (!error && data && data.session && data.session.user) {
+          await activateUserSession(data.session.user);
+        }
+      } else if (tokenHash) {
+        const { data, error } = await window.supabaseClient.auth.verifyOtp({
+          token_hash: tokenHash,
+          type: type
+        });
+        if (!error && data && data.session && data.session.user) {
+          await activateUserSession(data.session.user);
+        }
+      }
+
+      // 3. Restauration de session active existante
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (session && session.user) {
+        await activateUserSession(session.user, false);
+      }
+    } catch(e) {
+      console.warn("Auth check:", e);
+    }
+  }
 
   if (window.dataStore) {
     try {
@@ -644,7 +737,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (dbPayments && dbPayments.length > 0) AppState.payments = dbPayments;
       if (dbAccounting && dbAccounting.length > 0) AppState.accountingEntries = dbAccounting;
     } catch(e) {
-      console.log("DataStore local storage init");
+      console.log("DataStore init");
     }
   }
 

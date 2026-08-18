@@ -351,47 +351,47 @@ body.is-app-mode #app-workspace-layout {
 }
 
 .lp-btn-primary-glow {
-  background: linear-gradient(135deg, #0070F3, #00A3FF);
+  background: #2563EB;
   color: #fff;
   border: none;
-  border-radius: 14px;
-  padding: 16px 32px;
-  font-size: 1.05rem;
-  font-weight: 800;
+  border-radius: 10px;
+  padding: 14px 28px;
+  font-size: 0.98rem;
+  font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 10px 35px rgba(0,112,243,0.5), inset 0 1px 0 rgba(255,255,255,0.3);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transition: all 0.2s ease;
 }
 
 .lp-btn-primary-glow:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 15px 45px rgba(0,163,255,0.8), inset 0 1px 0 rgba(255,255,255,0.5);
+  background: #1D4ED8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
 }
 
 .lp-btn-secondary-glass {
   background: rgba(255,255,255,0.06);
   color: #fff;
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 14px;
-  padding: 16px 28px;
-  font-size: 1.02rem;
-  font-weight: 700;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 10px;
+  padding: 14px 24px;
+  font-size: 0.98rem;
+  font-weight: 600;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  backdrop-filter: blur(10px);
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
 }
 
 .lp-btn-secondary-glass:hover {
   background: rgba(255,255,255,0.12);
-  border-color: #00A3FF;
-  color: #00A3FF;
-  transform: translateY(-2px);
+  border-color: rgba(255,255,255,0.3);
+  color: #fff;
+  transform: translateY(-1px);
 }
 
 .lp-trust-bar {
@@ -400,7 +400,7 @@ body.is-app-mode #app-workspace-layout {
 
 .lp-trust-label {
   font-size: 0.82rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.6);
   font-weight: 600;
   display: block;
   margin-bottom: 10px;
@@ -415,59 +415,51 @@ body.is-app-mode #app-workspace-layout {
 }
 
 .lp-badge-pay {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
-  padding: 6px 12px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 6px 14px;
   border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: rgba(255,255,255,0.8);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.9);
 }
 
-/* ── MOCKUP 3D VECTORIEL PUR CODE CSS ── */
+/* ── MOCKUP APPLICATIF VECTORIEL PUR CSS ── */
 .lp-mockup-wrapper {
   position: relative;
   max-width: 1080px;
-  margin: 50px auto 0;
+  margin: 40px auto 0;
   z-index: 3;
 }
 
 .lp-floating-badge {
   position: absolute;
   z-index: 10;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(255,255,255,0.18);
-  backdrop-filter: blur(16px);
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(255,255,255,0.15);
   padding: 12px 18px;
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(0,163,255,0.2);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
   text-align: left;
-  animation: floatCard 4s ease-in-out infinite alternate;
 }
 
 .lp-floating-wa {
-  top: -24px;
-  left: -20px;
+  top: -20px;
+  left: -10px;
 }
 
 .lp-floating-pay {
   bottom: 20px;
-  right: -20px;
-  animation-delay: 2s;
-}
-
-@keyframes floatCard {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-10px); }
+  right: -10px;
 }
 
 .lp-float-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -475,11 +467,11 @@ body.is-app-mode #app-workspace-layout {
 }
 
 .lp-float-icon.green { background: #10B981; }
-.lp-float-icon.blue  { background: #0070F3; }
+.lp-float-icon.blue  { background: #2563EB; }
 
 .lp-float-title {
   font-size: 0.84rem;
-  font-weight: 800;
+  font-weight: 700;
   color: #FFFFFF;
 }
 
@@ -490,24 +482,23 @@ body.is-app-mode #app-workspace-layout {
 
 .lp-vector-window {
   position: relative;
-  background: #0B1120;
-  border: 1px solid rgba(0, 163, 255, 0.35);
-  border-radius: 20px;
+  background: #0F172A;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 50px rgba(0,163,255,0.15);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
   cursor: pointer;
-  transition: all 0.4s ease;
+  transition: all 0.25s ease;
 }
 
 .lp-vector-window:hover {
-  transform: translateY(-4px);
-  border-color: rgba(0, 163, 255, 0.6);
-  box-shadow: 0 40px 100px rgba(0,0,0,0.9), 0 0 70px rgba(0,163,255,0.3);
+  transform: translateY(-2px);
+  border-color: rgba(37, 99, 235, 0.5);
 }
 
 .lp-win-header {
-  background: #060A14;
-  padding: 12px 20px;
+  background: #090D16;
+  padding: 10px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
