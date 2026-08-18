@@ -2089,6 +2089,35 @@ function initCharts() {
 }
 
 // --------------------------------------------------------------------------
+// SÉLECTEUR DE PRÉSENTATION VISUELLE HERO (3D / MÉTIER / DÉMO LIVE)
+// --------------------------------------------------------------------------
+window.switchHeroView = function(viewKey) {
+  const v3d = document.getElementById('hero-view-3d');
+  const vPro = document.getElementById('hero-view-pro');
+  const vLive = document.getElementById('hero-view-live');
+  const b3d = document.getElementById('btn-showcase-3d');
+  const bPro = document.getElementById('btn-showcase-pro');
+  const bLive = document.getElementById('btn-showcase-live');
+
+  [b3d, bPro, bLive].forEach(b => { if (b) b.classList.remove('active'); });
+  if (v3d) v3d.style.display = 'none';
+  if (vPro) vPro.style.display = 'none';
+  if (vLive) vLive.style.display = 'none';
+
+  if (viewKey === '3d') {
+    if (v3d) v3d.style.display = 'block';
+    if (b3d) b3d.classList.add('active');
+  } else if (viewKey === 'pro') {
+    if (vPro) vPro.style.display = 'block';
+    if (bPro) bPro.classList.add('active');
+  } else if (viewKey === 'live') {
+    if (vLive) vLive.style.display = 'block';
+    if (bLive) bLive.classList.add('active');
+  }
+  if (window.lucide) lucide.createIcons();
+};
+
+// --------------------------------------------------------------------------
 // 14. SYSTÈME D'AUTHENTIFICATION & VÉRIFICATION EMAIL PAR CODE OTP SERVEUR
 // --------------------------------------------------------------------------
 let pendingAuthData = {
