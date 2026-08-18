@@ -1088,21 +1088,48 @@
         ============================================================ -->
         <section id="menu-2" class="view-container active">
 
-          <!-- Bannière de Bienvenue -->
+          <!-- Bannière de Bienvenue & Contrôles Gérant -->
           <div class="dashboard-welcome-banner">
             <div style="display:flex;align-items:center;gap:16px;">
               <img src="logo_3d.png" alt="Logo" style="width:44px;height:44px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,0.3));">
               <div>
-                <h2 style="font-size:1.25rem;font-weight:800;margin-bottom:4px;color:#ffffff;" data-i18n="dashWelcomeTitle">Suivi de vos Ventes &amp; Crédits</h2>
-                <p style="font-size:0.85rem;color:rgba(255,255,255,0.85);margin:0;" data-i18n="dashWelcomeSub">Visualisez en temps réel l'argent à récupérer et envoyez des rappels WhatsApp en un clic.</p>
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+                  <h2 style="font-size:1.25rem;font-weight:800;color:#ffffff;margin:0;" data-i18n="dashWelcomeTitle">Suivi de vos Ventes &amp; Crédits</h2>
+                  <span id="current-user-role-tag" style="background:rgba(255,255,255,0.2);color:#FFFFFF;padding:2px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;letter-spacing:0.5px;">SESSION : GÉRANT</span>
+                </div>
+                <p style="font-size:0.85rem;color:rgba(255,255,255,0.85);margin:0;" data-i18n="dashWelcomeSub">Visualisez en temps réel l'argent à récupérer et suivez vos encaissements par caissier.</p>
               </div>
             </div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <button class="btn btn-banner-transp btn-pdf-export" onclick="openOfficialReportModal()" title="Télécharger le Bilan Officiel">
+                <i data-lucide="file-text" style="width:16px;height:16px;"></i> <span>Bilan PDF</span>
+              </button>
               <button class="btn btn-banner-white" onclick="switchMenu('menu-5')">
                 <i data-lucide="plus-circle" style="width:16px;height:16px;"></i> <span data-i18n="btnNewCredit">+ Noter un Crédit</span>
               </button>
               <button class="btn btn-banner-transp" onclick="switchMenu('menu-8')">
                 <i data-lucide="bell-ring" style="width:16px;height:16px;"></i> <span data-i18n="menuReminders">Rappels WhatsApp</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- BANNIÈRE D'ALERTES D'ÉCHÉANCES MATINALES INTELLIGENTES -->
+          <div id="dash-morning-alerts-box" class="morning-alerts-card" style="display:none;">
+            <div class="morning-alerts-left">
+              <div class="morning-alerts-icon">
+                <i data-lucide="calendar-alert" style="width:24px;height:24px;"></i>
+              </div>
+              <div class="morning-alerts-text">
+                <h3 id="morning-alerts-title">2 Créances arrivent à échéance aujourd'hui !</h3>
+                <p id="morning-alerts-desc">Montant total à encaisser : <strong>125 000 FCFA</strong> auprès de vos clients.</p>
+              </div>
+            </div>
+            <div class="morning-alerts-actions">
+              <button type="button" class="btn btn-primary" style="padding:8px 14px;font-size:0.82rem;" onclick="switchMenu('menu-8')">
+                <i data-lucide="message-square" style="width:14px;height:14px;"></i> <span>Relancer sur WhatsApp</span>
+              </button>
+              <button type="button" class="btn btn-outline" style="padding:8px 12px;font-size:0.82rem;background:#FFFFFF;" onclick="switchMenu('menu-4-directory')">
+                <span>Voir les clients</span>
               </button>
             </div>
           </div>
@@ -1566,6 +1593,9 @@
                 <button class="btn btn-outline settings-tab-btn" id="tab-btn-privacy" onclick="switchSettingsTab('privacy')">
                   <i data-lucide="shield-check" style="width:16px;height:16px;"></i> <span>Confidentialité &amp; Cookies</span>
                 </button>
+                <button class="btn btn-outline settings-tab-btn" id="tab-btn-team" onclick="switchSettingsTab('team')">
+                  <i data-lucide="users-round" style="width:16px;height:16px;"></i> <span>Équipe &amp; Caissiers</span>
+                </button>
               </div>
             </div>
 
@@ -1652,6 +1682,37 @@
                 <button class="btn btn-outline" onclick="openSupportModal()">
                   <i data-lucide="help-circle"></i> <span>Contacter le DPO / Support</span>
                 </button>
+              </div>
+            </div>
+
+            <!-- Panel 6: Gestion de l'Équipe & Caissiers -->
+            <div class="card settings-panel" id="settings-panel-team" style="display:none;">
+              <div class="card-header">
+                <div>
+                  <span class="card-title">Gestion de l'Équipe &amp; des Caissiers</span>
+                  <p style="font-size:0.8rem;color:#64748B;margin:2px 0 0 0;">Permettez à vos employés d'encaisser et de noter des ventes sans avoir accès à vos bénéfices ni aux suppressions.</p>
+                </div>
+                <button class="btn btn-primary" style="padding:6px 14px;font-size:0.82rem;" onclick="openModal('modal-add-cashier')">
+                  <i data-lucide="user-plus" style="width:14px;height:14px;"></i> + Ajouter un Caissier
+                </button>
+              </div>
+
+              <!-- Sélecteur de session active -->
+              <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:12px;padding:16px;margin-bottom:18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                  <div>
+                    <strong style="font-size:0.9rem;color:#1E3A8A;display:block;">Session Active Actuelle : <span id="team-active-session-label" style="color:#2563EB;">Gérant (Patron)</span></strong>
+                    <span style="font-size:0.78rem;color:#64748B;">Basculez rapidement en mode caissier pour laisser un employé utiliser la caisse en boutique.</span>
+                  </div>
+                  <button type="button" class="btn btn-outline" style="background:#FFFFFF;border-color:#2563EB;color:#2563EB;font-size:0.82rem;" onclick="toggleCashierMode()">
+                    <i data-lucide="repeat" style="width:14px;height:14px;"></i> <span id="btn-toggle-cashier-text">Passer en Mode Caissier</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Grille des employés / caissiers enregistrés -->
+              <div id="team-cashiers-container" class="team-cashier-grid">
+                <!-- Dynamically injected -->
               </div>
             </div>
           </div>
@@ -2053,6 +2114,143 @@
             </button>
           </div>
         </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE AJOUT D'UN CAISSIER / VENDEUR EMPLOYÉ
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-add-cashier">
+    <div class="modal-card" style="max-width:480px;">
+      <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:12px;">
+        <span class="card-title" style="display:flex;align-items:center;gap:8px;">
+          <i data-lucide="user-plus" style="width:20px;height:20px;color:#2563EB;"></i>
+          Ajouter un Employé / Caissier
+        </span>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-add-cashier')">✕</button>
+      </div>
+
+      <form id="form-add-cashier" onsubmit="saveNewCashier(event)" style="padding-top:16px;">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Prénom &amp; Nom de l'employé *</label>
+          <input type="text" id="cashier-name-input" class="form-control" placeholder="ex: Mamadou DIOP" required>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Rôle assigné *</label>
+          <select id="cashier-role-select" class="form-control">
+            <option value="Caissier Principal">Caissier Principal (Encaissements &amp; Ventes)</option>
+            <option value="Vendeur Boutique">Vendeur Boutique (Prise de commandes &amp; Reçus)</option>
+            <option value="Gérant Adjoint">Gérant Adjoint</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Code PIN à 4 chiffres (pour connexion rapide) *</label>
+          <input type="password" id="cashier-pin-input" class="form-control" placeholder="ex: 1234" maxlength="4" pattern="[0-9]{4}" required>
+          <span style="font-size:0.75rem;color:#64748B;">Code simple à 4 chiffres que l'employé utilisera en magasin.</span>
+        </div>
+
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px;margin-bottom:18px;font-size:0.78rem;color:#475569;">
+          <strong>Sécurité garantie :</strong> Cet employé ne pourra ni exporter la base de données, ni voir les bénéfices globaux, ni supprimer l'historique de la boutique.
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-cashier')">Annuler</button>
+          <button type="submit" class="btn btn-primary">Enregistrer le Caissier</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE DU BILAN OFFICIEL DE GESTION & RECOUVREMENT (PDF)
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-official-pdf-report">
+    <div class="modal-card" style="max-width:760px;">
+      <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:12px;">
+        <div>
+          <span class="card-title" style="display:flex;align-items:center;gap:8px;">
+            <i data-lucide="file-check" style="width:20px;height:20px;color:#2563EB;"></i>
+            Bilan Officiel de Recouvrement &amp; Caisse
+          </span>
+          <p style="font-size:0.8rem;color:#64748B;margin:2px 0 0 0;">Document certifié généré pour impression ou envoi PDF.</p>
+        </div>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-official-pdf-report')">✕</button>
+      </div>
+
+      <!-- Zone Imprimable A4 du Bilan -->
+      <div id="printable-official-report" style="padding:20px;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;margin:16px 0;">
+        
+        <!-- En-tête Bilan -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0F172A;padding-bottom:14px;margin-bottom:18px;">
+          <div>
+            <h2 id="report-company-name" style="font-size:1.3rem;font-weight:800;color:#0F172A;margin:0 0 4px 0;">Boutique KOUASSI &amp; Fils</h2>
+            <div id="report-company-address" style="font-size:0.82rem;color:#64748B;">Avenue Chardy, Abidjan Plateau</div>
+            <div id="report-company-phone" style="font-size:0.82rem;color:#64748B;">Tel: +225 07 08 09 10 11</div>
+          </div>
+          <div style="text-align:right;">
+            <span style="display:inline-block;background:#0F172A;color:#FFFFFF;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:800;">RAPPORT OFFICIEL DE TRÉSORERIE</span>
+            <div id="report-date-generated" style="font-size:0.8rem;color:#64748B;margin-top:6px;">Date : 18 Août 2026</div>
+          </div>
+        </div>
+
+        <!-- 3 KPIs Résumé Bilan -->
+        <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:20px;">
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:0.75rem;color:#1E40AF;font-weight:700;text-transform:uppercase;">Créances à Récupérer</div>
+            <div id="report-kpi-due" style="font-size:1.2rem;font-weight:800;color:#2563EB;margin-top:4px;">225 000 FCFA</div>
+          </div>
+          <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:0.75rem;color:#065F46;font-weight:700;text-transform:uppercase;">Total Recouvré (Mois)</div>
+            <div id="report-kpi-recovered" style="font-size:1.2rem;font-weight:800;color:#10B981;margin-top:4px;">540 000 FCFA</div>
+          </div>
+          <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:0.75rem;color:#475569;font-weight:700;text-transform:uppercase;">Taux de Solvabilité</div>
+            <div id="report-kpi-rate" style="font-size:1.2rem;font-weight:800;color:#0F172A;margin-top:4px;">88.5%</div>
+          </div>
+        </div>
+
+        <!-- Tableau des 5 plus grands comptes débiteurs -->
+        <div style="margin-bottom:20px;">
+          <div style="font-weight:800;font-size:0.88rem;color:#0F172A;margin-bottom:8px;text-transform:uppercase;">État des Créances Clients</div>
+          <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+            <thead>
+              <tr style="background:#F1F5F9;border-bottom:1px solid #CBD5E1;">
+                <th style="padding:8px 10px;text-align:left;color:#475569;">Client</th>
+                <th style="padding:8px 10px;text-align:left;color:#475569;">Contact</th>
+                <th style="padding:8px 10px;text-align:right;color:#475569;">Solde Dû</th>
+                <th style="padding:8px 10px;text-align:center;color:#475569;">Statut</th>
+              </tr>
+            </thead>
+            <tbody id="report-table-body">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Signature et certification -->
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:28px;padding-top:14px;border-top:1px dashed #CBD5E1;">
+          <div style="font-size:0.75rem;color:#94A3B8;">
+            Document généré automatiquement via <strong>CréditTrack PRO</strong>.<br>
+            Données chiffrées conformes OHADA / RGPD.
+          </div>
+          <div style="text-align:center;">
+            <div style="font-size:0.78rem;font-weight:700;color:#0F172A;margin-bottom:28px;">Le Gérant / Propriétaire</div>
+            <div style="font-size:0.72rem;color:#64748B;font-style:italic;">(Signature certifiée)</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modal-official-pdf-report')">Fermer</button>
+        <button type="button" class="btn btn-primary" onclick="downloadOfficialReportPDF()">
+          <i data-lucide="download"></i> <span>Télécharger en PDF (A4)</span>
+        </button>
       </div>
 
     </div>

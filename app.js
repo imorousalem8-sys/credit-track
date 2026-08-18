@@ -3068,4 +3068,262 @@ window.handleSupportSubmit = function(e) {
   if (e.target && e.target.reset) e.target.reset();
 };
 
+// --------------------------------------------------------------------------
+// 17. GESTION DES CAISSIERS, ALERTES MATINALES & BILAN OFFICIEL PDF
+// --------------------------------------------------------------------------
+
+// 1. Initialisation de l'équipe et des caissiers
+AppState.team = JSON.parse(localStorage.getItem('ct_team_cashiers') || 'null') || [
+  { id: 'caisse_1', name: 'Mamadou DIOP', role: 'Caissier Principal', pin: '1234', active: true, totalCollected: 185000 }
+];
+AppState.activeSessionRole = localStorage.getItem('ct_active_role') || 'gerant'; // 'gerant' ou 'caissier'
+AppState.activeCashierName = localStorage.getItem('ct_active_cashier_name') || 'Gérant (Patron)';
+
+function saveTeamToStorage() {
+  localStorage.setItem('ct_team_cashiers', JSON.stringify(AppState.team));
+}
+
+window.renderTeamCashiers = function() {
+  const container = document.getElementById('team-cashiers-container');
+  if (!container) return;
+
+  if (AppState.team.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:30px 20px;color:#64748B;">
+        <strong>Aucun employé / caissier enregistré</strong>
+        <p style="font-size:0.8rem;margin:4px 0 0 0;">Cliquez sur « + Ajouter un Caissier » pour créer un accès sécurisé pour votre boutique.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = AppState.team.map(c => {
+    const isCurrentActive = AppState.activeCashierName === c.name && AppState.activeSessionRole === 'caissier';
+    return `
+      <div class="team-cashier-card ${isCurrentActive ? 'active' : ''}">
+        <div class="cashier-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="cashier-avatar">${escapeHTML(c.name.substring(0, 2).toUpperCase())}</div>
+            <div>
+              <strong style="font-size:0.9rem;color:#0F172A;display:block;">${escapeHTML(c.name)}</strong>
+              <span style="font-size:0.75rem;color:#64748B;">${escapeHTML(c.role)}</span>
+            </div>
+          </div>
+          <span style="background:${c.active ? '#ECFDF5' : '#F1F5F9'};color:${c.active ? '#10B981' : '#64748B'};padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:700;">
+            ${c.active ? 'Actif' : 'Désactivé'}
+          </span>
+        </div>
+
+        <div style="font-size:0.78rem;color:#64748B;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;">
+          <span>Code PIN Caisse : <strong>••••</strong></span>
+          <span>Encaissements : <strong style="color:#2563EB;">${formatCurrency(c.totalCollected || 0)}</strong></span>
+        </div>
+
+        <div style="display:flex;gap:6px;justify-content:flex-end;">
+          <button type="button" class="btn btn-outline" style="padding:4px 8px;font-size:0.75rem;" onclick="activateCashierSession('${escapeHTML(c.name)}')">
+            ${isCurrentActive ? 'Session Active' : 'Sélectionner'}
+          </button>
+          <button type="button" class="btn btn-outline" style="padding:4px 8px;font-size:0.75rem;color:#EF4444;border-color:#FCA5A5;" onclick="deleteCashier('${c.id}')" title="Supprimer">
+            ✕
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  updateSessionUI();
+};
+
+window.saveNewCashier = function(e) {
+  e.preventDefault();
+  const nameInput = document.getElementById('cashier-name-input');
+  const roleSelect = document.getElementById('cashier-role-select');
+  const pinInput = document.getElementById('cashier-pin-input');
+
+  const name = (nameInput?.value || '').trim();
+  const role = roleSelect?.value || 'Caissier Principal';
+  const pin = (pinInput?.value || '').trim();
+
+  if (!name || pin.length !== 4) {
+    showToast("Veuillez saisir un nom et un code PIN à 4 chiffres valide.");
+    return;
+  }
+
+  const newCashier = {
+    id: 'cashier_' + Date.now(),
+    name: name,
+    role: role,
+    pin: pin,
+    active: true,
+    totalCollected: 0
+  };
+
+  AppState.team.push(newCashier);
+  saveTeamToStorage();
+  closeModal('modal-add-cashier');
+  renderTeamCashiers();
+  showToast(`Caissier « ${name} » enregistré avec succès !`);
+
+  if (e.target && e.target.reset) e.target.reset();
+};
+
+window.deleteCashier = function(cashierId) {
+  if (!confirm("Voulez-vous vraiment supprimer cet accès caissier ?")) return;
+  AppState.team = AppState.team.filter(c => c.id !== cashierId);
+  saveTeamToStorage();
+  renderTeamCashiers();
+  showToast("Caissier supprimé.");
+};
+
+window.activateCashierSession = function(cashierName) {
+  AppState.activeSessionRole = 'caissier';
+  AppState.activeCashierName = cashierName;
+  localStorage.setItem('ct_active_role', 'caissier');
+  localStorage.setItem('ct_active_cashier_name', cashierName);
+  updateSessionUI();
+  showToast(`Session basculée sur le caissier : ${cashierName}`);
+};
+
+window.toggleCashierMode = function() {
+  if (AppState.activeSessionRole === 'gerant') {
+    const firstCashier = AppState.team[0];
+    AppState.activeSessionRole = 'caissier';
+    AppState.activeCashierName = firstCashier ? firstCashier.name : 'Caissier';
+  } else {
+    AppState.activeSessionRole = 'gerant';
+    AppState.activeCashierName = 'Gérant (Patron)';
+  }
+
+  localStorage.setItem('ct_active_role', AppState.activeSessionRole);
+  localStorage.setItem('ct_active_cashier_name', AppState.activeCashierName);
+  updateSessionUI();
+  showToast(`Session active : ${AppState.activeCashierName}`);
+};
+
+function updateSessionUI() {
+  const roleTag = document.getElementById('current-user-role-tag');
+  const sessionLabel = document.getElementById('team-active-session-label');
+  const btnToggle = document.getElementById('btn-toggle-cashier-text');
+
+  if (roleTag) {
+    roleTag.textContent = AppState.activeSessionRole === 'gerant' ? 'SESSION : GÉRANT (ACCÈS COMPLET)' : `SESSION : ${AppState.activeCashierName.toUpperCase()}`;
+    roleTag.style.background = AppState.activeSessionRole === 'gerant' ? 'rgba(255,255,255,0.2)' : '#10B981';
+  }
+
+  if (sessionLabel) {
+    sessionLabel.textContent = AppState.activeCashierName;
+  }
+
+  if (btnToggle) {
+    btnToggle.textContent = AppState.activeSessionRole === 'gerant' ? 'Passer en Mode Caissier' : 'Revenir en Mode Gérant (Patron)';
+  }
+}
+
+// 2. Alertes d'échéances matinales intelligentes
+window.renderMorningAlerts = function() {
+  const alertBox = document.getElementById('dash-morning-alerts-box');
+  const alertTitle = document.getElementById('morning-alerts-title');
+  const alertDesc = document.getElementById('morning-alerts-desc');
+  if (!alertBox) return;
+
+  const dueClients = AppState.clients.filter(c => c.totalDue > 0);
+  if (dueClients.length === 0) {
+    alertBox.style.display = 'none';
+    return;
+  }
+
+  const totalDueSum = dueClients.reduce((acc, c) => acc + c.totalDue, 0);
+  alertBox.style.display = 'flex';
+
+  if (alertTitle) {
+    alertTitle.textContent = `${dueClients.length} Créance(s) en attente d'encaissement`;
+  }
+  if (alertDesc) {
+    alertDesc.innerHTML = `Montant total à récupérer : <strong>${formatCurrency(totalDueSum)}</strong> auprès de vos clients.`;
+  }
+};
+
+// 3. Bilan officiel PDF de gestion et recouvrement
+window.openOfficialReportModal = function() {
+  const compName = document.getElementById('report-company-name');
+  const compAddr = document.getElementById('report-company-address');
+  const compPhone = document.getElementById('report-company-phone');
+  const dateGen = document.getElementById('report-date-generated');
+  
+  const kpiDue = document.getElementById('report-kpi-due');
+  const kpiRec = document.getElementById('report-kpi-recovered');
+  const kpiRate = document.getElementById('report-kpi-rate');
+  const tableBody = document.getElementById('report-table-body');
+
+  if (compName) compName.textContent = AppState.businessName || 'Boutique KOUASSI & Fils';
+  if (compAddr) compAddr.textContent = AppState.businessAddress || 'Avenue Chardy, Abidjan';
+  if (compPhone) compPhone.textContent = `Tel: ${AppState.businessPhone || '+225 07 08 09 10 11'}`;
+  if (dateGen) dateGen.textContent = `Date : ${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+  const totalDue = AppState.clients.reduce((acc, c) => acc + c.totalDue, 0);
+  const totalRecovered = AppState.payments.reduce((acc, p) => acc + (p.amount || 0), 0);
+  const totalVolume = totalDue + totalRecovered;
+  const rate = totalVolume > 0 ? Math.round((totalRecovered / totalVolume) * 100) : 100;
+
+  if (kpiDue) kpiDue.textContent = formatCurrency(totalDue);
+  if (kpiRec) kpiRec.textContent = formatCurrency(totalRecovered);
+  if (kpiRate) kpiRate.textContent = `${rate}%`;
+
+  if (tableBody) {
+    const debtorClients = AppState.clients.filter(c => c.totalDue > 0).slice(0, 8);
+    if (debtorClients.length === 0) {
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align:center;padding:16px;color:#64748B;">
+            Toutes les créances sont à jour. Aucun impayé constaté.
+          </td>
+        </tr>
+      `;
+    } else {
+      tableBody.innerHTML = debtorClients.map(c => `
+        <tr style="border-bottom:1px solid #F1F5F9;">
+          <td style="padding:8px 10px;font-weight:700;color:#0F172A;">${escapeHTML(c.name)}</td>
+          <td style="padding:8px 10px;color:#64748B;">${escapeHTML(c.phone)}</td>
+          <td style="padding:8px 10px;text-align:right;font-weight:800;color:#2563EB;">${formatCurrency(c.totalDue)}</td>
+          <td style="padding:8px 10px;text-align:center;">
+            <span style="background:#FEF3C7;color:#D97706;padding:2px 8px;border-radius:4px;font-size:0.72rem;font-weight:700;">En Cours</span>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+
+  openModal('modal-official-pdf-report');
+  if (window.lucide) lucide.createIcons();
+};
+
+window.downloadOfficialReportPDF = function() {
+  const element = document.getElementById('printable-official-report');
+  if (!element) return;
+
+  if (window.html2pdf) {
+    const opt = {
+      margin: 10,
+      filename: `Bilan_Recouvrement_${(AppState.businessName || 'CreditTrack').replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+    showToast("Bilan officiel PDF téléchargé avec succès !");
+  } else {
+    window.print();
+  }
+};
+
+// Initialisation au chargement
+window.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    renderTeamCashiers();
+    renderMorningAlerts();
+    updateSessionUI();
+  }, 1000);
+});
+
+
 

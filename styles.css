@@ -1977,6 +1977,123 @@ body.is-app-mode #app-workspace-layout {
     grid-template-columns: 1fr;
     gap: 24px;
   }
+
+/* ==========================================================================
+   ALERTES D'ÉCHÉANCES MATINALES, GESTION DES CAISSIERS & BILAN PDF
+   ========================================================================== */
+.morning-alerts-card {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  border: 1px solid #FCD34D;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.08);
+}
+
+.morning-alerts-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.morning-alerts-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #F59E0B;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+}
+
+.morning-alerts-text h3 {
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: #92400E;
+  margin-bottom: 2px;
+}
+
+.morning-alerts-text p {
+  font-size: 0.82rem;
+  color: #B45309;
+  margin: 0;
+}
+
+.morning-alerts-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.team-cashier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.team-cashier-card {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.team-cashier-card.active {
+  border-color: #2563EB;
+  background: #EFF6FF;
+}
+
+.cashier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cashier-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: #2563EB;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.btn-pdf-export {
+  background: #0F172A;
+  color: #FFFFFF;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-pdf-export:hover {
+  background: #1E293B;
+  transform: translateY(-1px);
+}
 /* ==========================================================================
    BANNIÈRE DE CONSENTEMENT AUX COOKIES & CENTRE DE CONFIDENTIALITÉ
    ========================================================================== */
