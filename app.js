@@ -2222,6 +2222,101 @@ window.backToAuthRegister = function() {
   switchAuthTab('register');
 };
 
+// --------------------------------------------------------------------------
+// GESTIONNAIRE DES 6 CASES NUMÉRIQUES OTP AVEC SAUT AUTOMATIQUE & COPIER-COLLER
+// --------------------------------------------------------------------------
+function setupOtpInputsListeners() {
+  const container = document.getElementById('otp-inputs-container');
+  if (!container) return;
+
+  const inputs = Array.from(container.querySelectorAll('.otp-digit-input'));
+  if (inputs.length !== 6) return;
+
+  inputs.forEach((input, index) => {
+    // 1. Saisie d'un chiffre & saut automatique
+    input.addEventListener('input', (e) => {
+      const val = e.target.value.replace(/[^0-9]/g, '');
+      e.target.value = val ? val.slice(-1) : '';
+
+      if (e.target.value) {
+        e.target.classList.add('filled');
+        if (index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+      } else {
+        e.target.classList.remove('filled');
+      }
+
+      // Auto-validation si les 6 cases sont remplies
+      const fullCode = getOtpCodeFromInputs();
+      if (fullCode.length === 6) {
+        const form = document.getElementById('form-auth-verify-otp');
+        if (form) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+      }
+    });
+
+    // 2. Navigation clavier (Backspace & Flèches)
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace') {
+        if (!e.target.value && index > 0) {
+          inputs[index - 1].focus();
+          inputs[index - 1].value = '';
+          inputs[index - 1].classList.remove('filled');
+        } else {
+          e.target.classList.remove('filled');
+        }
+      } else if (e.key === 'ArrowLeft' && index > 0) {
+        inputs[index - 1].focus();
+      } else if (e.key === 'ArrowRight' && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
+    });
+
+    // 3. Prise en charge du copier-coller (Paste)
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasteData = (e.clipboardData || window.clipboardData).getData('text');
+      const digits = pasteData.replace(/[^0-9]/g, '').slice(0, 6);
+
+      if (digits) {
+        digits.split('').forEach((d, i) => {
+          if (inputs[i]) {
+            inputs[i].value = d;
+            inputs[i].classList.add('filled');
+          }
+        });
+
+        const focusIndex = Math.min(digits.length, inputs.length - 1);
+        inputs[focusIndex].focus();
+
+        if (digits.length === 6) {
+          const form = document.getElementById('form-auth-verify-otp');
+          if (form) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
+        }
+      }
+    });
+  });
+}
+
+function getOtpCodeFromInputs() {
+  const container = document.getElementById('otp-inputs-container');
+  if (!container) return '';
+  const inputs = Array.from(container.querySelectorAll('.otp-digit-input'));
+  return inputs.map(i => i.value.trim()).join('');
+}
+
+function clearOtpInputs() {
+  const container = document.getElementById('otp-inputs-container');
+  if (!container) return;
+  const inputs = Array.from(container.querySelectorAll('.otp-digit-input'));
+  inputs.forEach((i, idx) => {
+    i.value = '';
+    i.classList.remove('filled');
+    i.style.borderColor = '';
+    if (idx === 0) setTimeout(() => i.focus(), 100);
+  });
+}
+
 window.promptPendingVerification = function() {
   const emailInput = prompt("Veuillez saisir votre adresse e-mail pour valider le code OTP reçu :");
   if (emailInput) {
@@ -2250,13 +2345,9 @@ function showOtpVerificationView(email) {
   if (modalTitle) modalTitle.textContent = 'Vérification de votre E-mail';
   if (targetDisplay) targetDisplay.textContent = maskEmail(email);
 
-  const otpInput = document.getElementById('auth-otp-code');
-  if (otpInput) {
-    otpInput.value = '';
-    otpInput.focus();
-  }
-
+  clearOtpInputs();
   startResendCooldown(60);
+  if (window.lucide) lucide.createIcons();
 }
 
 window.handleRegisterSubmit = async function(e) {
@@ -2295,9 +2386,9 @@ window.handleRegisterSubmit = async function(e) {
     return;
   }
 
-  // 3. Validation de mot de passe
-  if (!password || password.length < 6) {
-    showToast("Le mot de passe doit comporter au moins 6 caractères.");
+  // 3. Validation de mot de passe (Minimum 8 caractères)
+  if (!password || password.length < 8) {
+    showToast("Le mot de passe doit comporter au moins 8 caractères.");
     if (passInput) {
       passInput.style.borderColor = '#EF4444';
       passInput.focus();
@@ -2343,26 +2434,43 @@ window.handleRegisterSubmit = async function(e) {
       });
 
       if (error) {
-        if (error.message && (error.message.includes('already registered') || error.message.includes('already exists') || error.status === 422)) {
-          showToast("Un compte existe déjà avec cette adresse email. Veuillez vous connecter.");
-          switchAuthTab('login');
-          const loginEmail = document.getElementById('auth-login-email');
-          if (loginEmail) loginEmail.value = email;
+        // Si rate limit de 60s d'envoi d'e-mail par Supabase
+        if (error.code === 'over_email_send_rate_limit' || error.status === 429) {
+          showToast("Un code vous a déjà été envoyé récemment. Saisissez-le ci-dessous :");
+          showOtpVerificationView(email);
           return;
         }
+
+        // Si l'adresse est déclarée invalide par le serveur DNS
+        if (error.code === 'email_address_invalid' || (error.message && error.message.includes('invalid'))) {
+          showToast("Cette adresse e-mail est invalide ou n'existe pas. Veuillez vérifier votre saisie.");
+          if (emailInput) {
+            emailInput.style.borderColor = '#EF4444';
+            emailInput.focus();
+            setTimeout(() => { emailInput.style.borderColor = ''; }, 3000);
+          }
+          return;
+        }
+
+        // Si l'utilisateur est déjà inscrit
+        if (error.message && (error.message.includes('already registered') || error.message.includes('already exists') || error.status === 422)) {
+          showToast("Inscription existante. Veuillez saisir le code reçu ou vous connecter.");
+          showOtpVerificationView(email);
+          return;
+        }
+
         throw error;
       }
 
+      // Si l'adresse existait déjà sans identité nouvelle
       if (data && data.user && data.user.identities && data.user.identities.length === 0) {
-        showToast("Cette adresse email est déjà enregistrée. Veuillez vous connecter.");
-        switchAuthTab('login');
-        const loginEmail = document.getElementById('auth-login-email');
-        if (loginEmail) loginEmail.value = email;
+        showToast("Un compte existe avec cet email. Saisissez votre code de validation :");
+        showOtpVerificationView(email);
         return;
       }
     }
 
-    // Basculer vers l'écran de saisie du code OTP avec email masqué
+    // Basculer directement vers l'écran de saisie du code OTP à 6 cases
     showOtpVerificationView(email);
     showToast(`Un code de sécurité à 6 chiffres a été envoyé à ${maskEmail(email)} !`);
   } catch (err) {
@@ -2378,16 +2486,15 @@ window.handleRegisterSubmit = async function(e) {
 
 window.handleVerifyOtpSubmit = async function(e) {
   e.preventDefault();
-  const otpInput = document.getElementById('auth-otp-code');
-  const rawCode = (otpInput?.value || '').trim();
-  const otpCode = rawCode.replace(/[^0-9]/g, '');
+  const otpCode = getOtpCodeFromInputs();
 
   if (!otpCode || otpCode.length < 6) {
-    showToast("Veuillez entrer le code de sécurité à 6 chiffres reçu par mail.");
-    if (otpInput) {
-      otpInput.style.borderColor = '#EF4444';
-      otpInput.focus();
-      setTimeout(() => { otpInput.style.borderColor = ''; }, 3000);
+    showToast("Veuillez saisir les 6 chiffres du code de vérification reçu.");
+    const container = document.getElementById('otp-inputs-container');
+    if (container) {
+      const inputs = container.querySelectorAll('.otp-digit-input');
+      inputs.forEach(i => { if (!i.value) i.style.borderColor = '#EF4444'; });
+      setTimeout(() => { inputs.forEach(i => i.style.borderColor = ''); }, 3000);
     }
     return;
   }
@@ -2403,14 +2510,14 @@ window.handleVerifyOtpSubmit = async function(e) {
     let userEmail = pendingAuthData.email;
 
     if (window.supabaseClient) {
-      // Vérification côté serveur par Supabase Auth
+      // 1. Vérification côté serveur par Supabase Auth (type: 'signup')
       let verifyRes = await window.supabaseClient.auth.verifyOtp({
         email: pendingAuthData.email,
         token: otpCode,
         type: 'signup'
       });
 
-      // Fallback si le type de confirmation est 'email'
+      // 2. Fallback si le type de confirmation configuré sur le serveur est 'email'
       if (verifyRes.error) {
         verifyRes = await window.supabaseClient.auth.verifyOtp({
           email: pendingAuthData.email,
@@ -2442,7 +2549,7 @@ window.handleVerifyOtpSubmit = async function(e) {
     localStorage.setItem('userPlan', 'trial_3_months');
     localStorage.setItem('userName', AppState.userName);
 
-    // Charger immédiatement le jeu de données isolé propre à cet utilisateur
+    // Charger immédiatement le jeu de données propre à cet utilisateur
     AppState.clients = getCachedArray('credittrack_clients');
     AppState.payments = getCachedArray('credittrack_payments');
     AppState.accountingEntries = getCachedArray('credittrack_accounting');
@@ -2461,21 +2568,28 @@ window.handleVerifyOtpSubmit = async function(e) {
     updateUserPlanBadgeUI();
     closeModal('modal-auth');
 
-    // Ouvrir directement l'espace de travail sécurisé
+    // Ouvrir directement le Tableau de Bord (Dashboard)
     openAppWorkspace('menu-2');
 
-    showToast(`Bienvenue ${AppState.user.businessName} ! Compte vérifié & 3 Mois d'Essai activés !`);
+    showToast(`Bienvenue ${AppState.user.businessName} ! Compte vérifié avec succès & 3 Mois d'Essai activés !`);
   } catch (err) {
     console.error("Erreur validation OTP:", err);
-    showToast("Code incorrect ou expiré. Veuillez vérifier votre boîte mail.");
-    if (otpInput) {
-      otpInput.style.borderColor = '#EF4444';
-      setTimeout(() => { otpInput.style.borderColor = ''; }, 3500);
+    showToast("Code incorrect ou expiré. Veuillez vérifier votre boîte mail et réessayer.");
+    const container = document.getElementById('otp-inputs-container');
+    if (container) {
+      const inputs = container.querySelectorAll('.otp-digit-input');
+      inputs.forEach(i => {
+        i.style.borderColor = '#EF4444';
+        i.classList.remove('filled');
+      });
+      setTimeout(() => { inputs.forEach(i => i.style.borderColor = ''); }, 3500);
+      const firstInput = container.querySelector('.otp-digit-input');
+      if (firstInput) firstInput.focus();
     }
   } finally {
     if (verifyBtn) {
       verifyBtn.disabled = false;
-      verifyBtn.innerHTML = `Valider & Activer mon Compte`;
+      verifyBtn.innerHTML = `Valider et Activer mon Compte`;
     }
   }
 };
@@ -3318,6 +3432,7 @@ window.downloadOfficialReportPDF = function() {
 
 // Initialisation au chargement
 window.addEventListener('DOMContentLoaded', () => {
+  setupOtpInputsListeners();
   setTimeout(() => {
     renderTeamCashiers();
     renderMorningAlerts();

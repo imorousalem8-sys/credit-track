@@ -9,14 +9,14 @@ export interface ValidationResult {
 }
 
 // 1. POLITIQUE DE MOT DE PASSE ROBUSTE (NIST 800-63B / OWASP)
-// Minimum 12 caractères, avec Majuscule, Minuscule, Chiffre et Caractère Spécial
+// Minimum 8 caractères (12 recommandés), avec Majuscule, Minuscule et Chiffre
 export function validatePasswordStrength(password: string): ValidationResult {
   if (!password || typeof password !== 'string') {
     return { valid: false, error: 'Le mot de passe est obligatoire.' };
   }
 
-  if (password.length < 12) {
-    return { valid: false, error: 'Le mot de passe doit comporter au moins 12 caractères.' };
+  if (password.length < 8) {
+    return { valid: false, error: 'Le mot de passe doit comporter au moins 8 caractères.' };
   }
 
   if (password.length > 128) {
@@ -26,7 +26,6 @@ export function validatePasswordStrength(password: string): ValidationResult {
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
   const hasNumber = /[0-9]/.test(password);
-  const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?`~]/.test(password);
 
   if (!hasUpperCase) {
     return { valid: false, error: 'Le mot de passe doit contenir au moins une lettre majuscule (A-Z).' };
@@ -36,9 +35,6 @@ export function validatePasswordStrength(password: string): ValidationResult {
   }
   if (!hasNumber) {
     return { valid: false, error: 'Le mot de passe doit contenir au moins un chiffre (0-9).' };
-  }
-  if (!hasSpecial) {
-    return { valid: false, error: 'Le mot de passe doit contenir au moins un caractère spécial (!@#$%...).' };
   }
 
   // Liste de mots de passe triviaux courants

@@ -89,13 +89,26 @@ export async function POST(request: Request) {
         details: { message: error.message }
       });
 
-      if (error.message && (error.message.includes('already registered') || error.message.includes('already exists'))) {
-        return NextResponse.json(
-          { error: 'Un compte existe déjà avec cette adresse e-mail.', code: 'USER_EXISTS' },
-          { status: 409 }
-        );
+      if (error.code === 'over_email_send_rate_limit') {
+        return NextResponse.json({
+          success: true,
+          emailVerificationRequired: true,
+          message: 'Un code de sécurité vous a déjà été envoyé récemment. Veuillez saisir le code reçu.'
+        });
       }
-      return NextResponse.json({ error: 'Impossible de créer le compte pour le moment.' }, { status: 400 });
+
+      if (error.code === 'email_address_invalid' || (error.message && error.message.includes('invalid'))) {
+        return NextResponse.json({ error: 'Cette adresse e-mail est invalide ou introuvable.' }, { status: 400 });
+      }
+
+      if (error.message && (error.message.includes('already registered') || error.message.includes('already exists') || error.status === 422)) {
+        return NextResponse.json({
+          success: true,
+          emailVerificationRequired: true,
+          message: 'Inscription en attente. Veuillez saisir votre code de confirmation reçu par e-mail.'
+        });
+      }
+      return NextResponse.json({ error: error.message || 'Impossible de créer le compte pour le moment.' }, { status: 400 });
     }
 
     logSecurityEvent({
@@ -109,6 +122,7 @@ export async function POST(request: Request) {
     // 8. Réponse sécurisée sans exposer de secrets ou de tokens
     return NextResponse.json({
       success: true,
+      emailVerificationRequired: true,
       message: 'Un code de sécurité à 6 chiffres a été envoyé à votre adresse e-mail.'
     });
 

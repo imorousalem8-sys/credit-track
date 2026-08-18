@@ -71,21 +71,22 @@
           <div class="form-group" style="margin-bottom:12px;">
             <label class="form-label">Adresse E-mail Professionnelle *</label>
             <input type="email" id="auth-reg-email" class="form-control" placeholder="contact@entreprise.com" required autocomplete="email">
-            <small style="color:#64748B;font-size:0.73rem;margin-top:3px;display:block;">Un lien d'activation sécurisé et un code de confirmation seront envoyés à cette adresse.</small>
+            <small style="color:#64748B;font-size:0.73rem;margin-top:3px;display:block;">Un code de vérification à 6 chiffres vous sera envoyé par e-mail.</small>
           </div>
 
           <div class="form-group" style="margin-bottom:12px;">
-            <label class="form-label">Mot de passe * (min. 6 caractères)</label>
-            <input type="password" id="auth-reg-password" class="form-control" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+            <label class="form-label">Mot de passe * (min. 8 caractères)</label>
+            <input type="password" id="auth-reg-password" class="form-control" placeholder="••••••••" minlength="8" required autocomplete="new-password">
+            <small style="color:#64748B;font-size:0.72rem;margin-top:2px;display:block;">Majuscule, minuscule et au moins un chiffre recommandés.</small>
           </div>
 
           <div class="form-group" style="margin-bottom:16px;">
             <label class="form-label">Confirmez le Mot de passe *</label>
-            <input type="password" id="auth-reg-password-confirm" class="form-control" placeholder="••••••••" minlength="6" required autocomplete="new-password">
+            <input type="password" id="auth-reg-password-confirm" class="form-control" placeholder="••••••••" minlength="8" required autocomplete="new-password">
           </div>
 
           <button type="submit" id="auth-reg-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.92rem;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <span>Créer mon Compte</span>
+            <span>Créer mon Compte &amp; Recevoir le Code</span>
           </button>
         </form>
 
@@ -122,21 +123,32 @@
         </div>
       </div>
 
-      <!-- VUE 3 : ÉCRAN DE VÉRIFICATION OTP SÉCURISÉ -->
+      <!-- VUE 3 : ÉCRAN DE VÉRIFICATION OTP SÉCURISÉ (6 CASES NUMÉRIQUES) -->
       <div id="auth-view-otp" style="display:none;text-align:center;padding:10px 0;">
         <div style="width:48px;height:48px;background:#EFF6FF;color:#2563EB;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
           <i data-lucide="mail-check" style="width:24px;height:24px;"></i>
         </div>
-        <h4 style="font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:6px;">Vérification de votre adresse e-mail</h4>
+        <h4 style="font-size:1.15rem;font-weight:800;color:#0F172A;margin-bottom:6px;">Vérifiez votre adresse e-mail</h4>
         <p style="font-size:0.84rem;color:#64748B;margin-bottom:18px;line-height:1.5;">
-          Un code de confirmation et un lien d'activation ont été envoyés à :<br>
+          Un code de vérification à 6 chiffres a été envoyé à :<br>
           <strong id="auth-target-email-display" style="color:#2563EB;font-size:0.95rem;word-break:break-all;">u******@gmail.com</strong>
         </p>
 
         <form id="form-auth-verify-otp" onsubmit="handleVerifyOtpSubmit(event)">
           <div class="form-group" style="margin-bottom:18px;">
-            <label class="form-label" style="text-align:center;display:block;margin-bottom:8px;font-size:0.85rem;">Saisissez le code à 6 chiffres ou cliquez sur le lien reçu par e-mail :</label>
-            <input type="text" id="auth-otp-code" class="form-control" placeholder="• • • • • •" maxlength="8" pattern="[0-9\s]{6,8}" style="text-align:center;font-size:1.7rem;letter-spacing:8px;font-weight:800;padding:12px;max-width:260px;margin:0 auto;" required autocomplete="one-time-code" autofocus>
+            <label class="form-label" style="text-align:center;display:block;margin-bottom:10px;font-size:0.85rem;color:#334155;">
+              Saisissez le code à 6 chiffres reçu par e-mail :
+            </label>
+            
+            <!-- 6 CASES NUMÉRIQUES INDÉPENDANTES AVEC FOCUS AUTOMATIQUE -->
+            <div class="otp-inputs-grid" id="otp-inputs-container">
+              <input type="text" id="otp-digit-1" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" autofocus required>
+              <input type="text" id="otp-digit-2" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
+              <input type="text" id="otp-digit-3" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
+              <input type="text" id="otp-digit-4" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
+              <input type="text" id="otp-digit-5" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
+              <input type="text" id="otp-digit-6" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
+            </div>
           </div>
 
           <button type="submit" id="auth-verify-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.95rem;">

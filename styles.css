@@ -2094,6 +2094,53 @@ body.is-app-mode #app-workspace-layout {
   background: #1E293B;
   transform: translateY(-1px);
 }
+
+/* ==========================================================================
+   GRILLE DES 6 CASES DE SAISIE DU CODE OTP SÉCURISÉ
+   ========================================================================== */
+.otp-inputs-grid {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+  margin: 16px 0 20px 0;
+}
+
+.otp-digit-input {
+  width: 46px;
+  height: 54px;
+  border: 2px solid #CBD5E1;
+  border-radius: 10px;
+  background: #FFFFFF;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0F172A;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.otp-digit-input:focus {
+  border-color: #2563EB;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+  transform: translateY(-2px);
+}
+
+.otp-digit-input.filled {
+  border-color: #3B82F6;
+  background: #F8FAFC;
+}
+
+@media (max-width: 480px) {
+  .otp-digit-input {
+    width: 40px;
+    height: 48px;
+    font-size: 1.3rem;
+    gap: 6px;
+  }
+}
 /* ==========================================================================
    BANNIÈRE DE CONSENTEMENT AUX COOKIES & CENTRE DE CONFIDENTIALITÉ
    ========================================================================== */
