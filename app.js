@@ -3236,7 +3236,7 @@ window.handleSupportSubmit = function(e) {
 
 // 1. Initialisation de l'équipe et des caissiers
 AppState.team = JSON.parse(localStorage.getItem('ct_team_cashiers') || 'null') || [
-  { id: 'caisse_1', name: 'Mamadou DIOP', role: 'Caissier Principal', pin: '1234', active: true, totalCollected: 185000 }
+  { id: 'caisse_1', name: 'Mamadou DIOP', role: 'Caissier Principal', branch: 'Boutique Principale (Siège)', pin: '7492', active: true, totalCollected: 185000 }
 ];
 AppState.activeSessionRole = localStorage.getItem('ct_active_role') || 'gerant'; // 'gerant' ou 'caissier'
 AppState.activeCashierName = localStorage.getItem('ct_active_cashier_name') || 'Gérant (Patron)';
@@ -3253,7 +3253,7 @@ window.renderTeamCashiers = function() {
     container.innerHTML = `
       <div style="grid-column:1/-1;text-align:center;padding:30px 20px;color:#64748B;">
         <strong>Aucun employé / caissier enregistré</strong>
-        <p style="font-size:0.8rem;margin:4px 0 0 0;">Cliquez sur « + Ajouter un Caissier » pour créer un accès sécurisé pour votre boutique.</p>
+        <p style="font-size:0.8rem;margin:4px 0 0 0;">Cliquez sur « + Ajouter un Caissier » pour créer un accès sécurisé avec code PIN personnalisé.</p>
       </div>
     `;
     return;
@@ -3261,6 +3261,7 @@ window.renderTeamCashiers = function() {
 
   container.innerHTML = AppState.team.map(c => {
     const isCurrentActive = AppState.activeCashierName === c.name && AppState.activeSessionRole === 'caissier';
+    const branchLabel = c.branch || 'Boutique Principale';
     return `
       <div class="team-cashier-card ${isCurrentActive ? 'active' : ''}">
         <div class="cashier-header">
@@ -3268,7 +3269,7 @@ window.renderTeamCashiers = function() {
             <div class="cashier-avatar">${escapeHTML(c.name.substring(0, 2).toUpperCase())}</div>
             <div>
               <strong style="font-size:0.9rem;color:#0F172A;display:block;">${escapeHTML(c.name)}</strong>
-              <span style="font-size:0.75rem;color:#64748B;">${escapeHTML(c.role)}</span>
+              <span style="font-size:0.75rem;color:#64748B;">${escapeHTML(c.role)} • <span style="color:#2563EB;font-weight:700;">${escapeHTML(branchLabel)}</span></span>
             </div>
           </div>
           <span style="background:${c.active ? '#ECFDF5' : '#F1F5F9'};color:${c.active ? '#10B981' : '#64748B'};padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:700;">
@@ -3276,8 +3277,8 @@ window.renderTeamCashiers = function() {
           </span>
         </div>
 
-        <div style="font-size:0.78rem;color:#64748B;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;">
-          <span>Code PIN Caisse : <strong>••••</strong></span>
+        <div style="font-size:0.78rem;color:#64748B;background:#FFFFFF;border:1px solid #E2E8F0;border-radius:8px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;">
+          <span>Code PIN : <strong style="color:#0F172A;font-family:monospace;letter-spacing:1px;">${escapeHTML(c.pin || '****')}</strong></span>
           <span>Encaissements : <strong style="color:#2563EB;">${formatCurrency(c.totalCollected || 0)}</strong></span>
         </div>
 
@@ -3300,14 +3301,26 @@ window.saveNewCashier = function(e) {
   e.preventDefault();
   const nameInput = document.getElementById('cashier-name-input');
   const roleSelect = document.getElementById('cashier-role-select');
+  const branchSelect = document.getElementById('cashier-branch-select');
   const pinInput = document.getElementById('cashier-pin-input');
 
   const name = (nameInput?.value || '').trim();
   const role = roleSelect?.value || 'Caissier Principal';
-  const pin = (pinInput?.value || '').trim();
+  const branch = branchSelect?.value || 'Boutique Principale (Siège)';
+  const pin = (pinInput?.value || '').trim().replace(/[^0-9]/g, '');
 
-  if (!name || pin.length !== 4) {
-    showToast("Veuillez saisir un nom et un code PIN à 4 chiffres valide.");
+  if (!name) {
+    showToast("Veuillez saisir le nom de l'employé.");
+    return;
+  }
+
+  if (pin.length < 4 || pin.length > 8) {
+    showToast("Le code PIN doit comporter entre 4 et 8 chiffres.");
+    if (pinInput) {
+      pinInput.style.borderColor = '#EF4444';
+      pinInput.focus();
+      setTimeout(() => { pinInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
@@ -3315,6 +3328,7 @@ window.saveNewCashier = function(e) {
     id: 'cashier_' + Date.now(),
     name: name,
     role: role,
+    branch: branch,
     pin: pin,
     active: true,
     totalCollected: 0
@@ -3324,7 +3338,7 @@ window.saveNewCashier = function(e) {
   saveTeamToStorage();
   closeModal('modal-add-cashier');
   renderTeamCashiers();
-  showToast(`Caissier « ${name} » enregistré avec succès !`);
+  showToast(`Caissier « ${name} » enregistré avec le code PIN ${pin} !`);
 
   if (e.target && e.target.reset) e.target.reset();
 };

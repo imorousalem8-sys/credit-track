@@ -548,149 +548,15 @@
 
       </div>
 
-      <!-- ── MOCKUP APPLICATIF VECTORIEL & VISUELS 3D HAUTE DÉFINITION ── -->
+      <!-- ── MOCKUP APPLICATIF HAUTE DÉFINITION — VUE MÉTIER FCFA ── -->
       <div class="lp-mockup-wrapper" id="demo-live">
-
-        <!-- Sélecteur de Présentation Visuelle -->
-        <div class="lp-showcase-controls">
-          <button type="button" id="btn-showcase-3d" class="lp-showcase-btn active" onclick="switchHeroView('3d')">
-            <i data-lucide="sparkles" style="width:14px;height:14px;"></i> Vue 3D Futuriste
-          </button>
-          <button type="button" id="btn-showcase-pro" class="lp-showcase-btn" onclick="switchHeroView('pro')">
-            <i data-lucide="layout-dashboard" style="width:14px;height:14px;"></i> Vue Métier FCFA
-          </button>
-          <button type="button" id="btn-showcase-live" class="lp-showcase-btn" onclick="switchHeroView('live')">
-            <i data-lucide="play-circle" style="width:14px;height:14px;"></i> Démo Interactive
-          </button>
-        </div>
-
-        <!-- VUE 1 : VISUEL 3D FUTURISTE HAUTE DÉFINITION (ACTIVE PAR DÉFAUT) -->
-        <div id="hero-view-3d" class="lp-hero-image-box" onclick="openAppWorkspace('menu-2')" title="Cliquez pour ouvrir l'application">
-          <img src="hero_dashboard_showcase.jpg" alt="CreditTrack PRO Dashboard 3D">
+        <div class="lp-hero-image-box" onclick="openAppWorkspace('menu-2')" title="Cliquez pour ouvrir l'application">
+          <img src="hero_dashboard_pro.jpg" alt="CreditTrack PRO Dashboard">
           <div class="lp-image-overlay-badge">
             <span class="pulse-live"></span>
-            <span>Interface SaaS CreditTrack PRO • Accéder en Direct →</span>
+            <span>CreditTrack PRO • Cliquez pour ouvrir la Démo Live →</span>
           </div>
         </div>
-
-        <!-- VUE 2 : VISUEL FINTECH AFRIQUE FCFA & WHATSAPP -->
-        <div id="hero-view-pro" class="lp-hero-image-box" style="display:none;" onclick="openAppWorkspace('menu-2')" title="Cliquez pour ouvrir l'application">
-          <img src="hero_dashboard_pro.jpg" alt="CreditTrack PRO Vue Métier FCFA">
-          <div class="lp-image-overlay-badge">
-            <span class="pulse-live"></span>
-            <span>Trésorerie & Recouvrement FCFA • Accéder en Direct →</span>
-          </div>
-        </div>
-
-        <!-- VUE 3 : FENÊTRE SAAS INTERACTIVE EN DIRECT -->
-        <div id="hero-view-live" style="display:none;position:relative;">
-          
-          <!-- Carte Flottante 1 : Notification WhatsApp -->
-          <div class="lp-floating-badge lp-floating-wa">
-            <div class="lp-float-icon green"><i data-lucide="message-square"></i></div>
-            <div>
-              <div class="lp-float-title">Rappel WhatsApp transmis</div>
-              <div class="lp-float-sub">Moussa K. (150 000 FCFA) • <span style="color:#10B981;font-weight:700;">Règlement Wave</span></div>
-            </div>
-          </div>
-
-          <!-- Carte Flottante 2 : Encaissement Validé -->
-          <div class="lp-floating-badge lp-floating-pay">
-            <div class="lp-float-icon blue"><i data-lucide="check-circle-2"></i></div>
-            <div>
-              <div class="lp-float-title">Paiement Enregistré</div>
-              <div class="lp-float-sub"><strong style="color:#10B981;">+75 000 FCFA</strong> • Reçu délivré</div>
-            </div>
-          </div>
-
-          <!-- Fenêtre SaaS Principale Vectorielle -->
-          <div class="lp-vector-window" onclick="openAppWorkspace('menu-2')" title="Cliquez pour ouvrir l'application">
-            
-            <!-- Barre Supérieure de l'Application -->
-            <div class="lp-win-header">
-              <div class="lp-win-dots">
-                <span class="dot red"></span>
-                <span class="dot yellow"></span>
-                <span class="dot green"></span>
-              </div>
-              <div class="lp-win-search">
-                <i data-lucide="search" style="width:12px;height:12px;color:#94A3B8;"></i>
-                <span>credittrack.pro/workspace/dashboard</span>
-              </div>
-              <div class="lp-win-live-badge">
-                <span class="pulse-live"></span> Système Actif
-              </div>
-            </div>
-
-            <!-- Corps du Dashboard Démo Live -->
-            <div class="lp-win-body">
-              
-              <!-- Mini KPIs -->
-              <div class="lp-win-kpis">
-                <div class="lp-win-kpi">
-                  <div class="kpi-tag">Total Recouvré ce Mois</div>
-                  <div class="kpi-num" style="color:#10B981;">1 450 000 FCFA</div>
-                  <div class="kpi-sub">+18.4% ce mois</div>
-                </div>
-                <div class="lp-win-kpi">
-                  <div class="kpi-tag">Clients à Jour</div>
-                  <div class="kpi-num" style="color:#2563EB;">48 / 50</div>
-                  <div class="kpi-sub">96% de taux de recouvrement</div>
-                </div>
-                <div class="lp-win-kpi">
-                  <div class="kpi-tag">Délai Moyen de Règlement</div>
-                  <div class="kpi-num" style="color:#F59E0B;">48 Heures</div>
-                  <div class="kpi-sub">Règlement sous 48h</div>
-                </div>
-              </div>
-
-              <!-- Mini Tableau des Créances en Direct -->
-              <div class="lp-win-table-box">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                  <span style="font-weight:700;font-size:0.85rem;color:#0F172A;">Dernières créances en cours</span>
-                  <span style="font-size:0.75rem;font-weight:700;color:#2563EB;">+ Saisir un Crédit</span>
-                </div>
-                <div class="lp-win-table-row">
-                  <div class="client-cell">
-                    <div class="avatar-cell">SK</div>
-                    <div>
-                      <div class="c-name">Société Kouassi &amp; Frères</div>
-                      <div class="c-phone">+225 07 01 02 03</div>
-                    </div>
-                  </div>
-                  <div class="amount-cell" style="color:#2563EB;">150 000 FCFA</div>
-                  <div class="status-cell"><span class="badge-status paid">Score 94/100</span></div>
-                  <div class="action-cell">
-                    <span class="mini-btn-wa">WhatsApp</span>
-                  </div>
-                </div>
-
-                <div class="lp-win-table-row">
-                  <div class="client-cell">
-                    <div class="avatar-cell" style="background:#EF4444;color:#fff;">DT</div>
-                    <div>
-                      <div class="c-name">Diallo Transport SARL</div>
-                      <div class="c-phone">+225 05 04 03 02</div>
-                    </div>
-                  </div>
-                  <div class="amount-cell" style="color:#EF4444;">75 000 FCFA</div>
-                  <div class="status-cell"><span class="badge-status overdue">Retard 4 jours</span></div>
-                  <div class="action-cell">
-                    <span class="mini-btn-wa" style="background:#2563EB;color:#fff;">Relancer</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Overlay au survol du Mockup -->
-            <div class="lp-mockup-hover-overlay">
-              <span class="lp-hover-cta">Accéder à la démonstration en direct →</span>
-            </div>
-
-          </div>
-        </div>
-
       </div>
 
     </section>
@@ -2138,14 +2004,27 @@
           <select id="cashier-role-select" class="form-control">
             <option value="Caissier Principal">Caissier Principal (Encaissements &amp; Ventes)</option>
             <option value="Vendeur Boutique">Vendeur Boutique (Prise de commandes &amp; Reçus)</option>
+            <option value="Responsable de Caisse">Responsable de Caisse</option>
             <option value="Gérant Adjoint">Gérant Adjoint</option>
           </select>
         </div>
 
         <div class="form-group" style="margin-bottom:14px;">
-          <label class="form-label">Code PIN à 4 chiffres (pour connexion rapide) *</label>
-          <input type="password" id="cashier-pin-input" class="form-control" placeholder="ex: 1234" maxlength="4" pattern="[0-9]{4}" required>
-          <span style="font-size:0.75rem;color:#64748B;">Code simple à 4 chiffres que l'employé utilisera en magasin.</span>
+          <label class="form-label">Boutique / Point de Vente assigné *</label>
+          <select id="cashier-branch-select" class="form-control">
+            <option value="Boutique Principale (Siège)">Boutique Principale (Siège)</option>
+            <option value="Boutique 2 (Succursale)">Boutique 2 (Succursale)</option>
+            <option value="Point de Vente Marché">Point de Vente Marché</option>
+            <option value="Toutes les boutiques">Toutes les boutiques (Polyvalent)</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Code PIN Secret Personnalisé (4 à 8 chiffres) *</label>
+          <div style="position:relative;">
+            <input type="text" id="cashier-pin-input" class="form-control" placeholder="ex: 7492" minlength="4" maxlength="8" pattern="[0-9]{4,8}" required style="font-weight:700;letter-spacing:2px;">
+          </div>
+          <span style="font-size:0.75rem;color:#64748B;">Définissez le code PIN secret que cet employé utilisera pour sa session de caisse.</span>
         </div>
 
         <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px;margin-bottom:18px;font-size:0.78rem;color:#475569;">
