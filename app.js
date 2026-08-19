@@ -2354,22 +2354,6 @@ function clearOtpInputs() {
   });
 }
 
-window.fillMasterOtpCode = function() {
-  const container = document.getElementById('otp-inputs-container');
-  if (!container) return;
-  const inputs = Array.from(container.querySelectorAll('.otp-digit-input'));
-  const digits = '202688'.split('');
-  inputs.forEach((input, index) => {
-    if (digits[index]) {
-      input.value = digits[index];
-      input.classList.add('filled');
-    }
-  });
-  showToast("Code d'accès 202688 inséré avec succès !");
-  const form = document.getElementById('form-auth-verify-otp');
-  if (form) form.requestSubmit ? form.requestSubmit() : form.dispatchEvent(new Event('submit', { cancelable: true }));
-};
-
 window.promptPendingVerification = function() {
   const emailInput = prompt("Veuillez saisir votre adresse e-mail pour valider le code OTP reçu :");
   if (emailInput) {
