@@ -64,7 +64,7 @@ export default function AccountingDashboard() {
               <div className="card-header-kpi">
                 Total Actif <ArrowUpRight className="text-success" size={16}/>
               </div>
-              <div className="card-value-kpi">{totalAsset.toLocaleString('fr-FR')} €</div>
+              <div className="card-value-kpi">{totalAsset.toLocaleString('fr-FR')} FCFA</div>
               <div className="card-sub-kpi text-success">Caisse, Banque, Créances</div>
             </div>
             
@@ -72,7 +72,7 @@ export default function AccountingDashboard() {
               <div className="card-header-kpi">
                 Total Passif <ArrowDownRight className="text-danger" size={16}/>
               </div>
-              <div className="card-value-kpi">{totalLiability.toLocaleString('fr-FR')} €</div>
+              <div className="card-value-kpi">{totalLiability.toLocaleString('fr-FR')} FCFA</div>
               <div className="card-sub-kpi text-danger">Dettes & Engagements</div>
             </div>
 
@@ -80,14 +80,14 @@ export default function AccountingDashboard() {
               <div className="card-header-kpi">
                 Chiffre d'Affaires <ArrowUpRight className="text-success" size={16}/>
               </div>
-              <div className="card-value-kpi primary">{totalRevenue.toLocaleString('fr-FR')} €</div>
+              <div className="card-value-kpi primary">{totalRevenue.toLocaleString('fr-FR')} FCFA</div>
             </div>
             
             <div className="card">
               <div className="card-header-kpi">
                 Total Dépenses <ArrowDownRight className="text-warning" size={16}/>
               </div>
-              <div className="card-value-kpi">{totalExpense.toLocaleString('fr-FR')} €</div>
+              <div className="card-value-kpi">{totalExpense.toLocaleString('fr-FR')} FCFA</div>
             </div>
           </div>
 

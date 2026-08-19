@@ -25,9 +25,9 @@ export default function ClientsPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
       {/* Header Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px' }}>
         <div>
-          <h1 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#0F172A', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Users size={24} className="text-blue-600" />
             Répertoire des Clients & Scoring Solvabilité
           </h1>
@@ -40,7 +40,7 @@ export default function ClientsPage() {
           type="button" 
           className="btn btn-primary"
           onClick={() => setIsNewCreditModalOpen(true)}
-          style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', padding: '10px 20px', borderRadius: '10px', fontWeight: 800 }}
+          style={{ background: 'linear-gradient(135deg, #2563EB, #1D4ED8)', padding: '10px 18px', borderRadius: '10px', fontWeight: 800, minHeight: '44px' }}
         >
           <PlusCircle size={18} /> Nouveau Client
         </button>
@@ -103,84 +103,103 @@ export default function ClientsPage() {
       </div>
 
       {/* Clients Table Card */}
-      <div className="card" style={{ background: '#fff', borderRadius: '14px', border: '1px solid #E2E8F0', padding: 0, overflow: 'hidden' }}>
-        <div className="table-responsive">
-          <table className="custom-table" style={{ width: '100%', margin: 0 }}>
-            <thead>
-              <tr style={{ background: '#F8FAFC' }}>
-                <th style={{ padding: '16px 20px' }}>Nom / Entreprise</th>
-                <th style={{ padding: '16px 20px' }}>Score de Solvabilité</th>
-                <th style={{ padding: '16px 20px' }}>Créance Restante</th>
-                <th style={{ padding: '16px 20px' }}>Statut</th>
-                <th style={{ padding: '16px 20px', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredClients.length === 0 ? (
-                <tr>
-                  <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>
-                    Aucun client ne correspond à votre recherche.
-                  </td>
+      <div className="card" style={{ background: '#fff', borderRadius: '14px', border: '1px solid #E2E8F0', padding: clients.length === 0 ? '16px' : 0, overflow: 'hidden' }}>
+        {clients.length === 0 ? (
+          <div className="empty-state-box">
+            <div className="empty-state-icon-box">
+              <Users size={26} />
+            </div>
+            <div className="empty-state-title">Aucun client dans votre répertoire</div>
+            <div className="empty-state-desc">
+              Commencez par ajouter votre premier client pour évaluer sa solvabilité et enregistrer des ventes à crédit.
+            </div>
+            <button 
+              type="button" 
+              className="empty-state-cta"
+              onClick={() => setIsNewCreditModalOpen(true)}
+            >
+              <PlusCircle size={16} /> Ajouter un premier client
+            </button>
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="custom-table" style={{ width: '100%', margin: 0 }}>
+              <thead>
+                <tr style={{ background: '#F8FAFC' }}>
+                  <th style={{ padding: '16px 20px' }}>Nom / Entreprise</th>
+                  <th style={{ padding: '16px 20px' }}>Score de Solvabilité</th>
+                  <th style={{ padding: '16px 20px' }}>Créance Restante</th>
+                  <th style={{ padding: '16px 20px' }}>Statut</th>
+                  <th style={{ padding: '16px 20px', textAlign: 'right' }}>Actions</th>
                 </tr>
-              ) : (
-                filteredClients.map(client => {
-                  const scoreColor = client.reliabilityScore >= 80 ? '#10B981' : (client.reliabilityScore >= 50 ? '#F59E0B' : '#EF4444');
-                  const scoreText = client.reliabilityScore >= 80 ? 'Très Fiable' : (client.reliabilityScore >= 50 ? 'Moyen' : 'Risqué');
+              </thead>
+              <tbody>
+                {filteredClients.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: '#94A3B8' }}>
+                      Aucun client ne correspond à votre filtre de recherche.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredClients.map(client => {
+                    const scoreColor = client.reliabilityScore >= 80 ? '#10B981' : (client.reliabilityScore >= 50 ? '#F59E0B' : '#EF4444');
+                    const scoreText = client.reliabilityScore >= 80 ? 'Très Fiable' : (client.reliabilityScore >= 50 ? 'Moyen' : 'Risqué');
 
-                  return (
-                    <tr key={client.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                      <td style={{ padding: '16px 20px' }}>
-                        <div style={{ fontWeight: 800, color: '#0F172A', fontSize: '0.92rem' }}>{client.name}</div>
-                        <div style={{ fontSize: '0.78rem', color: '#64748B' }}>{client.phone}</div>
-                      </td>
-                      <td style={{ padding: '16px 20px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontWeight: 800, color: scoreColor, fontSize: '0.88rem' }}>
-                            {client.reliabilityScore}/100
+                    return (
+                      <tr key={client.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ fontWeight: 800, color: '#0F172A', fontSize: '0.92rem' }}>{client.name}</div>
+                          <div style={{ fontSize: '0.78rem', color: '#64748B' }}>{client.phone}</div>
+                        </td>
+                        <td style={{ padding: '16px 20px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontWeight: 800, color: scoreColor, fontSize: '0.88rem' }}>
+                              {client.reliabilityScore}/100
+                            </span>
+                            <span style={{ fontSize: '0.72rem', color: '#64748B' }}>({scoreText})</span>
+                          </div>
+                          <div style={{ width: '120px', height: '6px', background: '#E2E8F0', borderRadius: '3px', marginTop: '6px' }}>
+                            <div style={{ width: `${client.reliabilityScore}%`, height: '100%', background: scoreColor, borderRadius: '3px' }}></div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px 20px', fontWeight: 800, fontSize: '0.95rem', color: client.totalDue > 0 ? '#2563EB' : '#10B981' }}>
+                          {formatAmount(client.totalDue)}
+                        </td>
+                        <td style={{ padding: '16px 20px' }}>
+                          <span className={`badge-status ${client.status}`}>
+                            {client.status === 'paid' ? 'À Jour' : client.status === 'overdue' ? 'Impayé' : 'En cours'}
                           </span>
-                          <span style={{ fontSize: '0.72rem', color: '#64748B' }}>({scoreText})</span>
-                        </div>
-                        <div style={{ width: '120px', height: '6px', background: '#E2E8F0', borderRadius: '3px', marginTop: '6px' }}>
-                          <div style={{ width: `${client.reliabilityScore}%`, height: '100%', background: scoreColor, borderRadius: '3px' }}></div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px 20px', fontWeight: 800, fontSize: '0.95rem', color: client.totalDue > 0 ? '#2563EB' : '#10B981' }}>
-                        {formatAmount(client.totalDue)}
-                      </td>
-                      <td style={{ padding: '16px 20px' }}>
-                        <span className={`badge-status ${client.status}`}>
-                          {client.status === 'paid' ? 'À Jour' : client.status === 'overdue' ? 'Impayé' : 'En cours'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '16px 20px', textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '8px' }}>
-                          <button 
-                            type="button" 
-                            className="btn btn-outline"
-                            style={{ padding: '6px 12px', fontSize: '0.78rem', borderColor: '#2563EB', color: '#2563EB' }}
-                            onClick={() => setSelectedClient(client)}
-                          >
-                            <Eye size={14} /> Fiche
-                          </button>
-                          {client.totalDue > 0 && (
+                        </td>
+                        <td style={{ padding: '16px 20px', textAlign: 'right' }}>
+                          <div style={{ display: 'inline-flex', gap: '8px' }}>
                             <button 
                               type="button" 
-                              className="btn"
-                              style={{ background: '#25D366', color: '#fff', padding: '6px 12px', fontSize: '0.78rem', fontWeight: 700 }}
-                              onClick={() => sendWhatsApp(client.name, client.phone, client.totalDue)}
+                              className="btn btn-outline"
+                              style={{ padding: '6px 12px', fontSize: '0.78rem', borderColor: '#2563EB', color: '#2563EB' }}
+                              onClick={() => setSelectedClient(client)}
                             >
-                              <MessageSquare size={14} /> Relancer
+                              <Eye size={14} /> Fiche
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                            {client.totalDue > 0 && (
+                              <button 
+                                type="button" 
+                                className="btn"
+                                style={{ background: '#25D366', color: '#fff', padding: '6px 12px', fontSize: '0.78rem', fontWeight: 700 }}
+                                onClick={() => sendWhatsApp(client.name, client.phone, client.totalDue)}
+                              >
+                                <MessageSquare size={14} /> Relancer
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
     </div>

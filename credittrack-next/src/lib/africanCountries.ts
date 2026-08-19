@@ -2,7 +2,7 @@ export interface AfricanCountry {
   code: string;
   nameFr: string;
   nameEn: string;
-  flag: string;
+  flag: string; // Clean ISO alpha-2 badge (no emojis)
   currency: string;
   system: string;
   vatRate: number;
@@ -16,36 +16,36 @@ export interface AccountingAccount {
 }
 
 export const AFRICAN_COUNTRIES: AfricanCountry[] = [
-  { code: "BJ", nameFr: "Bénin", nameEn: "Benin", flag: "🇧🇯", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
-  { code: "CI", nameFr: "Côte d’Ivoire", nameEn: "Ivory Coast", flag: "🇨🇮", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
-  { code: "SN", nameFr: "Sénégal", nameEn: "Senegal", flag: "🇸🇳", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
-  { code: "CM", nameFr: "Cameroun", nameEn: "Cameroon", flag: "🇨🇲", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 19.25 },
-  { code: "GA", nameFr: "Gabon", nameEn: "Gabon", flag: "🇬🇦", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 18 },
-  { code: "CD", nameFr: "Congo (RDC)", nameEn: "DR Congo", flag: "🇨🇩", currency: "CDF", system: "OHADA / RDC", vatRate: 16 },
-  { code: "CG", nameFr: "Congo (Brazzaville)", nameEn: "Congo", flag: "🇨🇬", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 18 },
-  { code: "BF", nameFr: "Burkina Faso", nameEn: "Burkina Faso", flag: "🇧🇫", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
-  { code: "ML", nameFr: "Mali", nameEn: "Mali", flag: "🇲🇱", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
-  { code: "TG", nameFr: "Togo", nameEn: "Togo", flag: "🇹🇬", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
-  { code: "NE", nameFr: "Niger", nameEn: "Niger", flag: "🇳🇪", currency: "XOF", system: "SYSCOHADA", vatRate: 19 },
-  { code: "GN", nameFr: "Guinée", nameEn: "Guinea", flag: "🇬🇳", currency: "GNF", system: "SYSCOHADA", vatRate: 18 },
-  { code: "TD", nameFr: "Tchad", nameEn: "Chad", flag: "🇹🇩", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 18 },
-  { code: "CF", nameFr: "Centrafrique", nameEn: "Central African Republic", flag: "🇨🇫", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 19 },
-  { code: "GH", nameFr: "Ghana", nameEn: "Ghana", flag: "🇬🇭", currency: "GHS", system: "GRA / IFRS", vatRate: 21.9 },
-  { code: "NG", nameFr: "Nigeria", nameEn: "Nigeria", flag: "🇳🇬", currency: "NGN", system: "FIRS / IFRS", vatRate: 7.5 },
-  { code: "KE", nameFr: "Kenya", nameEn: "Kenya", flag: "🇰🇪", currency: "KES", system: "KRA / IFRS", vatRate: 16 },
-  { code: "ZA", nameFr: "Afrique du Sud", nameEn: "South Africa", flag: "🇿🇦", currency: "ZAR", system: "SARS / IFRS", vatRate: 15 },
-  { code: "MA", nameFr: "Maroc", nameEn: "Morocco", flag: "🇲🇦", currency: "MAD", system: "Code Général Marocain", vatRate: 20 },
-  { code: "DZ", nameFr: "Algérie", nameEn: "Algeria", flag: "🇩🇿", currency: "DZD", system: "NSC Algérie", vatRate: 19 },
-  { code: "TN", nameFr: "Tunisie", nameEn: "Tunisia", flag: "🇹🇳", currency: "TND", system: "Comptabilité Tunisienne", vatRate: 19 },
-  { code: "EG", nameFr: "Égypte", nameEn: "Egypt", flag: "🇪🇬", currency: "EGP", system: "Egyptian Accounting Code", vatRate: 14 },
-  { code: "AO", nameFr: "Angola", nameEn: "Angola", flag: "🇦🇴", currency: "AOA", system: "PGC Angola / IFRS", vatRate: 14 },
-  { code: "RW", nameFr: "Rwanda", nameEn: "Rwanda", flag: "🇷🇼", currency: "RWF", system: "RRA Rwanda", vatRate: 18 },
-  { code: "TZ", nameFr: "Tanzanie", nameEn: "Tanzania", flag: "🇹🇿", currency: "TZS", system: "TRA Tanzania", vatRate: 18 },
-  { code: "UG", nameFr: "Ouganda", nameEn: "Uganda", flag: "🇺🇬", currency: "UGX", system: "URA Uganda", vatRate: 18 },
-  { code: "ZM", nameFr: "Zambie", nameEn: "Zambia", flag: "🇿🇲", currency: "ZMW", system: "ZRA Zambia", vatRate: 16 },
-  { code: "ZW", nameFr: "Zimbabwe", nameEn: "Zimbabwe", flag: "🇿🇼", currency: "ZWL", system: "ZIMRA Zimbabwe", vatRate: 15 },
-  { code: "MG", nameFr: "Madagascar", nameEn: "Madagascar", flag: "🇲🇬", currency: "MGA", system: "PCG 2005 Madagascar", vatRate: 20 },
-  { code: "MU", nameFr: "Maurice", nameEn: "Mauritius", flag: "🇲🇺", currency: "MUR", system: "MRA / IFRS", vatRate: 15 }
+  { code: "BJ", nameFr: "Bénin", nameEn: "Benin", flag: "BJ", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
+  { code: "CI", nameFr: "Côte d’Ivoire", nameEn: "Ivory Coast", flag: "CI", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
+  { code: "SN", nameFr: "Sénégal", nameEn: "Senegal", flag: "SN", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
+  { code: "CM", nameFr: "Cameroun", nameEn: "Cameroon", flag: "CM", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 19.25 },
+  { code: "GA", nameFr: "Gabon", nameEn: "Gabon", flag: "GA", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 18 },
+  { code: "CD", nameFr: "Congo (RDC)", nameEn: "DR Congo", flag: "CD", currency: "CDF", system: "OHADA / RDC", vatRate: 16 },
+  { code: "CG", nameFr: "Congo (Brazzaville)", nameEn: "Congo", flag: "CG", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 18 },
+  { code: "BF", nameFr: "Burkina Faso", nameEn: "Burkina Faso", flag: "BF", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
+  { code: "ML", nameFr: "Mali", nameEn: "Mali", flag: "ML", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
+  { code: "TG", nameFr: "Togo", nameEn: "Togo", flag: "TG", currency: "XOF", system: "SYSCOHADA", vatRate: 18 },
+  { code: "NE", nameFr: "Niger", nameEn: "Niger", flag: "NE", currency: "XOF", system: "SYSCOHADA", vatRate: 19 },
+  { code: "GN", nameFr: "Guinée", nameEn: "Guinea", flag: "GN", currency: "GNF", system: "SYSCOHADA", vatRate: 18 },
+  { code: "TD", nameFr: "Tchad", nameEn: "Chad", flag: "TD", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 18 },
+  { code: "CF", nameFr: "Centrafrique", nameEn: "Central African Republic", flag: "CF", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 19 },
+  { code: "GH", nameFr: "Ghana", nameEn: "Ghana", flag: "GH", currency: "GHS", system: "GRA / IFRS", vatRate: 21.9 },
+  { code: "NG", nameFr: "Nigeria", nameEn: "Nigeria", flag: "NG", currency: "NGN", system: "FIRS / IFRS", vatRate: 7.5 },
+  { code: "KE", nameFr: "Kenya", nameEn: "Kenya", flag: "KE", currency: "KES", system: "KRA / IFRS", vatRate: 16 },
+  { code: "ZA", nameFr: "Afrique du Sud", nameEn: "South Africa", flag: "ZA", currency: "ZAR", system: "SARS / IFRS", vatRate: 15 },
+  { code: "MA", nameFr: "Maroc", nameEn: "Morocco", flag: "MA", currency: "MAD", system: "Code Général Marocain", vatRate: 20 },
+  { code: "DZ", nameFr: "Algérie", nameEn: "Algeria", flag: "DZ", currency: "DZD", system: "NSC Algérie", vatRate: 19 },
+  { code: "TN", nameFr: "Tunisie", nameEn: "Tunisia", flag: "TN", currency: "TND", system: "Comptabilité Tunisienne", vatRate: 19 },
+  { code: "EG", nameFr: "Égypte", nameEn: "Egypt", flag: "EG", currency: "EGP", system: "Egyptian Accounting Code", vatRate: 14 },
+  { code: "AO", nameFr: "Angola", nameEn: "Angola", flag: "AO", currency: "AOA", system: "PGC Angola / IFRS", vatRate: 14 },
+  { code: "RW", nameFr: "Rwanda", nameEn: "Rwanda", flag: "RW", currency: "RWF", system: "RRA Rwanda", vatRate: 18 },
+  { code: "TZ", nameFr: "Tanzanie", nameEn: "Tanzania", flag: "TZ", currency: "TZS", system: "TRA Tanzania", vatRate: 18 },
+  { code: "UG", nameFr: "Ouganda", nameEn: "Uganda", flag: "UG", currency: "UGX", system: "URA Uganda", vatRate: 18 },
+  { code: "ZM", nameFr: "Zambie", nameEn: "Zambia", flag: "ZM", currency: "ZMW", system: "ZRA Zambia", vatRate: 16 },
+  { code: "ZW", nameFr: "Zimbabwe", nameEn: "Zimbabwe", flag: "ZW", currency: "ZWL", system: "ZIMRA Zimbabwe", vatRate: 15 },
+  { code: "MG", nameFr: "Madagascar", nameEn: "Madagascar", flag: "MG", currency: "MGA", system: "PCG 2005 Madagascar", vatRate: 20 },
+  { code: "MU", nameFr: "Maurice", nameEn: "Mauritius", flag: "MU", currency: "MUR", system: "MRA / IFRS", vatRate: 15 }
 ];
 
 export const ACCOUNTING_CHARTS: Record<string, AccountingAccount[]> = {
@@ -80,10 +80,10 @@ export function getCountryConfig(code: string): AfricanCountry & { chart: Accoun
 export function formatAfricanCurrency(amount: number, currencyCode: string = 'XOF'): string {
   const numStr = Math.round(amount || 0).toLocaleString('fr-FR');
   if (currencyCode === 'XOF' || currencyCode === 'XAF') return `${numStr} FCFA`;
-  if (currencyCode === 'GHS') return `₵ ${numStr}`;
-  if (currencyCode === 'NGN') return `₦ ${numStr}`;
-  if (currencyCode === 'KES') return `KSh ${numStr}`;
-  if (currencyCode === 'ZAR') return `R ${numStr}`;
-  if (currencyCode === 'MAD') return `${numStr} DH`;
+  if (currencyCode === 'GHS') return `GHS ${numStr}`;
+  if (currencyCode === 'NGN') return `NGN ${numStr}`;
+  if (currencyCode === 'KES') return `KES ${numStr}`;
+  if (currencyCode === 'ZAR') return `ZAR ${numStr}`;
+  if (currencyCode === 'MAD') return `${numStr} MAD`;
   return `${numStr} ${currencyCode}`;
 }

@@ -1,8 +1,9 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { AfricanCountry, AFRICAN_COUNTRIES, getCountryConfig, formatAfricanCurrency, AccountingAccount } from '@/lib/africanCountries';
 import { supabase } from '@/lib/supabase';
+import { NativeBridge } from '@/lib/nativeBridge';
 
 export interface ClientTransaction {
   id: number | string;
@@ -54,6 +55,7 @@ interface AppContextType {
   currency: string;
   formatAmount: (amount: number) => string;
   
+  isOnline: boolean;
   clients: Client[];
   addClient: (client: Omit<Client, 'id' | 'reliabilityScore' | 'addedDate'>) => void;
   updateClientPayment: (clientId: number | string, amountPaid: number, receiptData: Partial<PaymentReceipt>) => void;
@@ -64,6 +66,7 @@ interface AppContextType {
   
   activeReceipt: PaymentReceipt | null;
   setActiveReceipt: (receipt: PaymentReceipt | null) => void;
+  shareReceiptNative: (receipt: PaymentReceipt) => Promise<boolean>;
   
   selectedClient: Client | null;
   setSelectedClient: (client: Client | null) => void;
@@ -71,70 +74,78 @@ interface AppContextType {
   isNewCreditModalOpen: boolean;
   setIsNewCreditModalOpen: (open: boolean) => void;
 
-  showToast: (msg: string) => void;
+  isMobileMenuOpen: boolean;
+  setIsMobileMenuOpen: (open: boolean) => void;
+
+  showToast: (msg: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-const INITIAL_CLIENTS: Client[] = [
-  {
-    id: 1,
-    name: 'Société ABC & Fils',
-    phone: '+229 97010203',
-    totalDue: 150000,
-    status: 'pending',
-    reliabilityScore: 92,
-    addedDate: '2026-05-10',
-    transactions: [
-      { id: 101, date: '2026-08-01', desc: '3 Sacs de Riz 50kg', amount: 150000, status: 'pending', dueDate: '2026-08-25' }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Entreprise BTP XYZ',
-    phone: '+225 05040302',
-    totalDue: 75000,
-    status: 'overdue',
-    reliabilityScore: 42,
-    addedDate: '2026-06-12',
-    transactions: [
-      { id: 102, date: '2026-07-15', desc: 'Matériaux & Ciment', amount: 75000, status: 'overdue', dueDate: '2026-08-05' }
-    ]
-  },
-  {
-    id: 3,
-    name: 'KOFFI Yao Jean',
-    phone: '+225 01020304',
-    totalDue: 0,
-    status: 'paid',
-    reliabilityScore: 98,
-    addedDate: '2026-04-01',
-    transactions: [
-      { id: 103, date: '2026-08-01', desc: 'Versement Intégral', amount: 90000, status: 'paid', dueDate: '2026-08-01' }
-    ]
-  }
-];
-
-const INITIAL_PAYMENTS: PaymentReceipt[] = [
-  { id: 201, ref: 'REC-2026-881', clientName: 'Société ABC & Fils', clientPhone: '+229 97010203', itemsDesc: 'Acompte Riz 50kg', amount: 150000, date: 'Aujourd\'hui, 09:45', method: 'Wave Mobile Money' },
-  { id: 202, ref: 'REC-2026-880', clientName: 'KOFFI Yao Jean', clientPhone: '+225 01020304', itemsDesc: 'Solde Facture', amount: 90000, date: '01 Août 2026', method: 'Orange Money' }
-];
-
-const INITIAL_ENTRIES: AccountingEntry[] = [
-  { id: 1, date: '2026-08-10', ref: 'FAC-2026-001', code: '701', label: 'Vente Marchandises (Société ABC)', type: 'revenue', amountHT: 150000, vatAmount: 27000, status: 'Validé' },
-  { id: 2, date: '2026-08-08', ref: 'ACH-2026-044', code: '601', label: 'Achat Stock Grossiste', type: 'expense', amountHT: 320000, vatAmount: 57600, status: 'Validé' },
-  { id: 3, date: '2026-08-05', ref: 'CHG-2026-012', code: '622', label: 'Frais de transport & livraison', type: 'expense', amountHT: 45000, vatAmount: 8100, status: 'Validé' }
-];
+const INITIAL_CLIENTS: Client[] = [];
+const INITIAL_PAYMENTS: PaymentReceipt[] = [];
+const INITIAL_ENTRIES: AccountingEntry[] = [];
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [countryCode, setCountryCodeState] = useState<string>('BJ');
   const [clients, setClients] = useState<Client[]>(INITIAL_CLIENTS);
   const [payments, setPayments] = useState<PaymentReceipt[]>(INITIAL_PAYMENTS);
   const [accountingEntries, setAccountingEntries] = useState<AccountingEntry[]>(INITIAL_ENTRIES);
+  const [isOnline, setIsOnline] = useState<boolean>(true);
   
   const [activeReceipt, setActiveReceipt] = useState<PaymentReceipt | null>(null);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isNewCreditModalOpen, setIsNewCreditModalOpen] = useState<boolean>(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+
+  const country = getCountryConfig(countryCode);
+  const currency = country.currency;
+
+  const showToast = useCallback((msg: string, type: 'info' | 'success' | 'warning' | 'error' = 'info') => {
+    if (typeof window === 'undefined') return;
+    const toast = document.createElement('div');
+    const borderColors = {
+      info: '#2563EB',
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444'
+    };
+
+    toast.style.cssText = `position:fixed;bottom:24px;right:24px;z-index:99999;background:#0F172A;color:#fff;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.875rem;box-shadow:0 10px 25px rgba(0,0,0,0.35);border-left:5px solid ${borderColors[type]};animation:fadeIn 0.3s ease;display:flex;align-items:center;gap:10px;max-width:90vw;`;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateY(10px)';
+      toast.style.transition = 'all 0.3s ease';
+      setTimeout(() => toast.remove(), 300);
+    }, 3800);
+  }, []);
+
+  const formatAmount = useCallback((amount: number) => {
+    return formatAfricanCurrency(amount, currency);
+  }, [currency]);
+
+  // Initialize Native features and offline listener
+  useEffect(() => {
+    NativeBridge.initApp();
+
+    NativeBridge.getNetworkStatus().then(st => setIsOnline(st.connected));
+    const unsubscribe = NativeBridge.onNetworkChange(st => {
+      setIsOnline(st.connected);
+      if (st.connected) {
+        showToast("Connexion rétablie. Données synchronisées.", "success");
+      } else {
+        showToast("Mode hors-ligne actif. Vos actions sont enregistrées localement.", "warning");
+      }
+    });
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, [showToast]);
 
   // Restore LocalStorage
   useEffect(() => {
@@ -160,24 +171,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('ct_country', code);
   };
 
-  const country = getCountryConfig(countryCode);
-  const currency = country.currency;
-
-  const formatAmount = (amount: number) => {
-    return formatAfricanCurrency(amount, currency);
-  };
-
-  const showToast = (msg: string) => {
-    const toast = document.createElement('div');
-    toast.style.cssText = "position:fixed;bottom:24px;right:24px;z-index:99999;background:#0F172A;color:#fff;padding:14px 22px;border-radius:12px;font-weight:700;font-size:0.9rem;box-shadow:0 10px 25px rgba(0,0,0,0.3);border-left:4px solid #2563EB;animation:fadeIn 0.3s ease;";
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
-      toast.style.transition = 'all 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
-    }, 3500);
+  const shareReceiptNative = async (receipt: PaymentReceipt): Promise<boolean> => {
+    const summary = `REÇU DE PAIEMENT - CRÉDITTRACK PRO\nRéférence: ${receipt.ref}\nClient: ${receipt.clientName}\nMontant: ${formatAfricanCurrency(receipt.amount, currency)}\nDate: ${receipt.date}\nMode: ${receipt.method}\n\nReçu certifié et sécurisé via CréditTrack PRO.`;
+    return await NativeBridge.shareReceipt(`Reçu ${receipt.ref} - ${receipt.clientName}`, summary);
   };
 
   const addClient = (clientData: Omit<Client, 'id' | 'reliabilityScore' | 'addedDate'>) => {
@@ -207,14 +203,18 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const updated = [newClient, ...clients];
     setClients(updated);
-    localStorage.setItem('ct_clients', JSON.stringify(updated));
-    showToast(`Client "${newClient.name}" enregistré avec succès !`);
+    try {
+      localStorage.setItem('ct_clients', JSON.stringify(updated));
+    } catch (e) {
+      console.warn("Storage write error", e);
+    }
+    showToast(`Client "${newClient.name}" enregistré avec succès !`, "success");
   };
 
   const updateClientPayment = (clientId: number | string, amountPaid: number, receiptData: Partial<PaymentReceipt>) => {
     const validAmount = Math.max(0, Number(amountPaid) || 0);
     if (validAmount <= 0) {
-      showToast("Veuillez saisir un montant d'encaissement valide.");
+      showToast("Veuillez saisir un montant d'encaissement valide.", "warning");
       return;
     }
 
@@ -232,7 +232,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     });
 
     setClients(updatedClients);
-    localStorage.setItem('ct_clients', JSON.stringify(updatedClients));
+    try {
+      localStorage.setItem('ct_clients', JSON.stringify(updatedClients));
+    } catch (e) {
+      console.warn("Storage write error", e);
+    }
 
     const newReceipt: PaymentReceipt = {
       id: Date.now(),
@@ -248,7 +252,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const updatedPayments = [newReceipt, ...payments];
     setPayments(updatedPayments);
-    localStorage.setItem('ct_payments', JSON.stringify(updatedPayments));
+    try {
+      localStorage.setItem('ct_payments', JSON.stringify(updatedPayments));
+    } catch (e) {
+      console.warn("Storage write error", e);
+    }
 
     // Also add to accounting entries
     const newEntry: AccountingEntry = {
@@ -265,10 +273,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const updatedEntries = [newEntry, ...accountingEntries];
     setAccountingEntries(updatedEntries);
-    localStorage.setItem('ct_entries', JSON.stringify(updatedEntries));
+    try {
+      localStorage.setItem('ct_entries', JSON.stringify(updatedEntries));
+    } catch (e) {
+      console.warn("Storage write error", e);
+    }
 
     setActiveReceipt(newReceipt);
-    showToast(`Paiement de ${formatAfricanCurrency(validAmount, currency)} enregistré et reçu généré !`);
+    showToast(`Paiement de ${formatAfricanCurrency(validAmount, currency)} enregistré et reçu généré !`, "success");
   };
 
   const addAccountingEntry = (entryData: Omit<AccountingEntry, 'id' | 'ref' | 'status'>) => {
@@ -287,8 +299,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const updated = [newEntry, ...accountingEntries];
     setAccountingEntries(updated);
-    localStorage.setItem('ct_entries', JSON.stringify(updated));
-    showToast("Écriture comptable ajoutée au journal !");
+    try {
+      localStorage.setItem('ct_entries', JSON.stringify(updated));
+    } catch (e) {
+      console.warn("Storage write error", e);
+    }
+    showToast("Écriture comptable ajoutée au journal !", "success");
   };
 
   return (
@@ -297,6 +313,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setCountryCode,
       currency,
       formatAmount,
+      isOnline,
       clients,
       addClient,
       updateClientPayment,
@@ -305,10 +322,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       addAccountingEntry,
       activeReceipt,
       setActiveReceipt,
+      shareReceiptNative,
       selectedClient,
       setSelectedClient,
       isNewCreditModalOpen,
       setIsNewCreditModalOpen,
+      isMobileMenuOpen,
+      setIsMobileMenuOpen,
       showToast
     }}>
       {children}

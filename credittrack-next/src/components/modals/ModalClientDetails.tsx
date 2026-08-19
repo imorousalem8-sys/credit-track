@@ -97,7 +97,7 @@ export default function ModalClientDetails() {
         <div style={{ padding: '24px' }}>
           
           {/* Due Banner & WhatsApp Action */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '16px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '20px' }}>
             <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '12px', padding: '16px' }}>
               <div style={{ fontSize: '0.78rem', color: '#64748B', fontWeight: 700 }}>Dette Totale Restante</div>
               <div style={{ fontSize: '1.7rem', fontWeight: 800, color: selectedClient.totalDue > 0 ? '#2563EB' : '#10B981', marginTop: '4px' }}>
@@ -112,7 +112,7 @@ export default function ModalClientDetails() {
               <button 
                 type="button"
                 className="btn"
-                style={{ background: '#25D366', color: '#fff', fontWeight: 700, width: '100%' }}
+                style={{ background: '#25D366', color: '#fff', fontWeight: 700, width: '100%', minHeight: '44px' }}
                 onClick={sendWhatsApp}
               >
                 <MessageSquare size={16} /> Relancer sur WhatsApp
@@ -132,7 +132,7 @@ export default function ModalClientDetails() {
               <h4 style={{ fontSize: '0.88rem', fontWeight: 800, color: '#1E40AF', margin: '0 0 12px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <DollarSign size={16} /> Enregistrer un Règlement / Versement
               </h4>
-              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr auto', gap: '10px', alignItems: 'flex-end' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px', alignItems: 'flex-end' }}>
                 <div>
                   <label className="form-label" style={{ fontSize: '0.75rem' }}>Montant Versé ({currency})</label>
                   <input 

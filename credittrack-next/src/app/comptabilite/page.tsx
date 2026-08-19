@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '@/context/AppContext';
-import { Calculator, PlusCircle, ArrowUpRight, ArrowDownRight, FileText, CheckCircle2, DollarSign } from 'lucide-react';
+import { Calculator, PlusCircle, ArrowUpRight, ArrowDownRight, FileText, CheckCircle2, DollarSign, FileSpreadsheet } from 'lucide-react';
 
 export default function ComptabilitePage() {
   const { country, formatAmount, accountingEntries, addAccountingEntry } = useApp();
@@ -71,7 +71,7 @@ export default function ComptabilitePage() {
             <PlusCircle size={18} /> Nouvelle Écriture au Journal {country.system}
           </h3>
 
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr) auto', gap: '12px', alignItems: 'flex-end' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', alignItems: 'flex-end' }}>
             <div>
               <label className="form-label" style={{ fontSize: '0.78rem' }}>Compte Comptable</label>
               <select className="form-control" value={code} onChange={e => setCode(e.target.value)}>
@@ -115,7 +115,7 @@ export default function ComptabilitePage() {
               />
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ height: '42px', padding: '0 20px', fontWeight: 800 }}>
+            <button type="submit" className="btn btn-primary" style={{ height: '44px', padding: '0 20px', fontWeight: 800, minWidth: '120px' }}>
               Enregistrer
             </button>
           </form>
@@ -123,7 +123,7 @@ export default function ComptabilitePage() {
       )}
 
       {/* 4 Financial KPIs */}
-      <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+      <div className="metrics-grid">
         <div className="metric-card">
           <div className="metric-info">
             <div className="metric-label">Total Produits (Chiffre d'Affaires)</div>
@@ -181,53 +181,72 @@ export default function ComptabilitePage() {
           </span>
         </div>
 
-        <div className="table-responsive">
-          <table className="custom-table" style={{ width: '100%', margin: 0 }}>
-            <thead>
-              <tr style={{ background: '#F8FAFC' }}>
-                <th style={{ padding: '14px 20px' }}>Date & Réf</th>
-                <th style={{ padding: '14px 20px' }}>Code Compte</th>
-                <th style={{ padding: '14px 20px' }}>Libellé Opération</th>
-                <th style={{ padding: '14px 20px' }}>Type</th>
-                <th style={{ padding: '14px 20px', textAlign: 'right' }}>Montant HT</th>
-                <th style={{ padding: '14px 20px', textAlign: 'right' }}>TVA ({country.vatRate}%)</th>
-                <th style={{ padding: '14px 20px', textAlign: 'right' }}>Statut</th>
-              </tr>
-            </thead>
-            <tbody>
-              {accountingEntries.map(entry => (
-                <tr key={entry.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                  <td style={{ padding: '14px 20px' }}>
-                    <div style={{ fontWeight: 800, color: '#0F172A', fontSize: '0.85rem' }}>{entry.ref}</div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748B' }}>{entry.date}</div>
-                  </td>
-                  <td style={{ padding: '14px 20px' }}>
-                    <span style={{ fontWeight: 800, background: '#EFF6FF', color: '#2563EB', padding: '3px 8px', borderRadius: '6px', fontSize: '0.82rem' }}>
-                      {entry.code}
-                    </span>
-                  </td>
-                  <td style={{ padding: '14px 20px', fontWeight: 700, color: '#0F172A' }}>
-                    {entry.label}
-                  </td>
-                  <td style={{ padding: '14px 20px' }}>
-                    <span className={`badge ${entry.type === 'revenue' ? 'badge-green' : 'badge-orange'}`}>
-                      {entry.type === 'revenue' ? 'Produit (Vente)' : 'Charge (Achat)'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '14px 20px', textAlign: 'right', fontWeight: 800, color: entry.type === 'revenue' ? '#10B981' : '#EF4444' }}>
-                    {entry.type === 'revenue' ? '+' : '-'}{formatAmount(entry.amountHT)}
-                  </td>
-                  <td style={{ padding: '14px 20px', textAlign: 'right', color: '#64748B', fontWeight: 600 }}>
-                    {formatAmount(entry.vatAmount)}
-                  </td>
-                  <td style={{ padding: '14px 20px', textAlign: 'right' }}>
-                    <span className="badge-status paid">Validé</span>
-                  </td>
+        {accountingEntries.length === 0 ? (
+          <div className="empty-state-box" style={{ margin: '16px' }}>
+            <div className="empty-state-icon-box">
+              <FileSpreadsheet size={26} />
+            </div>
+            <div className="empty-state-title">Aucune écriture au journal général</div>
+            <div className="empty-state-desc">
+              Utilisez le bouton "Nouvelle Écriture" ci-dessus pour enregistrer vos ventes, charges et calculer automatiquement votre balance fiscale {country.system}.
+            </div>
+            <button 
+              type="button" 
+              className="empty-state-cta"
+              onClick={() => setShowAddForm(true)}
+            >
+              <PlusCircle size={16} /> Ajouter une première écriture
+            </button>
+          </div>
+        ) : (
+          <div className="table-responsive">
+            <table className="custom-table" style={{ width: '100%', margin: 0 }}>
+              <thead>
+                <tr style={{ background: '#F8FAFC' }}>
+                  <th style={{ padding: '14px 20px' }}>Date & Réf</th>
+                  <th style={{ padding: '14px 20px' }}>Code Compte</th>
+                  <th style={{ padding: '14px 20px' }}>Libellé Opération</th>
+                  <th style={{ padding: '14px 20px' }}>Type</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'right' }}>Montant HT</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'right' }}>TVA ({country.vatRate}%)</th>
+                  <th style={{ padding: '14px 20px', textAlign: 'right' }}>Statut</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {accountingEntries.map(entry => (
+                  <tr key={entry.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                    <td style={{ padding: '14px 20px' }}>
+                      <div style={{ fontWeight: 800, color: '#0F172A', fontSize: '0.85rem' }}>{entry.ref}</div>
+                      <div style={{ fontSize: '0.72rem', color: '#64748B' }}>{entry.date}</div>
+                    </td>
+                    <td style={{ padding: '14px 20px' }}>
+                      <span style={{ fontWeight: 800, background: '#EFF6FF', color: '#2563EB', padding: '3px 8px', borderRadius: '6px', fontSize: '0.82rem' }}>
+                        {entry.code}
+                      </span>
+                    </td>
+                    <td style={{ padding: '14px 20px', fontWeight: 700, color: '#0F172A' }}>
+                      {entry.label}
+                    </td>
+                    <td style={{ padding: '14px 20px' }}>
+                      <span className={`badge ${entry.type === 'revenue' ? 'badge-green' : 'badge-orange'}`}>
+                        {entry.type === 'revenue' ? 'Produit (Vente)' : 'Charge (Achat)'}
+                      </span>
+                    </td>
+                    <td style={{ padding: '14px 20px', textAlign: 'right', fontWeight: 800, color: entry.type === 'revenue' ? '#10B981' : '#EF4444' }}>
+                      {entry.type === 'revenue' ? '+' : '-'}{formatAmount(entry.amountHT)}
+                    </td>
+                    <td style={{ padding: '14px 20px', textAlign: 'right', color: '#64748B', fontWeight: 600 }}>
+                      {formatAmount(entry.vatAmount)}
+                    </td>
+                    <td style={{ padding: '14px 20px', textAlign: 'right' }}>
+                      <span className="badge-status paid">Validé</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
     </div>

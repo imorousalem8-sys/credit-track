@@ -2,10 +2,10 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { useApp } from '@/context/AppContext';
-import { X, Printer, Download, CheckCircle, ShieldCheck } from 'lucide-react';
+import { X, Printer, Download, CheckCircle, ShieldCheck, Share2 } from 'lucide-react';
 
 export default function ModalReceipt() {
-  const { activeReceipt, setActiveReceipt, formatAmount } = useApp();
+  const { activeReceipt, setActiveReceipt, formatAmount, shareReceiptNative } = useApp();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSigned, setHasSigned] = useState(false);
@@ -67,6 +67,11 @@ export default function ModalReceipt() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleShare = async () => {
+    if (!activeReceipt) return;
+    await shareReceiptNative(activeReceipt);
   };
 
   return (
@@ -184,11 +189,19 @@ export default function ModalReceipt() {
         </div>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+        <div style={{ display: 'flex', gap: '8px', marginTop: '20px', flexWrap: 'wrap' }}>
           <button 
             type="button" 
             className="btn btn-outline" 
-            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            style={{ flex: 1, minWidth: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            onClick={handleShare}
+          >
+            <Share2 size={16} /> Partager
+          </button>
+          <button 
+            type="button" 
+            className="btn btn-outline" 
+            style={{ flex: 1, minWidth: '110px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             onClick={handlePrint}
           >
             <Printer size={16} /> Imprimer
@@ -196,13 +209,12 @@ export default function ModalReceipt() {
           <button 
             type="button" 
             className="btn btn-primary" 
-            style={{ flex: 1.2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#10B981' }}
+            style={{ flex: 1.2, minWidth: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', background: '#10B981' }}
             onClick={() => {
-              handlePrint();
               setActiveReceipt(null);
             }}
           >
-            <CheckCircle size={16} /> Valider & Fermer
+            <CheckCircle size={16} /> Terminé
           </button>
         </div>
 

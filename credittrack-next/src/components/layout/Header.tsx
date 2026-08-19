@@ -4,111 +4,100 @@ import React from 'react';
 import { usePathname } from 'next/navigation';
 import { useApp } from '@/context/AppContext';
 import { AFRICAN_COUNTRIES } from '@/lib/africanCountries';
-import { Bell, Plus, Globe, Sparkles } from 'lucide-react';
+import { Bell, Plus, Globe, Wifi, WifiOff, Menu } from 'lucide-react';
 
 export default function Header() {
   const pathname = usePathname();
-  const { country, setCountryCode, setIsNewCreditModalOpen } = useApp();
+  const { country, setCountryCode, setIsNewCreditModalOpen, isOnline, setIsMobileMenuOpen } = useApp();
 
   const getTitle = () => {
-    if (pathname === '/') return 'Tableau de Bord Exécutif';
-    if (pathname.startsWith('/clients') || pathname.startsWith('/credit')) return 'Répertoire & Solvabilité Clients';
-    if (pathname.startsWith('/comptabilite') || pathname.startsWith('/accounting')) return 'Comptabilité Générale (SYSCOHADA / IFRS)';
+    if (pathname === '/' || pathname.startsWith('/dashboard')) return 'Tableau de Bord';
+    if (pathname.startsWith('/clients') || pathname.startsWith('/credit')) return 'Clients & Solvabilité';
+    if (pathname.startsWith('/comptabilite') || pathname.startsWith('/accounting')) return 'Comptabilité Générale';
     if (pathname.startsWith('/ventes')) return 'Facturation & Ventes';
-    if (pathname.startsWith('/achats')) return 'Achats & Fournisseurs';
+    if (pathname.startsWith('/achats')) return 'Achats & Charges';
     if (pathname.startsWith('/tresorerie')) return 'Trésorerie & Mobile Money';
-    if (pathname.startsWith('/tva')) return 'Déclarations TVA & Taxes';
+    if (pathname.startsWith('/privacy')) return 'Confidentialité';
+    if (pathname.startsWith('/account/delete')) return 'Gestion Compte';
     const path = pathname.split('/')[1];
     if (path) return path.charAt(0).toUpperCase() + path.slice(1);
-    return 'Application';
+    return 'CréditTrack';
   };
 
   return (
     <header className="top-workspace-header">
-      <div className="header-left-title" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <span style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A' }}>{getTitle()}</span>
-        <span style={{
-          fontSize: '0.72rem',
-          background: '#EFF6FF',
-          color: '#2563EB',
-          border: '1px solid #BFDBFE',
-          padding: '2px 8px',
-          borderRadius: '9999px',
-          fontWeight: 700
-        }}>
-          {country.system}
-        </span>
+      
+      {/* Left: Mobile Hamburger + Title + System Badge */}
+      <div className="header-left-title">
+        
+        {/* Hamburger Toggle (Mobile Only) */}
+        <button
+          type="button"
+          className="mobile-drawer-toggle"
+          onClick={() => setIsMobileMenuOpen(true)}
+          aria-label="Ouvrir le menu"
+        >
+          <Menu size={22} />
+        </button>
+
+        <div className="header-title-wrap">
+          <h1 className="header-page-heading">{getTitle()}</h1>
+          
+          <div className="header-badges-row">
+            <span className="badge-system">
+              {country.system}
+            </span>
+
+            {/* Live Network Status Indicator */}
+            <span 
+              title={isOnline ? "Connecté au cloud (Synchronisation temps réel)" : "Mode hors-ligne actif (Données sauvegardées localement)"}
+              className={`badge-network ${isOnline ? 'online' : 'offline'}`}
+            >
+              {isOnline ? <Wifi size={11} /> : <WifiOff size={11} />}
+              <span>{isOnline ? 'En ligne' : 'Hors-ligne'}</span>
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div className="header-right-actions" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+      {/* Right: Actions */}
+      <div className="header-right-actions">
         
         {/* Country Selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#F8FAFC', border: '1px solid #E2E8F0', padding: '6px 12px', borderRadius: '10px' }}>
-          <Globe size={16} className="text-slate-400" />
+        <div className="country-selector-box">
+          <Globe size={15} className="text-slate-400" />
           <select 
             value={country.code} 
             onChange={(e) => setCountryCode(e.target.value)}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              color: '#0F172A',
-              outline: 'none',
-              cursor: 'pointer'
-            }}
+            className="country-select-input"
+            aria-label="Sélectionner le pays"
           >
             {AFRICAN_COUNTRIES.map(c => (
               <option key={c.code} value={c.code}>
-                {c.flag} {c.nameFr} ({c.currency})
+                {c.nameFr} ({c.code} • {c.currency})
               </option>
             ))}
           </select>
         </div>
 
-        {/* Notifications */}
+        {/* Notifications Icon Button */}
         <button 
           type="button"
-          style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '50%',
-            background: '#F8FAFC',
-            border: '1px solid #E2E8F0',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#64748B',
-            cursor: 'pointer',
-            position: 'relative'
-          }}
+          className="header-icon-btn"
+          aria-label="Notifications"
         >
           <Bell size={18} />
-          <span style={{ position: 'absolute', top: '8px', right: '8px', width: '8px', height: '8px', background: '#EF4444', borderRadius: '50%' }}></span>
+          <span className="notif-dot"></span>
         </button>
 
-        {/* Primary Action Button */}
+        {/* Primary CTA Button */}
         <button 
           type="button" 
           className="btn-header-primary"
           onClick={() => setIsNewCreditModalOpen(true)}
-          style={{
-            background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
-            color: '#fff',
-            fontWeight: 800,
-            fontSize: '0.88rem',
-            padding: '10px 18px',
-            borderRadius: '10px',
-            border: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(37,99,235,0.3)'
-          }}
         >
           <Plus size={18} />
-          <span>Nouveau Crédit</span>
+          <span className="btn-header-text">Nouveau Crédit</span>
         </button>
 
       </div>

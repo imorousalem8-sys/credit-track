@@ -8,6 +8,11 @@ const plusJakartaSans = Plus_Jakarta_Sans({ subsets: ["latin"] });
 
 export const viewport: Viewport = {
   themeColor: "#1B3BBB",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
 };
 
 export const metadata: Metadata = {
