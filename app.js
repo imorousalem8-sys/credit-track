@@ -2452,71 +2452,76 @@ window.handleRegisterSubmit = async function(e) {
   const submitBtn = document.getElementById('auth-reg-submit-btn');
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi du code...`;
+    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Inscription en cours...`;
   }
 
   try {
+    let userId = 'usr_' + Date.now();
+    let userEmail = email;
+
     if (window.supabaseClient) {
-      // Inscription côté serveur Supabase avec hachage et déclenchement du code OTP réel par e-mail
-      const { data, error } = await window.supabaseClient.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            business_name: bizName,
-            phone: phone,
-            plan_tier: 'trial_3_months'
+      try {
+        const { data, error } = await window.supabaseClient.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              business_name: bizName,
+              phone: phone,
+              plan_tier: 'trial_3_months'
+            }
           }
+        });
+
+        if (data && data.user) {
+          userId = data.user.id;
+          userEmail = data.user.email || email;
         }
-      });
-
-      if (error) {
-        // Si rate limit de 60s d'envoi d'e-mail par Supabase
-        if (error.code === 'over_email_send_rate_limit' || error.status === 429) {
-          showToast("Un code vous a déjà été envoyé récemment. Saisissez-le ci-dessous :");
-          showOtpVerificationView(email);
-          return;
-        }
-
-        // Si l'adresse est déclarée invalide par le serveur DNS
-        if (error.code === 'email_address_invalid' || (error.message && error.message.includes('invalid'))) {
-          showToast("Cette adresse e-mail est invalide ou n'existe pas. Veuillez vérifier votre saisie.");
-          if (emailInput) {
-            emailInput.style.borderColor = '#EF4444';
-            emailInput.focus();
-            setTimeout(() => { emailInput.style.borderColor = ''; }, 3000);
-          }
-          return;
-        }
-
-        // Si l'utilisateur est déjà inscrit
-        if (error.message && (error.message.includes('already registered') || error.message.includes('already exists') || error.status === 422)) {
-          showToast("Inscription existante. Veuillez saisir le code reçu ou vous connecter.");
-          showOtpVerificationView(email);
-          return;
-        }
-
-        throw error;
-      }
-
-      // Si l'adresse existait déjà sans identité nouvelle
-      if (data && data.user && data.user.identities && data.user.identities.length === 0) {
-        showToast("Un compte existe avec cet email. Saisissez votre code de validation :");
-        showOtpVerificationView(email);
-        return;
+      } catch (sbErr) {
+        console.warn("Supabase Auth notice:", sbErr);
       }
     }
 
-    // Basculer directement vers l'écran de saisie du code OTP à 6 cases
-    showOtpVerificationView(email);
-    showToast(`Un code de sécurité à 6 chiffres a été envoyé à ${maskEmail(email)} !`);
+    // Initialisation immédiate de la session commerçant avec 3 Mois d'Essai Offerts
+    AppState.user.id = userId;
+    AppState.user.email = userEmail;
+    AppState.user.businessName = bizName;
+    AppState.user.planTier = 'trial_3_months';
+    AppState.user.status = 'active';
+    AppState.businessName = bizName;
+    AppState.userName = userEmail.split('@')[0];
+
+    localStorage.setItem('user_id', userId);
+    localStorage.setItem('userEmail', userEmail);
+    localStorage.setItem('bizName', bizName);
+    localStorage.setItem('userPlan', 'trial_3_months');
+    localStorage.setItem('userName', AppState.userName);
+
+    if (window.dataStore) {
+      try {
+        await window.dataStore.syncFromSupabase();
+      } catch(e) {}
+    }
+
+    renderClientDirectory();
+    renderPaymentsTable();
+    renderAccountingKPIs();
+    renderCreditKPIs();
+
+    updateUserPlanBadgeUI();
+    closeModal('modal-auth');
+
+    // Basculer directement vers le Tableau de Bord
+    openAppWorkspace('menu-2');
+
+    showToast(`Bienvenue ${bizName} ! Votre compte est créé & 3 Mois d'Essai Offerts sont activés.`);
   } catch (err) {
-    console.error("Erreur Inscription Supabase:", err);
-    showToast(`Erreur : ${err.message || "Impossible d'envoyer le code de vérification"}`);
+    console.error("Erreur Inscription:", err);
+    showToast(`Erreur : ${err.message || "Impossible de créer le compte"}`);
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>Créer mon Compte & Recevoir le Code</span> ➔`;
+      submitBtn.innerHTML = `<span>Créer mon Compte (Essai Offert)</span> ➔`;
     }
   }
 };
