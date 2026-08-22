@@ -970,7 +970,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <span style="background:rgba(59,130,246,0.2);color:#93C5FD;padding:2px 6px;border-radius:4px;font-size:0.62rem;font-weight:800;">
-            v2.4.0
+            v2.4.1
           </span>
           <button class="btn-icon-tiny" onclick="handleSignOut()" title="Se Déconnecter" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#FCA5A5;border-radius:6px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
             <i data-lucide="log-out" style="width:15px;height:15px;"></i>
@@ -1691,291 +1691,222 @@
         </section>
 
         <!-- ============================================================
-             VUE FORMULAIRE : NOTER UN NOUVEAU CRÉDIT (#menu-5)
+             VUE FORMULAIRE : VENTE À CRÉDIT (#menu-5)
+             RÉPLIQUE EXACTE DE LA MAQUETTE
         ============================================================ -->
-        <section id="menu-5" class="view-container">
-          <div class="card" style="max-width:850px;margin:0 auto;padding:0;">
-            <div class="card-header" style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color:#fff; border-radius: 12px 12px 0 0; padding: 20px 24px;">
-              <div style="display:flex;align-items:center;gap:12px;">
-                <div style="width:40px;height:40px;background:rgba(255,255,255,0.1);border-radius:10px;display:flex;align-items:center;justify-content:center;">
-                  <i data-lucide="file-signature" style="color:#60A5FA;"></i>
-                </div>
-                <div>
-                  <h2 style="font-size:1.15rem;font-weight:800;margin:0;" data-i18n="newCreditHeaderTitle">Noter une Vente à Crédit</h2>
-                  <p style="font-size:0.8rem;color:#94A3B8;margin:4px 0 0 0;" data-i18n="newCreditHeaderSub">Enregistrez le client et fixez la date limite de paiement</p>
-                </div>
-              </div>
-            </div>
-
-            <form onsubmit="handleNewCreditSubmit(event)" style="padding: 24px;">
-              
-              <div class="wizard-steps">
-                <div class="wizard-step active"><i data-lucide="user"></i> <span data-i18n="step1">1. Qui achète ?</span></div>
-                <div class="wizard-step"><i data-lucide="coins"></i> <span data-i18n="step2">2. Combien &amp; Quand ?</span></div>
-                <div class="wizard-step"><i data-lucide="shield-check"></i> <span data-i18n="step3">3. Garantie (Optionnel)</span></div>
-              </div>
-
-              <!-- ÉTAPE 1 : CLIENT -->
-              <div id="step-1-client">
-                <div class="form-group">
-                  <label class="form-label" data-i18n="selectClientLabel">Choisir un Client Existant ou en Créer un Nouveau</label>
-                  <select id="credit-client-select" class="form-control" required onchange="handleCreditClientChange(this.value)"></select>
-                </div>
-
-                <div id="new-client-fields" style="display:none;background:#F8FAFC;border:1px solid #E2E8F0;padding:18px;border-radius:10px;margin-bottom:16px;">
-                  <h4 style="font-size:0.9rem;font-weight:800;margin-bottom:12px;color:#0F172A;" data-i18n="newClientTitle">➕ Créer la Fiche du Nouveau Client</h4>
-                  <div class="grid-2-equal" style="margin-bottom:10px;">
-                    <div class="form-group" style="margin-bottom:0;">
-                      <label class="form-label"><span data-i18n="clientNameLabel">Nom &amp; Prénoms</span> <strong style="color:#EF4444;">*</strong></label>
-                      <input type="text" id="new-client-name" class="form-control" placeholder="ex: KOFFI Yao Jean">
-                    </div>
-                    <div class="form-group" style="margin-bottom:0;">
-                      <label class="form-label"><span data-i18n="clientPhoneLabel">Numéro WhatsApp / Téléphone</span> <strong style="color:#EF4444;">* (Obligatoire)</strong></label>
-                      <input type="tel" id="credit-client-phone" class="form-control" placeholder="+225 0701020304" required>
-                    </div>
-                  </div>
-                  <div class="form-group" style="margin-top:12px; margin-bottom:0;">
-                    <label class="form-label" data-i18n="clientCNILabel">N° Pièce d'Identité / CNI (Optionnel)</label>
-                    <input type="text" id="new-client-cni" class="form-control" placeholder="ex: CI001928374">
-                  </div>
-                </div>
-              </div>
-
-              <!-- ÉTAPE 2 : MONTANT, DATE ET MODE DE RÈGLEMENT -->
-              <div id="step-2-details" style="margin-top:20px; padding-top:20px; border-top:1px dashed #E2E8F0;">
-                <h4 style="font-size:0.92rem;font-weight:800;margin-bottom:14px;color:#0F172A;display:flex;align-items:center;gap:6px;">
-                  <i data-lucide="coins" style="width:16px;height:16px;color:#2563EB;"></i> <span data-i18n="creditDetailsTitle">Montant, Échéance &amp; Moyen de Paiement</span>
-                </h4>
-                <div class="grid-2-equal">
-                  <div class="form-group">
-                    <label class="form-label"><span data-i18n="creditAmountLabel">Montant Total de la Vente (FCFA)</span> <strong style="color:#EF4444;">*</strong></label>
-                    <input type="number" id="credit-amount" class="form-control" placeholder="ex: 150000" min="100" required>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label"><span data-i18n="creditDueDateLabel">Date Limite de Remboursement</span> <strong style="color:#EF4444;">*</strong></label>
-                    <input type="date" id="credit-due-date" class="form-control" required>
-                  </div>
-                </div>
-
-                <div class="grid-2-equal">
-                  <div class="form-group">
-                    <label class="form-label">Comment le client prévoit de payer ?</label>
-                    <select id="credit-payment-method-pref" class="form-control" onchange="handlePaymentPrefChange(this.value)">
-                      <option value="Espèces">Espèces (Paiement physique en boutique)</option>
-                      <option value="Wave Direct">Wave Money</option>
-                      <option value="Orange Money">Orange Money</option>
-                      <option value="MTN MoMo">MTN Mobile Money</option>
-                      <option value="Moov Money">Moov Money</option>
-                      <option value="Virement Bancaire">Virement Bancaire</option>
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label">Numéro / Compte de paiement client :</label>
-                    <input type="text" id="credit-transfer-account" class="form-control" placeholder="Numéro Wave / MoMo ou RIB">
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label"><span data-i18n="creditDescLabel">Articles Voulus / Description de la Marchandise</span> <strong style="color:#EF4444;">*</strong></label>
-                  <textarea id="credit-description" class="form-control" rows="4" style="min-height:105px;resize:vertical;font-family:inherit;line-height:1.6;padding:12px;border-radius:10px;border:1px solid #CBD5E1;" placeholder="• 3 Sacs de Riz 50kg&#10;• 2 Cartons d'Huile 5L&#10;• 1 Carton de Lait Bonnet Rouge" required></textarea>
-                  <small style="color:#64748B;font-size:0.75rem;margin-top:5px;display:block;">Vous pouvez taper la touche <strong>Entrée</strong> pour aller à la ligne et lister chaque article acheté.</small>
-                </div>
-              </div>
-
-        <!-- ============================================================
-             VUE FORMULAIRE : NOTER UN NOUVEAU CRÉDIT (#menu-5)
-             GRAND FORMAT RECTANGULAIRE STYLE A - TABLEAU DE FACTURATION
-        ============================================================ -->
-        <section id="menu-5" class="view-container">
+        <section id="menu-5" class="view-container" style="max-width:1100px;margin:0 auto;padding-bottom:40px;">
           
-          <!-- En-tête Titre & Action rapide -->
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div style="width:44px;height:44px;background:#EFF6FF;color:#2563EB;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 6px rgba(37,99,235,0.15);">
-                <i data-lucide="file-plus-2"></i>
-              </div>
-              <div>
-                <h1 style="font-size:1.35rem;font-weight:800;color:#0F172A;margin:0;">Facturation &amp; Vente à Crédit</h1>
-                <p style="font-size:0.82rem;color:#64748B;margin:3px 0 0 0;">Tableau de facturation multi-articles avec calcul automatique des totaux et suivi des échéances.</p>
-              </div>
+          <!-- En-tête Titre & Bouton Retour -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px;">
+            <div>
+              <h1 style="font-size:1.5rem;font-weight:900;color:#0F172A;margin:0;">Vente à Crédit</h1>
+              <p style="font-size:0.84rem;color:#64748B;margin:3px 0 0 0;">Enregistrez une nouvelle vente à crédit</p>
             </div>
-            <div style="display:flex;gap:10px;">
-              <button type="button" class="btn btn-outline" onclick="switchMenu('menu-2')" style="font-size:0.85rem;padding:8px 16px;">
-                ✕ Annuler
-              </button>
-              <button type="button" class="btn btn-primary" onclick="document.getElementById('form-new-credit-saas')?.requestSubmit()" style="font-size:0.85rem;padding:8px 20px;">
-                <i data-lucide="check-circle" style="width:16px;height:16px;"></i> Enregistrer la Vente
+            <div>
+              <button type="button" class="btn btn-outline" onclick="switchMenu('menu-4-directory')" style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:10px;padding:8px 16px;font-size:0.82rem;font-weight:700;color:#334155;display:flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(0,0,0,0.04);cursor:pointer;">
+                <span>&lt;</span> Retour au cahier des crédits
               </button>
             </div>
           </div>
 
-          <form id="form-new-credit-saas" onsubmit="handleNewCreditSubmit(event)" style="display:flex;flex-direction:column;gap:20px;">
+          <!-- Rangée 1 : 4 Cartes Synthèse KPIs -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-bottom:20px;">
             
-            <!-- BLOC 1 : CLIENT & CONDITIONS DE RÈGLEMENT (GRILLE HORIZONTALE PLEINE LARGEUR) -->
-            <div class="card" style="padding:22px;border:1px solid #E2E8F0;border-radius:14px;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-              <div style="font-size:0.92rem;font-weight:800;color:#0F172A;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
-                <i data-lucide="user-check" style="width:18px;height:18px;color:#2563EB;"></i> 1. Identité du Client &amp; Modalités de Remboursement
+            <!-- KPI 1 : Montant Total -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+              <div style="width:44px;height:44px;border-radius:12px;background:#F5F3FF;color:#7C3AED;display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="wallet" style="width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-size:0.75rem;font-weight:700;color:#64748B;">Montant Total</div>
+                <div id="credit-kpi-total-display" style="font-size:1.3rem;font-weight:900;color:#0F172A;margin-top:2px;">0 FCFA</div>
+              </div>
+            </div>
+
+            <!-- KPI 2 : Articles -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+              <div style="width:44px;height:44px;border-radius:12px;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="package" style="width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-size:0.75rem;font-weight:700;color:#64748B;">Articles</div>
+                <div id="credit-kpi-count-display" style="font-size:1.3rem;font-weight:900;color:#0F172A;margin-top:2px;">0</div>
+              </div>
+            </div>
+
+            <!-- KPI 3 : Date Limite -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+              <div style="width:44px;height:44px;border-radius:12px;background:#FFFBEB;color:#D97706;display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="calendar" style="width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-size:0.75rem;font-weight:700;color:#64748B;">Date Limite</div>
+                <div id="credit-kpi-duedate-display" style="font-size:1.1rem;font-weight:900;color:#0F172A;margin-top:2px;">--/--/----</div>
+              </div>
+            </div>
+
+            <!-- KPI 4 : Mode de Paiement -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+              <div style="width:44px;height:44px;border-radius:12px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;">
+                <i data-lucide="badge-dollar-sign" style="width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-size:0.75rem;font-weight:700;color:#64748B;">Mode de Paiement</div>
+                <div id="credit-kpi-method-display" style="font-size:1.1rem;font-weight:900;color:#0F172A;margin-top:2px;">Espèces</div>
+              </div>
+            </div>
+
+          </div>
+
+          <form id="form-new-credit-saas" onsubmit="handleNewCreditSubmit(event)">
+
+            <!-- Rangée 2 : Carte Client -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+              <div style="font-size:0.95rem;font-weight:800;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                <i data-lucide="user" style="width:18px;height:18px;color:#2563EB;"></i> Client
+              </div>
+              
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <select id="credit-client-select" class="form-control" onchange="handleCreditClientChange(this.value)" style="flex:1;min-width:280px;height:42px;border-radius:8px;font-size:0.86rem;"></select>
+                <span style="color:#94A3B8;font-size:0.82rem;font-weight:600;">ou</span>
+                <button type="button" class="btn btn-outline" onclick="toggleNewClientInlineForm()" style="color:#2563EB;border-color:#BFDBFE;background:#EFF6FF;font-weight:700;font-size:0.85rem;padding:9px 18px;border-radius:8px;display:flex;align-items:center;gap:6px;cursor:pointer;">
+                  + Nouveau client
+                </button>
               </div>
 
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:16px;">
-                
-                <!-- Sélection ou création Client -->
-                <div class="form-group" style="margin-bottom:0;">
-                  <label class="form-label" style="font-weight:700;font-size:0.82rem;">Client Acheteur <span style="color:#EF4444;">*</span></label>
-                  <select id="credit-client-select" class="form-control" required onchange="handleCreditClientChange(this.value)" style="height:42px;font-size:0.85rem;"></select>
+              <!-- Fiche Nouveau Client Inline -->
+              <div id="new-client-fields" style="display:none;margin-top:16px;padding:16px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:12px;">
+                  <div>
+                    <label class="form-label" style="font-size:0.78rem;font-weight:700;">Nom &amp; Prénoms <span style="color:#EF4444;">*</span></label>
+                    <input type="text" id="new-client-name" class="form-control" placeholder="Nom complet du client" style="height:38px;font-size:0.85rem;">
+                  </div>
+                  <div>
+                    <label class="form-label" style="font-size:0.78rem;font-weight:700;">Numéro WhatsApp / Téléphone <span style="color:#EF4444;">*</span></label>
+                    <input type="tel" id="credit-client-phone" class="form-control" placeholder="Numéro WhatsApp" style="height:38px;font-size:0.85rem;">
+                  </div>
+                  <div>
+                    <label class="form-label" style="font-size:0.78rem;font-weight:700;">N° CNI / RCCM (Optionnel)</label>
+                    <input type="text" id="new-client-cni" class="form-control" placeholder="N° Pièce d'identité" style="height:38px;font-size:0.85rem;">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rangée 3 : Carte Articles de la vente à crédit -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:20px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+              <div style="font-size:0.95rem;font-weight:800;color:#0F172A;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                <i data-lucide="shopping-cart" style="width:18px;height:18px;color:#2563EB;"></i> Articles de la vente à crédit
+              </div>
+
+              <div class="table-responsive" style="margin-bottom:14px;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.86rem;">
+                  <thead>
+                    <tr style="border-bottom:1.5px solid #E2E8F0;color:#475569;">
+                      <th style="text-align:left;padding:10px 12px;font-weight:700;font-size:0.8rem;width:40%;">Article</th>
+                      <th style="text-align:center;padding:10px 12px;font-weight:700;font-size:0.8rem;width:15%;">Quantité</th>
+                      <th style="text-align:right;padding:10px 12px;font-weight:700;font-size:0.8rem;width:20%;">Prix Unitaire (FCFA)</th>
+                      <th style="text-align:right;padding:10px 12px;font-weight:700;font-size:0.8rem;width:20%;">Sous-total (FCFA)</th>
+                      <th style="text-align:center;padding:10px 12px;font-weight:700;font-size:0.8rem;width:5%;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="credit-items-table-body">
+                    <!-- Rendu dynamique par JS -->
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Bouton + Ajouter un article (Ligne en pointillés pleine largeur) -->
+              <button type="button" onclick="addCreditProductRow()" style="width:100%;padding:10px;border:1.5px dashed #93C5FD;background:#F8FAFC;color:#2563EB;border-radius:10px;font-weight:700;font-size:0.85rem;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.2s ease;">
+                <span>+</span> Ajouter un article
+              </button>
+
+              <!-- Total Général Footer -->
+              <div style="display:flex;justify-content:flex-end;align-items:center;gap:16px;margin-top:18px;padding-top:16px;border-top:1px solid #F1F5F9;">
+                <span style="font-weight:800;font-size:0.88rem;color:#475569;letter-spacing:0.5px;">TOTAL GÉNÉRAL</span>
+                <div id="credit-grand-total-pill" style="background:#EFF6FF;color:#2563EB;font-size:1.35rem;font-weight:900;padding:10px 22px;border-radius:12px;border:1px solid #BFDBFE;">
+                  0 FCFA
+                </div>
+              </div>
+            </div>
+
+            <!-- Rangée 4 : Grille 2 Colonnes (Détails de paiement 50% | Garantie 50%) -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;margin-bottom:20px;">
+              
+              <!-- Colonne Gauche : Détails de paiement -->
+              <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                <div style="font-size:0.92rem;font-weight:800;color:#0F172A;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                  <i data-lucide="credit-card" style="width:18px;height:18px;color:#2563EB;"></i> Détails de paiement
                 </div>
 
-                <!-- Date Limite de Paiement -->
-                <div class="form-group" style="margin-bottom:0;">
-                  <label class="form-label" style="font-weight:700;font-size:0.82rem;">Date Limite de Remboursement <span style="color:#EF4444;">*</span></label>
-                  <input type="date" id="credit-due-date" class="form-control" required style="height:42px;font-size:0.85rem;">
-                </div>
-
-                <!-- Mode de Règlement prévu -->
-                <div class="form-group" style="margin-bottom:0;">
-                  <label class="form-label" style="font-weight:700;font-size:0.82rem;">Moyen de Paiement Convenu</label>
-                  <select id="credit-payment-method-pref" class="form-control" onchange="handlePaymentPrefChange(this.value)" style="height:42px;font-size:0.85rem;">
-                    <option value="Espèces">Espèces (Au comptoir)</option>
-                    <option value="Wave Direct">Wave Money</option>
+                <div style="margin-bottom:14px;">
+                  <label class="form-label" style="font-size:0.8rem;font-weight:700;color:#334155;margin-bottom:4px;">Comment le client prévoit de payer ?</label>
+                  <select id="credit-payment-method-pref" class="form-control" onchange="handlePaymentPrefChange(this.value)" style="height:42px;font-size:0.85rem;border-radius:8px;">
+                    <option value="Espèces (Paiement physique en boutique)">Espèces (Paiement physique en boutique)</option>
+                    <option value="Wave Money">Wave Money</option>
                     <option value="Orange Money">Orange Money</option>
-                    <option value="MTN MoMo">MTN Mobile Money</option>
+                    <option value="MTN MoMo">MTN MoMo</option>
                     <option value="Moov Money">Moov Money</option>
                     <option value="Virement Bancaire">Virement Bancaire</option>
                   </select>
                 </div>
 
-                <!-- Boutique de Vente -->
-                <div class="form-group" style="margin-bottom:0;">
-                  <label class="form-label" style="font-weight:700;font-size:0.82rem;">Boutique / Point de Vente</label>
-                  <select id="credit-branch-select" class="form-control" style="height:42px;font-size:0.85rem;">
-                    <option value="Boutique Principale (Siège)">Boutique Principale (Siège)</option>
-                    <option value="Succursale 2">Succursale 2</option>
-                    <option value="Dépôt Central">Dépôt Central</option>
-                  </select>
+                <div style="margin-bottom:14px;">
+                  <label class="form-label" style="font-size:0.8rem;font-weight:700;color:#334155;margin-bottom:4px;">Numéro / Compte de paiement client (optionnel)</label>
+                  <input type="text" id="credit-transfer-account" class="form-control" placeholder="Numéro Wave / MoMo ou RIB" style="height:42px;font-size:0.85rem;border-radius:8px;">
                 </div>
 
+                <div style="margin-bottom:0;">
+                  <label class="form-label" style="font-size:0.8rem;font-weight:700;color:#334155;margin-bottom:4px;">Date limite de remboursement <span style="color:#EF4444;">*</span></label>
+                  <input type="date" id="credit-due-date" class="form-control" required onchange="updateCreditDueDateKPI(this.value)" style="height:42px;font-size:0.85rem;border-radius:8px;">
+                </div>
               </div>
 
-              <!-- Fiche Nouveau Client si sélectionné -->
-              <div id="new-client-fields" style="display:none;margin-top:16px;padding:16px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;">
-                <div style="font-size:0.84rem;font-weight:800;color:#1E293B;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-                  <i data-lucide="user-plus" style="width:16px;height:16px;color:#10B981;"></i> Informations du Nouveau Client
+              <!-- Colonne Droite : Garantie (optionnel) -->
+              <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                <div style="font-size:0.92rem;font-weight:800;color:#0F172A;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                  <i data-lucide="shield-check" style="width:18px;height:18px;color:#2563EB;"></i> Garantie <span style="font-size:0.8rem;font-weight:600;color:#64748B;">(optionnel)</span>
                 </div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px;">
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label" style="font-size:0.8rem;font-weight:700;">Nom &amp; Prénoms <span style="color:#EF4444;">*</span></label>
-                    <input type="text" id="new-client-name" class="form-control" placeholder="Nom complet du client" style="height:38px;font-size:0.85rem;">
-                  </div>
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label" style="font-size:0.8rem;font-weight:700;">Numéro WhatsApp / Téléphone <span style="color:#EF4444;">*</span></label>
-                    <input type="tel" id="credit-client-phone" class="form-control" placeholder="Numéro WhatsApp / Téléphone" style="height:38px;font-size:0.85rem;">
-                  </div>
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label" style="font-size:0.8rem;font-weight:700;">N° CNI / RCCM (Optionnel)</label>
-                    <input type="text" id="new-client-cni" class="form-control" placeholder="N° Pièce d'identité ou registre" style="height:38px;font-size:0.85rem;">
-                  </div>
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label" style="font-size:0.8rem;font-weight:700;">Compte Mobile Money / RIB</label>
-                    <input type="text" id="credit-transfer-account" class="form-control" placeholder="Numéro de paiement Wave / MoMo" style="height:38px;font-size:0.85rem;">
-                  </div>
+
+                <div style="margin-bottom:14px;">
+                  <label class="form-label" style="font-size:0.8rem;font-weight:700;color:#334155;margin-bottom:4px;">Nom du garant</label>
+                  <input type="text" id="credit-guarantor-name" class="form-control" placeholder="Ex: KONE Drissa" style="height:42px;font-size:0.85rem;border-radius:8px;">
+                </div>
+
+                <div style="margin-bottom:0;">
+                  <label class="form-label" style="font-size:0.8rem;font-weight:700;color:#334155;margin-bottom:4px;">Téléphone du garant</label>
+                  <input type="tel" id="credit-guarantor-phone" class="form-control" placeholder="+225 01 02 03 04 05" style="height:42px;font-size:0.85rem;border-radius:8px;">
                 </div>
               </div>
 
             </div>
 
-            <!-- BLOC 2 : GRAND TABLEAU DE FACTURATION RECTANGULAIRE MULTI-PRODUITS -->
-            <div class="card" style="padding:22px;border:1px solid #E2E8F0;border-radius:14px;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
-                <div style="font-size:0.92rem;font-weight:800;color:#0F172A;display:flex;align-items:center;gap:8px;">
-                  <i data-lucide="shopping-bag" style="width:18px;height:18px;color:#2563EB;"></i> 2. Détail des Marchandises Vendues à Crédit (Grand Tableau)
-                </div>
-                <button type="button" class="btn btn-outline" onclick="addCreditProductRow()" style="font-size:0.82rem;padding:6px 14px;display:flex;align-items:center;gap:6px;background:#F1F5F9;color:#0F172A;font-weight:700;">
-                  <i data-lucide="plus" style="width:15px;height:15px;color:#2563EB;"></i> + Ajouter un Article
-                </button>
+            <!-- Rangée 5 : Carte Notes ou informations complémentaires -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:20px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+              <div style="font-size:0.92rem;font-weight:800;color:#0F172A;margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+                <i data-lucide="file-text" style="width:18px;height:18px;color:#2563EB;"></i> Notes ou informations complémentaires <span style="font-size:0.8rem;font-weight:600;color:#64748B;">(optionnel)</span>
               </div>
-
-              <!-- Grand Tableau Rectangulaire Pleine Largeur -->
-              <div class="table-responsive" style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;">
-                <table class="custom-table" style="margin:0;width:100%;border-collapse:collapse;">
-                  <thead style="background:#F8FAFC;">
-                    <tr style="border-bottom:2px solid #E2E8F0;">
-                      <th style="width:45px;text-align:center;font-size:0.75rem;padding:10px;">#</th>
-                      <th style="text-align:left;font-size:0.75rem;padding:10px;">Désignation de l'Article / Marchandise <span style="color:#EF4444;">*</span></th>
-                      <th style="width:110px;text-align:center;font-size:0.75rem;padding:10px;">Quantité <span style="color:#EF4444;">*</span></th>
-                      <th style="width:160px;text-align:right;font-size:0.75rem;padding:10px;">Prix Unitaire <span style="color:#EF4444;">*</span></th>
-                      <th style="width:180px;text-align:right;font-size:0.75rem;padding:10px;">Total Ligne (Auto)</th>
-                      <th style="width:50px;text-align:center;font-size:0.75rem;padding:10px;"></th>
-                    </tr>
-                  </thead>
-                  <tbody id="credit-items-table-body">
-                    <!-- Généré dynamiquement en JS -->
-                  </tbody>
-                  <tfoot style="background:#F8FAFC;border-top:2px solid #E2E8F0;font-weight:800;">
-                    <tr>
-                      <td colspan="4" style="text-align:right;padding:12px;font-size:0.88rem;color:#475569;">Montant Total des Articles :</td>
-                      <td id="credit-table-gross-total" style="text-align:right;padding:12px;font-size:1rem;color:#0F172A;">0 FCFA</td>
-                      <td></td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-
-              <!-- Synthèse Financière Horizontale (Acompte & Solde Net Dû) -->
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-top:18px;padding-top:16px;border-top:1px dashed #E2E8F0;">
-                
-                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;">
-                  <div style="font-size:0.78rem;font-weight:700;color:#64748B;text-transform:uppercase;">Total Brut Facturé</div>
-                  <div id="credit-summary-gross" style="font-size:1.15rem;font-weight:800;color:#0F172A;margin-top:4px;">0 FCFA</div>
-                </div>
-
-                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;">
-                  <label for="credit-deposit" style="font-size:0.78rem;font-weight:700;color:#64748B;text-transform:uppercase;display:block;margin-bottom:4px;">Acompte Payé Immédiatement</label>
-                  <input type="number" id="credit-deposit" class="form-control" placeholder="0" min="0" value="0" oninput="calculateCreditFinancials()" style="height:36px;font-size:0.95rem;font-weight:700;color:#10B981;">
-                </div>
-
-                <div style="background:#EFF6FF;border:2px solid #BFDBFE;border-radius:10px;padding:14px;">
-                  <div style="font-size:0.78rem;font-weight:800;color:#1E40AF;text-transform:uppercase;">Solde Net Crédit (Restant Dû)</div>
-                  <div id="credit-summary-net" style="font-size:1.25rem;font-weight:800;color:#2563EB;margin-top:4px;">0 FCFA</div>
-                </div>
-
-              </div>
-
-              <!-- Champ caché pour compatibilité JS -->
-              <input type="hidden" id="credit-amount" value="0">
-              <input type="hidden" id="credit-description" value="">
-
+              <input type="text" id="credit-notes-input" class="form-control" placeholder="Toute information utile concernant cette vente à crédit..." style="height:44px;font-size:0.85rem;border-radius:8px;">
             </div>
 
-            <!-- BLOC 3 : GARANTIE / TÉMOIN (FACULTATIF MAIS PROPREMENT INTÉGRÉ) -->
-            <div class="card" style="padding:22px;border:1px solid #E2E8F0;border-radius:14px;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-              <div style="font-size:0.92rem;font-weight:800;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
-                <i data-lucide="shield-check" style="width:18px;height:18px;color:#10B981;"></i> 3. Personne Garante ou Témoin (Optionnel)
-              </div>
-
-              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:16px;">
-                <div class="form-group" style="margin-bottom:0;">
-                  <label class="form-label" style="font-size:0.8rem;font-weight:700;">Nom complet du Garant / Témoin</label>
-                  <input type="text" id="credit-guarantor-name" class="form-control" placeholder="Nom de la personne garante" style="height:40px;font-size:0.85rem;">
-                </div>
-                <div class="form-group" style="margin-bottom:0;">
-                  <label class="form-label" style="font-size:0.8rem;font-weight:700;">Numéro de Téléphone du Garant</label>
-                  <input type="tel" id="credit-guarantor-phone" class="form-control" placeholder="Numéro WhatsApp / Téléphone" style="height:40px;font-size:0.85rem;">
-                </div>
-              </div>
-            </div>
-
-            <!-- BARRE INFÉRIEURE DE SOUMISSION -->
-            <div style="display:flex;gap:14px;justify-content:flex-end;align-items:center;padding:12px 0 24px 0;">
-              <button type="button" class="btn btn-outline" onclick="switchMenu('menu-2')" style="padding:12px 24px;font-size:0.9rem;font-weight:700;">
+            <!-- Rangée 6 : Actions Inférieures -->
+            <div style="display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-bottom:20px;">
+              <button type="button" class="btn btn-outline" onclick="switchMenu('menu-4-directory')" style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:8px;padding:10px 22px;font-size:0.88rem;font-weight:700;color:#475569;cursor:pointer;">
                 Annuler
               </button>
-              <button type="submit" class="btn btn-primary" style="padding:12px 32px;font-size:0.95rem;font-weight:800;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(37,99,235,0.25);">
-                <i data-lucide="check-circle" style="width:18px;height:18px;"></i> Enregistrer le Crédit &amp; Générer la Facture
+              <button type="submit" class="btn btn-primary" style="background:#2563EB;color:#FFFFFF;border:none;border-radius:8px;padding:10px 26px;font-size:0.88rem;font-weight:800;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(37,99,235,0.3);cursor:pointer;">
+                <i data-lucide="check" style="width:16px;height:16px;"></i> Enregistrer la vente à crédit
               </button>
             </div>
 
+            <!-- Champs cachés pour compatibilité -->
+            <input type="hidden" id="credit-amount" value="0">
+            <input type="hidden" id="credit-description" value="">
+
           </form>
+
         </section>
+
 
 
         <!-- ============================================================

@@ -4277,21 +4277,199 @@ window.sendDailyClosingWhatsApp = function() {
 };
 
 
-// Initialisation au chargement
+// --------------------------------------------------------------------------
+// 20. MOTEUR VENTE À CRÉDIT (TABLEAU DYNAMIQUE & 4 CARTES KPIS EN TEMPS RÉEL)
+// --------------------------------------------------------------------------
+window.creditProducts = [
+  { id: '1', name: 'Sac de Riz 50kg', quantity: 3, unitPrice: 25000 },
+  { id: '2', name: 'Carton d\'Huile 5L', quantity: 2, unitPrice: 8000 },
+  { id: '3', name: 'Carton de Lait Bonnet Rouge', quantity: 1, unitPrice: 5000 }
+];
+
+window.renderCreditProductsTable = function() {
+  const tbody = document.getElementById('credit-items-table-body');
+  if (!tbody) return;
+
+  if (!window.creditProducts || window.creditProducts.length === 0) {
+    window.creditProducts = [
+      { id: '1', name: '', quantity: 1, unitPrice: 0 }
+    ];
+  }
+
+  tbody.innerHTML = window.creditProducts.map((item) => {
+    const subtotal = (item.quantity || 0) * (item.unitPrice || 0);
+    return `
+      <tr style="border-bottom:1px solid #F1F5F9;transition:background 0.15s ease;">
+        <td style="padding:10px 12px;">
+          <input type="text" 
+            class="form-control" 
+            placeholder="Désignation article (ex: Sac de Riz 50kg)" 
+            value="${escapeHTML(item.name || '')}" 
+            oninput="updateCreditProduct('${item.id}', 'name', this.value)" 
+            style="height:38px;font-size:0.85rem;border-radius:8px;">
+        </td>
+        <td style="padding:10px 12px;text-align:center;">
+          <input type="number" 
+            class="form-control" 
+            min="1" 
+            value="${item.quantity || 1}" 
+            oninput="updateCreditProduct('${item.id}', 'quantity', this.value)" 
+            style="height:38px;font-size:0.85rem;text-align:center;border-radius:8px;max-width:90px;margin:0 auto;">
+        </td>
+        <td style="padding:10px 12px;text-align:right;">
+          <input type="number" 
+            class="form-control" 
+            min="0" 
+            placeholder="0" 
+            value="${item.unitPrice || ''}" 
+            oninput="updateCreditProduct('${item.id}', 'unitPrice', this.value)" 
+            style="height:38px;font-size:0.85rem;text-align:right;border-radius:8px;max-width:140px;margin-left:auto;">
+        </td>
+        <td style="padding:10px 12px;text-align:right;font-weight:800;color:#2563EB;font-size:0.92rem;">
+          ${formatCurrency(subtotal)}
+        </td>
+        <td style="padding:10px 12px;text-align:center;">
+          <button type="button" 
+            onclick="removeCreditProductRow('${item.id}')" 
+            title="Supprimer la ligne" 
+            style="background:transparent;border:none;color:#EF4444;cursor:pointer;padding:6px;border-radius:6px;display:flex;align-items:center;justify-content:center;margin:0 auto;">
+            <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+  window.calculateCreditFinancials();
+};
+
+window.addCreditProductRow = function() {
+  if (!window.creditProducts) window.creditProducts = [];
+  window.creditProducts.push({
+    id: 'row_' + Date.now() + '_' + Math.random().toString(36).substring(2, 5),
+    name: '',
+    quantity: 1,
+    unitPrice: 0
+  });
+  window.renderCreditProductsTable();
+};
+
+window.removeCreditProductRow = function(id) {
+  if (!window.creditProducts || window.creditProducts.length <= 1) {
+    window.creditProducts = [{ id: '1', name: '', quantity: 1, unitPrice: 0 }];
+  } else {
+    window.creditProducts = window.creditProducts.filter(it => it.id !== id);
+  }
+  window.renderCreditProductsTable();
+};
+
+window.updateCreditProduct = function(id, field, val) {
+  const item = window.creditProducts?.find(it => it.id === id);
+  if (!item) return;
+  if (field === 'quantity') {
+    item.quantity = parseFloat(val) || 0;
+  } else if (field === 'unitPrice') {
+    item.unitPrice = parseFloat(val) || 0;
+  } else {
+    item[field] = val;
+  }
+  window.calculateCreditFinancials();
+};
+
+window.calculateCreditFinancials = function() {
+  let grossTotal = 0;
+  let totalArticlesCount = 0;
+
+  (window.creditProducts || []).forEach(it => {
+    const q = it.quantity || 0;
+    const p = it.unitPrice || 0;
+    grossTotal += (q * p);
+    if (it.name && it.name.trim()) totalArticlesCount += q;
+  });
+
+  const kpiTotal = document.getElementById('credit-kpi-total-display');
+  const kpiCount = document.getElementById('credit-kpi-count-display');
+  const grandTotalPill = document.getElementById('credit-grand-total-pill');
+  const hiddenAmount = document.getElementById('credit-amount');
+  const hiddenDesc = document.getElementById('credit-description');
+
+  if (kpiTotal) kpiTotal.textContent = formatCurrency(grossTotal);
+  if (kpiCount) kpiCount.textContent = totalArticlesCount.toString();
+  if (grandTotalPill) grandTotalPill.textContent = formatCurrency(grossTotal);
+  if (hiddenAmount) hiddenAmount.value = grossTotal;
+
+  if (hiddenDesc) {
+    const lines = (window.creditProducts || [])
+      .filter(it => it.name && it.name.trim())
+      .map(it => `• ${it.name} (Qté: ${it.quantity} × ${formatCurrency(it.unitPrice)}) = ${formatCurrency(it.quantity * it.unitPrice)}`);
+    hiddenDesc.value = lines.join('\n');
+  }
+};
+
+window.updateCreditDueDateKPI = function(dateVal) {
+  const kpiDueDate = document.getElementById('credit-kpi-duedate-display');
+  if (!kpiDueDate) return;
+  if (!dateVal) {
+    kpiDueDate.textContent = '--/--/----';
+    return;
+  }
+  const parts = dateVal.split('-');
+  if (parts.length === 3) {
+    kpiDueDate.textContent = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  } else {
+    kpiDueDate.textContent = dateVal;
+  }
+};
+
+window.handlePaymentPrefChange = function(methodVal) {
+  const kpiMethod = document.getElementById('credit-kpi-method-display');
+  if (!kpiMethod) return;
+  if (methodVal.includes('Espèces')) {
+    kpiMethod.textContent = 'Espèces';
+  } else if (methodVal.includes('Wave')) {
+    kpiMethod.textContent = 'Wave Money';
+  } else if (methodVal.includes('Orange')) {
+    kpiMethod.textContent = 'Orange Money';
+  } else if (methodVal.includes('MTN')) {
+    kpiMethod.textContent = 'MTN MoMo';
+  } else if (methodVal.includes('Moov')) {
+    kpiMethod.textContent = 'Moov Money';
+  } else {
+    kpiMethod.textContent = methodVal;
+  }
+};
+
+window.toggleNewClientInlineForm = function() {
+  const container = document.getElementById('new-client-fields');
+  const select = document.getElementById('credit-client-select');
+  if (!container) return;
+  const isHidden = container.style.display === 'none' || !container.style.display;
+  container.style.display = isHidden ? 'block' : 'none';
+  if (isHidden) {
+    if (select) select.value = 'NEW';
+    document.getElementById('new-client-name')?.focus();
+  }
+};
+
+// Initialisation par défaut de la date d'échéance et du tableau Vente à Crédit
 window.addEventListener('DOMContentLoaded', () => {
-  setupOtpInputsListeners();
-  setTimeout(() => {
-    renderTeamCashiers();
-    renderMorningAlerts();
-    renderDailySalesBook();
-    updateSessionUI();
-  }, 1000);
+  const defaultDueDateInput = document.getElementById('credit-due-date');
+  if (defaultDueDateInput && !defaultDueDateInput.value) {
+    const futureDate = new Date();
+    futureDate.setDate(futureDate.getDate() + 30);
+    const dateStr = futureDate.toISOString().split('T')[0];
+    defaultDueDateInput.value = dateStr;
+    window.updateCreditDueDateKPI(dateStr);
+  }
+  window.renderCreditProductsTable();
 });
 
+
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.0)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.1)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.4.0";
+window.APP_VERSION = "2.4.1";
 
 window.checkAppVersion = async function() {
   try {

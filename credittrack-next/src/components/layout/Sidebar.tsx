@@ -180,7 +180,7 @@ export default function Sidebar() {
             </Link>
             <span>•</span>
             <span style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#93C5FD', padding: '1px 6px', borderRadius: '4px', fontWeight: 800, fontSize: '0.62rem' }}>
-              v2.4.0
+              v2.4.1
             </span>
           </div>
         </div>
