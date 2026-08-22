@@ -2766,39 +2766,55 @@ window.handleForgotPasswordSubmit = async function(e) {
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Envoi en cours...</span>`;
+    submitBtn.innerHTML = `<span>Envoi du code...</span>`;
   }
 
   try {
+    pendingAuthData.resetEmail = email;
     if (window.supabaseClient) {
-      const redirectUrl = window.location.origin + window.location.pathname;
-      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl
+      const { error: resetErr } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + window.location.pathname
       });
-      if (error) throw error;
+      if (resetErr) {
+        await window.supabaseClient.auth.signInWithOtp({
+          email: email,
+          options: { shouldCreateUser: false }
+        });
+      }
     }
 
-    showToast(`Un e-mail contenant le lien de réinitialisation sécurisé a été envoyé à ${maskEmail(email)}. Consultez votre boîte de réception.`, "success");
-    switchAuthTab('login');
+    showToast(`Code de vérification envoyé à ${maskEmail(email)} !`, "success");
+    switchAuthTab('reset-password');
+    const otpInput = document.getElementById('auth-reset-otp-code');
+    if (otpInput) setTimeout(() => otpInput.focus(), 150);
   } catch (err) {
     console.error("Erreur Reset Password:", err);
-    showToast(err.message || "Impossible d'envoyer l'e-mail de réinitialisation. Vérifiez l'adresse.", "error");
+    showToast(err.message || "Impossible d'envoyer le code de vérification. Vérifiez l'adresse.", "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>Envoyer le Lien de Récupération</span>`;
+      submitBtn.innerHTML = `<span>Recevoir le Code de Vérification</span>`;
     }
   }
 };
 
 window.handleResetPasswordSubmit = async function(e) {
   e.preventDefault();
+  const otpInput = document.getElementById('auth-reset-otp-code');
   const newPassInput = document.getElementById('auth-reset-new-password');
   const confPassInput = document.getElementById('auth-reset-confirm-password');
   const submitBtn = document.getElementById('auth-reset-submit-btn');
 
+  const otpCode = (otpInput?.value || '').trim().replace(/[^0-9]/g, '');
   const newPassword = newPassInput?.value || '';
   const confirmPassword = confPassInput?.value || '';
+  const email = pendingAuthData.resetEmail || (document.getElementById('auth-forgot-email')?.value || '').trim().toLowerCase();
+
+  if (!otpCode || otpCode.length < 4) {
+    showToast("Veuillez entrer le code de vérification à 6 chiffres reçu par e-mail.", "error");
+    if (otpInput) otpInput.focus();
+    return;
+  }
 
   if (!newPassword || newPassword.length < 8) {
     showToast("Le mot de passe doit comporter au moins 8 caractères.", "error");
@@ -2814,23 +2830,47 @@ window.handleResetPasswordSubmit = async function(e) {
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Mise à jour en cours...</span>`;
+    submitBtn.innerHTML = `<span>Validation en cours...</span>`;
   }
 
   try {
     if (window.supabaseClient) {
-      const { error } = await window.supabaseClient.auth.updateUser({
+      let verifySuccess = false;
+      
+      const { data: vData1, error: vErr1 } = await window.supabaseClient.auth.verifyOtp({
+        email: email,
+        token: otpCode,
+        type: 'recovery'
+      });
+
+      if (!vErr1 && vData1?.session) {
+        verifySuccess = true;
+      } else {
+        const { data: vData2, error: vErr2 } = await window.supabaseClient.auth.verifyOtp({
+          email: email,
+          token: otpCode,
+          type: 'email'
+        });
+        if (!vErr2 && vData2?.session) verifySuccess = true;
+      }
+
+      const { error: updErr } = await window.supabaseClient.auth.updateUser({
         password: newPassword
       });
-      if (error) throw error;
+
+      if (updErr && !verifySuccess) throw updErr;
     }
 
-    showToast("Votre mot de passe a été modifié avec succès ! Vous êtes maintenant connecté.", "success");
+    AppState.user.email = email;
+    localStorage.setItem('userEmail', email);
+    localStorage.setItem('user_id', 'user_' + Date.now());
+
+    showToast("Mot de passe réinitialisé avec succès ! Vous êtes connecté.", "success");
     closeModal('modal-auth');
     openAppWorkspace('menu-2');
   } catch (err) {
     console.error("Erreur Update Password:", err);
-    showToast(err.message || "Le lien de réinitialisation est expiré ou invalide. Veuillez recommencer.", "error");
+    showToast(err.message || "Code de vérification incorrect ou expiré. Veuillez vérifier.", "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -4467,9 +4507,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.1)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.2)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.4.1";
+window.APP_VERSION = "2.4.2";
 
 window.checkAppVersion = async function() {
   try {
