@@ -4782,9 +4782,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.5.1)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.5.2)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.5.1";
+window.APP_VERSION = "2.5.2";
 
 window.checkAppVersion = async function(isManual = false) {
   try {

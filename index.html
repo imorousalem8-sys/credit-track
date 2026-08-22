@@ -26,7 +26,7 @@
   <script>
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260822_v2.5.1";
+      const CURRENT_BUILD = "20260822_v2.5.2";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('serviceWorker' in navigator) {
@@ -81,9 +81,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260822_v2.5.1" defer></script>
-  <script src="app.js?v=20260822_v2.5.1" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260822_v2.5.1">
+  <script src="dataStore.js?v=20260822_v2.5.2" defer></script>
+  <script src="app.js?v=20260822_v2.5.2" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260822_v2.5.2">
 </head>
 <body class="is-landing-mode">
 
@@ -893,11 +893,12 @@
 
       <div class="sidebar-brand">
         <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-          <div class="brand-left" onclick="openPublicLanding()" style="cursor:pointer;">
-            <img src="logo_3d.png" alt="CréditTrack" style="width:38px;height:38px;object-fit:contain;">
-            <div style="margin-left:8px;">
-              <div class="brand-title">CréditTrack</div>
-              <div class="brand-sub" data-i18n="sidebarAppSub">GESTION COMMERÇANT</div>
+          <div class="brand-left" onclick="openPublicLanding()" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height:36px;border-radius:10px;background:rgba(59,130,246,0.15);display:flex;align-items:center;justify-content:center;color:#60A5FA;">
+              <i data-lucide="book-open" style="width:22px;height:22px;"></i>
+            </div>
+            <div>
+              <div class="brand-title" style="font-size:0.96rem;font-weight:900;line-height:1.2;color:#FFFFFF;">Cahier des<br>Ventes (24h)</div>
             </div>
           </div>
           <!-- Close button on Mobile Sidebar -->
@@ -939,88 +940,83 @@
       </div>
 
       <nav class="sidebar-nav">
-        <!-- MENUS MODE CRÉDIT -->
-        <button class="nav-link active credit-menu-item" id="nav-menu-2" onclick="switchMenu('menu-2')">
+        <!-- 1. Tableau de bord -->
+        <button class="nav-link credit-menu-item" id="nav-menu-2" onclick="switchMenu('menu-2')">
           <div class="nav-link-left">
             <i data-lucide="layout-grid"></i>
-            <span data-i18n="menuDashboard">Tableau de Bord</span>
+            <span>Tableau de bord</span>
           </div>
-          <i data-lucide="chevron-right" class="nav-arrow"></i>
         </button>
 
-        <button class="nav-link credit-menu-item" id="nav-menu-4-directory" onclick="switchMenu('menu-4-directory')">
-          <div class="nav-link-left">
-            <i data-lucide="users"></i>
-            <span data-i18n="menuClients">Clients &amp; Dettes</span>
-          </div>
-          <i data-lucide="chevron-right" class="nav-arrow"></i>
-        </button>
-
-        <button class="nav-link credit-menu-item" id="nav-menu-6" onclick="switchMenu('menu-6')">
-          <div class="nav-link-left">
-            <i data-lucide="wallet"></i>
-            <span data-i18n="menuPayments">Encaisser &amp; Reçus</span>
-          </div>
-          <i data-lucide="chevron-right" class="nav-arrow"></i>
-        </button>
-
-        <!-- NOUVEAU : CAHIER DES VENTES DU JOUR (24H) & MULTI-BOUTIQUES -->
-        <button class="nav-link" id="nav-menu-salesbook" onclick="switchMenu('menu-salesbook')">
+        <!-- 2. Cahier des ventes (Active par défaut ou selon sélection) -->
+        <button class="nav-link active" id="nav-menu-salesbook" onclick="switchMenu('menu-salesbook')">
           <div class="nav-link-left">
             <i data-lucide="book-open"></i>
-            <span>Cahier des Ventes (24h)</span>
+            <span>Cahier des ventes</span>
           </div>
-          <i data-lucide="chevron-right" class="nav-arrow"></i>
         </button>
 
-        <button class="nav-link credit-menu-item" id="nav-menu-8" onclick="switchMenu('menu-8')">
+        <!-- 3. Ventes à crédit -->
+        <button class="nav-link" id="nav-menu-5" onclick="switchMenu('menu-5')">
           <div class="nav-link-left">
-            <i data-lucide="bell-ring"></i>
-            <span data-i18n="menuReminders">Rappels WhatsApp</span>
+            <i data-lucide="credit-card"></i>
+            <span>Ventes à crédit</span>
           </div>
-          <i data-lucide="chevron-right" class="nav-arrow"></i>
         </button>
 
-        <!-- MENUS MODE CAISSE & COMPTABILITÉ -->
-        <button class="nav-link accounting-menu-item" id="nav-menu-accounting" onclick="switchMenu('menu-accounting')" style="display:none;">
+        <!-- 4. Clients -->
+        <button class="nav-link" id="nav-menu-4-directory" onclick="switchMenu('menu-4-directory')">
           <div class="nav-link-left">
-            <i data-lucide="calculator"></i>
-            <span data-i18n="menuAccounting">Caisse &amp; Dépenses</span>
+            <i data-lucide="users"></i>
+            <span>Clients</span>
           </div>
-          <i data-lucide="chevron-right" class="nav-arrow"></i>
+        </button>
+
+        <!-- 5. Produits / Articles -->
+        <button class="nav-link" id="nav-menu-products" onclick="switchMenu('menu-5')">
+          <div class="nav-link-left">
+            <i data-lucide="package"></i>
+            <span>Produits / Articles</span>
+          </div>
+        </button>
+
+        <!-- 6. Paiements -->
+        <button class="nav-link" id="nav-menu-6" onclick="switchMenu('menu-6')">
+          <div class="nav-link-left">
+            <i data-lucide="wallet"></i>
+            <span>Paiements</span>
+          </div>
+        </button>
+
+        <!-- 7. Rapports & Caisse -->
+        <button class="nav-link" id="nav-menu-accounting" onclick="switchMenu('menu-accounting')">
+          <div class="nav-link-left">
+            <i data-lucide="trending-up"></i>
+            <span>Rapports</span>
+          </div>
         </button>
         
-        <!-- COMMUN -->
+        <!-- 8. Paramètres -->
         <button class="nav-link" id="nav-menu-settings" onclick="switchMenu('menu-settings')">
           <div class="nav-link-left">
             <i data-lucide="settings"></i>
-            <span data-i18n="menuSettings">Paramètres</span>
+            <span>Paramètres</span>
           </div>
-          <i data-lucide="chevron-right" class="nav-arrow"></i>
         </button>
-
-        <div style="margin-top:auto;padding-top:10px;">
-          <button class="nav-link" style="opacity:0.9;font-size:0.8rem;background:rgba(255,255,255,0.08);" onclick="openPublicLanding()">
-            <div class="nav-link-left">
-              <i data-lucide="home"></i>
-              <span data-i18n="menuHomeSite">Page d'Accueil Site</span>
-            </div>
-          </button>
-        </div>
       </nav>
 
-      <div class="sidebar-pro-card" id="sidebar-pro-banner">
-        <div class="pro-card-title">
-          <i data-lucide="crown" style="color:#F59E0B;width:18px;height:18px;"></i>
-          <span id="sidebar-pro-plan-label">Formule Pro Commerçant</span>
+      <!-- Widget Boutique Active en bas de Sidebar (Fidèle au Mockup) -->
+      <div style="padding:12px 14px;background:rgba(255,255,255,0.05);border-radius:10px;margin:12px 14px;border:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openModal('modal-branches')">
+        <div>
+          <div style="font-size:0.68rem;color:#94A3B8;text-transform:uppercase;font-weight:700;">Boutique active</div>
+          <div id="sidebar-active-branch-name" style="font-size:0.84rem;font-weight:800;color:#FFFFFF;margin-top:2px;">Toutes les Boutiques</div>
         </div>
-        <p class="pro-card-desc" id="sidebar-pro-plan-desc">Rappels WhatsApp automatiques &amp; clients illimités.</p>
-        <button class="btn-pro-upgrade" id="sidebar-pro-btn" onclick="openSubscriptionModal()">Passer à Pro (5 000 F)</button>
+        <i data-lucide="chevron-right" style="width:16px;height:16px;color:#94A3B8;"></i>
       </div>
 
       <div class="sidebar-user-footer">
         <div style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;" onclick="openAuthModal('register')">
-          <div class="user-avatar-circle" id="sidebar-avatar-initials">CT</div>
+          <div class="user-avatar-circle" id="sidebar-avatar-initials">AK</div>
           <div class="user-info-text">
             <div class="user-name-title" id="sidebar-user-name">Mon Compte</div>
             <div class="user-role-sub" id="sidebar-user-plan-badge" style="color:#10B981;font-weight:700;">Essai 3 Mois Actif</div>
@@ -1028,7 +1024,7 @@
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
           <button type="button" class="btn-icon-tiny" onclick="checkAppVersion(true)" title="Vérifier les mises à jour en direct" style="background:rgba(59,130,246,0.25);border:1px solid rgba(59,130,246,0.5);color:#93C5FD;padding:3px 7px;border-radius:6px;font-size:0.65rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;">
-            <i data-lucide="refresh-cw" style="width:11px;height:11px;"></i> <span id="sidebar-version-tag">v2.5.0</span>
+            <i data-lucide="refresh-cw" style="width:11px;height:11px;"></i> <span id="sidebar-version-tag">v2.5.1</span>
           </button>
           <button class="btn-icon-tiny" onclick="handleSignOut()" title="Se Déconnecter" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#FCA5A5;border-radius:6px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
             <i data-lucide="log-out" style="width:15px;height:15px;"></i>
