@@ -1327,16 +1327,17 @@ function renderPaymentsTable() {
     }
   }
 
-
   if (activityList) {
-    if (AppState.payments.length === 0) {
+    // Filter out subscription payments — show only real client payments
+    const clientPayments = AppState.payments.filter(p => p.type !== 'subscription');
+    if (clientPayments.length === 0) {
       activityList.innerHTML = `
         <div style="text-align:center;padding:35px 15px;color:#94A3B8;font-size:0.85rem;">
           ${AppState.lang === 'en' ? 'No recent activity.' : 'Aucune activité récente.'}
         </div>
       `;
     } else {
-      activityList.innerHTML = AppState.payments.slice(0, 4).map(p => `
+      activityList.innerHTML = clientPayments.slice(0, 4).map(p => `
         <div class="activity-item">
           <div class="activity-left">
             <div class="activity-icon green">
@@ -3413,7 +3414,8 @@ function activateProPlan(planTier, amount, method) {
       clientName: `Abonnement ${planTier === 'pro_yearly' ? 'Annuel' : 'Mensuel'} PRO`,
       amount,
       date: 'À l\'instant',
-      method
+      method,
+      type: 'subscription'
     });
   }
 
