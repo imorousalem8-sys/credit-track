@@ -4321,9 +4321,7 @@ window.sendDailyClosingWhatsApp = function() {
 // 20. MOTEUR VENTE À CRÉDIT (TABLEAU DYNAMIQUE & 4 CARTES KPIS EN TEMPS RÉEL)
 // --------------------------------------------------------------------------
 window.creditProducts = [
-  { id: '1', name: 'Sac de Riz 50kg', quantity: 3, unitPrice: 25000 },
-  { id: '2', name: 'Carton d\'Huile 5L', quantity: 2, unitPrice: 8000 },
-  { id: '3', name: 'Carton de Lait Bonnet Rouge', quantity: 1, unitPrice: 5000 }
+  { id: '1', name: '', quantity: 1, unitPrice: 0 }
 ];
 
 window.renderCreditProductsTable = function() {
@@ -4507,9 +4505,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.2)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.3)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.4.2";
+window.APP_VERSION = "2.4.3";
 
 window.checkAppVersion = async function() {
   try {
