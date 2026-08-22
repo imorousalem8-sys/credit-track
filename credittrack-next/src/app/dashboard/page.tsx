@@ -25,8 +25,10 @@ export default function DashboardPage() {
     formatAmount, 
     setSelectedClient, 
     setIsNewCreditModalOpen,
-    country
+    country,
+    showToast
   } = useApp();
+
 
   // Compute live KPIs 100% dynamically
   const totalDue = clients.reduce((acc, c) => acc + (Number(c.totalDue) || 0), 0);
@@ -200,10 +202,16 @@ export default function DashboardPage() {
                     className="btn"
                     style={{ background: '#25D366', color: '#fff', padding: '6px 10px', fontSize: '0.75rem', fontWeight: 700 }}
                     onClick={() => {
-                      const cleanPhone = c.phone.replace(/[^0-9]/g, '');
+                      const cleanPhone = (c.phone || '').replace(/[^0-9]/g, '');
+                      if (!cleanPhone || cleanPhone.length < 8) {
+                        if (showToast) showToast("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.", "error");
+                        else alert("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.");
+                        return;
+                      }
                       const msg = `Bonjour ${c.name},\nVotre paiement de ${formatAmount(c.totalDue)} chez CréditTrack est arrivé à échéance. Merci de procéder au règlement via Wave ou Mobile Money.`;
                       window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                     }}
+
                   >
                     <MessageSquare size={13} /> Relancer
                   </button>
@@ -333,10 +341,16 @@ export default function DashboardPage() {
                               className="btn" 
                               style={{ background: '#25D366', color: '#fff', padding: '5px 9px', fontSize: '0.74rem', fontWeight: 700, border: 'none', borderRadius: '6px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                               onClick={() => {
-                                const cleanPhone = c.phone.replace(/[^0-9]/g, '');
+                                const cleanPhone = (c.phone || '').replace(/[^0-9]/g, '');
+                                if (!cleanPhone || cleanPhone.length < 8) {
+                                  if (showToast) showToast("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.", "error");
+                                  else alert("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.");
+                                  return;
+                                }
                                 const msg = `Bonjour ${c.name}, nous vous rappelons amicalement que votre solde de ${formatAmount(c.totalDue)} est à régler. Merci pour votre confiance !`;
                                 window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
                               }}
+
                               title="Relancer par WhatsApp"
                             >
                               <MessageSquare size={13} /> WhatsApp

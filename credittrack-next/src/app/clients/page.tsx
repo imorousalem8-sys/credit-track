@@ -5,7 +5,8 @@ import { useApp } from '@/context/AppContext';
 import { Users, Search, PlusCircle, Eye, MessageSquare, Shield, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export default function ClientsPage() {
-  const { clients, formatAmount, setSelectedClient, setIsNewCreditModalOpen } = useApp();
+  const { clients, formatAmount, setSelectedClient, setIsNewCreditModalOpen, showToast } = useApp();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
 
@@ -16,10 +17,16 @@ export default function ClientsPage() {
   });
 
   const sendWhatsApp = (clientName: string, phone: string, amount: number) => {
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+    if (!cleanPhone || cleanPhone.length < 8) {
+      if (showToast) showToast("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.", "error");
+      else alert("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.");
+      return;
+    }
     const msg = `Bonjour ${clientName},\nVotre solde restant chez CréditTrack s'élève à ${formatAmount(amount)}.\nMerci de régulariser par Wave ou Mobile Money.`;
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
   };
+
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>

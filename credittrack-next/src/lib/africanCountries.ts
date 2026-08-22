@@ -77,13 +77,49 @@ export function getCountryConfig(code: string): AfricanCountry & { chart: Accoun
   return { ...country, chart };
 }
 
+export interface CurrencyOption {
+  code: string;
+  label: string;
+  symbol: string;
+}
+
+export const CURRENCY_OPTIONS: CurrencyOption[] = [
+  { code: 'XOF', label: 'Franc CFA UEMOA (FCFA)', symbol: 'FCFA' },
+  { code: 'XAF', label: 'Franc CFA CEMAC (FCFA)', symbol: 'FCFA' },
+  { code: 'GHS', label: 'Ghana Cedi (₵)', symbol: '₵' },
+  { code: 'NGN', label: 'Naira Nigérian (₦)', symbol: '₦' },
+  { code: 'GNF', label: 'Franc Guinéen (GNF)', symbol: 'GNF' },
+  { code: 'CDF', label: 'Franc Congolais (CDF)', symbol: 'CDF' },
+  { code: 'KES', label: 'Shilling Kenyan (KES)', symbol: 'KES' },
+  { code: 'ZAR', label: 'Rand Sud-Africain (ZAR)', symbol: 'R' },
+  { code: 'MAD', label: 'Dirham Marocain (MAD)', symbol: 'MAD' },
+  { code: 'DZD', label: 'Dinar Algérien (DZD)', symbol: 'DZD' },
+  { code: 'TND', label: 'Dinar Tunisien (TND)', symbol: 'DT' },
+  { code: 'EGP', label: 'Livre Égyptienne (EGP)', symbol: 'E£' },
+  { code: 'EUR', label: 'Euro (€)', symbol: '€' },
+  { code: 'USD', label: 'Dollar Américain ($)', symbol: '$' },
+  { code: 'GBP', label: 'Livre Sterling (£)', symbol: '£' },
+  { code: 'CAD', label: 'Dollar Canadien (CAD)', symbol: 'CA$' },
+];
+
+export function getCurrencySymbol(code: string = 'XOF'): string {
+  const found = CURRENCY_OPTIONS.find(c => c.code === code);
+  return found ? found.symbol : code;
+}
+
 export function formatAfricanCurrency(amount: number, currencyCode: string = 'XOF'): string {
   const numStr = Math.round(amount || 0).toLocaleString('fr-FR');
-  if (currencyCode === 'XOF' || currencyCode === 'XAF') return `${numStr} FCFA`;
-  if (currencyCode === 'GHS') return `GHS ${numStr}`;
-  if (currencyCode === 'NGN') return `NGN ${numStr}`;
+  if (currencyCode === 'XOF' || currencyCode === 'XAF' || currencyCode === 'FCFA') return `${numStr} FCFA`;
+  if (currencyCode === 'GHS') return `₵ ${numStr}`;
+  if (currencyCode === 'NGN') return `₦ ${numStr}`;
+  if (currencyCode === 'EUR') return `${numStr} €`;
+  if (currencyCode === 'USD') return `$ ${numStr}`;
+  if (currencyCode === 'GBP') return `£ ${numStr}`;
   if (currencyCode === 'KES') return `KES ${numStr}`;
-  if (currencyCode === 'ZAR') return `ZAR ${numStr}`;
+  if (currencyCode === 'ZAR') return `R ${numStr}`;
   if (currencyCode === 'MAD') return `${numStr} MAD`;
+  if (currencyCode === 'GNF') return `${numStr} GNF`;
+  if (currencyCode === 'CDF') return `${numStr} CDF`;
   return `${numStr} ${currencyCode}`;
 }
+

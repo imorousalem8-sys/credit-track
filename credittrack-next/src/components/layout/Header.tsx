@@ -64,8 +64,8 @@ export default function Header() {
       <div className="header-right-actions">
         
         {/* Country Selector */}
-        <div className="country-selector-box">
-          <Globe size={15} className="text-slate-400" />
+        <div className="country-selector-box" title={`Pays actif: ${country.nameFr} (${country.currency})`}>
+          <Globe size={15} className="text-slate-400 shrink-0" />
           <select 
             value={country.code} 
             onChange={(e) => setCountryCode(e.target.value)}
@@ -74,7 +74,7 @@ export default function Header() {
           >
             {AFRICAN_COUNTRIES.map(c => (
               <option key={c.code} value={c.code}>
-                {c.nameFr} ({c.code} • {c.currency})
+                {c.code} - {c.nameFr} ({c.currency})
               </option>
             ))}
           </select>
@@ -83,7 +83,7 @@ export default function Header() {
         {/* Notifications Icon Button */}
         <button 
           type="button"
-          className="header-icon-btn"
+          className="header-icon-btn hidden sm:flex"
           aria-label="Notifications"
         >
           <Bell size={18} />
@@ -95,8 +95,9 @@ export default function Header() {
           type="button" 
           className="btn-header-primary"
           onClick={() => setIsNewCreditModalOpen(true)}
+          title="Créer un nouveau crédit ou client"
         >
-          <Plus size={18} />
+          <Plus size={18} className="shrink-0" />
           <span className="btn-header-text">Nouveau Crédit</span>
         </button>
 
@@ -104,3 +105,4 @@ export default function Header() {
     </header>
   );
 }
+

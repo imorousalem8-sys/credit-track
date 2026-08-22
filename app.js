@@ -499,11 +499,12 @@ const AppState = {
   country: localStorage.getItem('country') || 'CI',
   mode: localStorage.getItem('mode') || 'credit',
   countryConfig: null,
-  businessName: localStorage.getItem('bizName') || 'Mon Commerce',
-  businessAddress: localStorage.getItem('bizAddress') || 'Abidjan, Côte d’Ivoire',
-  businessPhone: localStorage.getItem('bizPhone') || '+225 0701020304',
-  userName: localStorage.getItem('userName') || 'Administrateur',
-  userRole: localStorage.getItem('userRole') || 'Administrateur',
+  currency: localStorage.getItem('appCurrency') || 'FCFA',
+  businessName: localStorage.getItem('bizName') || localStorage.getItem('businessName') || '',
+  businessAddress: localStorage.getItem('bizAddress') || localStorage.getItem('businessAddress') || '',
+  businessPhone: localStorage.getItem('bizPhone') || localStorage.getItem('businessPhone') || '',
+  userName: localStorage.getItem('userName') || '',
+  userRole: localStorage.getItem('userRole') || 'Gérant',
   activeClientInModal: null,
 
   // Données persistantes multi-couches garanties à 100% et isolées par commerçant
@@ -514,7 +515,7 @@ const AppState = {
   user: {
     id: localStorage.getItem('user_id') || '',
     email: localStorage.getItem('userEmail') || '',
-    businessName: localStorage.getItem('bizName') || 'Mon Commerce',
+    businessName: localStorage.getItem('bizName') || localStorage.getItem('businessName') || '',
     planTier: localStorage.getItem('userPlan') || 'free',
     status: 'active',
     isVip: localStorage.getItem('isVip') === 'true'
@@ -545,15 +546,25 @@ function escapeHTML(str) {
 }
 
 function formatCurrency(amount) {
-  const curr = AppState.countryConfig ? AppState.countryConfig.currency : 'FCFA';
+  const curr = AppState.currency || (AppState.countryConfig ? AppState.countryConfig.currency : 'FCFA');
   const numStr = Number(amount || 0).toLocaleString('fr-FR');
-  if (curr === 'XOF' || curr === 'XAF') return `${numStr} FCFA`;
+  
+  if (curr === 'FCFA' || curr === 'XOF' || curr === 'XAF') return `${numStr} FCFA`;
   if (curr === 'GHS') return `₵ ${numStr}`;
   if (curr === 'NGN') return `₦ ${numStr}`;
+  if (curr === 'USD') return `$ ${numStr}`;
+  if (curr === 'EUR') return `${numStr} €`;
+  if (curr === 'GNF') return `${numStr} GNF`;
+  if (curr === 'MRU') return `${numStr} MRU`;
+  if (curr === 'CDF') return `${numStr} CDF`;
+  if (curr === 'MAD') return `${numStr} DH`;
+  if (curr === 'DZD') return `${numStr} DA`;
   if (curr === 'KES') return `KSh ${numStr}`;
   if (curr === 'ZAR') return `R ${numStr}`;
   return `${numStr} ${curr}`;
 }
+window.formatCurrency = formatCurrency;
+
 
 window.showToast = function(msg) {
   let container = document.getElementById('toast-container');
@@ -758,6 +769,44 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function restoreSavedState() {
+  // Purge de sécurité : suppression des anciennes valeurs démo stockées dans le cache du navigateur
+  const demoPhones = ['+225 0701020304', '+225 07 08 09 10 11', '+225 00000000', '+225 0700000000', '0701020304', '0708091011'];
+  if (demoPhones.includes(AppState.businessPhone) || demoPhones.includes(localStorage.getItem('bizPhone')) || demoPhones.includes(localStorage.getItem('businessPhone'))) {
+    AppState.businessPhone = '';
+    localStorage.removeItem('bizPhone');
+    localStorage.removeItem('businessPhone');
+  }
+
+  const demoNames = ['Boutique KOUASSI & Fils', 'Boutique KOUASSI', 'Établissements KOUASSI', 'Société ABC'];
+  if (demoNames.includes(AppState.businessName) || demoNames.includes(localStorage.getItem('bizName')) || demoNames.includes(localStorage.getItem('businessName'))) {
+    AppState.businessName = '';
+    localStorage.removeItem('bizName');
+    localStorage.removeItem('businessName');
+  }
+
+  if (AppState.businessAddress === 'Abidjan, Côte d’Ivoire' || AppState.businessAddress === 'Avenue Chardy, Abidjan Plateau') {
+    AppState.businessAddress = '';
+    localStorage.removeItem('bizAddress');
+    localStorage.removeItem('businessAddress');
+  }
+
+  if (AppState.userName === 'Administrateur' || AppState.userName === 'KOUASSI Antoine' || AppState.userName === 'Admin KOUASSI') {
+    AppState.userName = '';
+    localStorage.removeItem('userName');
+  }
+
+  // Nettoyage des fausses ventes de test si présentes dans le stockage
+  if (AppState.sales && AppState.sales.some(s => s.id === 'sale_1' || s.id === 'sale_2' || s.id === 'sale_3')) {
+    AppState.sales = AppState.sales.filter(s => s.id !== 'sale_1' && s.id !== 'sale_2' && s.id !== 'sale_3');
+    saveSalesToStorage();
+  }
+
+  // Nettoyage des faux caissiers de test si présents dans le stockage
+  if (AppState.team && AppState.team.some(c => c.id === 'caisse_1' || c.name === 'Mamadou DIOP')) {
+    AppState.team = AppState.team.filter(c => c.id !== 'caisse_1' && c.name !== 'Mamadou DIOP');
+    saveTeamToStorage();
+  }
+
   const savedCountry = localStorage.getItem('country') || 'CI';
   const savedMode = localStorage.getItem('mode') || 'credit';
 
@@ -771,10 +820,19 @@ function restoreSavedState() {
 
   // Valeurs dans Paramètres
   const compInp = document.getElementById('setting-company-input');
-  if (compInp && AppState.businessName) compInp.value = AppState.businessName;
+  if (compInp) compInp.value = AppState.businessName || '';
 
   const addrInp = document.getElementById('setting-address-input');
-  if (addrInp && AppState.businessAddress) addrInp.value = AppState.businessAddress;
+  if (addrInp) addrInp.value = AppState.businessAddress || '';
+
+  const phoneInp = document.getElementById('setting-phone-input');
+  if (phoneInp) phoneInp.value = AppState.businessPhone || '';
+
+  const userInp = document.getElementById('setting-username-input');
+  if (userInp) userInp.value = AppState.userName || '';
+
+  const roleInp = document.getElementById('setting-role-input');
+  if (roleInp) roleInp.value = AppState.userRole || '';
 
   const savedUserId = localStorage.getItem('user_id');
   const savedEmail = localStorage.getItem('userEmail');
@@ -784,7 +842,7 @@ function restoreSavedState() {
   if (savedUserId && savedEmail && activeView === 'workspace') {
     AppState.user.id = savedUserId;
     AppState.user.email = savedEmail;
-    AppState.user.businessName = localStorage.getItem('bizName') || 'Mon Commerce';
+    AppState.user.businessName = AppState.businessName || '';
     AppState.user.planTier = localStorage.getItem('userPlan') || 'trial_3_months';
     AppState.userName = savedEmail.split('@')[0];
     updateUserPlanBadgeUI();
@@ -793,6 +851,7 @@ function restoreSavedState() {
     openPublicLanding();
   }
 }
+
 
 function populateCountrySelect() {
   const select1 = document.getElementById('country-select');
@@ -810,6 +869,13 @@ function switchCountry(code, notify = true) {
   AppState.country = code;
   AppState.countryConfig = config;
   localStorage.setItem('country', code);
+
+  // Sync default currency with country unless user chose a custom one
+  if (!localStorage.getItem('appCurrency')) {
+    AppState.currency = config.currency;
+    const currSelect = document.getElementById('settings-currency-dropdown');
+    if (currSelect) currSelect.value = config.currency;
+  }
 
   const sel1 = document.getElementById('country-select');
   const sel2 = document.getElementById('settings-country-dropdown');
@@ -832,9 +898,31 @@ function switchCountry(code, notify = true) {
   renderCreditKPIs();
   renderClientDirectory();
   renderPaymentsTable();
+  if (typeof renderDailySalesBook === 'function') renderDailySalesBook();
 
   if (notify) showToast(`Pays sélectionné : ${config.flag} ${config.nameFr} (${config.currency})`);
 }
+window.switchCountry = switchCountry;
+
+function switchCurrency(currCode, notify = true) {
+  if (!currCode) return;
+  AppState.currency = currCode;
+  localStorage.setItem('appCurrency', currCode);
+
+  const currSelect = document.getElementById('settings-currency-dropdown');
+  if (currSelect) currSelect.value = currCode;
+
+  renderAccountingKPIs();
+  renderAccountingJournal();
+  renderCreditKPIs();
+  renderClientDirectory();
+  renderPaymentsTable();
+  if (typeof renderDailySalesBook === 'function') renderDailySalesBook();
+
+  if (notify) showToast(`Monnaie de compte définie sur : ${currCode}`);
+}
+window.switchCurrency = switchCurrency;
+
 
 function switchAppMode(mode, notify = true) {
   AppState.mode = mode;
@@ -1049,7 +1137,34 @@ function switchMenu(menuId) {
   if (menuId === 'menu-salesbook') {
     renderDailySalesBook();
   }
+  if (menuId === 'menu-6') {
+    renderPaymentsTable();
+  }
+  if (menuId === 'menu-4-directory') {
+    renderClientDirectory();
+    renderCreditKPIs();
+  }
+  if (menuId === 'menu-5') {
+    populateCreditClientSelect();
+    const dueDateInput = document.getElementById('credit-due-date');
+    if (dueDateInput && !dueDateInput.value) {
+      dueDateInput.value = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    }
+    if (typeof window.renderCreditProductsTable === 'function') {
+      window.renderCreditProductsTable();
+    }
+  }
+  if (menuId === 'menu-settings') {
+
+    const compInp = document.getElementById('setting-company-input');
+    if (compInp) compInp.value = AppState.businessName || '';
+    const addrInp = document.getElementById('setting-address-input');
+    if (addrInp) addrInp.value = AppState.businessAddress || '';
+    const phoneInp = document.getElementById('setting-phone-input');
+    if (phoneInp) phoneInp.value = AppState.businessPhone || '';
+  }
 }
+
 
 // --------------------------------------------------------------------------
 // 8. GESTION DES CLIENTS, CRÉDITS & ENCAISSEMENTS
@@ -1175,18 +1290,43 @@ function renderPaymentsTable() {
         </tr>
       `;
     } else {
-      tbody.innerHTML = AppState.payments.map(p => `
-        <tr>
-          <td style="font-weight:800;">${escapeHTML(p.ref)}</td>
-          <td style="font-weight:700;">${escapeHTML(p.clientName)}</td>
-          <td style="font-weight:800;color:#10B981;">${formatCurrency(p.amount)}</td>
-          <td>${escapeHTML(p.method)}</td>
-          <td style="color:#64748B;">${escapeHTML(p.date)}</td>
-          <td><button class="btn btn-outline" style="padding:4px 8px;font-size:0.72rem;" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName)}', '+225 00000000', 'Paiement ${escapeHTML(p.ref)}', ${p.amount})">${AppState.lang === 'en' ? 'Receipt' : 'Reçu'}</button></td>
-        </tr>
-      `).join('');
+      tbody.innerHTML = AppState.payments.map(p => {
+        const clientObj = AppState.clients.find(c => c.name === p.clientName);
+        const realPhone = clientObj ? clientObj.phone : '';
+        return `
+          <tr>
+            <td style="font-weight:800;">${escapeHTML(p.ref)}</td>
+            <td style="font-weight:700;">${escapeHTML(p.clientName)}</td>
+            <td style="font-weight:800;color:#10B981;">${formatCurrency(p.amount)}</td>
+            <td>${escapeHTML(p.method)}</td>
+            <td style="color:#64748B;">${escapeHTML(p.date)}</td>
+            <td><button class="btn btn-outline" style="padding:4px 8px;font-size:0.72rem;" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName)}', '${escapeHTML(realPhone)}', 'Paiement ${escapeHTML(p.ref)}', ${p.amount})">${AppState.lang === 'en' ? 'Receipt' : 'Reçu'}</button></td>
+          </tr>
+        `;
+      }).join('');
     }
   }
+
+  // Métriques Paiements Dynamiques
+  const payKpiTotal = document.getElementById('pay-kpi-total');
+  const payKpiCount = document.getElementById('pay-kpi-count');
+  const payKpiMethod = document.getElementById('pay-kpi-method');
+
+  const totalPaymentsAmount = AppState.payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+  if (payKpiTotal) payKpiTotal.textContent = formatCurrency(totalPaymentsAmount);
+  if (payKpiCount) payKpiCount.textContent = `${AppState.payments.length} Paiement${AppState.payments.length > 1 ? 's' : ''}`;
+  
+  if (payKpiMethod) {
+    if (AppState.payments.length > 0) {
+      const methodCounts = {};
+      AppState.payments.forEach(p => { methodCounts[p.method] = (methodCounts[p.method] || 0) + 1; });
+      const topMethod = Object.keys(methodCounts).reduce((a, b) => methodCounts[a] > methodCounts[b] ? a : b);
+      payKpiMethod.textContent = topMethod;
+    } else {
+      payKpiMethod.textContent = '--';
+    }
+  }
+
 
   if (activityList) {
     if (AppState.payments.length === 0) {
@@ -1246,45 +1386,160 @@ function populateCreditClientSelect() {
   `;
 }
 
-function handleCreditClientChange(val) {
-  const phoneInput = document.getElementById('credit-client-phone');
-  const newFields = document.getElementById('new-client-fields');
-  const accountInput = document.getElementById('credit-transfer-account');
+// --------------------------------------------------------------------------
+// MOTEUR DU GRAND TABLEAU DE FACTURATION MULTI-PRODUITS (STYLE A)
+// --------------------------------------------------------------------------
+window.creditProducts = [
+  { id: 1, name: '', qty: 1, unitPrice: 0 },
+  { id: 2, name: '', qty: 1, unitPrice: 0 }
+];
 
-  if (val === 'new') {
-    if (newFields) newFields.style.display = 'block';
-    if (phoneInput) phoneInput.value = '';
-    if (accountInput) accountInput.value = '';
+window.renderCreditProductsTable = function() {
+  const tbody = document.getElementById('credit-items-table-body');
+  if (!tbody) return;
+
+  tbody.innerHTML = window.creditProducts.map((p, idx) => `
+    <tr style="border-bottom:1px solid #E2E8F0;">
+      <td style="text-align:center;font-weight:700;color:#64748B;font-size:0.8rem;padding:8px;">${idx + 1}</td>
+      <td style="padding:6px 8px;">
+        <input 
+          type="text" 
+          class="form-control" 
+          placeholder="Désignation de l'article (ex: Sac de riz, Ciment, Huile...)" 
+          value="${escapeHTML(p.name)}" 
+          oninput="updateCreditProduct(${p.id}, 'name', this.value)"
+          style="height:38px;font-size:0.85rem;border-radius:6px;"
+          required
+        >
+      </td>
+      <td style="padding:6px 8px;text-align:center;">
+        <input 
+          type="number" 
+          class="form-control" 
+          min="1" 
+          value="${p.qty || 1}" 
+          oninput="updateCreditProduct(${p.id}, 'qty', this.value)"
+          style="height:38px;font-size:0.85rem;text-align:center;border-radius:6px;"
+          required
+        >
+      </td>
+      <td style="padding:6px 8px;text-align:right;">
+        <input 
+          type="number" 
+          class="form-control" 
+          min="0" 
+          placeholder="0" 
+          value="${p.unitPrice || ''}" 
+          oninput="updateCreditProduct(${p.id}, 'unitPrice', this.value)"
+          style="height:38px;font-size:0.85rem;text-align:right;border-radius:6px;"
+          required
+        >
+      </td>
+      <td style="padding:8px 12px;text-align:right;font-weight:800;color:#0F172A;font-size:0.88rem;">
+        ${formatCurrency((p.qty || 1) * (p.unitPrice || 0))}
+      </td>
+      <td style="padding:6px 8px;text-align:center;">
+        ${window.creditProducts.length > 1 ? `
+          <button type="button" class="btn btn-outline" onclick="removeCreditProductRow(${p.id})" style="padding:4px 8px;color:#EF4444;border-color:#FCA5A5;font-size:0.75rem;border-radius:6px;" title="Supprimer cette ligne">
+            ✕
+          </button>
+        ` : ''}
+      </td>
+    </tr>
+  `).join('');
+
+  calculateCreditFinancials();
+};
+
+window.addCreditProductRow = function() {
+  window.creditProducts.push({
+    id: Date.now() + Math.floor(Math.random() * 1000),
+    name: '',
+    qty: 1,
+    unitPrice: 0
+  });
+  window.renderCreditProductsTable();
+};
+
+window.removeCreditProductRow = function(id) {
+  if (window.creditProducts.length <= 1) return;
+  window.creditProducts = window.creditProducts.filter(p => p.id !== id);
+  window.renderCreditProductsTable();
+};
+
+window.updateCreditProduct = function(id, field, val) {
+  const item = window.creditProducts.find(p => p.id === id);
+  if (!item) return;
+
+  if (field === 'qty') {
+    item.qty = Math.max(1, parseFloat(val) || 1);
+  } else if (field === 'unitPrice') {
+    item.unitPrice = Math.max(0, parseFloat(val) || 0);
   } else {
-    if (newFields) newFields.style.display = 'none';
-    const client = AppState.clients.find(c => c.id === parseInt(val));
-    if (client) {
-      if (phoneInput) phoneInput.value = client.phone || '';
-      if (accountInput) accountInput.value = client.paymentAccount || client.phone || '';
+    item.name = val;
+  }
+
+  // Recalculer sans re-rendre tout l'input pour préserver le curseur
+  calculateCreditFinancials();
+  
+  // Mettre à jour l'affichage de la ligne
+  const tbody = document.getElementById('credit-items-table-body');
+  if (tbody) {
+    const rows = tbody.querySelectorAll('tr');
+    const idx = window.creditProducts.findIndex(p => p.id === id);
+    if (idx !== -1 && rows[idx]) {
+      const lineTotalCell = rows[idx].querySelectorAll('td')[4];
+      if (lineTotalCell) {
+        lineTotalCell.textContent = formatCurrency(item.qty * item.unitPrice);
+      }
     }
   }
-}
+};
 
-window.handlePaymentPrefChange = function(val) {
-  const accountInput = document.getElementById('credit-transfer-account');
-  const phoneInput = document.getElementById('credit-client-phone');
-  if (accountInput && phoneInput && !accountInput.value && val !== 'Espèces') {
-    accountInput.value = phoneInput.value;
-  }
+window.calculateCreditFinancials = function() {
+  const grossTotal = window.creditProducts.reduce((acc, p) => acc + ((p.qty || 1) * (p.unitPrice || 0)), 0);
+  const depositInput = document.getElementById('credit-deposit');
+  const deposit = parseFloat(depositInput?.value || 0) || 0;
+  const netDue = Math.max(0, grossTotal - deposit);
+
+  const grossTotalEl = document.getElementById('credit-table-gross-total');
+  const summaryGrossEl = document.getElementById('credit-summary-gross');
+  const summaryNetEl = document.getElementById('credit-summary-net');
+  const creditAmountHidden = document.getElementById('credit-amount');
+
+  if (grossTotalEl) grossTotalEl.textContent = formatCurrency(grossTotal);
+  if (summaryGrossEl) summaryGrossEl.textContent = formatCurrency(grossTotal);
+  if (summaryNetEl) summaryNetEl.textContent = formatCurrency(netDue);
+  if (creditAmountHidden) creditAmountHidden.value = netDue;
 };
 
 async function handleNewCreditSubmit(e) {
   e.preventDefault();
   const clientSelect = document.getElementById('credit-client-select').value;
   const clientPhone = (document.getElementById('credit-client-phone')?.value || '').trim();
-  const amount = parseInt(document.getElementById('credit-amount').value) || 0;
-  const desc = document.getElementById('credit-description').value;
   const dueDate = document.getElementById('credit-due-date').value;
   const payMethodPref = document.getElementById('credit-payment-method-pref')?.value || 'Espèces';
   const payAccount = (document.getElementById('credit-transfer-account')?.value || '').trim();
+  const branch = document.getElementById('credit-branch-select')?.value || 'Boutique Principale (Siège)';
   const cni = document.getElementById('new-client-cni') ? document.getElementById('new-client-cni').value : '';
   const guarantorName = document.getElementById('credit-guarantor-name') ? document.getElementById('credit-guarantor-name').value : '';
   const guarantorPhone = document.getElementById('credit-guarantor-phone') ? document.getElementById('credit-guarantor-phone').value : '';
+  
+  const deposit = parseFloat(document.getElementById('credit-deposit')?.value || 0) || 0;
+  const grossTotal = window.creditProducts.reduce((acc, p) => acc + ((p.qty || 1) * (p.unitPrice || 0)), 0);
+  const netDue = Math.max(0, grossTotal - deposit);
+
+  // Validation financière
+  if (grossTotal <= 0) {
+    showToast(AppState.lang === 'en' ? "Please add at least one article with a unit price." : "Veuillez renseigner au moins un article avec un prix unitaire.", "error");
+    return;
+  }
+
+  // Description complète multi-produits
+  const validProducts = window.creditProducts.filter(p => p.name.trim() && p.unitPrice > 0);
+  const desc = validProducts.length > 0 
+    ? validProducts.map(p => `• ${p.qty}x ${p.name.trim()} (${formatCurrency(p.unitPrice)}/u = ${formatCurrency(p.qty * p.unitPrice)})`).join('\n')
+    : `Vente à crédit (${formatCurrency(grossTotal)})`;
 
   // VALIDATION STRICTE : Le numéro de téléphone est OBLIGATOIRE
   if (!clientPhone || clientPhone.replace(/[^0-9]/g, '').length < 8) {
@@ -1321,17 +1576,20 @@ async function handleNewCreditSubmit(e) {
       cni: cni,
       preferredPaymentMethod: payMethodPref,
       paymentAccount: payAccount || clientPhone,
-      totalDue: amount,
-      status: 'pending',
+      totalDue: netDue,
+      status: netDue > 0 ? 'pending' : 'paid',
       reliabilityScore: 85,
       addedDate: new Date().toISOString().split('T')[0],
       transactions: [{ 
         id: Date.now(), 
         date: new Date().toISOString().split('T')[0], 
         desc, 
-        amount, 
-        status: 'pending', 
+        grossAmount: grossTotal,
+        deposit: deposit,
+        amount: netDue, 
+        status: netDue > 0 ? 'pending' : 'paid', 
         dueDate, 
+        branch,
         preferredPaymentMethod: payMethodPref,
         paymentAccount: payAccount || clientPhone,
         guarantorName, 
@@ -1347,14 +1605,18 @@ async function handleNewCreditSubmit(e) {
       activeClient.phone = clientPhone || activeClient.phone;
       activeClient.preferredPaymentMethod = payMethodPref;
       activeClient.paymentAccount = payAccount || activeClient.phone;
-      activeClient.totalDue += amount;
+      activeClient.totalDue += netDue;
+      if (activeClient.totalDue > 0) activeClient.status = 'pending';
       activeClient.transactions.push({ 
         id: Date.now(), 
         date: new Date().toISOString().split('T')[0], 
         desc, 
-        amount, 
-        status: 'pending', 
+        grossAmount: grossTotal,
+        deposit: deposit,
+        amount: netDue, 
+        status: netDue > 0 ? 'pending' : 'paid', 
         dueDate, 
+        branch,
         preferredPaymentMethod: payMethodPref,
         paymentAccount: payAccount || activeClient.phone,
         guarantorName, 
@@ -1365,15 +1627,48 @@ async function handleNewCreditSubmit(e) {
   }
 
   saveLocalCache('credittrack_clients', AppState.clients);
-  showToast(`${AppState.lang === 'en' ? 'Credit recorded for' : 'Crédit de'} ${formatCurrency(amount)} ${AppState.lang === 'en' ? 'saved!' : 'enregistré pour'} ${clientName} !`);
-  populateCreditClientSelect();
+
+  // Si un acompte a été versé, l'enregistrer dans les paiements
+  if (deposit > 0 && activeClient) {
+    const paymentReceipt = {
+      id: Date.now() + 1,
+      ref: `REC-${Date.now().toString().slice(-6)}`,
+      clientId: activeClient.id,
+      clientName: activeClient.name,
+      amount: deposit,
+      date: new Date().toISOString().split('T')[0],
+      method: payMethodPref,
+      note: `Acompte initial sur vente à crédit (${formatCurrency(grossTotal)})`
+    };
+    AppState.payments.unshift(paymentReceipt);
+    saveLocalCache('credittrack_payments', AppState.payments);
+    if (window.dataStore) await window.dataStore.add("payments", paymentReceipt);
+  }
+
+  // Réinitialiser le grand tableau
+  window.creditProducts = [
+    { id: 1, name: '', qty: 1, unitPrice: 0 },
+    { id: 2, name: '', qty: 1, unitPrice: 0 }
+  ];
+  window.renderCreditProductsTable();
+  const depInp = document.getElementById('credit-deposit');
+  if (depInp) depInp.value = 0;
+  const newNameInp = document.getElementById('new-client-name');
+  if (newNameInp) newNameInp.value = '';
+  const newCniInp = document.getElementById('new-client-cni');
+  if (newCniInp) newCniInp.value = '';
+
+  showToast(`Vente à crédit de ${formatCurrency(netDue)} enregistrée pour ${clientName} !`, "success");
+  
+  // Basculer vers le répertoire client
+  switchMenu('menu-4-directory');
   renderClientDirectory();
   renderCreditKPIs();
-  switchMenu('menu-2');
 }
 
 // --------------------------------------------------------------------------
 // 9. ENCAISSEMENT CLIENT (payClientDebt) & REÇUS
+
 // --------------------------------------------------------------------------
 window.payClientDebt = async function() {
   const client = AppState.activeClientInModal;
@@ -1541,6 +1836,10 @@ window.openReminderModal = function(name, phone, amount) {
 
 window.triggerWhatsAppFromModal = function() {
   const cleanPhone = sanitizePhoneNumber(currentReminderTarget.phone);
+  if (!cleanPhone || cleanPhone.replace(/\D/g, '').length < 8) {
+    showToast("Numéro de téléphone manquant ou incomplet pour ce client. Veuillez renseigner son numéro WhatsApp.");
+    return;
+  }
   const text = document.getElementById('reminder-modal-custom-text')?.value || '';
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
   window.open(url, '_blank');
@@ -1550,6 +1849,10 @@ window.triggerWhatsAppFromModal = function() {
 
 window.triggerSMSFromModal = function() {
   const cleanPhone = sanitizePhoneNumber(currentReminderTarget.phone);
+  if (!cleanPhone || cleanPhone.replace(/\D/g, '').length < 8) {
+    showToast("Numéro de téléphone manquant ou incomplet pour ce client.");
+    return;
+  }
   const text = document.getElementById('reminder-modal-custom-text')?.value || '';
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const separator = isIOS ? '&' : '?';
@@ -1561,6 +1864,10 @@ window.triggerSMSFromModal = function() {
 
 window.sendWhatsAppReminder = function(name, phone, amount) {
   const cleanPhone = sanitizePhoneNumber(phone);
+  if (!cleanPhone || cleanPhone.replace(/\D/g, '').length < 8) {
+    showToast("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.");
+    return;
+  }
   const client = AppState.clients.find(c => c.name === name || c.phone === phone);
   
   // Extraire la liste détaillée des articles achetés à crédit
@@ -1579,14 +1886,14 @@ window.sendWhatsAppReminder = function(name, phone, amount) {
   let msg = template
     .replace(/{nom_client}/g, name)
     .replace(/{montant}/g, formatCurrency(amount))
-    .replace(/{nom_commerce}/g, AppState.businessName);
+    .replace(/{nom_commerce}/g, AppState.businessName || 'notre établissement');
 
   if (itemsSummary) {
     msg += `\n\nDétail de vos achats à régler :\n${itemsSummary}`;
   }
 
-  if (AppState.businessPhone) {
-    msg += `\n\nRèglement possible en espèces ou par Mobile Money / Wave au : ${AppState.businessPhone}`;
+  if (AppState.businessPhone && AppState.businessPhone.trim().length >= 8) {
+    msg += `\n\nRèglement possible en espèces ou par Mobile Money / Wave au : ${AppState.businessPhone.trim()}`;
   }
 
   // Ouvre directement WhatsApp avec le numéro de téléphone et le message propre
@@ -1597,6 +1904,10 @@ window.sendWhatsAppReminder = function(name, phone, amount) {
 
 window.sendSMSReminder = function(name, phone, amount) {
   const cleanPhone = sanitizePhoneNumber(phone);
+  if (!cleanPhone || cleanPhone.replace(/\D/g, '').length < 8) {
+    showToast("Veuillez renseigner un numéro de téléphone valide avant d'envoyer le SMS.");
+    return;
+  }
   const template = localStorage.getItem('whatsappTemplate') || 
     (AppState.lang === 'en' ? 
       "Hello {nom_client}, reminder of your balance of {montant} at {nom_commerce}." : 
@@ -1605,7 +1916,8 @@ window.sendSMSReminder = function(name, phone, amount) {
   let msg = template
     .replace(/{nom_client}/g, name)
     .replace(/{montant}/g, formatCurrency(amount))
-    .replace(/{nom_commerce}/g, AppState.businessName);
+    .replace(/{nom_commerce}/g, AppState.businessName || 'notre établissement');
+
 
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const separator = isIOS ? '&' : '?';
@@ -2370,6 +2682,8 @@ window.promptPendingVerification = function() {
 function showOtpVerificationView(email) {
   const viewReg = document.getElementById('auth-view-register');
   const viewLogin = document.getElementById('auth-view-login');
+  const viewForgot = document.getElementById('auth-view-forgot-password');
+  const viewReset = document.getElementById('auth-view-reset-password');
   const viewOtp = document.getElementById('auth-view-otp');
   const tabsContainer = document.getElementById('auth-tabs-container');
   const targetDisplay = document.getElementById('auth-target-email-display');
@@ -2378,6 +2692,8 @@ function showOtpVerificationView(email) {
   if (tabsContainer) tabsContainer.style.display = 'none';
   if (viewReg) viewReg.style.display = 'none';
   if (viewLogin) viewLogin.style.display = 'none';
+  if (viewForgot) viewForgot.style.display = 'none';
+  if (viewReset) viewReset.style.display = 'none';
   if (viewOtp) viewOtp.style.display = 'block';
   if (modalTitle) modalTitle.textContent = 'Vérification de votre E-mail';
   if (targetDisplay) targetDisplay.textContent = maskEmail(email);
@@ -2386,6 +2702,143 @@ function showOtpVerificationView(email) {
   startResendCooldown(60);
   if (window.lucide) lucide.createIcons();
 }
+
+window.switchAuthTab = function(tab) {
+  const viewReg = document.getElementById('auth-view-register');
+  const viewLogin = document.getElementById('auth-view-login');
+  const viewForgot = document.getElementById('auth-view-forgot-password');
+  const viewReset = document.getElementById('auth-view-reset-password');
+  const viewOtp = document.getElementById('auth-view-otp');
+  const tabReg = document.getElementById('tab-auth-register');
+  const tabLogin = document.getElementById('tab-auth-login');
+  const tabsContainer = document.getElementById('auth-tabs-container');
+  const modalTitle = document.getElementById('auth-modal-title');
+
+  if (viewReg) viewReg.style.display = 'none';
+  if (viewLogin) viewLogin.style.display = 'none';
+  if (viewForgot) viewForgot.style.display = 'none';
+  if (viewReset) viewReset.style.display = 'none';
+  if (viewOtp) viewOtp.style.display = 'none';
+
+  if (tab === 'register') {
+    if (tabsContainer) tabsContainer.style.display = 'flex';
+    if (viewReg) viewReg.style.display = 'block';
+    if (tabReg) { tabReg.classList.add('active'); tabReg.style.background = '#fff'; tabReg.style.color = '#0F172A'; }
+    if (tabLogin) { tabLogin.classList.remove('active'); tabLogin.style.background = 'transparent'; tabLogin.style.color = '#64748B'; }
+    if (modalTitle) modalTitle.innerHTML = `<i data-lucide="user-plus" style="width:18px;height:18px;color:#2563EB;"></i> <span>Créer votre Compte</span>`;
+  } else if (tab === 'login') {
+    if (tabsContainer) tabsContainer.style.display = 'flex';
+    if (viewLogin) viewLogin.style.display = 'block';
+    if (tabLogin) { tabLogin.classList.add('active'); tabLogin.style.background = '#fff'; tabLogin.style.color = '#0F172A'; }
+    if (tabReg) { tabReg.classList.remove('active'); tabReg.style.background = 'transparent'; tabReg.style.color = '#64748B'; }
+    if (modalTitle) modalTitle.innerHTML = `<i data-lucide="lock" style="width:18px;height:18px;color:#2563EB;"></i> <span>Connexion à votre Espace</span>`;
+  } else if (tab === 'forgot-password') {
+    if (tabsContainer) tabsContainer.style.display = 'none';
+    if (viewForgot) viewForgot.style.display = 'block';
+    if (modalTitle) modalTitle.innerHTML = `<i data-lucide="key-round" style="width:18px;height:18px;color:#2563EB;"></i> <span>Récupération de Compte</span>`;
+    const forgotInput = document.getElementById('auth-forgot-email');
+    if (forgotInput) {
+      const loginEmail = document.getElementById('auth-login-email')?.value;
+      if (loginEmail) forgotInput.value = loginEmail;
+      setTimeout(() => forgotInput.focus(), 100);
+    }
+  } else if (tab === 'reset-password') {
+    if (tabsContainer) tabsContainer.style.display = 'none';
+    if (viewReset) viewReset.style.display = 'block';
+    if (modalTitle) modalTitle.innerHTML = `<i data-lucide="shield-check" style="width:18px;height:18px;color:#10B981;"></i> <span>Nouveau Mot de Passe</span>`;
+    setTimeout(() => document.getElementById('auth-reset-new-password')?.focus(), 100);
+  }
+
+  if (window.lucide) lucide.createIcons();
+};
+
+window.handleForgotPasswordSubmit = async function(e) {
+  e.preventDefault();
+  const emailInput = document.getElementById('auth-forgot-email');
+  const email = (emailInput?.value || '').trim().toLowerCase();
+  const submitBtn = document.getElementById('auth-forgot-submit-btn');
+
+  if (!email || !isValidEmailStrict(email)) {
+    showToast("Veuillez entrer une adresse e-mail valide.", "error");
+    if (emailInput) emailInput.focus();
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span>Envoi en cours...</span>`;
+  }
+
+  try {
+    if (window.supabaseClient) {
+      const redirectUrl = window.location.origin + window.location.pathname;
+      const { error } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl
+      });
+      if (error) throw error;
+    }
+
+    showToast(`Un e-mail contenant le lien de réinitialisation sécurisé a été envoyé à ${maskEmail(email)}. Consultez votre boîte de réception.`, "success");
+    switchAuthTab('login');
+  } catch (err) {
+    console.error("Erreur Reset Password:", err);
+    showToast(err.message || "Impossible d'envoyer l'e-mail de réinitialisation. Vérifiez l'adresse.", "error");
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>Envoyer le Lien de Récupération</span>`;
+    }
+  }
+};
+
+window.handleResetPasswordSubmit = async function(e) {
+  e.preventDefault();
+  const newPassInput = document.getElementById('auth-reset-new-password');
+  const confPassInput = document.getElementById('auth-reset-confirm-password');
+  const submitBtn = document.getElementById('auth-reset-submit-btn');
+
+  const newPassword = newPassInput?.value || '';
+  const confirmPassword = confPassInput?.value || '';
+
+  if (!newPassword || newPassword.length < 8) {
+    showToast("Le mot de passe doit comporter au moins 8 caractères.", "error");
+    if (newPassInput) newPassInput.focus();
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    showToast("Les deux mots de passe ne correspondent pas.", "error");
+    if (confPassInput) confPassInput.focus();
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span>Mise à jour en cours...</span>`;
+  }
+
+  try {
+    if (window.supabaseClient) {
+      const { error } = await window.supabaseClient.auth.updateUser({
+        password: newPassword
+      });
+      if (error) throw error;
+    }
+
+    showToast("Votre mot de passe a été modifié avec succès ! Vous êtes maintenant connecté.", "success");
+    closeModal('modal-auth');
+    openAppWorkspace('menu-2');
+  } catch (err) {
+    console.error("Erreur Update Password:", err);
+    showToast(err.message || "Le lien de réinitialisation est expiré ou invalide. Veuillez recommencer.", "error");
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = `<span>Enregistrer &amp; Se Connecter</span>`;
+    }
+  }
+};
+
 
 window.handleRegisterSubmit = async function(e) {
   e.preventDefault();
@@ -3231,12 +3684,11 @@ window.handleSupportSubmit = function(e) {
 // 17. GESTION DES CAISSIERS, ALERTES MATINALES & BILAN OFFICIEL PDF
 // --------------------------------------------------------------------------
 
-// 1. Initialisation de l'équipe et des caissiers
-AppState.team = JSON.parse(localStorage.getItem('ct_team_cashiers') || 'null') || [
-  { id: 'caisse_1', name: 'Mamadou DIOP', role: 'Caissier Principal', branch: 'Boutique Principale (Siège)', pin: '7492', active: true, totalCollected: 185000 }
-];
+// 1. Initialisation de l'équipe et des caissiers (données réelles sauvegardées ou liste vide)
+AppState.team = JSON.parse(localStorage.getItem('ct_team_cashiers') || '[]') || [];
 AppState.activeSessionRole = localStorage.getItem('ct_active_role') || 'gerant'; // 'gerant' ou 'caissier'
 AppState.activeCashierName = localStorage.getItem('ct_active_cashier_name') || 'Gérant (Patron)';
+
 
 function saveTeamToStorage() {
   localStorage.setItem('ct_team_cashiers', JSON.stringify(AppState.team));
@@ -3428,10 +3880,11 @@ window.openOfficialReportModal = function() {
   const kpiRate = document.getElementById('report-kpi-rate');
   const tableBody = document.getElementById('report-table-body');
 
-  if (compName) compName.textContent = AppState.businessName || 'Boutique KOUASSI & Fils';
-  if (compAddr) compAddr.textContent = AppState.businessAddress || 'Avenue Chardy, Abidjan';
-  if (compPhone) compPhone.textContent = `Tel: ${AppState.businessPhone || '+225 07 08 09 10 11'}`;
+  if (compName) compName.textContent = AppState.businessName || 'Mon Entreprise';
+  if (compAddr) compAddr.textContent = AppState.businessAddress || '';
+  if (compPhone) compPhone.textContent = AppState.businessPhone ? `Tel: ${AppState.businessPhone}` : '';
   if (dateGen) dateGen.textContent = `Date : ${new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
 
   const totalDue = AppState.clients.reduce((acc, c) => acc + c.totalDue, 0);
   const totalRecovered = AppState.payments.reduce((acc, p) => acc + (p.amount || 0), 0);
@@ -3490,70 +3943,65 @@ window.downloadOfficialReportPDF = function() {
 };
 
 // --------------------------------------------------------------------------
-// 18. MOTEUR MULTI-BOUTIQUES & CAHIER DES VENTES DU JOUR (24H)
+// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — TABLEUR INTERACTIF EN LIGNE
 // --------------------------------------------------------------------------
 AppState.selectedBranch = localStorage.getItem('ct_selected_branch') || 'all';
 
-// Initialisation des ventes du jour (stockées dans ct_daily_sales)
-AppState.sales = JSON.parse(localStorage.getItem('ct_daily_sales') || 'null') || [
-  { id: 'sale_1', item: 'Sac de Riz Parfumé 50kg', qty: 2, unitPrice: 24000, total: 48000, method: 'Espèces', branch: 'Boutique Principale (Siège)', client: 'Client Comptoir', cashier: 'Mamadou DIOP', time: '09:15', date: new Date().toISOString().split('T')[0] },
-  { id: 'sale_2', item: 'Carton Huile Végétale Dinor 5L', qty: 1, unitPrice: 16500, total: 16500, method: 'Wave Direct', branch: 'Boutique Principale (Siège)', client: 'Mme Bamba', cashier: 'Mamadou DIOP', time: '11:30', date: new Date().toISOString().split('T')[0] },
-  { id: 'sale_3', item: 'Carton Lait Bonnet Rouge', qty: 1, unitPrice: 22000, total: 22000, method: 'Orange Money', branch: 'Boutique 2 (Succursale)', client: 'Koffi Paul', cashier: 'Gérant (Patron)', time: '14:20', date: new Date().toISOString().split('T')[0] }
-];
+// Initialisation des ventes du jour (données réelles sauvegardées ou liste vide)
+AppState.sales = JSON.parse(localStorage.getItem('ct_daily_sales') || '[]') || [];
 
 function saveSalesToStorage() {
   localStorage.setItem('ct_daily_sales', JSON.stringify(AppState.sales));
 }
 
-// Calcul automatique du total dans le formulaire de vente rapide
-window.calculateSaleTotal = function() {
-  const qtyInput = document.getElementById('sale-item-qty');
-  const unitPriceInput = document.getElementById('sale-item-unitprice');
-  const totalInput = document.getElementById('sale-item-total');
+// Calcul instantané du total dans la ligne de saisie en direct
+window.calculateInlineSaleTotal = function() {
+  const qtyInput = document.getElementById('inline-sale-qty');
+  const unitPriceInput = document.getElementById('inline-sale-unitprice');
+  const totalDisplay = document.getElementById('inline-sale-total-display');
 
-  const qty = parseFloat(qtyInput?.value || 0);
-  const unitPrice = parseFloat(unitPriceInput?.value || 0);
+  const qty = parseFloat(qtyInput?.value || 0) || 1;
+  const unitPrice = parseFloat(unitPriceInput?.value || 0) || 0;
   const total = qty * unitPrice;
 
-  if (totalInput) {
-    totalInput.value = formatCurrency(total);
+  if (totalDisplay) {
+    totalDisplay.textContent = formatCurrency(total);
   }
 };
 
-// Gestionnaire du filtre multi-boutiques
-window.handleBranchFilterChange = function(branch) {
-  AppState.selectedBranch = branch;
-  localStorage.setItem('ct_selected_branch', branch);
-  
-  // Synchroniser le sélecteur du header et de la modale
-  const topSel = document.getElementById('top-branch-selector');
-  if (topSel && topSel.value !== branch) topSel.value = branch;
-
-  showToast(branch === 'all' ? "Affichage consolidé de toutes les boutiques." : `Filtre appliqué : ${branch}`);
-  
-  renderDailySalesBook();
-  if (typeof updateDashboardMetrics === 'function') updateDashboardMetrics();
+// Gestionnaire du clavier : validation instantanée avec Entrée et passage au suivant
+window.handleInlineSaleKey = function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    submitInlineSale();
+  }
 };
 
-// Enregistrement d'une vente d'article
-window.handleQuickSaleSubmit = function(e) {
-  e.preventDefault();
-  const itemNameInput = document.getElementById('sale-item-name');
-  const qtyInput = document.getElementById('sale-item-qty');
-  const unitPriceInput = document.getElementById('sale-item-unitprice');
-  const methodSelect = document.getElementById('sale-payment-method');
-  const branchSelect = document.getElementById('sale-branch-select');
-  const clientInput = document.getElementById('sale-client-name');
+// Validation et enregistrement d'une vente en direct depuis le tableau
+window.submitInlineSale = function() {
+  const itemInput = document.getElementById('inline-sale-item');
+  const qtyInput = document.getElementById('inline-sale-qty');
+  const unitPriceInput = document.getElementById('inline-sale-unitprice');
+  const methodSelect = document.getElementById('inline-sale-method');
+  const branchSelect = document.getElementById('inline-sale-branch');
+  const clientInput = document.getElementById('inline-sale-client');
 
-  const item = (itemNameInput?.value || '').trim();
-  const qty = parseInt(qtyInput?.value || 1, 10);
+  const item = (itemInput?.value || '').trim();
+  const qty = Math.max(1, parseInt(qtyInput?.value || 1, 10));
   const unitPrice = parseFloat(unitPriceInput?.value || 0);
   const method = methodSelect?.value || 'Espèces';
   const branch = branchSelect?.value || 'Boutique Principale (Siège)';
   const client = (clientInput?.value || 'Client Comptoir').trim();
 
-  if (!item || unitPrice <= 0 || qty <= 0) {
-    showToast("Veuillez renseigner un article et un prix unitaire valide.");
+  if (!item) {
+    showToast("Veuillez saisir la désignation de l'article.", "error");
+    itemInput?.focus();
+    return;
+  }
+
+  if (unitPrice <= 0) {
+    showToast("Veuillez saisir un prix unitaire supérieur à 0.", "error");
+    unitPriceInput?.focus();
     return;
   }
 
@@ -3579,7 +4027,7 @@ window.handleQuickSaleSubmit = function(e) {
   AppState.sales.unshift(newSale);
   saveSalesToStorage();
 
-  // Mettre à jour les stats du caissier actif
+  // Mettre à jour les encaissements du caissier connecté
   if (AppState.team && AppState.activeCashierName) {
     const cashierObj = AppState.team.find(c => c.name === AppState.activeCashierName);
     if (cashierObj) {
@@ -3589,15 +4037,22 @@ window.handleQuickSaleSubmit = function(e) {
     }
   }
 
-  // Réinitialiser formulaire
-  if (itemNameInput) itemNameInput.value = '';
+  // Réinitialiser la ligne de saisie pour l'article suivant
+  if (itemInput) itemInput.value = '';
   if (qtyInput) qtyInput.value = '1';
   if (unitPriceInput) unitPriceInput.value = '';
-  calculateSaleTotal();
   if (clientInput) clientInput.value = '';
+  calculateInlineSaleTotal();
 
+  // Mettre à jour l'affichage du tableau
   renderDailySalesBook();
-  showToast(`Vente « ${item} » (${formatCurrency(total)}) enregistrée avec succès !`);
+  showToast(`Vente enregistrée : ${item} (${formatCurrency(total)}) !`, "success");
+
+  // Remettre le focus instantanément sur le champ Article pour la vente suivante
+  setTimeout(() => {
+    const nextItemInput = document.getElementById('inline-sale-item');
+    if (nextItemInput) nextItemInput.focus();
+  }, 40);
 };
 
 // Suppression d'un article du journal
@@ -3640,57 +4095,80 @@ window.renderDailySalesBook = function() {
   const kpiTotal = document.getElementById('daily-kpi-total-sales');
   const kpiCount = document.getElementById('daily-kpi-count');
   const kpiCash = document.getElementById('daily-kpi-cash');
+  const kpiMoMo = document.getElementById('daily-kpi-momo');
 
   if (kpiTotal) kpiTotal.textContent = formatCurrency(totalSales);
   if (kpiCount) kpiCount.textContent = `${totalCount} article${totalCount > 1 ? 's' : ''}`;
   if (kpiCash) kpiCash.textContent = formatCurrency(totalCash);
+  if (kpiMoMo) kpiMoMo.textContent = formatCurrency(totalWave + totalMoMo);
 
   if (filteredSales.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="7" style="text-align:center;padding:32px 16px;color:#64748B;">
-          <i data-lucide="shopping-bag" style="width:32px;height:32px;color:#CBD5E1;display:block;margin:0 auto 8px auto;"></i>
-          <strong>Aucune vente enregistrée aujourd'hui ${AppState.selectedBranch !== 'all' ? `pour ${AppState.selectedBranch}` : ''}</strong>
-          <p style="font-size:0.8rem;margin:4px 0 0 0;">Utilisez le formulaire à gauche pour noter votre premier article vendu.</p>
+        <td colspan="9" style="text-align:center;padding:36px 16px;color:#64748B;">
+          <i data-lucide="shopping-bag" style="width:36px;height:36px;color:#CBD5E1;display:block;margin:0 auto 10px auto;"></i>
+          <strong style="font-size:0.95rem;color:#1E293B;display:block;">Aucune vente enregistrée aujourd'hui ${AppState.selectedBranch !== 'all' ? `pour ${AppState.selectedBranch}` : ''}</strong>
+          <p style="font-size:0.8rem;margin:4px 0 0 0;">Utilisez la première ligne du tableau ci-dessus pour saisir directement votre premier article vendu.</p>
         </td>
       </tr>
     `;
   } else {
-    tableBody.innerHTML = filteredSales.map(s => {
+    const rowsHtml = filteredSales.map((s, idx) => {
       let badgeClass = 'sales-badge-cash';
       if (s.method === 'Wave Direct') badgeClass = 'sales-badge-wave';
       else if (s.method !== 'Espèces') badgeClass = 'sales-badge-momo';
 
+      const unitPriceVal = s.unitPrice || Math.round(s.total / (s.qty || 1));
+
       return `
-        <tr style="border-bottom:1px solid #F1F5F9;">
-          <td style="padding:10px 12px;font-weight:700;color:#64748B;font-family:monospace;">${escapeHTML(s.time || '12:00')}</td>
-          <td style="padding:10px 12px;font-weight:700;color:#0F172A;">
+        <tr style="border-bottom:1px solid #F1F5F9;background:${idx % 2 === 0 ? '#FFFFFF' : '#FAFAFA'};">
+          <td style="padding:10px 12px;font-weight:700;color:#64748B;font-family:monospace;text-align:center;font-size:0.8rem;">${escapeHTML(s.time || '12:00')}</td>
+          <td style="padding:10px 12px;font-weight:800;color:#0F172A;">
             ${escapeHTML(s.item)}
-            ${s.client && s.client !== 'Client Comptoir' ? `<div style="font-size:0.72rem;color:#64748B;">Client: ${escapeHTML(s.client)}</div>` : ''}
+            ${s.client && s.client !== 'Client Comptoir' ? `<div style="font-size:0.72rem;color:#2563EB;font-weight:600;">Client: ${escapeHTML(s.client)}</div>` : ''}
           </td>
-          <td style="padding:10px 12px;font-weight:800;color:#0F172A;">${s.qty}</td>
-          <td style="padding:10px 12px;text-align:right;font-weight:900;color:#2563EB;">${formatCurrency(s.total)}</td>
-          <td style="padding:10px 12px;">
+          <td style="padding:10px 8px;text-align:center;font-weight:800;color:#0F172A;">${s.qty}</td>
+          <td style="padding:10px 10px;text-align:right;font-weight:700;color:#64748B;">${formatCurrency(unitPriceVal)}</td>
+          <td style="padding:10px 12px;text-align:right;font-weight:900;color:#2563EB;font-size:0.92rem;">${formatCurrency(s.total)}</td>
+          <td style="padding:10px 10px;">
             <span class="sales-badge-payment ${badgeClass}">${escapeHTML(s.method)}</span>
           </td>
-          <td style="padding:10px 12px;font-size:0.78rem;color:#475569;">
-            ${escapeHTML(s.branch)}
+          <td style="padding:10px 10px;font-size:0.78rem;color:#475569;">
+            <strong>${escapeHTML(s.branch)}</strong>
             <div style="font-size:0.7rem;color:#94A3B8;">Par: ${escapeHTML(s.cashier || 'Caissier')}</div>
           </td>
-          <td style="padding:10px 12px;text-align:center;">
-            <button type="button" class="btn btn-outline" style="padding:3px 7px;font-size:0.72rem;color:#EF4444;border-color:#FCA5A5;" onclick="deleteSaleItem('${s.id}')" title="Supprimer">
+          <td style="padding:10px 10px;font-size:0.8rem;color:#64748B;">
+            ${escapeHTML(s.client || 'Client Comptoir')}
+          </td>
+          <td style="padding:10px 10px;text-align:center;">
+            <button type="button" class="btn btn-outline" style="padding:3px 8px;font-size:0.75rem;color:#EF4444;border-color:#FCA5A5;border-radius:6px;" onclick="deleteSaleItem('${s.id}')" title="Supprimer cette ligne">
               ✕
             </button>
           </td>
         </tr>
       `;
     }).join('');
+
+    const footerTotalHtml = `
+      <tr style="background:#F1F5F9;border-top:2px solid #CBD5E1;font-weight:900;">
+        <td colspan="2" style="padding:12px 14px;color:#0F172A;font-size:0.88rem;">TOTAL GÉNÉRAL DU JOUR (${filteredSales.length} ventes)</td>
+        <td style="padding:12px 8px;text-align:center;color:#0F172A;font-size:0.92rem;">${totalCount}</td>
+        <td style="padding:12px 10px;"></td>
+        <td style="padding:12px 12px;text-align:right;color:#2563EB;font-size:1.05rem;">${formatCurrency(totalSales)}</td>
+        <td colspan="4" style="padding:12px 14px;font-size:0.78rem;color:#64748B;">
+          Espèces : <strong>${formatCurrency(totalCash)}</strong> • Électronique : <strong>${formatCurrency(totalWave + totalMoMo)}</strong>
+        </td>
+      </tr>
+    `;
+
+    tableBody.innerHTML = rowsHtml + footerTotalHtml;
   }
 
   if (window.lucide) lucide.createIcons();
 };
 
 // Ouverture de la modale de clôture journalière 24h
+
 window.openDailyClosingModal = function() {
   const todayStr = new Date().toISOString().split('T')[0];
   const dateFormatted = new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -3786,14 +4264,18 @@ window.sendDailyClosingWhatsApp = function() {
     `👤 *Rapport transmis par :* ${AppState.activeCashierName || 'Responsable de Caisse'}\n` +
     `✅ _Données certifiées et archivées automatiquement._`;
 
-  const encoded = encodeURIComponent(text);
-  const patronPhone = (document.getElementById('setting-phone-input')?.value || '').replace(/[^0-9]/g, '');
-  const url = patronPhone ? `https://wa.me/${patronPhone}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
+  const patronPhone = (document.getElementById('setting-phone-input')?.value || AppState.businessPhone || '').replace(/[^0-9]/g, '');
+  if (!patronPhone || patronPhone.length < 8) {
+    showToast("Veuillez renseigner le numéro WhatsApp du patron dans les Paramètres avant de transmettre le rapport.", "error");
+    return;
+  }
+  const url = `https://wa.me/${patronPhone}?text=${encoded}`;
 
   window.open(url, '_blank');
   showToast("Synthèse 24h transmise sur WhatsApp !");
   closeModal('modal-daily-closing-summary');
 };
+
 
 // Initialisation au chargement
 window.addEventListener('DOMContentLoaded', () => {
@@ -3805,6 +4287,61 @@ window.addEventListener('DOMContentLoaded', () => {
     updateSessionUI();
   }, 1000);
 });
+
+// --------------------------------------------------------------------------
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.0)
+// --------------------------------------------------------------------------
+window.APP_VERSION = "2.4.0";
+
+window.checkAppVersion = async function() {
+  try {
+    const res = await fetch('/version.json?t=' + Date.now());
+    if (!res.ok) return;
+    const data = await res.json();
+    if (data && data.version && data.version !== window.APP_VERSION) {
+      console.log(`[Version Checker] Nouvelle version détectée : ${data.version} (actuelle : ${window.APP_VERSION})`);
+      const banner = document.getElementById('app-update-banner');
+      if (banner) {
+        banner.style.display = 'block';
+        if (window.lucide) lucide.createIcons();
+      }
+    }
+  } catch (e) {
+    // Erreur silencieuse
+  }
+};
+
+window.applyAppUpdate = function() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(r => r.unregister());
+    });
+  }
+  if ('caches' in window) {
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
+  }
+  window.location.reload(true);
+};
+
+window.dismissAppUpdate = function() {
+  const banner = document.getElementById('app-update-banner');
+  if (banner) banner.style.display = 'none';
+};
+
+// Vérification de version
+setInterval(window.checkAppVersion, 5 * 60 * 1000);
+setTimeout(window.checkAppVersion, 3500);
+
+// Écoute de lien de récupération de mot de passe dans l'URL
+if (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token=')) {
+  setTimeout(() => {
+    openModal('modal-auth');
+    if (typeof window.switchAuthTab === 'function') {
+      window.switchAuthTab('reset-password');
+    }
+  }, 500);
+}
+
 
 
 

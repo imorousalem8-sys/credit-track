@@ -60,12 +60,12 @@
         <form id="form-auth-register" onsubmit="handleRegisterSubmit(event)">
           <div class="form-group" style="margin-bottom:12px;">
             <label class="form-label">Nom de l'Entreprise / Commerce *</label>
-            <input type="text" id="auth-reg-biz-name" class="form-control" placeholder="ex: Établissements KOUASSI" required>
+            <input type="text" id="auth-reg-biz-name" class="form-control" placeholder="Nom de votre boutique / entreprise" required>
           </div>
 
           <div class="form-group" style="margin-bottom:12px;">
-            <label class="form-label">Numéro de Téléphone Professionnel *</label>
-            <input type="tel" id="auth-reg-phone" class="form-control" placeholder="+225 0701020304" required>
+            <label class="form-label" data-i18n="phone">Numéro WhatsApp *</label>
+            <input type="tel" id="auth-reg-phone" class="form-control" placeholder="Numéro WhatsApp professionnel" required>
           </div>
 
           <div class="form-group" style="margin-bottom:12px;">
@@ -104,7 +104,12 @@
           </div>
 
           <div class="form-group" style="margin-bottom:18px;">
-            <label class="form-label">Mot de passe *</label>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <label class="form-label" style="margin-bottom:0;">Mot de passe *</label>
+              <a href="javascript:void(0)" onclick="switchAuthTab('forgot-password')" style="color:#2563EB;font-size:0.78rem;font-weight:700;text-decoration:none;">
+                Mot de passe oublié ?
+              </a>
+            </div>
             <input type="password" id="auth-login-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
           </div>
 
@@ -122,6 +127,66 @@
           </a>
         </div>
       </div>
+
+      <!-- VUE : MOT DE PASSE OUBLIÉ (DEMANDE DE RÉINITIALISATION) -->
+      <div id="auth-view-forgot-password" style="display:none;padding:6px 0;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+            <i data-lucide="key-round" style="width:24px;height:24px;"></i>
+          </div>
+          <h4 style="font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:4px;">Mot de passe oublié ?</h4>
+          <p style="font-size:0.82rem;color:#64748B;line-height:1.4;">
+            Saisissez votre adresse e-mail professionnelle. Nous vous enverrons un lien sécurisé pour réinitialiser votre mot de passe.
+          </p>
+        </div>
+
+        <form id="form-auth-forgot-password" onsubmit="handleForgotPasswordSubmit(event)">
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Adresse E-mail Professionnelle *</label>
+            <input type="email" id="auth-forgot-email" class="form-control" placeholder="contact@entreprise.com" required autocomplete="email">
+          </div>
+
+          <button type="submit" id="auth-forgot-submit-btn" class="btn btn-primary" style="width:100%;padding:12px;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span>Envoyer le Lien de Récupération</span>
+          </button>
+        </form>
+
+        <div style="text-align:center;margin-top:16px;">
+          <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:#64748B;font-size:0.82rem;text-decoration:none;font-weight:700;">
+            ← Revenir à la Connexion
+          </a>
+        </div>
+      </div>
+
+      <!-- VUE : DÉFINITION DU NOUVEAU MOT DE PASSE (RÉINITIALISATION EFFECTIVE) -->
+      <div id="auth-view-reset-password" style="display:none;padding:6px 0;">
+        <div style="text-align:center;margin-bottom:16px;">
+          <div style="width:48px;height:48px;border-radius:50%;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+            <i data-lucide="shield-check" style="width:24px;height:24px;"></i>
+          </div>
+          <h4 style="font-size:1.1rem;font-weight:800;color:#0F172A;margin-bottom:4px;">Nouveau Mot de Passe</h4>
+          <p style="font-size:0.82rem;color:#64748B;">
+            Créez un nouveau mot de passe robuste (min. 8 caractères).
+          </p>
+        </div>
+
+        <form id="form-auth-reset-password" onsubmit="handleResetPasswordSubmit(event)">
+          <div class="form-group" style="margin-bottom:12px;">
+            <label class="form-label">Nouveau Mot de Passe *</label>
+            <input type="password" id="auth-reset-new-password" class="form-control" placeholder="••••••••" required minlength="8" autocomplete="new-password">
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Confirmez le Mot de Passe *</label>
+            <input type="password" id="auth-reset-confirm-password" class="form-control" placeholder="••••••••" required minlength="8" autocomplete="new-password">
+          </div>
+
+          <button type="submit" id="auth-reset-submit-btn" class="btn btn-primary" style="width:100%;padding:12px;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#10B981,#059669);">
+            <span>Enregistrer &amp; Se Connecter</span>
+          </button>
+        </form>
+      </div>
+
 
       <!-- VUE 3 : ÉCRAN DE VÉRIFICATION OTP SÉCURISÉ (6 CASES NUMÉRIQUES) -->
       <div id="auth-view-otp" style="display:none;text-align:center;padding:10px 0;">
@@ -395,11 +460,12 @@
       <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <strong id="reminder-modal-client-name" style="font-size:1.05rem;color:#0F172A;">Client</strong>
-          <span id="reminder-modal-amount" style="font-weight:800;color:#2563EB;font-size:1.1rem;">150 000 FCFA</span>
+          <span id="reminder-modal-amount" style="font-weight:800;color:#2563EB;font-size:1.1rem;">--</span>
+
         </div>
-        <div style="font-size:0.84rem;color:#64748B;">
-          Numéro enregistré : <strong id="reminder-modal-phone" style="color:#0F172A;">+225 07010203</strong>
-        </div>
+        <p style="font-size:0.85rem;color:#64748B;margin:4px 0 0 0;">
+          Numéro enregistré : <strong id="reminder-modal-phone" style="color:#0F172A;">--</strong>
+        </p>
       </div>
 
       <div class="form-group">
@@ -902,12 +968,16 @@
             <div class="user-role-sub" id="sidebar-user-plan-badge" style="color:#10B981;font-weight:700;">Essai 3 Mois Actif</div>
           </div>
         </div>
-        <div style="display:flex;gap:6px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="background:rgba(59,130,246,0.2);color:#93C5FD;padding:2px 6px;border-radius:4px;font-size:0.62rem;font-weight:800;">
+            v2.4.0
+          </span>
           <button class="btn-icon-tiny" onclick="handleSignOut()" title="Se Déconnecter" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#FCA5A5;border-radius:6px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
             <i data-lucide="log-out" style="width:15px;height:15px;"></i>
           </button>
         </div>
       </div>
+
 
     </aside>
 
@@ -1317,7 +1387,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="collectedThisMonth">Total Encaissé ce Mois</div>
-                <div class="metric-value" style="color:#10B981;">240 000 FCFA</div>
+                <div id="pay-kpi-total" class="metric-value" style="color:#10B981;">0 FCFA</div>
                 <div class="metric-trend"><i data-lucide="trending-up"></i> <span data-i18n="collectedThisMonthSub">Règlements validés</span></div>
               </div>
               <div class="metric-icon-box green"><i data-lucide="wallet"></i></div>
@@ -1326,7 +1396,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="paymentsCount">Nombre d'Encaissements</div>
-                <div class="metric-value" style="color:#2563EB;">2 Paiements</div>
+                <div id="pay-kpi-count" class="metric-value" style="color:#2563EB;">0 Paiement</div>
                 <div class="metric-trend"><i data-lucide="check-circle"></i> <span data-i18n="receiptsDelivered">Reçus délivrés</span></div>
               </div>
               <div class="metric-icon-box blue"><i data-lucide="trending-up"></i></div>
@@ -1335,8 +1405,8 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="favoritePaymentMethod">Moyen Préféré</div>
-                <div class="metric-value">Wave Money</div>
-                <div class="metric-trend"><i data-lucide="smartphone"></i> <span data-i18n="mobileMoneyWave">Paiement Mobile Simple</span></div>
+                <div id="pay-kpi-method" class="metric-value">--</div>
+                <div class="metric-trend"><i data-lucide="smartphone"></i> <span data-i18n="mobileMoneyWave">Paiement Mobile &amp; Espèces</span></div>
               </div>
               <div class="metric-icon-box blue"><i data-lucide="smartphone"></i></div>
             </div>
@@ -1345,7 +1415,7 @@
           <div class="grid-2-equal">
             <div class="card" style="text-align:center;">
               <div class="card-header"><span class="card-title" data-i18n="qrCodeTitle">QR Code pour Payer Directement</span></div>
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://credittrack.app/pay/BOUTIQUE-KOUASSI" alt="QR Code Paiement" style="width:130px;height:130px;margin:8px auto;display:block;">
+              <img id="merchant-qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://credittrack.app/pay" alt="QR Code Paiement" style="width:130px;height:130px;margin:8px auto;display:block;">
               <p style="font-size:0.8rem;color:#64748B;" data-i18n="qrCodeSub">Vos clients peuvent scanner pour vous payer par Wave, MTN ou Orange Money.</p>
             </div>
 
@@ -1355,10 +1425,11 @@
               <canvas id="signature-pad" style="border:2px dashed #CBD5E1;border-radius:8px;width:100%;height:100px;background:#fff;touch-action:none;"></canvas>
               <div style="display:flex;gap:10px;margin-top:10px;">
                 <button class="btn btn-outline" style="flex:1;" onclick="clearSignature()" data-i18n="clear">Effacer</button>
-                <button class="btn btn-primary" style="flex:2;" onclick="openReceiptPreviewModalWithData('Société ABC', '+225 07010203', 'Règlement solde', 150000)" data-i18n="previewReceipt">Générer le Reçu</button>
+                <button class="btn btn-primary" style="flex:2;" onclick="handleSignatureReceiptClick()" data-i18n="previewReceipt">Générer le Reçu</button>
               </div>
             </div>
           </div>
+
 
           <div class="card">
             <div class="card-header">
@@ -1481,15 +1552,15 @@
               <div class="card-header"><span class="card-title" data-i18n="settingsCompanyTitle">Informations de Mon Commerce</span></div>
               <div class="form-group">
                 <label class="form-label" data-i18n="companyName">Nom du Magasin / Entreprise</label>
-                <input type="text" class="form-control" value="Boutique KOUASSI &amp; Fils" id="setting-company-input">
+                <input type="text" class="form-control" placeholder="Ex: Mon Entreprise / Magasin" id="setting-company-input">
               </div>
               <div class="form-group">
                 <label class="form-label" data-i18n="companyAddress">Adresse &amp; Ville</label>
-                <input type="text" class="form-control" value="Avenue Chardy, Abidjan Plateau" id="setting-address-input">
+                <input type="text" class="form-control" placeholder="Ex: Marché Central, Ville..." id="setting-address-input">
               </div>
               <div class="form-group">
                 <label class="form-label" data-i18n="companyPhone">Numéro Téléphone / WhatsApp</label>
-                <input type="tel" class="form-control" value="+225 07 08 09 10 11" id="setting-phone-input">
+                <input type="tel" class="form-control" placeholder="Ex: Numéro WhatsApp professionnel" id="setting-phone-input">
               </div>
               <button class="btn btn-primary" onclick="saveCompanySettings()" data-i18n="saveSettings">Sauvegarder les Modifications</button>
             </div>
@@ -1499,26 +1570,49 @@
               <div class="card-header"><span class="card-title" data-i18n="settingsUserTitle">Profil du Caissier / Gérant</span></div>
               <div class="form-group">
                 <label class="form-label" data-i18n="userName">Nom Complet</label>
-                <input type="text" class="form-control" value="KOUASSI Antoine" id="setting-username-input">
+                <input type="text" class="form-control" placeholder="Ex: Votre Nom et Prénom" id="setting-username-input">
               </div>
               <div class="form-group">
                 <label class="form-label" data-i18n="userRoleLabel">Rôle</label>
-                <input type="text" class="form-control" value="Administrateur / Gérant" id="setting-role-input">
+                <input type="text" class="form-control" placeholder="Ex: Propriétaire / Gérant" id="setting-role-input">
               </div>
               <button class="btn btn-primary" onclick="saveUserSettings()" data-i18n="saveSettings">Sauvegarder le Profil</button>
             </div>
 
             <!-- Panel 3: Devise & Pays -->
             <div class="card settings-panel" id="settings-panel-currency" style="display:none;">
-              <div class="card-header"><span class="card-title" data-i18n="settingsCountryTitle">Pays d'Activité &amp; Monnaie</span></div>
-              <div class="form-group">
-                <label class="form-label" data-i18n="selectCountry">Sélectionnez votre Pays</label>
+              <div class="card-header"><span class="card-title" data-i18n="settingsCountryTitle">Pays d'Activité &amp; Monnaie de Compte</span></div>
+              
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label" data-i18n="selectCountry">1. Sélectionnez votre Pays (Régime fiscal &amp; TVA)</label>
                 <select id="settings-country-dropdown" class="form-control" onchange="switchCountry(this.value)">
                   <!-- Dynamic populated -->
                 </select>
               </div>
-              <p style="font-size:0.8rem;color:#64748B;" data-i18n="countryDesc">Toutes les sommes de l'application s'ajusteront automatiquement avec la devise de votre pays.</p>
+
+              <div class="form-group" style="margin-bottom:16px;">
+                <label class="form-label">2. Choix Libre de la Devise / Monnaie</label>
+                <select id="settings-currency-dropdown" class="form-control" onchange="switchCurrency(this.value)">
+                  <option value="FCFA">FCFA (Franc CFA - XOF / XAF)</option>
+                  <option value="GHS">GHS - Cedi Ghanéen (₵)</option>
+                  <option value="NGN">NGN - Naira Nigérian (₦)</option>
+                  <option value="GNF">GNF - Franc Guinéen</option>
+                  <option value="USD">USD - Dollar Américain ($)</option>
+                  <option value="EUR">EUR - Euro (€)</option>
+                  <option value="MRU">MRU - Ouguiya Mauritanien</option>
+                  <option value="CDF">CDF - Franc Congolais</option>
+                  <option value="MAD">MAD - Dirham Marocain (DH)</option>
+                  <option value="DZD">DZD - Dinar Algérien (DA)</option>
+                  <option value="KES">KES - Shilling Kenyan (KSh)</option>
+                  <option value="ZAR">ZAR - Rand Sud-Africain (R)</option>
+                </select>
+              </div>
+
+              <p style="font-size:0.8rem;color:#64748B;line-height:1.4;" data-i18n="countryDesc">
+                Toutes les sommes de l'application (crédits, factures, encaissements, journal de caisse) s'actualisent immédiatement avec la devise choisie.
+              </p>
             </div>
+
 
             <!-- Panel 4: Sauvegarde & Exports -->
             <div class="card settings-panel" id="settings-panel-backup" style="display:none;">
@@ -1688,178 +1782,403 @@
                 </div>
               </div>
 
-              <!-- ÉTAPE 3 : GARANTIES -->
-              <div id="step-3-guarantees" style="margin-top:20px; padding-top:20px; border-top:1px dashed #E2E8F0;">
-                <h4 style="font-size:0.92rem;font-weight:800;margin-bottom:14px;color:#0F172A;display:flex;align-items:center;gap:6px;">
-                  <i data-lucide="shield-check" style="width:16px;height:16px;color:#10B981;"></i> <span data-i18n="guaranteeTitle">Garantie ou Témoin (Optionnel)</span>
-                </h4>
+        <!-- ============================================================
+             VUE FORMULAIRE : NOTER UN NOUVEAU CRÉDIT (#menu-5)
+             GRAND FORMAT RECTANGULAIRE STYLE A - TABLEAU DE FACTURATION
+        ============================================================ -->
+        <section id="menu-5" class="view-container">
+          
+          <!-- En-tête Titre & Action rapide -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px;border-bottom:1px solid #E2E8F0;padding-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="width:44px;height:44px;background:#EFF6FF;color:#2563EB;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 2px 6px rgba(37,99,235,0.15);">
+                <i data-lucide="file-plus-2"></i>
+              </div>
+              <div>
+                <h1 style="font-size:1.35rem;font-weight:800;color:#0F172A;margin:0;">Facturation &amp; Vente à Crédit</h1>
+                <p style="font-size:0.82rem;color:#64748B;margin:3px 0 0 0;">Tableau de facturation multi-articles avec calcul automatique des totaux et suivi des échéances.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;">
+              <button type="button" class="btn btn-outline" onclick="switchMenu('menu-2')" style="font-size:0.85rem;padding:8px 16px;">
+                ✕ Annuler
+              </button>
+              <button type="button" class="btn btn-primary" onclick="document.getElementById('form-new-credit-saas')?.requestSubmit()" style="font-size:0.85rem;padding:8px 20px;">
+                <i data-lucide="check-circle" style="width:16px;height:16px;"></i> Enregistrer la Vente
+              </button>
+            </div>
+          </div>
+
+          <form id="form-new-credit-saas" onsubmit="handleNewCreditSubmit(event)" style="display:flex;flex-direction:column;gap:20px;">
+            
+            <!-- BLOC 1 : CLIENT & CONDITIONS DE RÈGLEMENT (GRILLE HORIZONTALE PLEINE LARGEUR) -->
+            <div class="card" style="padding:22px;border:1px solid #E2E8F0;border-radius:14px;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+              <div style="font-size:0.92rem;font-weight:800;color:#0F172A;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+                <i data-lucide="user-check" style="width:18px;height:18px;color:#2563EB;"></i> 1. Identité du Client &amp; Modalités de Remboursement
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:16px;">
                 
-                <div class="grid-2-equal">
-                  <div class="form-group">
-                    <label class="form-label" data-i18n="guarantorNameLabel">Nom de la Personne Garante</label>
-                    <input type="text" id="credit-guarantor-name" class="form-control" placeholder="ex: KONE Drissa">
+                <!-- Sélection ou création Client -->
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" style="font-weight:700;font-size:0.82rem;">Client Acheteur <span style="color:#EF4444;">*</span></label>
+                  <select id="credit-client-select" class="form-control" required onchange="handleCreditClientChange(this.value)" style="height:42px;font-size:0.85rem;"></select>
+                </div>
+
+                <!-- Date Limite de Paiement -->
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" style="font-weight:700;font-size:0.82rem;">Date Limite de Remboursement <span style="color:#EF4444;">*</span></label>
+                  <input type="date" id="credit-due-date" class="form-control" required style="height:42px;font-size:0.85rem;">
+                </div>
+
+                <!-- Mode de Règlement prévu -->
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" style="font-weight:700;font-size:0.82rem;">Moyen de Paiement Convenu</label>
+                  <select id="credit-payment-method-pref" class="form-control" onchange="handlePaymentPrefChange(this.value)" style="height:42px;font-size:0.85rem;">
+                    <option value="Espèces">Espèces (Au comptoir)</option>
+                    <option value="Wave Direct">Wave Money</option>
+                    <option value="Orange Money">Orange Money</option>
+                    <option value="MTN MoMo">MTN Mobile Money</option>
+                    <option value="Moov Money">Moov Money</option>
+                    <option value="Virement Bancaire">Virement Bancaire</option>
+                  </select>
+                </div>
+
+                <!-- Boutique de Vente -->
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" style="font-weight:700;font-size:0.82rem;">Boutique / Point de Vente</label>
+                  <select id="credit-branch-select" class="form-control" style="height:42px;font-size:0.85rem;">
+                    <option value="Boutique Principale (Siège)">Boutique Principale (Siège)</option>
+                    <option value="Succursale 2">Succursale 2</option>
+                    <option value="Dépôt Central">Dépôt Central</option>
+                  </select>
+                </div>
+
+              </div>
+
+              <!-- Fiche Nouveau Client si sélectionné -->
+              <div id="new-client-fields" style="display:none;margin-top:16px;padding:16px;background:#F8FAFC;border:1px solid #CBD5E1;border-radius:10px;">
+                <div style="font-size:0.84rem;font-weight:800;color:#1E293B;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+                  <i data-lucide="user-plus" style="width:16px;height:16px;color:#10B981;"></i> Informations du Nouveau Client
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px;">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.8rem;font-weight:700;">Nom &amp; Prénoms <span style="color:#EF4444;">*</span></label>
+                    <input type="text" id="new-client-name" class="form-control" placeholder="Nom complet du client" style="height:38px;font-size:0.85rem;">
                   </div>
-                  <div class="form-group">
-                    <label class="form-label" data-i18n="guarantorPhoneLabel">Téléphone du Garant</label>
-                    <input type="tel" id="credit-guarantor-phone" class="form-control" placeholder="+225 0102030405">
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.8rem;font-weight:700;">Numéro WhatsApp / Téléphone <span style="color:#EF4444;">*</span></label>
+                    <input type="tel" id="credit-client-phone" class="form-control" placeholder="Numéro WhatsApp / Téléphone" style="height:38px;font-size:0.85rem;">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.8rem;font-weight:700;">N° CNI / RCCM (Optionnel)</label>
+                    <input type="text" id="new-client-cni" class="form-control" placeholder="N° Pièce d'identité ou registre" style="height:38px;font-size:0.85rem;">
+                  </div>
+                  <div class="form-group" style="margin-bottom:0;">
+                    <label class="form-label" style="font-size:0.8rem;font-weight:700;">Compte Mobile Money / RIB</label>
+                    <input type="text" id="credit-transfer-account" class="form-control" placeholder="Numéro de paiement Wave / MoMo" style="height:38px;font-size:0.85rem;">
                   </div>
                 </div>
               </div>
 
-              <div style="margin-top:28px; display:flex; gap:14px; justify-content:flex-end;">
-                <button type="button" class="btn btn-outline" onclick="switchMenu('menu-2')" data-i18n="cancel">Annuler</button>
-                <button type="submit" class="btn btn-primary" style="padding:12px 24px; font-size:0.95rem;">
-                  <i data-lucide="check-circle"></i> <span data-i18n="btnSaveCredit">Enregistrer le Crédit</span>
+            </div>
+
+            <!-- BLOC 2 : GRAND TABLEAU DE FACTURATION RECTANGULAIRE MULTI-PRODUITS -->
+            <div class="card" style="padding:22px;border:1px solid #E2E8F0;border-radius:14px;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+              <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+                <div style="font-size:0.92rem;font-weight:800;color:#0F172A;display:flex;align-items:center;gap:8px;">
+                  <i data-lucide="shopping-bag" style="width:18px;height:18px;color:#2563EB;"></i> 2. Détail des Marchandises Vendues à Crédit (Grand Tableau)
+                </div>
+                <button type="button" class="btn btn-outline" onclick="addCreditProductRow()" style="font-size:0.82rem;padding:6px 14px;display:flex;align-items:center;gap:6px;background:#F1F5F9;color:#0F172A;font-weight:700;">
+                  <i data-lucide="plus" style="width:15px;height:15px;color:#2563EB;"></i> + Ajouter un Article
                 </button>
               </div>
-            </form>
-          </div>
+
+              <!-- Grand Tableau Rectangulaire Pleine Largeur -->
+              <div class="table-responsive" style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;">
+                <table class="custom-table" style="margin:0;width:100%;border-collapse:collapse;">
+                  <thead style="background:#F8FAFC;">
+                    <tr style="border-bottom:2px solid #E2E8F0;">
+                      <th style="width:45px;text-align:center;font-size:0.75rem;padding:10px;">#</th>
+                      <th style="text-align:left;font-size:0.75rem;padding:10px;">Désignation de l'Article / Marchandise <span style="color:#EF4444;">*</span></th>
+                      <th style="width:110px;text-align:center;font-size:0.75rem;padding:10px;">Quantité <span style="color:#EF4444;">*</span></th>
+                      <th style="width:160px;text-align:right;font-size:0.75rem;padding:10px;">Prix Unitaire <span style="color:#EF4444;">*</span></th>
+                      <th style="width:180px;text-align:right;font-size:0.75rem;padding:10px;">Total Ligne (Auto)</th>
+                      <th style="width:50px;text-align:center;font-size:0.75rem;padding:10px;"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="credit-items-table-body">
+                    <!-- Généré dynamiquement en JS -->
+                  </tbody>
+                  <tfoot style="background:#F8FAFC;border-top:2px solid #E2E8F0;font-weight:800;">
+                    <tr>
+                      <td colspan="4" style="text-align:right;padding:12px;font-size:0.88rem;color:#475569;">Montant Total des Articles :</td>
+                      <td id="credit-table-gross-total" style="text-align:right;padding:12px;font-size:1rem;color:#0F172A;">0 FCFA</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+
+              <!-- Synthèse Financière Horizontale (Acompte & Solde Net Dû) -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:16px;margin-top:18px;padding-top:16px;border-top:1px dashed #E2E8F0;">
+                
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;">
+                  <div style="font-size:0.78rem;font-weight:700;color:#64748B;text-transform:uppercase;">Total Brut Facturé</div>
+                  <div id="credit-summary-gross" style="font-size:1.15rem;font-weight:800;color:#0F172A;margin-top:4px;">0 FCFA</div>
+                </div>
+
+                <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:14px;">
+                  <label for="credit-deposit" style="font-size:0.78rem;font-weight:700;color:#64748B;text-transform:uppercase;display:block;margin-bottom:4px;">Acompte Payé Immédiatement</label>
+                  <input type="number" id="credit-deposit" class="form-control" placeholder="0" min="0" value="0" oninput="calculateCreditFinancials()" style="height:36px;font-size:0.95rem;font-weight:700;color:#10B981;">
+                </div>
+
+                <div style="background:#EFF6FF;border:2px solid #BFDBFE;border-radius:10px;padding:14px;">
+                  <div style="font-size:0.78rem;font-weight:800;color:#1E40AF;text-transform:uppercase;">Solde Net Crédit (Restant Dû)</div>
+                  <div id="credit-summary-net" style="font-size:1.25rem;font-weight:800;color:#2563EB;margin-top:4px;">0 FCFA</div>
+                </div>
+
+              </div>
+
+              <!-- Champ caché pour compatibilité JS -->
+              <input type="hidden" id="credit-amount" value="0">
+              <input type="hidden" id="credit-description" value="">
+
+            </div>
+
+            <!-- BLOC 3 : GARANTIE / TÉMOIN (FACULTATIF MAIS PROPREMENT INTÉGRÉ) -->
+            <div class="card" style="padding:22px;border:1px solid #E2E8F0;border-radius:14px;background:#FFFFFF;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+              <div style="font-size:0.92rem;font-weight:800;color:#0F172A;margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+                <i data-lucide="shield-check" style="width:18px;height:18px;color:#10B981;"></i> 3. Personne Garante ou Témoin (Optionnel)
+              </div>
+
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:16px;">
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" style="font-size:0.8rem;font-weight:700;">Nom complet du Garant / Témoin</label>
+                  <input type="text" id="credit-guarantor-name" class="form-control" placeholder="Nom de la personne garante" style="height:40px;font-size:0.85rem;">
+                </div>
+                <div class="form-group" style="margin-bottom:0;">
+                  <label class="form-label" style="font-size:0.8rem;font-weight:700;">Numéro de Téléphone du Garant</label>
+                  <input type="tel" id="credit-guarantor-phone" class="form-control" placeholder="Numéro WhatsApp / Téléphone" style="height:40px;font-size:0.85rem;">
+                </div>
+              </div>
+            </div>
+
+            <!-- BARRE INFÉRIEURE DE SOUMISSION -->
+            <div style="display:flex;gap:14px;justify-content:flex-end;align-items:center;padding:12px 0 24px 0;">
+              <button type="button" class="btn btn-outline" onclick="switchMenu('menu-2')" style="padding:12px 24px;font-size:0.9rem;font-weight:700;">
+                Annuler
+              </button>
+              <button type="submit" class="btn btn-primary" style="padding:12px 32px;font-size:0.95rem;font-weight:800;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(37,99,235,0.25);">
+                <i data-lucide="check-circle" style="width:18px;height:18px;"></i> Enregistrer le Crédit &amp; Générer la Facture
+              </button>
+            </div>
+
+          </form>
         </section>
+
 
         <!-- ============================================================
              VUE : CAHIER DES VENTES DU JOUR (24H) & MULTI-BOUTIQUES (#menu-salesbook)
+             GRAND FORMAT TABLEUR INTERACTIF PLEIN ÉCRAN (STYLE A)
         ============================================================ -->
         <section id="menu-salesbook" class="view-container">
           
-          <!-- Bannière Synthèse Quotidienne 24h & Clôture Patron -->
-          <div class="daily-closing-banner">
+          <!-- En-tête Titre & Bouton Clôture -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:18px;border-bottom:1px solid #E2E8F0;padding-bottom:14px;">
             <div>
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-                <span style="background:rgba(56,189,248,0.2);color:#38BDF8;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;letter-spacing:0.5px;">JOURNAL DE VENTE 24H</span>
-                <span id="salesbook-date-label" style="font-size:0.85rem;color:#94A3B8;">Aujourd'hui</span>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                <span style="background:#EFF6FF;color:#2563EB;padding:3px 10px;border-radius:6px;font-size:0.72rem;font-weight:800;letter-spacing:0.5px;border:1px solid #BFDBFE;">
+                  CAHIER DE CAISSE 24H
+                </span>
+                <span id="salesbook-date-label" style="font-size:0.85rem;color:#64748B;font-weight:700;">Aujourd'hui</span>
               </div>
-              <h2 style="font-size:1.35rem;font-weight:900;margin:0 0 4px 0;">Cahier des Ventes &amp; Recettes du Jour</h2>
-              <p style="font-size:0.82rem;color:#94A3B8;margin:0;">Enregistrez chaque article vendu en boutique. Le patron reçoit la synthèse consolidée toutes les 24h.</p>
+              <h2 style="font-size:1.4rem;font-weight:900;margin:0;color:#0F172A;">Cahier des Ventes &amp; Recettes du Jour</h2>
+              <p style="font-size:0.82rem;color:#64748B;margin:2px 0 0 0;">Saisissez directement vos ventes dans le tableau ci-dessous. Validez avec la touche <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-weight:800;color:#0F172A;">Entrée</kbd> pour enchaîner immédiatement.</p>
             </div>
 
-            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-              <div class="daily-closing-kpis">
-                <div class="daily-kpi-item">
-                  <span class="daily-kpi-label">Ventes du Jour</span>
-                  <span id="daily-kpi-total-sales" class="daily-kpi-val">0 FCFA</span>
-                </div>
-                <div class="daily-kpi-item">
-                  <span class="daily-kpi-label">Articles Vendus</span>
-                  <span id="daily-kpi-count" class="daily-kpi-val" style="color:#10B981;">0</span>
-                </div>
-                <div class="daily-kpi-item">
-                  <span class="daily-kpi-label">Espèces en Caisse</span>
-                  <span id="daily-kpi-cash" class="daily-kpi-val" style="color:#F59E0B;">0 FCFA</span>
-                </div>
-              </div>
-
-              <button type="button" class="btn-closing-action" onclick="openDailyClosingModal()">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <button type="button" class="btn btn-outline" onclick="window.print()" style="display:flex;align-items:center;gap:6px;font-size:0.84rem;padding:9px 14px;border-radius:10px;">
+                <i data-lucide="printer" style="width:15px;height:15px;"></i> Imprimer Journal
+              </button>
+              <button type="button" class="btn btn-outline" onclick="renderDailySalesBook()" style="display:flex;align-items:center;gap:6px;font-size:0.84rem;padding:9px 14px;border-radius:10px;">
+                <i data-lucide="refresh-cw" style="width:15px;height:15px;"></i> Actualiser
+              </button>
+              <button type="button" class="btn btn-primary" onclick="openDailyClosingModal()" style="background:linear-gradient(135deg, #10B981 0%, #059669 100%);color:#fff;border:none;padding:10px 18px;border-radius:10px;font-weight:800;font-size:0.84rem;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(16,185,129,0.25);">
                 <i data-lucide="send" style="width:16px;height:16px;"></i>
                 <span>Clôturer &amp; Transmettre au Patron</span>
               </button>
             </div>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 2fr;gap:20px;align-items:start;" class="grid-salesbook-layout">
+          <!-- 4 Mini-Cartes KPIs Discrètes & Lisibles (Style A) -->
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:18px;">
             
-            <!-- Formulaire Saisie Rapide d'un Article Vendu -->
-            <div class="card" style="padding:20px;">
-              <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:12px;margin-bottom:16px;">
-                <span class="card-title" style="display:flex;align-items:center;gap:8px;">
-                  <i data-lucide="shopping-cart" style="width:18px;height:18px;color:#2563EB;"></i>
-                  Noter un Article Vendu
-                </span>
+            <!-- KPI 1 : Total Ventes -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+              <div style="width:40px;height:40px;border-radius:10px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;font-weight:900;">
+                <i data-lucide="shopping-cart" style="width:20px;height:20px;"></i>
               </div>
-
-              <form id="form-quick-sale" onsubmit="handleQuickSaleSubmit(event)">
-                <div class="form-group" style="margin-bottom:12px;">
-                  <label class="form-label">Article / Marchandise *</label>
-                  <input type="text" id="sale-item-name" class="form-control" placeholder="ex: Sac de Riz 50kg, Huile Dinor 5L..." required>
-                </div>
-
-                <div class="grid-2-equal" style="gap:10px;margin-bottom:12px;">
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label">Quantité *</label>
-                    <input type="number" id="sale-item-qty" class="form-control" value="1" min="1" required oninput="calculateSaleTotal()">
-                  </div>
-                  <div class="form-group" style="margin-bottom:0;">
-                    <label class="form-label">Prix Unitaire (FCFA) *</label>
-                    <input type="number" id="sale-item-unitprice" class="form-control" placeholder="ex: 22500" min="50" required oninput="calculateSaleTotal()">
-                  </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom:12px;">
-                  <label class="form-label">Montant Total :</label>
-                  <input type="text" id="sale-item-total" class="form-control" readonly value="0 FCFA" style="background:#F1F5F9;font-weight:900;color:#2563EB;font-size:1.05rem;">
-                </div>
-
-                <div class="form-group" style="margin-bottom:12px;">
-                  <label class="form-label">Mode de Règlement *</label>
-                  <select id="sale-payment-method" class="form-control">
-                    <option value="Espèces">💵 Espèces (Cash en boutique)</option>
-                    <option value="Wave Direct">🌊 Wave Money</option>
-                    <option value="Orange Money">🟠 Orange Money</option>
-                    <option value="MTN MoMo">🟡 MTN Mobile Money</option>
-                    <option value="Moov Money">🔵 Moov Money</option>
-                  </select>
-                </div>
-
-                <div class="form-group" style="margin-bottom:14px;">
-                  <label class="form-label">Boutique de Vente *</label>
-                  <select id="sale-branch-select" class="form-control">
-                    <option value="Boutique Principale (Siège)">📍 Boutique Principale (Siège)</option>
-                    <option value="Boutique 2 (Succursale)">📍 Boutique 2 (Succursale)</option>
-                    <option value="Point de Vente Marché">📍 Point de Vente Marché</option>
-                  </select>
-                </div>
-
-                <div class="form-group" style="margin-bottom:16px;">
-                  <label class="form-label">Nom du Client (Optionnel)</label>
-                  <input type="text" id="sale-client-name" class="form-control" placeholder="Client Comptoir / Nom">
-                </div>
-
-                <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;">
-                  <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
-                  <span>Enregistrer la Vente</span>
-                </button>
-              </form>
+              <div>
+                <div style="font-size:0.72rem;font-weight:700;color:#64748B;text-transform:uppercase;">Ventes du Jour</div>
+                <div id="daily-kpi-total-sales" style="font-size:1.25rem;font-weight:900;color:#0F172A;margin-top:1px;">0 FCFA</div>
+              </div>
             </div>
 
-            <!-- Liste des Ventes Enregistrées Aujourd'hui -->
-            <div class="card" style="padding:20px;">
-              <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
-                <div>
-                  <span class="card-title" style="display:flex;align-items:center;gap:8px;">
-                    <i data-lucide="receipt" style="width:18px;height:18px;color:#10B981;"></i>
-                    Articles Vendus Aujourd'hui
-                  </span>
-                  <span style="font-size:0.75rem;color:#64748B;">Mise à jour instantanée en temps réel</span>
-                </div>
-
-                <button type="button" class="btn btn-outline" style="font-size:0.78rem;padding:6px 12px;" onclick="renderDailySalesBook()">
-                  <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Actualiser
-                </button>
+            <!-- KPI 2 : Nombre Articles -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+              <div style="width:40px;height:40px;border-radius:10px;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;font-weight:900;">
+                <i data-lucide="package" style="width:20px;height:20px;"></i>
               </div>
+              <div>
+                <div style="font-size:0.72rem;font-weight:700;color:#64748B;text-transform:uppercase;">Articles Vendus</div>
+                <div id="daily-kpi-count" style="font-size:1.25rem;font-weight:900;color:#10B981;margin-top:1px;">0 article</div>
+              </div>
+            </div>
 
-              <!-- Tableau du Journal -->
-              <div style="overflow-x:auto;">
-                <table style="width:100%;border-collapse:collapse;font-size:0.84rem;">
-                  <thead>
-                    <tr style="background:#F8FAFC;border-bottom:2px solid #E2E8F0;text-align:left;">
-                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Heure</th>
-                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Article</th>
-                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Qté</th>
-                      <th style="padding:10px 12px;color:#64748B;font-weight:700;text-align:right;">Montant</th>
-                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Paiement</th>
-                      <th style="padding:10px 12px;color:#64748B;font-weight:700;">Boutique</th>
-                      <th style="padding:10px 12px;color:#64748B;font-weight:700;text-align:center;">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody id="daily-sales-table-body">
-                    <!-- Dynamic populated -->
-                  </tbody>
-                </table>
+            <!-- KPI 3 : Espèces Cash -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+              <div style="width:40px;height:40px;border-radius:10px;background:#FFFBEB;color:#D97706;display:flex;align-items:center;justify-content:center;font-weight:900;">
+                <i data-lucide="banknote" style="width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-size:0.72rem;font-weight:700;color:#64748B;text-transform:uppercase;">Espèces en Caisse</div>
+                <div id="daily-kpi-cash" style="font-size:1.25rem;font-weight:900;color:#D97706;margin-top:1px;">0 FCFA</div>
+              </div>
+            </div>
+
+            <!-- KPI 4 : Mobile Money & Wave -->
+            <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.02);">
+              <div style="width:40px;height:40px;border-radius:10px;background:#F5F3FF;color:#7C3AED;display:flex;align-items:center;justify-content:center;font-weight:900;">
+                <i data-lucide="smartphone" style="width:20px;height:20px;"></i>
+              </div>
+              <div>
+                <div style="font-size:0.72rem;font-weight:700;color:#64748B;text-transform:uppercase;">Mobile Money &amp; Wave</div>
+                <div id="daily-kpi-momo" style="font-size:1.25rem;font-weight:900;color:#7C3AED;margin-top:1px;">0 FCFA</div>
               </div>
             </div>
 
           </div>
 
+          <!-- GRAND CAHIER DE VENTES EN PLEIN FORMAT (TABLEUR DE SAISIE RAPIDE INTÉGRÉE) -->
+          <div style="background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(15,23,42,0.05);">
+            
+            <div style="max-height:580px;overflow-y:auto;position:relative;">
+              <table style="width:100%;border-collapse:collapse;font-size:0.86rem;text-align:left;">
+                
+                <!-- En-tête Sticky avec Ligne de Saisie Directe Active -->
+                <thead style="position:sticky;top:0;z-index:20;background:#0F172A;color:#FFFFFF;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                  <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                    <th style="padding:10px 12px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:75px;text-align:center;">Heure</th>
+                    <th style="padding:10px 12px;font-size:0.75rem;font-weight:800;text-transform:uppercase;min-width:220px;">Article / Marchandise <span style="color:#60A5FA;">*</span></th>
+                    <th style="padding:10px 8px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:center;width:80px;">Qté <span style="color:#60A5FA;">*</span></th>
+                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:right;width:130px;">P.U <span style="color:#60A5FA;">*</span></th>
+                    <th style="padding:10px 12px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:right;width:130px;">Total (Auto)</th>
+                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:140px;">Règlement <span style="color:#60A5FA;">*</span></th>
+                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:170px;">Boutique</th>
+                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:160px;">Client (Optionnel)</th>
+                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:center;width:105px;">Action</th>
+                  </tr>
+
+                  <!-- LIGNE PERMANENTE DE SAISIE RAPIDE DIRECTE (INLINE SPREADSHEET ROW) -->
+                  <tr style="background:#F1F5F9;border-bottom:2.5px solid #2563EB;color:#0F172A;">
+                    <td style="padding:6px 8px;text-align:center;">
+                      <span style="display:inline-block;padding:4px 6px;background:#EFF6FF;color:#2563EB;border-radius:6px;font-size:0.72rem;font-weight:800;">
+                        Direct ⚡
+                      </span>
+                    </td>
+                    <td style="padding:6px 8px;">
+                      <input 
+                        type="text" 
+                        id="inline-sale-item" 
+                        class="form-control" 
+                        placeholder="Article vendu (ex: Bouteille d'eau, Riz...)" 
+                        style="height:38px;font-size:0.86rem;font-weight:700;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" 
+                        onkeydown="handleInlineSaleKey(event)"
+                      >
+                    </td>
+                    <td style="padding:6px 6px;text-align:center;">
+                      <input 
+                        type="number" 
+                        id="inline-sale-qty" 
+                        class="form-control" 
+                        value="1" 
+                        min="1" 
+                        style="height:38px;font-size:0.86rem;font-weight:800;text-align:center;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" 
+                        oninput="calculateInlineSaleTotal()" 
+                        onkeydown="handleInlineSaleKey(event)"
+                      >
+                    </td>
+                    <td style="padding:6px 8px;">
+                      <input 
+                        type="number" 
+                        id="inline-sale-unitprice" 
+                        class="form-control" 
+                        placeholder="0" 
+                        min="0" 
+                        style="height:38px;font-size:0.86rem;font-weight:800;text-align:right;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" 
+                        oninput="calculateInlineSaleTotal()" 
+                        onkeydown="handleInlineSaleKey(event)"
+                      >
+                    </td>
+                    <td style="padding:6px 12px;text-align:right;font-size:0.92rem;font-weight:900;color:#2563EB;" id="inline-sale-total-display">
+                      0 FCFA
+                    </td>
+                    <td style="padding:6px 8px;">
+                      <select id="inline-sale-method" class="form-control" style="height:38px;font-size:0.82rem;font-weight:700;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" onkeydown="handleInlineSaleKey(event)">
+                        <option value="Espèces">💵 Espèces</option>
+                        <option value="Wave Direct">🌊 Wave Money</option>
+                        <option value="Orange Money">🟠 Orange Money</option>
+                        <option value="MTN MoMo">🟡 MTN MoMo</option>
+                        <option value="Moov Money">🔵 Moov Money</option>
+                      </select>
+                    </td>
+                    <td style="padding:6px 8px;">
+                      <select id="inline-sale-branch" class="form-control" style="height:38px;font-size:0.82rem;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" onkeydown="handleInlineSaleKey(event)">
+                        <option value="Boutique Principale (Siège)">📍 Boutique Principale</option>
+                        <option value="Succursale 2">📍 Succursale 2</option>
+                        <option value="Point de Vente Marché">📍 Point de Vente Marché</option>
+                      </select>
+                    </td>
+                    <td style="padding:6px 8px;">
+                      <input 
+                        type="text" 
+                        id="inline-sale-client" 
+                        class="form-control" 
+                        placeholder="Client Comptoir" 
+                        style="height:38px;font-size:0.85rem;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" 
+                        onkeydown="handleInlineSaleKey(event)"
+                      >
+                    </td>
+                    <td style="padding:6px 8px;text-align:center;">
+                      <button 
+                        type="button" 
+                        class="btn btn-primary" 
+                        onclick="submitInlineSale()" 
+                        style="height:38px;width:100%;padding:0 8px;font-weight:800;font-size:0.8rem;white-space:nowrap;background:linear-gradient(135deg, #2563EB, #1D4ED8);display:flex;align-items:center;justify-content:center;gap:4px;border-radius:6px;box-shadow:0 2px 8px rgba(37,99,235,0.35);" 
+                        title="Enregistrer cette ligne (Touche Entrée)"
+                      >
+                        <i data-lucide="check" style="width:14px;height:14px;"></i>
+                        <span>+ Entrée</span>
+                      </button>
+                    </td>
+                  </tr>
+
+                </thead>
+
+                <!-- Corps du Journal Défilable -->
+                <tbody id="daily-sales-table-body">
+                  <!-- Rempli dynamiquement par renderDailySalesBook() -->
+                </tbody>
+
+              </table>
+            </div>
+
+          </div>
+
         </section>
+
+
 
       </main>
     </div>
@@ -1887,6 +2206,29 @@
       </button>
     </nav>
 
+  <!-- ============================================================
+       BANNIÈRE DE NOTIFICATION DE NOUVELLE VERSION (NON BLOQUANTE)
+  ============================================================ -->
+  <div id="app-update-banner" style="display:none;position:fixed;top:16px;right:16px;z-index:99999;background:#0F172A;color:#FFFFFF;border:1.5px solid #3B82F6;border-radius:14px;padding:14px 18px;box-shadow:0 8px 30px rgba(0,0,0,0.3);max-width:380px;animation:slideDown 0.3s ease;">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <div style="width:36px;height:36px;border-radius:10px;background:#1E3A8A;color:#60A5FA;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i data-lucide="sparkles" style="width:20px;height:20px;"></i>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:0.88rem;font-weight:800;color:#FFFFFF;margin-bottom:2px;">Nouvelle Version Disponible !</div>
+        <p style="font-size:0.78rem;color:#94A3B8;margin:0 0 10px 0;line-height:1.4;">
+          Une mise à jour de l'application est prête. Actualisez dès maintenant sans perdre votre session ni vos données.
+        </p>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button type="button" onclick="applyAppUpdate()" style="background:#2563EB;color:#FFFFFF;border:none;padding:6px 14px;border-radius:8px;font-weight:800;font-size:0.78rem;cursor:pointer;display:flex;align-items:center;gap:4px;">
+            <i data-lucide="refresh-cw" style="width:13px;height:13px;"></i> Actualiser Maintenant
+          </button>
+          <button type="button" onclick="dismissAppUpdate()" style="background:transparent;color:#94A3B8;border:1px solid #334155;padding:6px 10px;border-radius:8px;font-size:0.75rem;cursor:pointer;">
+            Plus tard
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- ============================================================
@@ -2106,7 +2448,8 @@
         <form id="form-support-contact" onsubmit="handleSupportSubmit(event)">
           <div class="form-group" style="margin-bottom:12px;">
             <label class="form-label">Votre Nom / Nom de Commerce *</label>
-            <input type="text" id="support-input-name" class="form-control" placeholder="ex: KOUASSI Antoine" required>
+            <input type="text" id="support-input-name" class="form-control" placeholder="Votre nom complet" required>
+
           </div>
 
           <div class="form-group" style="margin-bottom:12px;">
@@ -2157,7 +2500,8 @@
       <form id="form-add-cashier" onsubmit="saveNewCashier(event)" style="padding-top:16px;">
         <div class="form-group" style="margin-bottom:14px;">
           <label class="form-label">Prénom &amp; Nom de l'employé *</label>
-          <input type="text" id="cashier-name-input" class="form-control" placeholder="ex: Mamadou DIOP" required>
+          <input type="text" id="cashier-name-input" class="form-control" placeholder="Nom complet du caissier / vendeur" required>
+
         </div>
 
         <div class="form-group" style="margin-bottom:14px;">
@@ -2223,13 +2567,13 @@
         <!-- En-tête Bilan -->
         <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0F172A;padding-bottom:14px;margin-bottom:18px;">
           <div>
-            <h2 id="report-company-name" style="font-size:1.3rem;font-weight:800;color:#0F172A;margin:0 0 4px 0;">Boutique KOUASSI &amp; Fils</h2>
-            <div id="report-company-address" style="font-size:0.82rem;color:#64748B;">Avenue Chardy, Abidjan Plateau</div>
-            <div id="report-company-phone" style="font-size:0.82rem;color:#64748B;">Tel: +225 07 08 09 10 11</div>
+            <h2 id="report-company-name" style="font-size:1.3rem;font-weight:800;color:#0F172A;margin:0 0 4px 0;">--</h2>
+            <div id="report-company-address" style="font-size:0.82rem;color:#64748B;"></div>
+            <div id="report-company-phone" style="font-size:0.82rem;color:#64748B;"></div>
           </div>
           <div style="text-align:right;">
             <span style="display:inline-block;background:#0F172A;color:#FFFFFF;padding:4px 10px;border-radius:6px;font-size:0.75rem;font-weight:800;">RAPPORT OFFICIEL DE TRÉSORERIE</span>
-            <div id="report-date-generated" style="font-size:0.8rem;color:#64748B;margin-top:6px;">Date : 18 Août 2026</div>
+            <div id="report-date-generated" style="font-size:0.8rem;color:#64748B;margin-top:6px;">--</div>
           </div>
         </div>
 
@@ -2237,17 +2581,18 @@
         <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:12px;margin-bottom:20px;">
           <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px;text-align:center;">
             <div style="font-size:0.75rem;color:#1E40AF;font-weight:700;text-transform:uppercase;">Créances à Récupérer</div>
-            <div id="report-kpi-due" style="font-size:1.2rem;font-weight:800;color:#2563EB;margin-top:4px;">225 000 FCFA</div>
+            <div id="report-kpi-due" style="font-size:1.2rem;font-weight:800;color:#2563EB;margin-top:4px;">0 FCFA</div>
           </div>
           <div style="background:#ECFDF5;border:1px solid #A7F3D0;border-radius:10px;padding:12px;text-align:center;">
             <div style="font-size:0.75rem;color:#065F46;font-weight:700;text-transform:uppercase;">Total Recouvré (Mois)</div>
-            <div id="report-kpi-recovered" style="font-size:1.2rem;font-weight:800;color:#10B981;margin-top:4px;">540 000 FCFA</div>
+            <div id="report-kpi-recovered" style="font-size:1.2rem;font-weight:800;color:#10B981;margin-top:4px;">0 FCFA</div>
           </div>
           <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px;text-align:center;">
             <div style="font-size:0.75rem;color:#475569;font-weight:700;text-transform:uppercase;">Taux de Solvabilité</div>
-            <div id="report-kpi-rate" style="font-size:1.2rem;font-weight:800;color:#0F172A;margin-top:4px;">88.5%</div>
+            <div id="report-kpi-rate" style="font-size:1.2rem;font-weight:800;color:#0F172A;margin-top:4px;">0%</div>
           </div>
         </div>
+
 
         <!-- Tableau des 5 plus grands comptes débiteurs -->
         <div style="margin-bottom:20px;">

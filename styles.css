@@ -2900,3 +2900,111 @@ body.is-app-mode #app-workspace-layout {
 .sales-badge-wave { background: #EFF6FF; color: #2563EB; }
 .sales-badge-momo { background: #FFFBEB; color: #D97706; }
 
+@media (max-width: 1024px) {
+  .sales-quick-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .sales-quick-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ============================================================
+   BARRE DE NAVIGATION MOBILE BAS D'ÉCRAN (BOTTOM NAV)
+   Cachée sur ordinateur, fixée au bas sur smartphone
+============================================================ */
+.mobile-bottom-nav {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: #FFFFFF;
+    border-top: 1px solid #E2E8F0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    z-index: 9999;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 8px;
+  }
+
+  .mobile-nav-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #64748B;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    flex: 1;
+    max-width: 72px;
+  }
+
+  .mobile-nav-btn:hover {
+    color: #2563EB;
+    background: #F8FAFC;
+  }
+
+  .mobile-nav-btn.active {
+    color: #2563EB;
+  }
+
+  .mobile-nav-btn i,
+  .mobile-nav-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-nav-btn-plus {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    margin-top: -22px;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .mobile-nav-btn-plus:hover {
+    transform: scale(1.06);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5);
+  }
+
+  .mobile-nav-btn-plus i,
+  .mobile-nav-btn-plus svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.5;
+  }
+
+  /* Espace pour éviter que le contenu ne soit masqué par la barre */
+  .workspace-main {
+    padding-bottom: 80px !important;
+  }
+}
+
+
+

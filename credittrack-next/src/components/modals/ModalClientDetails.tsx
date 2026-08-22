@@ -5,7 +5,8 @@ import { useApp } from '@/context/AppContext';
 import { X, MessageSquare, DollarSign, History, Shield, Calendar } from 'lucide-react';
 
 export default function ModalClientDetails() {
-  const { selectedClient, setSelectedClient, updateClientPayment, formatAmount, currency } = useApp();
+  const { selectedClient, setSelectedClient, updateClientPayment, formatAmount, currency, showToast } = useApp();
+
   const [payAmount, setPayAmount] = useState('');
   const [payMethod, setPayMethod] = useState('Wave Mobile Money');
 
@@ -28,11 +29,17 @@ export default function ModalClientDetails() {
   };
 
   const sendWhatsApp = () => {
-    const cleanPhone = selectedClient.phone.replace(/[^0-9]/g, '');
+    const cleanPhone = (selectedClient.phone || '').replace(/[^0-9]/g, '');
+    if (!cleanPhone || cleanPhone.length < 8) {
+      if (showToast) showToast("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.", "error");
+      else alert("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.");
+      return;
+    }
     const msg = `Bonjour ${selectedClient.name},\nNous vous rappelons que votre solde chez CréditTrack s'élève à ${formatAmount(selectedClient.totalDue)}.\nMerci de régulariser par Wave ou Mobile Money.\nCordialement.`;
     const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
+
 
   const scoreColor = selectedClient.reliabilityScore >= 80 ? '#10B981' : (selectedClient.reliabilityScore >= 50 ? '#F59E0B' : '#EF4444');
   const scoreText = selectedClient.reliabilityScore >= 80 ? 'Excellente Solvabilité' : (selectedClient.reliabilityScore >= 50 ? 'Solvabilité Moyenne' : 'Risque Élevé');

@@ -49,6 +49,18 @@ export interface AccountingEntry {
   status: string;
 }
 
+export interface CashierAccount {
+  id: string;
+  name: string;
+  storeName: string;
+  phone: string;
+  pin: string; // 4-digit PIN
+  status: 'active' | 'inactive';
+  dailySalesTotal: number;
+  monthlySalesTotal: number;
+  lastActive: string;
+}
+
 interface AppContextType {
   country: AfricanCountry & { chart: AccountingAccount[] };
   setCountryCode: (code: string) => void;
@@ -77,6 +89,23 @@ interface AppContextType {
   isMobileMenuOpen: boolean;
   setIsMobileMenuOpen: (open: boolean) => void;
 
+  // Subscription state
+  isSubscriptionModalOpen: boolean;
+  setIsSubscriptionModalOpen: (open: boolean) => void;
+  isProUser: boolean;
+  upgradeToPro: (planTitle: string) => void;
+
+  // Multi-store & Cashier sub-accounts
+  currentRole: 'owner' | 'cashier';
+  activeCashier: CashierAccount | null;
+  cashiers: CashierAccount[];
+  addCashier: (cashier: Omit<CashierAccount, 'id' | 'dailySalesTotal' | 'monthlySalesTotal' | 'lastActive'>) => void;
+  deleteCashier: (id: string) => void;
+  loginCashierByPin: (pin: string) => boolean;
+  logoutToOwner: () => void;
+  isCashierPinModalOpen: boolean;
+  setIsCashierPinModalOpen: (open: boolean) => void;
+
   showToast: (msg: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
 }
 
@@ -85,6 +114,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const INITIAL_CLIENTS: Client[] = [];
 const INITIAL_PAYMENTS: PaymentReceipt[] = [];
 const INITIAL_ENTRIES: AccountingEntry[] = [];
+const INITIAL_CASHIERS: CashierAccount[] = [];
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [countryCode, setCountryCodeState] = useState<string>('BJ');
@@ -97,6 +127,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isNewCreditModalOpen, setIsNewCreditModalOpen] = useState<boolean>(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
+  const [isProUser, setIsProUser] = useState<boolean>(true);
+
+  // Multi-store and Cashiers
+  const [currentRole, setCurrentRole] = useState<'owner' | 'cashier'>('owner');
+  const [activeCashier, setActiveCashier] = useState<CashierAccount | null>(null);
+  const [cashiers, setCashiers] = useState<CashierAccount[]>(() => {
+    if (typeof window === 'undefined') return [];
+    try {
+      const saved = localStorage.getItem('ct_cashiers');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isCashierPinModalOpen, setIsCashierPinModalOpen] = useState<boolean>(false);
+
 
   const country = getCountryConfig(countryCode);
   const currency = country.currency;
@@ -121,6 +168,61 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setTimeout(() => toast.remove(), 300);
     }, 3800);
   }, []);
+
+  const upgradeToPro = (planTitle: string) => {
+    setIsProUser(true);
+    setIsSubscriptionModalOpen(false);
+    showToast(`Félicitations ! Votre abonnement ${planTitle} est maintenant actif.`, 'success');
+  };
+
+  const addCashier = (data: Omit<CashierAccount, 'id' | 'dailySalesTotal' | 'monthlySalesTotal' | 'lastActive'>) => {
+    const newCashier: CashierAccount = {
+      ...data,
+      id: `csh_${Date.now()}`,
+      dailySalesTotal: 0,
+      monthlySalesTotal: 0,
+      lastActive: 'Jamais connecté'
+    };
+    const updated = [newCashier, ...cashiers];
+    setCashiers(updated);
+    try {
+      localStorage.setItem('ct_cashiers', JSON.stringify(updated));
+    } catch (e) {
+      console.warn("Storage write error", e);
+    }
+    showToast(`Caissier "${data.name}" créé avec succès ! Code PIN : ${data.pin}`, 'success');
+  };
+
+  const deleteCashier = (id: string) => {
+    const updated = cashiers.filter(c => c.id !== id);
+    setCashiers(updated);
+    try {
+      localStorage.setItem('ct_cashiers', JSON.stringify(updated));
+    } catch (e) {
+      console.warn("Storage write error", e);
+    }
+    showToast("Caissier supprimé.", "info");
+  };
+
+  const loginCashierByPin = (pin: string): boolean => {
+    const found = cashiers.find(c => c.pin === pin.trim());
+    if (found) {
+      setCurrentRole('cashier');
+      setActiveCashier(found);
+      setIsCashierPinModalOpen(false);
+      showToast(`Bienvenue ${found.name} (${found.storeName}). Mode Caissier actif !`, 'success');
+      return true;
+    }
+    showToast("Code PIN incorrect. Veuillez réessayer.", "error");
+    return false;
+  };
+
+  const logoutToOwner = () => {
+    setCurrentRole('owner');
+    setActiveCashier(null);
+    showToast("Retour au mode Patron / Administrateur.", "info");
+  };
+
 
   const formatAmount = useCallback((amount: number) => {
     return formatAfricanCurrency(amount, currency);
@@ -329,12 +431,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setIsNewCreditModalOpen,
       isMobileMenuOpen,
       setIsMobileMenuOpen,
+      isSubscriptionModalOpen,
+      setIsSubscriptionModalOpen,
+      isProUser,
+      upgradeToPro,
+      currentRole,
+      activeCashier,
+      cashiers,
+      addCashier,
+      deleteCashier,
+      loginCashierByPin,
+      logoutToOwner,
+      isCashierPinModalOpen,
+      setIsCashierPinModalOpen,
       showToast
     }}>
       {children}
     </AppContext.Provider>
   );
 }
+
 
 export function useApp() {
   const context = useContext(AppContext);

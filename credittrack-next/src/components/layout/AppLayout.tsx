@@ -9,6 +9,8 @@ import BottomNav from './BottomNav';
 import ModalNewCredit from '@/components/modals/ModalNewCredit';
 import ModalReceipt from '@/components/modals/ModalReceipt';
 import ModalClientDetails from '@/components/modals/ModalClientDetails';
+import ModalSubscription from '@/components/modals/ModalSubscription';
+import ModalCashierPin from '@/components/modals/ModalCashierPin';
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -43,9 +45,12 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       <ModalNewCredit />
       <ModalReceipt />
       <ModalClientDetails />
+      <ModalSubscription />
+      <ModalCashierPin />
     </div>
   );
 }
+
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
