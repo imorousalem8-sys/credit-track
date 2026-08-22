@@ -566,27 +566,114 @@ function formatCurrency(amount) {
 window.formatCurrency = formatCurrency;
 
 
-window.showToast = function(msg) {
-  let container = document.getElementById('toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.id = 'toast-container';
-    document.body.appendChild(container);
+// ==========================================================================
+// 4.b MOTEUR D'AUTO-SAUVEGARDE & PERSISTANCE TOTALE DES FORMULAIRES EN DIRECT
+// ==========================================================================
+// Empêche toute perte de données en cas d'actualisation accidentelle de la page ou de coupure
+window.initDraftAutosaveEngine = function() {
+  function getFieldStorageKey(el) {
+    if (el.id) return `ct_draft_id_${el.id}`;
+    if (el.name) return `ct_draft_name_${el.name}`;
+    return null;
   }
-  const toast = document.createElement('div');
-  toast.style.cssText = "background:#0F172A;color:#fff;padding:12px 18px;border-radius:10px;font-size:0.86rem;font-weight:700;box-shadow:0 10px 25px rgba(0,0,0,0.3);border-left:4px solid #2563EB;transition:all 0.3s ease;pointer-events:auto;";
-  toast.textContent = msg;
-  container.appendChild(toast);
-  setTimeout(() => {
-    toast.style.opacity = '0';
-    toast.style.transform = 'translateY(10px)';
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
+
+  function handleFieldEvent(e) {
+    const el = e.target;
+    if (!el || !el.tagName) return;
+    const tag = el.tagName.toLowerCase();
+    if (tag !== 'input' && tag !== 'textarea' && tag !== 'select') return;
+    if (el.type === 'password' || el.type === 'file' || el.dataset.noAutosave) return;
+
+    const key = getFieldStorageKey(el);
+    if (!key) return;
+
+    const val = (el.type === 'checkbox' || el.type === 'radio') ? (el.checked ? el.value : '') : el.value;
+    try {
+      if (val !== undefined && val !== null) {
+        localStorage.setItem(key, val);
+      }
+    } catch(err) {}
+  }
+
+  document.addEventListener('input', handleFieldEvent, true);
+  document.addEventListener('change', handleFieldEvent, true);
+  document.addEventListener('keyup', handleFieldEvent, true);
+
+  // Sauvegarde avant déchargement de la page
+  window.addEventListener('beforeunload', () => {
+    const active = document.activeElement;
+    if (active) handleFieldEvent({ target: active });
+  });
 };
 
-// --------------------------------------------------------------------------
-// 5. SYSTÈME DE TRADUCTION (i18n DYNAMIQUE)
-// --------------------------------------------------------------------------
+// Restauration automatique de tous les champs sauvegardés
+window.restoreAllDraftInputs = function() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (!key) continue;
+
+      if (key.startsWith('ct_draft_id_')) {
+        const id = key.replace('ct_draft_id_', '');
+        const el = document.getElementById(id);
+        if (el && el.type !== 'password') {
+          const val = localStorage.getItem(key);
+          if (val !== null && val !== undefined && val !== '') {
+            if (el.type === 'checkbox' || el.type === 'radio') {
+              el.checked = (el.value === val);
+            } else {
+              el.value = val;
+            }
+          }
+        }
+      } else if (key.startsWith('ct_draft_name_')) {
+        const name = key.replace('ct_draft_name_', '');
+        const el = document.querySelector(`[name="${name}"]`);
+        if (el && el.type !== 'password') {
+          const val = localStorage.getItem(key);
+          if (val !== null && val !== undefined && val !== '') {
+            el.value = val;
+          }
+        }
+      }
+    }
+
+    // Restauration des lignes multi-produits pour la Vente à Crédit
+    const savedProducts = localStorage.getItem('ct_draft_creditProducts');
+    if (savedProducts) {
+      const parsed = JSON.parse(savedProducts);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        window.creditProducts = parsed;
+        if (typeof window.renderCreditProductsTable === 'function') {
+          window.renderCreditProductsTable();
+        }
+      }
+    }
+
+    // Déclencher les recalculs si nécessaire
+    if (typeof window.calculateCreditFinancials === 'function') {
+      window.calculateCreditFinancials();
+    }
+    if (typeof window.calculateInlineSaleTotal === 'function') {
+      window.calculateInlineSaleTotal();
+    }
+  } catch(e) {
+    console.warn('[Draft Engine] Notice:', e);
+  }
+};
+
+// Nettoyage ciblé des brouillons après validation réussie d'un formulaire
+window.clearDraftFields = function(fieldIds = []) {
+  fieldIds.forEach(id => {
+    localStorage.removeItem(`ct_draft_id_${id}`);
+    localStorage.removeItem(`ct_draft_name_${id}`);
+    const el = document.getElementById(id);
+    if (el && el.type !== 'checkbox' && el.type !== 'radio') {
+      el.value = '';
+    }
+  });
+};
+
 window.switchLanguage = function(lang) {
   if (!translations[lang]) lang = 'fr';
   AppState.lang = lang;
@@ -1163,6 +1250,13 @@ function switchMenu(menuId) {
     const phoneInp = document.getElementById('setting-phone-input');
     if (phoneInp) phoneInp.value = AppState.businessPhone || '';
   }
+
+  // Restauration immédiate des brouillons de champs pour cette vue
+  setTimeout(() => {
+    if (typeof window.restoreAllDraftInputs === 'function') {
+      window.restoreAllDraftInputs();
+    }
+  }, 25);
 }
 
 
@@ -1460,12 +1554,14 @@ window.addCreditProductRow = function() {
     qty: 1,
     unitPrice: 0
   });
+  localStorage.setItem('ct_draft_creditProducts', JSON.stringify(window.creditProducts));
   window.renderCreditProductsTable();
 };
 
 window.removeCreditProductRow = function(id) {
   if (window.creditProducts.length <= 1) return;
   window.creditProducts = window.creditProducts.filter(p => p.id !== id);
+  localStorage.setItem('ct_draft_creditProducts', JSON.stringify(window.creditProducts));
   window.renderCreditProductsTable();
 };
 
@@ -1480,6 +1576,10 @@ window.updateCreditProduct = function(id, field, val) {
   } else {
     item.name = val;
   }
+
+  try {
+    localStorage.setItem('ct_draft_creditProducts', JSON.stringify(window.creditProducts));
+  } catch(e) {}
 
   // Recalculer sans re-rendre tout l'input pour préserver le curseur
   calculateCreditFinancials();
@@ -1647,7 +1747,19 @@ async function handleNewCreditSubmit(e) {
     if (window.dataStore) await window.dataStore.add("payments", paymentReceipt);
   }
 
-  // Réinitialiser le grand tableau
+  // Réinitialiser le grand tableau et purger les brouillons
+  window.clearDraftFields([
+    'new-client-name',
+    'credit-client-phone',
+    'new-client-cni',
+    'credit-deposit',
+    'credit-transfer-account',
+    'credit-guarantor-name',
+    'credit-guarantor-phone',
+    'credit-client-select'
+  ]);
+  localStorage.removeItem('ct_draft_creditProducts');
+
   window.creditProducts = [
     { id: 1, name: '', qty: 1, unitPrice: 0 },
     { id: 2, name: '', qty: 1, unitPrice: 0 }
@@ -2040,7 +2152,14 @@ window.downloadReceiptPDF = function() {
 
 window.openModal = function(id) {
   const m = document.getElementById(id);
-  if (m) m.classList.add('active');
+  if (m) {
+    m.classList.add('active');
+    setTimeout(() => {
+      if (typeof window.restoreAllDraftInputs === 'function') {
+        window.restoreAllDraftInputs();
+      }
+    }, 20);
+  }
 };
 
 window.closeModal = function(id) {
@@ -4055,7 +4174,8 @@ window.submitInlineSale = function() {
     }
   }
 
-  // Réinitialiser la ligne de saisie pour l'article suivant
+  // Réinitialiser la ligne de saisie et purger les brouillons pour l'article suivant
+  window.clearDraftFields(['inline-sale-item', 'inline-sale-unitprice', 'inline-sale-client']);
   if (itemInput) itemInput.value = '';
   if (unitPriceInput) unitPriceInput.value = '';
   if (clientInput) clientInput.value = '';
@@ -4455,7 +4575,11 @@ window.toggleNewClientInlineForm = function() {
   }
 };
 
-// Initialisation par défaut de la date d'échéance et du tableau Vente à Crédit
+// Initialisation du Moteur d'Auto-Sauvegarde en temps réel & Restauration au démarrage
+if (typeof window.initDraftAutosaveEngine === 'function') {
+  window.initDraftAutosaveEngine();
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   const defaultDueDateInput = document.getElementById('credit-due-date');
   if (defaultDueDateInput && !defaultDueDateInput.value) {
@@ -4465,14 +4589,31 @@ window.addEventListener('DOMContentLoaded', () => {
     defaultDueDateInput.value = dateStr;
     window.updateCreditDueDateKPI(dateStr);
   }
-  window.renderCreditProductsTable();
+  
+  if (typeof window.renderCreditProductsTable === 'function') {
+    window.renderCreditProductsTable();
+  }
+
+  // Restauration immédiate des brouillons de saisie
+  if (typeof window.restoreAllDraftInputs === 'function') {
+    window.restoreAllDraftInputs();
+  }
+
+  // Si l'utilisateur était déjà connecté, ré-ouvrir sa vue active
+  const storedUserId = localStorage.getItem('user_id');
+  const storedActiveView = localStorage.getItem('activeView');
+  const storedActiveMenu = localStorage.getItem('activeMenu') || 'menu-2';
+
+  if (storedUserId && storedActiveView === 'workspace') {
+    openAppWorkspace(storedActiveMenu);
+  }
 });
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.9)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.5.0)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.4.9";
+window.APP_VERSION = "2.5.0";
 
 window.checkAppVersion = async function(isManual = false) {
   try {
