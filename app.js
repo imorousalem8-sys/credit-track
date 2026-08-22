@@ -4491,25 +4491,35 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.7)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.8)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.4.7";
+window.APP_VERSION = "2.4.8";
 
-window.checkAppVersion = async function() {
+window.checkAppVersion = async function(isManual = false) {
   try {
     const res = await fetch('/version.json?t=' + Date.now(), { cache: 'no-store' });
-    if (!res.ok) return;
+    if (!res.ok) {
+      if (isManual) showToast("Impossible de vérifier les mises à jour pour le moment.", "error");
+      return;
+    }
     const data = await res.json();
     if (data && data.version && data.version !== window.APP_VERSION) {
-      console.log(`[Version Checker] Nouvelle version détectée : ${data.version} (actuelle : ${window.APP_VERSION})`);
+      console.log(`[Version Checker] Nouvelle version disponible : ${data.version} (actuelle : ${window.APP_VERSION})`);
       const banner = document.getElementById('app-update-banner');
       if (banner) {
         banner.style.display = 'block';
         if (window.lucide) lucide.createIcons();
       }
+      if (isManual) {
+        showToast(`Une nouvelle version (${data.version}) est disponible ! Cliquez sur la bannière pour mettre à jour.`);
+      }
+    } else {
+      if (isManual) {
+        showToast(`✓ Vous utilisez la dernière version (v${window.APP_VERSION}) !`, "success");
+      }
     }
   } catch (e) {
-    // Erreur silencieuse
+    if (isManual) showToast("Erreur de connexion lors de la vérification.", "error");
   }
 };
 

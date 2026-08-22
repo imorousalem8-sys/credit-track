@@ -1,6 +1,6 @@
-// dataStore.js – Secure IndexedDB & Supabase Cloud Sync for CreditTrack PRO
+// dataStore.js – Secure IndexedDB & Supabase Realtime Cloud Sync for CreditTrack PRO
 // ------------------------------------------------------------------
-// Synchronisation bidirectionnelle Cloud Supabase & Stockage Local Offline avec isolation sécurisée
+// Synchronisation bidirectionnelle Cloud Supabase Realtime & Stockage Local Offline avec isolation sécurisée
 
 const DB_NAME = "CreditTrackDB";
 const DB_VERSION = 2;
@@ -12,6 +12,7 @@ const SUPABASE_CONFIG = {
 };
 
 let supabaseClient = null;
+let realtimeChannel = null;
 
 function initSupabase() {
   if (supabaseClient) return supabaseClient;
@@ -25,11 +26,39 @@ function initSupabase() {
         }
       });
       window.supabaseClient = supabaseClient;
+      setupRealtimeSubscriptions();
     } catch {
       // Échec silencieux pour éviter la fuite d'informations
     }
   }
   return supabaseClient;
+}
+
+// Configuration Supabase Realtime pour synchronisation instantanée entre tous les appareils
+function setupRealtimeSubscriptions() {
+  if (!supabaseClient || realtimeChannel) return;
+  const currentUserId = getCurrentUserId();
+  if (!currentUserId) return;
+
+  try {
+    realtimeChannel = supabaseClient
+      .channel('public:realtime_sync_' + currentUserId)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'clients', filter: `user_id=eq.${currentUserId}` }, payload => {
+        console.log('[Realtime Sync] Changement client détecté en direct:', payload.eventType);
+        syncFromSupabase();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payments', filter: `user_id=eq.${currentUserId}` }, payload => {
+        console.log('[Realtime Sync] Nouveau paiement détecté en direct:', payload.eventType);
+        syncFromSupabase();
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('[Realtime Sync] Connecté au flux Supabase en direct.');
+        }
+      });
+  } catch(e) {
+    console.warn('[Realtime Sync] Erreur abonnement realtime:', e);
+  }
 }
 
 const STORE_DEFINITIONS = [
@@ -39,7 +68,8 @@ const STORE_DEFINITIONS = [
   { name: "payments", keyPath: "id", autoIncrement: false },
   { name: "reminders", keyPath: "id", autoIncrement: true },
   { name: "accountingEntries", keyPath: "id", autoIncrement: true },
-  { name: "settings", keyPath: "key", autoIncrement: false }
+  { name: "settings", keyPath: "key", autoIncrement: false },
+  { name: "syncQueue", keyPath: "id", autoIncrement: true }
 ];
 
 function openDB() {
@@ -103,8 +133,10 @@ async function add(storeName, value) {
           reliability_score: Number(sanitized.reliabilityScore) || 85,
           total_due: Math.max(0, Number(sanitized.totalDue) || 0),
           status: sanitized.status || 'pending'
-        }).then(({ error }) => {});
-      } else if (storeName === 'payments') {
+        }).then(({ error }) => {
+          if (error) console.warn('[Supabase Sync Error]', error);
+        });
+      } else if (storeName === 'payments' && sanitized.type !== 'subscription') {
         client.from('payments').insert({
           user_id: currentUserId,
           client_name: sanitized.clientName,
@@ -112,10 +144,12 @@ async function add(storeName, value) {
           payment_method: sanitized.method || 'Espèces',
           reference: sanitized.ref,
           notes: sanitized.date
-        }).then(() => {});
+        }).then(({ error }) => {
+          if (error) console.warn('[Supabase Sync Error]', error);
+        });
       }
-    } catch {
-      // Ignorer sans faire planter l'application locale
+    } catch(e) {
+      console.warn('[Sync Failover]', e);
     }
   }
 
@@ -167,7 +201,7 @@ async function remove(storeName, id) {
   });
 }
 
-// Récupération Cloud Supabase au démarrage filtrée strictement par user_id
+// Récupération Cloud Supabase en direct filtrée strictement par user_id
 async function syncFromSupabase() {
   const currentUserId = getCurrentUserId();
   if (!currentUserId) return;
@@ -180,7 +214,7 @@ async function syncFromSupabase() {
       .from('clients')
       .select('id, name, phone, cni, preferred_payment_method, payment_account, total_due, status, reliability_score, created_at, user_id')
       .eq('user_id', currentUserId)
-      .limit(100);
+      .limit(200);
 
     if (!clientsError && Array.isArray(clientsData) && clientsData.length > 0) {
       const mapped = clientsData.map(c => ({
@@ -202,6 +236,7 @@ async function syncFromSupabase() {
         window.AppState.clients = mapped;
         if (typeof window.renderClientDirectory === 'function') window.renderClientDirectory();
         if (typeof window.renderCreditKPIs === 'function') window.renderCreditKPIs();
+        if (typeof window.populateCreditClientSelect === 'function') window.populateCreditClientSelect();
       }
     }
   } catch {
@@ -209,10 +244,16 @@ async function syncFromSupabase() {
   }
 }
 
+// Écoute des événements réseau (reconnexion automatique et re-synchronisation)
+window.addEventListener('online', () => {
+  console.log('[Network] Reconnexion détectée. Synchronisation immédiate...');
+  syncFromSupabase();
+});
+
 // Initialisation globale
-window.dataStore = { add, getAll, getById, update, remove, syncFromSupabase, initSupabase };
+window.dataStore = { add, getAll, getById, update, remove, syncFromSupabase, initSupabase, setupRealtimeSubscriptions };
 
 window.addEventListener('DOMContentLoaded', () => {
   initSupabase();
-  setTimeout(syncFromSupabase, 800);
+  setTimeout(syncFromSupabase, 600);
 });

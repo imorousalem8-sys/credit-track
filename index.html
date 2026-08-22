@@ -26,7 +26,7 @@
   <script>
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260822_v2.4.7";
+      const CURRENT_BUILD = "20260822_v2.4.8";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('serviceWorker' in navigator) {
@@ -59,9 +59,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260822_v2.4.7" defer></script>
-  <script src="app.js?v=20260822_v2.4.7" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260822_v2.4.7">
+  <script src="dataStore.js?v=20260822_v2.4.8" defer></script>
+  <script src="app.js?v=20260822_v2.4.8" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260822_v2.4.8">
 </head>
 <body class="is-landing-mode">
 
@@ -1005,9 +1005,9 @@
           </div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <span style="background:rgba(59,130,246,0.2);color:#93C5FD;padding:2px 6px;border-radius:4px;font-size:0.62rem;font-weight:800;">
-            v2.4.3
-          </span>
+          <button type="button" class="btn-icon-tiny" onclick="checkAppVersion(true)" title="Vérifier les mises à jour en direct" style="background:rgba(59,130,246,0.25);border:1px solid rgba(59,130,246,0.5);color:#93C5FD;padding:3px 7px;border-radius:6px;font-size:0.65rem;font-weight:800;cursor:pointer;display:flex;align-items:center;gap:4px;">
+            <i data-lucide="refresh-cw" style="width:11px;height:11px;"></i> <span id="sidebar-version-tag">v2.4.8</span>
+          </button>
           <button class="btn-icon-tiny" onclick="handleSignOut()" title="Se Déconnecter" style="background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.4);color:#FCA5A5;border-radius:6px;padding:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
             <i data-lucide="log-out" style="width:15px;height:15px;"></i>
           </button>
@@ -1652,8 +1652,19 @@
 
             <!-- Panel 4: Sauvegarde & Exports -->
             <div class="card settings-panel" id="settings-panel-backup" style="display:none;">
-              <div class="card-header"><span class="card-title" data-i18n="settingsBackupTitle">Sauvegarde &amp; Sécurité des Données</span></div>
-              <p style="font-size:0.85rem;color:#64748B;margin-bottom:16px;" data-i18n="backupDesc">Vos données sont stockées de façon 100% sécurisée. Vous pouvez exporter votre fichier à tout moment.</p>
+              <div class="card-header"><span class="card-title" data-i18n="settingsBackupTitle">Sauvegarde, Mises à Jour &amp; Sécurité</span></div>
+              <p style="font-size:0.85rem;color:#64748B;margin-bottom:16px;" data-i18n="backupDesc">Vos données sont synchronisées en temps réel et stockées de façon 100% sécurisée. Vous pouvez exporter vos données ou vérifier les mises à jour de l'application.</p>
+              
+              <div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+                <div>
+                  <strong style="font-size:0.9rem;color:#0F172A;display:block;">Version Actuelle du Système : <span style="color:#2563EB;">v2.4.8 (Août 2026)</span></strong>
+                  <span style="font-size:0.78rem;color:#64748B;">Synchronisation Cloud Supabase Realtime active.</span>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="checkAppVersion(true)" style="font-size:0.82rem;padding:8px 16px;display:flex;align-items:center;gap:6px;">
+                  <i data-lucide="refresh-cw" style="width:14px;height:14px;"></i> <span>Vérifier les Mises à Jour</span>
+                </button>
+              </div>
+
               <div style="display:flex;gap:12px;flex-wrap:wrap;">
                 <button class="btn btn-primary" onclick="exportJSON()">
                   <i data-lucide="download"></i> <span data-i18n="exportBackupJSON">Télécharger Sauvegarde Complète (JSON)</span>
