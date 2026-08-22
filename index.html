@@ -99,16 +99,14 @@
       <div id="auth-view-login" style="display:none;">
         <form id="form-auth-login" onsubmit="handleLoginSubmit(event)">
           <div class="form-group" style="margin-bottom:14px;">
-            <label class="form-label">Adresse E-mail Professionnelle *</label>
+            <label class="form-label">Adresse E-mail *</label>
             <input type="email" id="auth-login-email" class="form-control" placeholder="contact@entreprise.com" required autocomplete="email">
           </div>
 
           <div class="form-group" style="margin-bottom:18px;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
               <label class="form-label" style="margin-bottom:0;">Mot de passe *</label>
-              <a href="javascript:void(0)" onclick="switchAuthTab('forgot-password')" style="color:#2563EB;font-size:0.82rem;font-weight:700;text-decoration:underline;">
-                Mot de passe oublié ?
-              </a>
+              <a href="javascript:void(0)" onclick="switchAuthTab('forgot-password')" style="color:#2563EB;font-size:0.82rem;font-weight:700;text-decoration:underline;">Mot de passe oublié ?</a>
             </div>
             <input type="password" id="auth-login-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
           </div>
@@ -118,62 +116,56 @@
           </button>
         </form>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;font-size:0.82rem;border-top:1px solid #F1F5F9;padding-top:12px;">
-          <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#2563EB;font-weight:700;text-decoration:none;">
-            Créer un nouveau compte
-          </a>
-          <a href="javascript:void(0)" onclick="switchAuthTab('forgot-password')" style="color:#2563EB;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:4px;">
-            <i data-lucide="key" style="width:14px;height:14px;"></i> Mot de passe oublié ?
-          </a>
+        <div style="text-align:center;margin-top:16px;font-size:0.82rem;color:#64748B;border-top:1px solid #F1F5F9;padding-top:12px;">
+          Pas encore de compte ? <a href="javascript:void(0)" onclick="switchAuthTab('register')" style="color:#2563EB;font-weight:700;text-decoration:none;">Créer un compte gratuit</a>
         </div>
       </div>
 
       <!-- VUE : MOT DE PASSE OUBLIÉ (ÉTAPE 1 : SAISIE EMAIL) -->
       <div id="auth-view-forgot-password" style="display:none;padding:6px 0;">
         <div style="text-align:center;margin-bottom:16px;">
-          <div style="width:48px;height:48px;border-radius:50%;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-            <i data-lucide="key-round" style="width:24px;height:24px;"></i>
+          <div style="width:52px;height:52px;border-radius:50%;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <i data-lucide="key-round" style="width:26px;height:26px;"></i>
           </div>
-          <h4 style="font-size:1.15rem;font-weight:800;color:#0F172A;margin-bottom:4px;">Mot de passe oublié ?</h4>
-          <p style="font-size:0.84rem;color:#64748B;line-height:1.4;">
-            Entrez votre adresse e-mail. Nous vous enverrons immédiatement un code de vérification à 6 chiffres pour réinitialiser votre mot de passe.
+          <h4 style="font-size:1.15rem;font-weight:900;color:#0F172A;margin-bottom:4px;">Mot de passe oublié ?</h4>
+          <p style="font-size:0.84rem;color:#64748B;line-height:1.45;">
+            Saisissez votre adresse e-mail. Vous recevrez dans les secondes suivantes un <strong style="color:#0F172A;">code de vérification à 6 chiffres</strong> pour créer un nouveau mot de passe.
           </p>
         </div>
 
         <form id="form-auth-forgot-password" onsubmit="handleForgotPasswordSubmit(event)">
           <div class="form-group" style="margin-bottom:16px;">
-            <label class="form-label">Adresse E-mail Professionnelle *</label>
+            <label class="form-label">Adresse E-mail *</label>
             <input type="email" id="auth-forgot-email" class="form-control" placeholder="contact@entreprise.com" required autocomplete="email">
           </div>
 
           <button type="submit" id="auth-forgot-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <span>Recevoir le Code de Vérification</span>
+            <i data-lucide="send" style="width:17px;height:17px;"></i>
+            <span>Recevoir mon Code de Vérification</span>
           </button>
         </form>
 
         <div style="text-align:center;margin-top:16px;">
-          <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:#64748B;font-size:0.82rem;text-decoration:none;font-weight:700;">
-            ← Revenir à la Connexion
-          </a>
+          <a href="javascript:void(0)" onclick="switchAuthTab('login')" style="color:#64748B;font-size:0.82rem;text-decoration:none;font-weight:700;">← Revenir à la Connexion</a>
         </div>
       </div>
 
-      <!-- VUE : RÉINITIALISATION DU MOT DE PASSE (ÉTAPE 2 : CODE OTP + NOUVEAU MOT DE PASSE) -->
+      <!-- VUE : RÉINITIALISATION (ÉTAPE 2 : CODE OTP 6 CHIFFRES + NOUVEAU MOT DE PASSE) -->
       <div id="auth-view-reset-password" style="display:none;padding:6px 0;">
         <div style="text-align:center;margin-bottom:16px;">
-          <div style="width:48px;height:48px;border-radius:50%;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
-            <i data-lucide="shield-check" style="width:24px;height:24px;"></i>
+          <div style="width:52px;height:52px;border-radius:50%;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <i data-lucide="shield-check" style="width:26px;height:26px;"></i>
           </div>
-          <h4 style="font-size:1.15rem;font-weight:800;color:#0F172A;margin-bottom:4px;">Nouveau Mot de Passe</h4>
-          <p style="font-size:0.82rem;color:#64748B;line-height:1.4;">
-            Saisissez le code de vérification à 6 chiffres reçu sur votre e-mail ainsi que votre nouveau mot de passe.
+          <h4 style="font-size:1.15rem;font-weight:900;color:#0F172A;margin-bottom:4px;">Nouveau Mot de Passe</h4>
+          <p style="font-size:0.84rem;color:#64748B;line-height:1.45;">
+            Saisissez le <strong style="color:#0F172A;">code à 6 chiffres</strong> reçu par e-mail, puis créez votre nouveau mot de passe.
           </p>
         </div>
 
         <form id="form-auth-reset-password" onsubmit="handleResetPasswordSubmit(event)">
           <div class="form-group" style="margin-bottom:12px;">
-            <label class="form-label">Code de Vérification (6 chiffres reçu par e-mail) *</label>
-            <input type="text" id="auth-reset-otp-code" class="form-control" placeholder="123456" maxlength="8" required style="letter-spacing:3px;font-weight:800;font-size:1.1rem;text-align:center;">
+            <label class="form-label">Code de Vérification reçu par e-mail (6 chiffres) *</label>
+            <input type="text" id="auth-reset-otp-code" class="form-control" placeholder="1 2 3 4 5 6" maxlength="8" required style="letter-spacing:4px;font-weight:800;font-size:1.15rem;text-align:center;">
           </div>
 
           <div class="form-group" style="margin-bottom:12px;">
@@ -187,18 +179,14 @@
           </div>
 
           <button type="submit" id="auth-reset-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#10B981,#059669);">
-            <span>Enregistrer &amp; Se Connecter</span>
+            <span>✓ Valider &amp; Se Connecter</span>
           </button>
         </form>
 
         <div style="text-align:center;margin-top:14px;">
-          <a href="javascript:void(0)" onclick="switchAuthTab('forgot-password')" style="color:#64748B;font-size:0.8rem;text-decoration:none;">
-            Renvoyer un nouveau code
-          </a>
+          <a href="javascript:void(0)" onclick="switchAuthTab('forgot-password')" style="color:#64748B;font-size:0.8rem;text-decoration:none;font-weight:600;">Renvoyer un nouveau code</a>
         </div>
       </div>
-
-
 
       <!-- VUE 3 : ÉCRAN DE VÉRIFICATION OTP SÉCURISÉ (6 CASES NUMÉRIQUES) -->
       <div id="auth-view-otp" style="display:none;text-align:center;padding:10px 0;">
@@ -208,7 +196,7 @@
         <h4 style="font-size:1.15rem;font-weight:800;color:#0F172A;margin-bottom:6px;">Vérifiez votre adresse e-mail</h4>
         <p style="font-size:0.84rem;color:#64748B;margin-bottom:18px;line-height:1.5;">
           Un code de vérification à 6 chiffres a été envoyé à :<br>
-          <strong id="auth-target-email-display" style="color:#2563EB;font-size:0.95rem;word-break:break-all;">u******@gmail.com</strong>
+          <strong id="auth-target-email-display" style="color:#2563EB;font-size:0.95rem;word-break:break-all;"></strong>
         </p>
 
         <form id="form-auth-verify-otp" onsubmit="handleVerifyOtpSubmit(event)">
@@ -1080,7 +1068,7 @@
               </div>
               <div class="morning-alerts-text">
                 <h3 id="morning-alerts-title">2 Créances arrivent à échéance aujourd'hui !</h3>
-                <p id="morning-alerts-desc">Montant total à encaisser : <strong>125 000 FCFA</strong> auprès de vos clients.</p>
+                <p id="morning-alerts-desc">Consultez les fiches clients concernées et relancez via WhatsApp.</p>
               </div>
             </div>
             <div class="morning-alerts-actions">
@@ -1098,7 +1086,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="kpiTotalDue">Total à Récupérer</div>
-                <div class="metric-value" style="color:#2563EB;" id="metric-total-due">225 000 FCFA</div>
+                <div class="metric-value" style="color:#2563EB;" id="metric-total-due">0 FCFA</div>
                 <div class="metric-trend"><i data-lucide="trending-up"></i> <span data-i18n="kpiTotalDueSub">Dettes clients en cours</span></div>
               </div>
               <div class="metric-icon-box blue">
@@ -1109,7 +1097,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="kpiActiveClients">Clients avec Dettes</div>
-                <div class="metric-value" id="metric-active-clients">3</div>
+                <div class="metric-value" id="metric-active-clients">0</div>
                 <div class="metric-trend"><i data-lucide="users"></i> <span data-i18n="kpiActiveClientsSub">Fiches enregistrées</span></div>
               </div>
               <div class="metric-icon-box blue">
@@ -1120,7 +1108,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="kpiOverdue">Paiements en Retard</div>
-                <div class="metric-value" style="color:#EF4444;" id="metric-overdue-count">1</div>
+                <div class="metric-value" style="color:#EF4444;" id="metric-overdue-count">0</div>
                 <div class="metric-trend" style="color:#EF4444;"><i data-lucide="alert-circle"></i> <span data-i18n="kpiOverdueSub">Rappel recommandé</span></div>
               </div>
               <div class="metric-icon-box red">
@@ -1131,7 +1119,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="kpiRecoveryRate">Taux d'Argent Récupéré</div>
-                <div class="metric-value" style="color:#10B981;">87 %</div>
+                <div class="metric-value" style="color:#10B981;" id="metric-recovery-rate">-- %</div>
                 <div class="metric-trend"><i data-lucide="check-circle"></i> <span data-i18n="kpiRecoveryRateSub">Grâce aux rappels</span></div>
               </div>
               <div class="metric-icon-box green">
@@ -1163,15 +1151,15 @@
                 <div style="display:flex;flex-direction:column;gap:10px;flex:1;font-size:0.8rem;font-weight:700;">
                   <div style="display:flex;align-items:center;justify-content:space-between;">
                     <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#10B981;"></span> <span data-i18n="trustGood">Clients Sérieux</span></span>
-                    <span style="color:#64748B;">60%</span>
+                    <span id="trust-pct-good" style="color:#64748B;">-- %</span>
                   </div>
                   <div style="display:flex;align-items:center;justify-content:space-between;">
                     <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#F59E0B;"></span> <span data-i18n="trustAverage">Moyen / En attente</span></span>
-                    <span style="color:#64748B;">25%</span>
+                    <span id="trust-pct-avg" style="color:#64748B;">-- %</span>
                   </div>
                   <div style="display:flex;align-items:center;justify-content:space-between;">
                     <span style="display:flex;align-items:center;gap:6px;"><span style="width:10px;height:10px;border-radius:50%;background:#EF4444;"></span> <span data-i18n="trustRisk">En retard</span></span>
-                    <span style="color:#64748B;">15%</span>
+                    <span id="trust-pct-risk" style="color:#64748B;">-- %</span>
                   </div>
                 </div>
               </div>
