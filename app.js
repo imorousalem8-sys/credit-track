@@ -4084,7 +4084,7 @@ window.downloadOfficialReportPDF = function() {
 };
 
 // --------------------------------------------------------------------------
-// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — TABLEUR INTERACTIF EN LIGNE
+// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — TABLEUR EXACT STYLE MOCKUP
 // --------------------------------------------------------------------------
 AppState.selectedBranch = localStorage.getItem('ct_selected_branch') || 'all';
 
@@ -4095,68 +4095,130 @@ function saveSalesToStorage() {
   localStorage.setItem('ct_daily_sales', JSON.stringify(AppState.sales));
 }
 
-// Calcul instantané du total dans la ligne de saisie en direct
-window.calculateInlineSaleTotal = function() {
-  const qtyInput = document.getElementById('inline-sale-qty');
-  const unitPriceInput = document.getElementById('inline-sale-unitprice');
-  const totalDisplay = document.getElementById('inline-sale-total-display');
+// Horloge temps réel pour l'en-tête du cahier
+setInterval(() => {
+  const clockEl = document.getElementById('salesbook-live-time');
+  if (clockEl) {
+    const now = new Date();
+    clockEl.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  }
+}, 1000);
+
+// Calcul instantané du total dans le formulaire de saisie rapide du haut
+window.updateSalesbookQuickTotal = function() {
+  const qtyInput = document.getElementById('sale-input-qty');
+  const priceInput = document.getElementById('sale-input-price');
+  const totalInput = document.getElementById('sale-input-total');
 
   const qty = parseFloat(qtyInput?.value || 0) || 1;
-  const unitPrice = parseFloat(unitPriceInput?.value || 0) || 0;
-  const total = qty * unitPrice;
+  const price = parseFloat(priceInput?.value || 0) || 0;
+  const total = qty * price;
 
-  if (totalDisplay) {
-    totalDisplay.textContent = formatCurrency(total);
+  if (totalInput) {
+    totalInput.value = formatCurrency(total);
   }
 };
 
-// Gestionnaire du clavier : validation instantanée avec Entrée et passage au suivant
-window.handleInlineSaleKey = function(event) {
-  if (event.key === 'Enter') {
-    event.preventDefault();
-    submitInlineSale();
+// Afficher / Masquer la bannière de saisie rapide
+window.toggleQuickSaleBanner = function(show) {
+  const form = document.getElementById('salesbook-quick-form');
+  if (form) form.style.display = show ? 'grid' : 'none';
+};
+
+// Basculer en mode plein écran pour le tableau
+window.toggleSalesbookFullscreen = function() {
+  const tableCard = document.querySelector('.salesbook-table-card');
+  if (tableCard) {
+    tableCard.classList.toggle('fullscreen-mode');
   }
 };
 
-// Validation et enregistrement d'une vente en direct depuis le bandeau
-window.submitInlineSale = function() {
-  const itemInput = document.getElementById('inline-sale-item');
-  const unitPriceInput = document.getElementById('inline-sale-unitprice');
-  const methodSelect = document.getElementById('inline-sale-method');
-  const clientInput = document.getElementById('inline-sale-client');
+// Validation et enregistrement d'une vente (depuis le haut ou depuis la ligne du tableau)
+window.submitSalesbookSale = function(source = 'top') {
+  let item = '', qty = 1, unitPrice = 0, method = 'Espèces', client = '', branch = 'Boutique Centrale';
 
-  const item = (itemInput?.value || '').trim();
-  const total = parseFloat(unitPriceInput?.value || 0);
-  const method = methodSelect?.value || 'Espèces';
-  const branch = AppState.selectedBranch === 'all' ? 'Boutique Principale' : AppState.selectedBranch;
-  const client = (clientInput?.value || '').trim() || 'Client Comptoir';
+  if (source === 'top') {
+    const itemInput = document.getElementById('sale-input-item');
+    const qtyInput = document.getElementById('sale-input-qty');
+    const priceInput = document.getElementById('sale-input-price');
+    const methodSelect = document.getElementById('sale-input-method');
+    const clientInput = document.getElementById('sale-input-client');
 
-  if (!item) {
-    showToast("Veuillez saisir le nom de l'article vendu.", "error");
-    itemInput?.focus();
-    return;
-  }
+    item = (itemInput?.value || '').trim();
+    qty = parseFloat(qtyInput?.value || 0) || 1;
+    unitPrice = parseFloat(priceInput?.value || 0);
+    method = methodSelect?.value || 'Espèces';
+    client = (clientInput?.value || '').trim();
+    branch = AppState.selectedBranch === 'all' ? 'Boutique Centrale' : AppState.selectedBranch;
 
-  if (total <= 0) {
-    showToast("Veuillez saisir un montant supérieur à 0.", "error");
-    unitPriceInput?.focus();
-    return;
+    if (!item) {
+      showToast("Veuillez saisir le nom de l'article.", "error");
+      itemInput?.focus();
+      return;
+    }
+    if (unitPrice <= 0) {
+      showToast("Veuillez saisir un prix unitaire supérieur à 0.", "error");
+      priceInput?.focus();
+      return;
+    }
+
+    // Réinitialiser les champs et purger le brouillon
+    window.clearDraftFields(['sale-input-item', 'sale-input-qty', 'sale-input-price', 'sale-input-total', 'sale-input-client']);
+    if (itemInput) itemInput.value = '';
+    if (qtyInput) qtyInput.value = '1';
+    if (priceInput) priceInput.value = '';
+    if (document.getElementById('sale-input-total')) document.getElementById('sale-input-total').value = '';
+    if (clientInput) clientInput.value = '';
+    setTimeout(() => itemInput?.focus(), 40);
+
+  } else if (source === 'inline_row') {
+    const itemInput = document.getElementById('inline-row-item');
+    const qtyInput = document.getElementById('inline-row-qty');
+    const priceInput = document.getElementById('inline-row-price');
+    const methodSelect = document.getElementById('inline-row-method');
+    const clientInput = document.getElementById('inline-row-client');
+    const branchSelect = document.getElementById('inline-row-branch');
+
+    item = (itemInput?.value || '').trim();
+    qty = parseFloat(qtyInput?.value || 0) || 1;
+    unitPrice = parseFloat(priceInput?.value || 0);
+    method = methodSelect?.value || 'Espèces';
+    client = (clientInput?.value || '').trim();
+    branch = branchSelect?.value || 'Boutique Centrale';
+
+    if (!item) {
+      showToast("Veuillez saisir le nom de l'article.", "error");
+      itemInput?.focus();
+      return;
+    }
+    if (unitPrice <= 0) {
+      showToast("Veuillez saisir un prix unitaire supérieur à 0.", "error");
+      priceInput?.focus();
+      return;
+    }
+
+    if (itemInput) itemInput.value = '';
+    if (qtyInput) qtyInput.value = '1';
+    if (priceInput) priceInput.value = '';
+    if (document.getElementById('inline-row-total')) document.getElementById('inline-row-total').value = '0';
+    if (clientInput) clientInput.value = '';
+    setTimeout(() => itemInput?.focus(), 40);
   }
 
   const now = new Date();
-  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   const dateStr = now.toISOString().split('T')[0];
+  const total = qty * unitPrice;
 
   const newSale = {
     id: 'sale_' + Date.now(),
-    item: item,
-    qty: 1,
-    unitPrice: total,
-    total: total,
-    method: method,
-    branch: branch,
-    client: client,
-    cashier: AppState.activeCashierName || 'Gérant (Patron)',
+    item,
+    qty,
+    unitPrice,
+    total,
+    method,
+    client: client || '—',
+    branch: branch || 'Boutique Centrale',
     time: timeStr,
     date: dateStr
   };
@@ -4174,122 +4236,231 @@ window.submitInlineSale = function() {
     }
   }
 
-  // Réinitialiser la ligne de saisie et purger les brouillons pour l'article suivant
-  window.clearDraftFields(['inline-sale-item', 'inline-sale-unitprice', 'inline-sale-client']);
-  if (itemInput) itemInput.value = '';
-  if (unitPriceInput) unitPriceInput.value = '';
-  if (clientInput) clientInput.value = '';
-
-  // Mettre à jour l'affichage du tableau
   renderDailySalesBook();
   showToast(`✓ Vente enregistrée : ${item} (${formatCurrency(total)}) !`, "success");
-
-  // Remettre le focus sur le champ Article pour enchaîner
-  setTimeout(() => {
-    const nextItemInput = document.getElementById('inline-sale-item');
-    if (nextItemInput) nextItemInput.focus();
-  }, 40);
 };
 
-// Suppression d'un article du journal
+// Suppression d'un article
 window.deleteSaleItem = function(saleId) {
-  if (!confirm("Voulez-vous annuler et supprimer cette vente du cahier ?")) return;
+  if (!confirm("Voulez-vous supprimer cette vente du cahier ?")) return;
   AppState.sales = AppState.sales.filter(s => s.id !== saleId);
   saveSalesToStorage();
   renderDailySalesBook();
   showToast("Vente supprimée du journal.");
 };
 
-// Rendu du cahier des ventes du jour (Format épuré 6 colonnes)
+// Édition rapide d'un article
+window.editSaleItem = function(saleId) {
+  const sale = AppState.sales.find(s => s.id === saleId);
+  if (!sale) return;
+  const newItem = prompt("Modifier le nom de l'article :", sale.item);
+  if (newItem === null) return;
+  const newPrice = prompt("Modifier le prix unitaire :", sale.unitPrice);
+  if (newPrice === null) return;
+
+  sale.item = newItem.trim() || sale.item;
+  sale.unitPrice = parseFloat(newPrice) || sale.unitPrice;
+  sale.total = (sale.qty || 1) * sale.unitPrice;
+  saveSalesToStorage();
+  renderDailySalesBook();
+  showToast("Vente modifiée avec succès.");
+};
+
+// Filtrage en direct dans le tableau
+window.salesbookSearchQuery = '';
+window.filterDailySalesTable = function(q) {
+  window.salesbookSearchQuery = (q || '').trim().toLowerCase();
+  renderDailySalesBook();
+};
+
+// Rendu complet du cahier des ventes
 window.renderDailySalesBook = function() {
   const tableBody = document.getElementById('daily-sales-table-body');
   if (!tableBody) return;
 
+  // Initialiser le date picker si non renseigné
+  const datePicker = document.getElementById('salesbook-date-picker');
   const todayStr = new Date().toISOString().split('T')[0];
-  const filteredSales = AppState.sales.filter(s => {
-    const isToday = s.date === todayStr;
-    const matchesBranch = AppState.selectedBranch === 'all' || s.branch === AppState.selectedBranch;
-    return isToday && matchesBranch;
-  });
+  if (datePicker && !datePicker.value) {
+    datePicker.value = todayStr;
+  }
+  const selectedDate = datePicker?.value || todayStr;
 
-  // Calcul des totaux de la journée
-  let totalSales = 0;
-  let totalCount = 0;
-  let totalCash = 0;
-  let totalWave = 0;
-  let totalMoMo = 0;
-
-  filteredSales.forEach(s => {
-    totalSales += (s.total || 0);
-    totalCount += (s.qty || 1);
-    if (s.method === 'Espèces') totalCash += s.total;
-    else if (s.method === 'Wave Direct') totalWave += s.total;
-    else totalMoMo += s.total;
-  });
-
-  // Mise à jour des KPIs
-  const kpiTotal = document.getElementById('daily-kpi-total-sales');
-  const kpiCount = document.getElementById('daily-kpi-count');
-  const kpiCash = document.getElementById('daily-kpi-cash');
-  const kpiMoMo = document.getElementById('daily-kpi-momo');
-
-  if (kpiTotal) kpiTotal.textContent = formatCurrency(totalSales);
-  if (kpiCount) kpiCount.textContent = `${totalCount} article${totalCount > 1 ? 's' : ''}`;
-  if (kpiCash) kpiCash.textContent = formatCurrency(totalCash);
-  if (kpiMoMo) kpiMoMo.textContent = formatCurrency(totalWave + totalMoMo);
-
-  if (filteredSales.length === 0) {
-    tableBody.innerHTML = `
-      <tr>
-        <td colspan="6" style="text-align:center;padding:36px 16px;color:#64748B;">
-          <i data-lucide="shopping-bag" style="width:36px;height:36px;color:#CBD5E1;display:block;margin:0 auto 10px auto;"></i>
-          <strong style="font-size:0.95rem;color:#1E293B;display:block;">Aucune vente enregistrée aujourd'hui</strong>
-          <p style="font-size:0.8rem;margin:4px 0 0 0;">Utilisez le formulaire ci-dessus pour enregistrer votre premier article vendu.</p>
-        </td>
-      </tr>
-    `;
-  } else {
-    const rowsHtml = filteredSales.map((s, idx) => {
-      let badgeClass = 'sales-badge-cash';
-      if (s.method === 'Wave Direct') badgeClass = 'sales-badge-wave';
-      else if (s.method !== 'Espèces') badgeClass = 'sales-badge-momo';
-
-      return `
-        <tr style="border-bottom:1px solid #F1F5F9;background:${idx % 2 === 0 ? '#FFFFFF' : '#FAFAFA'};">
-          <td style="padding:12px 14px;font-weight:700;color:#64748B;font-family:monospace;text-align:center;font-size:0.82rem;">${escapeHTML(s.time || '12:00')}</td>
-          <td style="padding:12px 14px;font-weight:800;color:#0F172A;font-size:0.9rem;">
-            ${escapeHTML(s.item)}
-          </td>
-          <td style="padding:12px 14px;text-align:right;font-weight:900;color:#2563EB;font-size:0.95rem;">${formatCurrency(s.total)}</td>
-          <td style="padding:12px 14px;">
-            <span class="sales-badge-payment ${badgeClass}">${escapeHTML(s.method)}</span>
-          </td>
-          <td style="padding:12px 14px;font-size:0.82rem;color:#475569;">
-            ${escapeHTML(s.client || 'Client Comptoir')}
-          </td>
-          <td style="padding:12px 14px;text-align:center;">
-            <button type="button" class="btn btn-outline" style="padding:4px 10px;font-size:0.75rem;color:#EF4444;border-color:#FCA5A5;border-radius:6px;" onclick="deleteSaleItem('${s.id}')" title="Supprimer cette vente">
-              ✕
-            </button>
-          </td>
-        </tr>
-      `;
-    }).join('');
-
-    const footerTotalHtml = `
-      <tr style="background:#F8FAFC;border-top:2.5px solid #CBD5E1;font-weight:900;">
-        <td colspan="2" style="padding:14px 16px;color:#0F172A;font-size:0.92rem;">TOTAL DU JOUR (${filteredSales.length} ventes enregistrées)</td>
-        <td style="padding:14px 16px;text-align:right;color:#2563EB;font-size:1.1rem;">${formatCurrency(totalSales)}</td>
-        <td colspan="3" style="padding:14px 16px;font-size:0.82rem;color:#64748B;">
-          Espèces : <strong>${formatCurrency(totalCash)}</strong> • Électronique : <strong>${formatCurrency(totalWave + totalMoMo)}</strong>
-        </td>
-      </tr>
-    `;
-
-    tableBody.innerHTML = rowsHtml + footerTotalHtml;
+  // Filtrer par date et recherche
+  let filteredSales = AppState.sales.filter(s => s.date === selectedDate);
+  if (AppState.selectedBranch && AppState.selectedBranch !== 'all') {
+    filteredSales = filteredSales.filter(s => s.branch === AppState.selectedBranch);
   }
 
+  // Calcul des métriques pour les 5 KPIs
+  let totalRevenue = 0;
+  let totalItems = 0;
+  let totalCash = 0;
+  let totalElectronic = 0;
+  const totalSalesCount = filteredSales.length;
+
+  filteredSales.forEach(s => {
+    totalRevenue += (s.total || 0);
+    totalItems += (s.qty || 1);
+    if (s.method === 'Espèces') {
+      totalCash += (s.total || 0);
+    } else {
+      totalElectronic += (s.total || 0);
+    }
+  });
+
+  // Mise à jour des 5 KPIs
+  const kpiRevenue = document.getElementById('salesbook-kpi-revenue');
+  const kpiItems = document.getElementById('salesbook-kpi-items');
+  const kpiCash = document.getElementById('salesbook-kpi-cash');
+  const kpiElectronic = document.getElementById('salesbook-kpi-electronic');
+  const kpiCount = document.getElementById('salesbook-kpi-salescount');
+
+  if (kpiRevenue) kpiRevenue.textContent = formatCurrency(totalRevenue);
+  if (kpiItems) kpiItems.textContent = totalItems;
+  if (kpiCash) kpiCash.textContent = formatCurrency(totalCash);
+  if (kpiElectronic) kpiElectronic.textContent = formatCurrency(totalElectronic);
+  if (kpiCount) kpiCount.textContent = totalSalesCount;
+
+  // Footer résumé
+  const rowsCountEl = document.getElementById('salesbook-rows-count');
+  const grandTotalEl = document.getElementById('salesbook-grand-total-amount');
+  if (rowsCountEl) rowsCountEl.textContent = totalSalesCount;
+  if (grandTotalEl) grandTotalEl.textContent = formatCurrency(totalRevenue);
+
+  // Filtrer par terme de recherche si présent
+  if (window.salesbookSearchQuery) {
+    filteredSales = filteredSales.filter(s => 
+      (s.item || '').toLowerCase().includes(window.salesbookSearchQuery) ||
+      (s.client || '').toLowerCase().includes(window.salesbookSearchQuery) ||
+      (s.method || '').toLowerCase().includes(window.salesbookSearchQuery) ||
+      (s.branch || '').toLowerCase().includes(window.salesbookSearchQuery)
+    );
+  }
+
+  // Génération des lignes du tableau
+  const rowsHtml = filteredSales.map(s => {
+    let badgeHtml = '';
+    if (s.method === 'Wave Direct' || s.method.includes('Wave')) {
+      badgeHtml = `<span class="sales-badge-payment sales-badge-wave">🟣 Wave</span>`;
+    } else if (s.method.includes('Orange')) {
+      badgeHtml = `<span class="sales-badge-payment sales-badge-orange">🟠 Orange Money</span>`;
+    } else if (s.method.includes('MTN')) {
+      badgeHtml = `<span class="sales-badge-payment sales-badge-mtn">🟡 MTN MoMo</span>`;
+    } else if (s.method.includes('Moov')) {
+      badgeHtml = `<span class="sales-badge-payment sales-badge-moov">🔵 Moov Money</span>`;
+    } else {
+      badgeHtml = `<span class="sales-badge-payment sales-badge-cash">💵 Espèces</span>`;
+    }
+
+    return `
+      <tr>
+        <td style="color:#64748B;font-family:monospace;font-size:0.82rem;font-weight:700;">${escapeHTML(s.time || '10:00:00')}</td>
+        <td style="font-weight:800;color:#0F172A;font-size:0.88rem;">${escapeHTML(s.item)}</td>
+        <td style="text-align:center;font-weight:700;color:#334155;">${s.qty || 1}</td>
+        <td style="text-align:right;color:#64748B;font-weight:700;">${Number(s.unitPrice || 0).toLocaleString('fr-FR')}</td>
+        <td style="text-align:right;font-weight:900;color:#0F172A;font-size:0.9rem;">${Number(s.total || 0).toLocaleString('fr-FR')}</td>
+        <td>${badgeHtml}</td>
+        <td style="color:#64748B;font-size:0.84rem;">${escapeHTML(s.client || '—')}</td>
+        <td style="color:#475569;font-size:0.82rem;font-weight:600;">${escapeHTML(s.branch || 'Boutique Centrale')}</td>
+        <td style="text-align:center;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+            <button type="button" class="btn-icon-tiny" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#64748B;border:none;background:transparent;cursor:pointer;padding:4px;">
+              <i data-lucide="edit-2" style="width:15px;height:15px;"></i>
+            </button>
+            <button type="button" class="btn-icon-tiny" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:4px;">
+              <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Ligne de saisie interactive directe en bas de tableau (comme dans le mockup)
+  const now = new Date();
+  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+  const inlineEntryRowHtml = `
+    <tr style="background:#F8FAFC;border-top:2px solid #E2E8F0;">
+      <td style="color:#94A3B8;font-family:monospace;font-size:0.8rem;white-space:nowrap;">
+        ${currentTime} 🕒
+      </td>
+      <td>
+        <input type="text" id="inline-row-item" class="salesbook-inline-table-input" placeholder="Nom de l'article..." onkeydown="if(event.key==='Enter') submitSalesbookSale('inline_row')">
+      </td>
+      <td style="text-align:center;">
+        <input type="number" id="inline-row-qty" class="salesbook-inline-table-input" value="1" min="1" style="text-align:center;" oninput="updateInlineRowTotal()" onkeydown="if(event.key==='Enter') submitSalesbookSale('inline_row')">
+      </td>
+      <td style="text-align:right;">
+        <input type="number" id="inline-row-price" class="salesbook-inline-table-input" placeholder="0" min="0" style="text-align:right;" oninput="updateInlineRowTotal()" onkeydown="if(event.key==='Enter') submitSalesbookSale('inline_row')">
+      </td>
+      <td style="text-align:right;">
+        <input type="text" id="inline-row-total" class="salesbook-inline-table-input" placeholder="0" readonly style="text-align:right;background:#F1F5F9;font-weight:800;color:#2563EB;">
+      </td>
+      <td>
+        <select id="inline-row-method" class="salesbook-inline-table-input" style="font-weight:700;">
+          <option value="Espèces">💵 Espèces</option>
+          <option value="Wave Direct">🟣 Wave</option>
+          <option value="Orange Money">🟠 Orange Money</option>
+          <option value="MTN MoMo">🟡 MTN MoMo</option>
+          <option value="Moov Money">🔵 Moov Money</option>
+        </select>
+      </td>
+      <td>
+        <input type="text" id="inline-row-client" class="salesbook-inline-table-input" placeholder="Client (optionnel)..." onkeydown="if(event.key==='Enter') submitSalesbookSale('inline_row')">
+      </td>
+      <td>
+        <select id="inline-row-branch" class="salesbook-inline-table-input" style="font-weight:600;">
+          <option value="Boutique Centrale">Boutique Centrale</option>
+          <option value="Boutique Annexe">Boutique Annexe</option>
+          <option value="Boutique Siège">Boutique Siège</option>
+        </select>
+      </td>
+      <td style="text-align:center;">
+        <button type="button" class="btn btn-primary" onclick="submitSalesbookSale('inline_row')" style="padding:6px 12px;border-radius:6px;font-size:0.8rem;background:#2563EB;color:#fff;border:none;box-shadow:none;">
+          <i data-lucide="check" style="width:15px;height:15px;"></i>
+        </button>
+      </td>
+    </tr>
+  `;
+
+  tableBody.innerHTML = rowsHtml + inlineEntryRowHtml;
   if (window.lucide) lucide.createIcons();
+};
+
+window.updateInlineRowTotal = function() {
+  const qty = parseFloat(document.getElementById('inline-row-qty')?.value || 0) || 1;
+  const price = parseFloat(document.getElementById('inline-row-price')?.value || 0) || 0;
+  const totalEl = document.getElementById('inline-row-total');
+  if (totalEl) totalEl.value = (qty * price).toLocaleString('fr-FR');
+};
+
+// Exportation du cahier des ventes en CSV (Excel)
+window.exportSalesbookCSV = function() {
+  const datePicker = document.getElementById('salesbook-date-picker');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const selectedDate = datePicker?.value || todayStr;
+
+  const salesToExport = AppState.sales.filter(s => s.date === selectedDate);
+  if (salesToExport.length === 0) {
+    showToast("Aucune vente à exporter pour cette date.", "error");
+    return;
+  }
+
+  let csvContent = "\uFEFFHeure;Article / Marchandise;Quantite;Prix Unitaire (FCFA);Total (FCFA);Mode de Reglement;Client;Boutique\n";
+  salesToExport.forEach(s => {
+    csvContent += `"${s.time || ''}";"${(s.item || '').replace(/"/g, '""')}";${s.qty || 1};${s.unitPrice || 0};${s.total || 0};"${s.method || ''}";"${(s.client || '').replace(/"/g, '""')}";"${(s.branch || '').replace(/"/g, '""')}"\n`;
+  });
+
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Cahier_Ventes_${selectedDate}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("✓ Cahier des ventes exporté avec succès !");
 };
 
 // Ouverture de la modale de clôture journalière 24h
@@ -4611,9 +4782,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.5.0)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.5.1)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.5.0";
+window.APP_VERSION = "2.5.1";
 
 window.checkAppVersion = async function(isManual = false) {
   try {
