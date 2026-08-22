@@ -23,9 +23,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
-  <script src="dataStore.js?v=20260817_v1" defer></script>
-  <script src="app.js?v=20260817_v1" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260817_v1">
+  <script src="dataStore.js?v=20260822_v2.4.6" defer></script>
+  <script src="app.js?v=20260822_v2.4.6" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260822_v2.4.6">
 </head>
 <body class="is-landing-mode">
 
@@ -1465,7 +1465,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="remindersSent">Rappels Envoyés</div>
-                <div class="metric-value">48 Messages</div>
+                <div class="metric-value" id="reminders-metric-sent">0 Message</div>
                 <div class="metric-trend"><i data-lucide="send"></i> WhatsApp &amp; SMS</div>
               </div>
               <div class="metric-icon-box blue"><i data-lucide="send"></i></div>
@@ -1474,7 +1474,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="successRate">Paiements après Rappel</div>
-                <div class="metric-value" style="color:#10B981;">76 %</div>
+                <div class="metric-value" style="color:#10B981;" id="reminders-metric-success">-- %</div>
                 <div class="metric-trend"><i data-lucide="check-check"></i> <span data-i18n="within48h">Payé sous 48h</span></div>
               </div>
               <div class="metric-icon-box green"><i data-lucide="check-circle"></i></div>
@@ -1483,7 +1483,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="amountRecovered">Argent Récupéré</div>
-                <div class="metric-value" style="color:#2563EB;">890 000 FCFA</div>
+                <div class="metric-value" style="color:#2563EB;" id="reminders-metric-recovered">0 FCFA</div>
                 <div class="metric-trend"><i data-lucide="zap"></i> <span data-i18n="zeroLoss">Zéro impayé oublié</span></div>
               </div>
               <div class="metric-icon-box blue"><i data-lucide="zap"></i></div>
@@ -1924,7 +1924,7 @@
         ============================================================ -->
         <section id="menu-salesbook" class="view-container">
           
-          <!-- En-tête Titre & Bouton Clôture -->
+          <!-- En-tête Titre & Boutons d'Action -->
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:18px;border-bottom:1px solid #E2E8F0;padding-bottom:14px;">
             <div>
               <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
@@ -1934,7 +1934,7 @@
                 <span id="salesbook-date-label" style="font-size:0.85rem;color:#64748B;font-weight:700;">Aujourd'hui</span>
               </div>
               <h2 style="font-size:1.4rem;font-weight:900;margin:0;color:#0F172A;">Cahier des Ventes &amp; Recettes du Jour</h2>
-              <p style="font-size:0.82rem;color:#64748B;margin:2px 0 0 0;">Saisissez directement vos ventes dans le tableau ci-dessous. Validez avec la touche <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-weight:800;color:#0F172A;">Entrée</kbd> pour enchaîner immédiatement.</p>
+              <p style="font-size:0.82rem;color:#64748B;margin:2px 0 0 0;">Notez vos ventes rapidement au comptoir. Appuyez sur <kbd style="background:#E2E8F0;padding:2px 6px;border-radius:4px;font-weight:800;color:#0F172A;">Entrée</kbd> pour valider et enchaîner.</p>
             </div>
 
             <div style="display:flex;align-items:center;gap:10px;">
@@ -1951,7 +1951,7 @@
             </div>
           </div>
 
-          <!-- 4 Mini-Cartes KPIs Discrètes & Lisibles (Style A) -->
+          <!-- 4 Cartes KPIs Lisibles (Style A) -->
           <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:18px;">
             
             <!-- KPI 1 : Total Ventes -->
@@ -2000,117 +2000,117 @@
 
           </div>
 
-          <!-- GRAND CAHIER DE VENTES EN PLEIN FORMAT (TABLEUR DE SAISIE RAPIDE INTÉGRÉE) -->
-          <div style="background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(15,23,42,0.05);">
+          <!-- BANDEAU DE SAISIE RAPIDE DIRECTE (ESPACÉ, CLAIR ET INTUITIF) -->
+          <div style="background:#FFFFFF;border:1.5px solid #2563EB;border-radius:14px;padding:16px 20px;margin-bottom:18px;box-shadow:0 4px 16px rgba(37,99,235,0.08);">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span style="display:inline-flex;align-items:center;gap:6px;background:#EFF6FF;color:#2563EB;padding:4px 10px;border-radius:8px;font-size:0.8rem;font-weight:800;">
+                <i data-lucide="plus-circle" style="width:16px;height:16px;"></i> Nouvelle Vente Directe
+              </span>
+              <span style="font-size:0.78rem;color:#64748B;">Saisissez l'article et le montant, puis validez avec Entrée</span>
+            </div>
+
+            <form onsubmit="event.preventDefault(); submitInlineSale();" style="display:grid;grid-template-columns:2.5fr 1.2fr 1.3fr 1.5fr auto;gap:12px;align-items:flex-end;">
+              
+              <!-- 1. Article / Marchandise -->
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:800;color:#334155;margin-bottom:4px;text-transform:uppercase;">
+                  Article / Marchandise <span style="color:#EF4444;">*</span>
+                </label>
+                <input 
+                  type="text" 
+                  id="inline-sale-item" 
+                  class="form-control" 
+                  placeholder="Ex: 1 Sac de Riz 50kg, Savon, Bouteille..." 
+                  style="height:44px;font-size:0.92rem;font-weight:700;background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:8px;" 
+                  required
+                >
+              </div>
+
+              <!-- 2. Montant Total (FCFA) -->
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:800;color:#334155;margin-bottom:4px;text-transform:uppercase;">
+                  Prix / Montant <span style="color:#EF4444;">*</span>
+                </label>
+                <input 
+                  type="number" 
+                  id="inline-sale-unitprice" 
+                  class="form-control" 
+                  placeholder="0" 
+                  min="1" 
+                  style="height:44px;font-size:0.95rem;font-weight:800;color:#2563EB;background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:8px;" 
+                  required
+                >
+              </div>
+
+              <!-- 3. Mode de Règlement -->
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:800;color:#334155;margin-bottom:4px;text-transform:uppercase;">
+                  Règlement <span style="color:#EF4444;">*</span>
+                </label>
+                <select id="inline-sale-method" class="form-control" style="height:44px;font-size:0.85rem;font-weight:700;background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:8px;">
+                  <option value="Espèces">💵 Espèces</option>
+                  <option value="Wave Direct">🌊 Wave Money</option>
+                  <option value="Orange Money">🟠 Orange Money</option>
+                  <option value="MTN MoMo">🟡 MTN MoMo</option>
+                  <option value="Moov Money">🔵 Moov Money</option>
+                </select>
+              </div>
+
+              <!-- 4. Client ou Note (Optionnel) -->
+              <div>
+                <label style="display:block;font-size:0.75rem;font-weight:800;color:#334155;margin-bottom:4px;text-transform:uppercase;">
+                  Client (Optionnel)
+                </label>
+                <input 
+                  type="text" 
+                  id="inline-sale-client" 
+                  class="form-control" 
+                  placeholder="Client Comptoir" 
+                  style="height:44px;font-size:0.88rem;background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:8px;"
+                >
+              </div>
+
+              <!-- 5. Bouton Valider -->
+              <div>
+                <button 
+                  type="submit" 
+                  class="btn btn-primary" 
+                  style="height:44px;padding:0 20px;font-weight:800;font-size:0.88rem;white-space:nowrap;background:linear-gradient(135deg, #2563EB, #1D4ED8);display:flex;align-items:center;justify-content:center;gap:6px;border-radius:8px;box-shadow:0 4px 12px rgba(37,99,235,0.3);"
+                >
+                  <i data-lucide="plus" style="width:16px;height:16px;"></i>
+                  <span>+ Noter la Vente</span>
+                </button>
+              </div>
+
+            </form>
+          </div>
+
+          <!-- TABLEAU DU REGISTRE DES VENTES DU JOUR -->
+          <div style="background:#FFFFFF;border:1.5px solid #E2E8F0;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.03);">
             
-            <div style="max-height:580px;overflow-y:auto;position:relative;">
-              <table style="width:100%;border-collapse:collapse;font-size:0.86rem;text-align:left;">
-                
-                <!-- En-tête Sticky avec Ligne de Saisie Directe Active -->
-                <thead style="position:sticky;top:0;z-index:20;background:#0F172A;color:#FFFFFF;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-                  <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
-                    <th style="padding:10px 12px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:75px;text-align:center;">Heure</th>
-                    <th style="padding:10px 12px;font-size:0.75rem;font-weight:800;text-transform:uppercase;min-width:220px;">Article / Marchandise <span style="color:#60A5FA;">*</span></th>
-                    <th style="padding:10px 8px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:center;width:80px;">Qté <span style="color:#60A5FA;">*</span></th>
-                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:right;width:130px;">P.U <span style="color:#60A5FA;">*</span></th>
-                    <th style="padding:10px 12px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:right;width:130px;">Total (Auto)</th>
-                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:140px;">Règlement <span style="color:#60A5FA;">*</span></th>
-                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:170px;">Boutique</th>
-                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:160px;">Client (Optionnel)</th>
-                    <th style="padding:10px 10px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:center;width:105px;">Action</th>
-                  </tr>
+            <div style="padding:14px 18px;border-bottom:1px solid #E2E8F0;background:#F8FAFC;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:0.88rem;font-weight:800;color:#0F172A;display:flex;align-items:center;gap:8px;">
+                <i data-lucide="list" style="width:18px;height:18px;color:#2563EB;"></i>
+                Registre des Ventes Enregistrées Aujourd'hui
+              </span>
+              <span style="font-size:0.78rem;color:#64748B;">Mise à jour automatique en temps réel</span>
+            </div>
 
-                  <!-- LIGNE PERMANENTE DE SAISIE RAPIDE DIRECTE (INLINE SPREADSHEET ROW) -->
-                  <tr style="background:#F1F5F9;border-bottom:2.5px solid #2563EB;color:#0F172A;">
-                    <td style="padding:6px 8px;text-align:center;">
-                      <span style="display:inline-block;padding:4px 6px;background:#EFF6FF;color:#2563EB;border-radius:6px;font-size:0.72rem;font-weight:800;">
-                        Direct ⚡
-                      </span>
-                    </td>
-                    <td style="padding:6px 8px;">
-                      <input 
-                        type="text" 
-                        id="inline-sale-item" 
-                        class="form-control" 
-                        placeholder="Article vendu (ex: Bouteille d'eau, Riz...)" 
-                        style="height:38px;font-size:0.86rem;font-weight:700;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" 
-                        onkeydown="handleInlineSaleKey(event)"
-                      >
-                    </td>
-                    <td style="padding:6px 6px;text-align:center;">
-                      <input 
-                        type="number" 
-                        id="inline-sale-qty" 
-                        class="form-control" 
-                        value="1" 
-                        min="1" 
-                        style="height:38px;font-size:0.86rem;font-weight:800;text-align:center;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" 
-                        oninput="calculateInlineSaleTotal()" 
-                        onkeydown="handleInlineSaleKey(event)"
-                      >
-                    </td>
-                    <td style="padding:6px 8px;">
-                      <input 
-                        type="number" 
-                        id="inline-sale-unitprice" 
-                        class="form-control" 
-                        placeholder="0" 
-                        min="0" 
-                        style="height:38px;font-size:0.86rem;font-weight:800;text-align:right;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" 
-                        oninput="calculateInlineSaleTotal()" 
-                        onkeydown="handleInlineSaleKey(event)"
-                      >
-                    </td>
-                    <td style="padding:6px 12px;text-align:right;font-size:0.92rem;font-weight:900;color:#2563EB;" id="inline-sale-total-display">
-                      0 FCFA
-                    </td>
-                    <td style="padding:6px 8px;">
-                      <select id="inline-sale-method" class="form-control" style="height:38px;font-size:0.82rem;font-weight:700;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" onkeydown="handleInlineSaleKey(event)">
-                        <option value="Espèces">💵 Espèces</option>
-                        <option value="Wave Direct">🌊 Wave Money</option>
-                        <option value="Orange Money">🟠 Orange Money</option>
-                        <option value="MTN MoMo">🟡 MTN MoMo</option>
-                        <option value="Moov Money">🔵 Moov Money</option>
-                      </select>
-                    </td>
-                    <td style="padding:6px 8px;">
-                      <select id="inline-sale-branch" class="form-control" style="height:38px;font-size:0.82rem;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" onkeydown="handleInlineSaleKey(event)">
-                        <option value="Boutique Principale (Siège)">📍 Boutique Principale</option>
-                        <option value="Succursale 2">📍 Succursale 2</option>
-                        <option value="Point de Vente Marché">📍 Point de Vente Marché</option>
-                      </select>
-                    </td>
-                    <td style="padding:6px 8px;">
-                      <input 
-                        type="text" 
-                        id="inline-sale-client" 
-                        class="form-control" 
-                        placeholder="Client Comptoir" 
-                        style="height:38px;font-size:0.85rem;background:#FFFFFF;border:1.5px solid #94A3B8;border-radius:6px;" 
-                        onkeydown="handleInlineSaleKey(event)"
-                      >
-                    </td>
-                    <td style="padding:6px 8px;text-align:center;">
-                      <button 
-                        type="button" 
-                        class="btn btn-primary" 
-                        onclick="submitInlineSale()" 
-                        style="height:38px;width:100%;padding:0 8px;font-weight:800;font-size:0.8rem;white-space:nowrap;background:linear-gradient(135deg, #2563EB, #1D4ED8);display:flex;align-items:center;justify-content:center;gap:4px;border-radius:6px;box-shadow:0 2px 8px rgba(37,99,235,0.35);" 
-                        title="Enregistrer cette ligne (Touche Entrée)"
-                      >
-                        <i data-lucide="check" style="width:14px;height:14px;"></i>
-                        <span>+ Entrée</span>
-                      </button>
-                    </td>
+            <div class="table-responsive" style="margin-bottom:0;border:none;">
+              <table class="custom-table" style="width:100%;border-collapse:collapse;">
+                <thead>
+                  <tr style="background:#0F172A;color:#FFFFFF;">
+                    <th style="padding:11px 14px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:80px;text-align:center;">Heure</th>
+                    <th style="padding:11px 14px;font-size:0.75rem;font-weight:800;text-transform:uppercase;">Article / Marchandise</th>
+                    <th style="padding:11px 14px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:right;width:150px;">Montant</th>
+                    <th style="padding:11px 14px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:160px;">Règlement</th>
+                    <th style="padding:11px 14px;font-size:0.75rem;font-weight:800;text-transform:uppercase;width:180px;">Client</th>
+                    <th style="padding:11px 14px;font-size:0.75rem;font-weight:800;text-transform:uppercase;text-align:center;width:90px;">Action</th>
                   </tr>
-
                 </thead>
-
-                <!-- Corps du Journal Défilable -->
                 <tbody id="daily-sales-table-body">
                   <!-- Rempli dynamiquement par renderDailySalesBook() -->
                 </tbody>
-
               </table>
             </div>
 

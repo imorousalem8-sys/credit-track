@@ -3005,6 +3005,27 @@ body.is-app-mode #app-workspace-layout {
     padding-bottom: 80px !important;
   }
 }
-
-
-
+/* Styles des Badges de Paiement du Cahier des Ventes */
+.sales-badge-payment {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.sales-badge-cash {
+  background: #FFFBEB;
+  color: #D97706;
+  border: 1px solid #FDE68A;
+}
+.sales-badge-wave {
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
+}
+.sales-badge-momo {
+  background: #F5F3FF;
+  color: #7C3AED;
+  border: 1px solid #DDD6FE;
+}

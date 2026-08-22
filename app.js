@@ -4019,35 +4019,31 @@ window.handleInlineSaleKey = function(event) {
   }
 };
 
-// Validation et enregistrement d'une vente en direct depuis le tableau
+// Validation et enregistrement d'une vente en direct depuis le bandeau
 window.submitInlineSale = function() {
   const itemInput = document.getElementById('inline-sale-item');
-  const qtyInput = document.getElementById('inline-sale-qty');
   const unitPriceInput = document.getElementById('inline-sale-unitprice');
   const methodSelect = document.getElementById('inline-sale-method');
-  const branchSelect = document.getElementById('inline-sale-branch');
   const clientInput = document.getElementById('inline-sale-client');
 
   const item = (itemInput?.value || '').trim();
-  const qty = Math.max(1, parseInt(qtyInput?.value || 1, 10));
-  const unitPrice = parseFloat(unitPriceInput?.value || 0);
+  const total = parseFloat(unitPriceInput?.value || 0);
   const method = methodSelect?.value || 'Espèces';
-  const branch = branchSelect?.value || 'Boutique Principale (Siège)';
-  const client = (clientInput?.value || 'Client Comptoir').trim();
+  const branch = AppState.selectedBranch === 'all' ? 'Boutique Principale' : AppState.selectedBranch;
+  const client = (clientInput?.value || '').trim() || 'Client Comptoir';
 
   if (!item) {
-    showToast("Veuillez saisir la désignation de l'article.", "error");
+    showToast("Veuillez saisir le nom de l'article vendu.", "error");
     itemInput?.focus();
     return;
   }
 
-  if (unitPrice <= 0) {
-    showToast("Veuillez saisir un prix unitaire supérieur à 0.", "error");
+  if (total <= 0) {
+    showToast("Veuillez saisir un montant supérieur à 0.", "error");
     unitPriceInput?.focus();
     return;
   }
 
-  const total = qty * unitPrice;
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   const dateStr = now.toISOString().split('T')[0];
@@ -4055,8 +4051,8 @@ window.submitInlineSale = function() {
   const newSale = {
     id: 'sale_' + Date.now(),
     item: item,
-    qty: qty,
-    unitPrice: unitPrice,
+    qty: 1,
+    unitPrice: total,
     total: total,
     method: method,
     branch: branch,
@@ -4081,16 +4077,14 @@ window.submitInlineSale = function() {
 
   // Réinitialiser la ligne de saisie pour l'article suivant
   if (itemInput) itemInput.value = '';
-  if (qtyInput) qtyInput.value = '1';
   if (unitPriceInput) unitPriceInput.value = '';
   if (clientInput) clientInput.value = '';
-  calculateInlineSaleTotal();
 
   // Mettre à jour l'affichage du tableau
   renderDailySalesBook();
-  showToast(`Vente enregistrée : ${item} (${formatCurrency(total)}) !`, "success");
+  showToast(`✓ Vente enregistrée : ${item} (${formatCurrency(total)}) !`, "success");
 
-  // Remettre le focus instantanément sur le champ Article pour la vente suivante
+  // Remettre le focus sur le champ Article pour enchaîner
   setTimeout(() => {
     const nextItemInput = document.getElementById('inline-sale-item');
     if (nextItemInput) nextItemInput.focus();
@@ -4106,7 +4100,7 @@ window.deleteSaleItem = function(saleId) {
   showToast("Vente supprimée du journal.");
 };
 
-// Rendu du cahier des ventes du jour
+// Rendu du cahier des ventes du jour (Format épuré 6 colonnes)
 window.renderDailySalesBook = function() {
   const tableBody = document.getElementById('daily-sales-table-body');
   if (!tableBody) return;
@@ -4147,10 +4141,10 @@ window.renderDailySalesBook = function() {
   if (filteredSales.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="9" style="text-align:center;padding:36px 16px;color:#64748B;">
+        <td colspan="6" style="text-align:center;padding:36px 16px;color:#64748B;">
           <i data-lucide="shopping-bag" style="width:36px;height:36px;color:#CBD5E1;display:block;margin:0 auto 10px auto;"></i>
-          <strong style="font-size:0.95rem;color:#1E293B;display:block;">Aucune vente enregistrée aujourd'hui ${AppState.selectedBranch !== 'all' ? `pour ${AppState.selectedBranch}` : ''}</strong>
-          <p style="font-size:0.8rem;margin:4px 0 0 0;">Utilisez la première ligne du tableau ci-dessus pour saisir directement votre premier article vendu.</p>
+          <strong style="font-size:0.95rem;color:#1E293B;display:block;">Aucune vente enregistrée aujourd'hui</strong>
+          <p style="font-size:0.8rem;margin:4px 0 0 0;">Utilisez le formulaire ci-dessus pour enregistrer votre premier article vendu.</p>
         </td>
       </tr>
     `;
@@ -4160,30 +4154,21 @@ window.renderDailySalesBook = function() {
       if (s.method === 'Wave Direct') badgeClass = 'sales-badge-wave';
       else if (s.method !== 'Espèces') badgeClass = 'sales-badge-momo';
 
-      const unitPriceVal = s.unitPrice || Math.round(s.total / (s.qty || 1));
-
       return `
         <tr style="border-bottom:1px solid #F1F5F9;background:${idx % 2 === 0 ? '#FFFFFF' : '#FAFAFA'};">
-          <td style="padding:10px 12px;font-weight:700;color:#64748B;font-family:monospace;text-align:center;font-size:0.8rem;">${escapeHTML(s.time || '12:00')}</td>
-          <td style="padding:10px 12px;font-weight:800;color:#0F172A;">
+          <td style="padding:12px 14px;font-weight:700;color:#64748B;font-family:monospace;text-align:center;font-size:0.82rem;">${escapeHTML(s.time || '12:00')}</td>
+          <td style="padding:12px 14px;font-weight:800;color:#0F172A;font-size:0.9rem;">
             ${escapeHTML(s.item)}
-            ${s.client && s.client !== 'Client Comptoir' ? `<div style="font-size:0.72rem;color:#2563EB;font-weight:600;">Client: ${escapeHTML(s.client)}</div>` : ''}
           </td>
-          <td style="padding:10px 8px;text-align:center;font-weight:800;color:#0F172A;">${s.qty}</td>
-          <td style="padding:10px 10px;text-align:right;font-weight:700;color:#64748B;">${formatCurrency(unitPriceVal)}</td>
-          <td style="padding:10px 12px;text-align:right;font-weight:900;color:#2563EB;font-size:0.92rem;">${formatCurrency(s.total)}</td>
-          <td style="padding:10px 10px;">
+          <td style="padding:12px 14px;text-align:right;font-weight:900;color:#2563EB;font-size:0.95rem;">${formatCurrency(s.total)}</td>
+          <td style="padding:12px 14px;">
             <span class="sales-badge-payment ${badgeClass}">${escapeHTML(s.method)}</span>
           </td>
-          <td style="padding:10px 10px;font-size:0.78rem;color:#475569;">
-            <strong>${escapeHTML(s.branch)}</strong>
-            <div style="font-size:0.7rem;color:#94A3B8;">Par: ${escapeHTML(s.cashier || 'Caissier')}</div>
-          </td>
-          <td style="padding:10px 10px;font-size:0.8rem;color:#64748B;">
+          <td style="padding:12px 14px;font-size:0.82rem;color:#475569;">
             ${escapeHTML(s.client || 'Client Comptoir')}
           </td>
-          <td style="padding:10px 10px;text-align:center;">
-            <button type="button" class="btn btn-outline" style="padding:3px 8px;font-size:0.75rem;color:#EF4444;border-color:#FCA5A5;border-radius:6px;" onclick="deleteSaleItem('${s.id}')" title="Supprimer cette ligne">
+          <td style="padding:12px 14px;text-align:center;">
+            <button type="button" class="btn btn-outline" style="padding:4px 10px;font-size:0.75rem;color:#EF4444;border-color:#FCA5A5;border-radius:6px;" onclick="deleteSaleItem('${s.id}')" title="Supprimer cette vente">
               ✕
             </button>
           </td>
@@ -4192,12 +4177,10 @@ window.renderDailySalesBook = function() {
     }).join('');
 
     const footerTotalHtml = `
-      <tr style="background:#F1F5F9;border-top:2px solid #CBD5E1;font-weight:900;">
-        <td colspan="2" style="padding:12px 14px;color:#0F172A;font-size:0.88rem;">TOTAL GÉNÉRAL DU JOUR (${filteredSales.length} ventes)</td>
-        <td style="padding:12px 8px;text-align:center;color:#0F172A;font-size:0.92rem;">${totalCount}</td>
-        <td style="padding:12px 10px;"></td>
-        <td style="padding:12px 12px;text-align:right;color:#2563EB;font-size:1.05rem;">${formatCurrency(totalSales)}</td>
-        <td colspan="4" style="padding:12px 14px;font-size:0.78rem;color:#64748B;">
+      <tr style="background:#F8FAFC;border-top:2.5px solid #CBD5E1;font-weight:900;">
+        <td colspan="2" style="padding:14px 16px;color:#0F172A;font-size:0.92rem;">TOTAL DU JOUR (${filteredSales.length} ventes enregistrées)</td>
+        <td style="padding:14px 16px;text-align:right;color:#2563EB;font-size:1.1rem;">${formatCurrency(totalSales)}</td>
+        <td colspan="3" style="padding:14px 16px;font-size:0.82rem;color:#64748B;">
           Espèces : <strong>${formatCurrency(totalCash)}</strong> • Électronique : <strong>${formatCurrency(totalWave + totalMoMo)}</strong>
         </td>
       </tr>
@@ -4507,13 +4490,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.3)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.6)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.4.3";
+window.APP_VERSION = "2.4.6";
 
 window.checkAppVersion = async function() {
   try {
-    const res = await fetch('/version.json?t=' + Date.now());
+    const res = await fetch('/version.json?t=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
     if (data && data.version && data.version !== window.APP_VERSION) {
@@ -4546,9 +4529,14 @@ window.dismissAppUpdate = function() {
   if (banner) banner.style.display = 'none';
 };
 
-// Vérification de version
-setInterval(window.checkAppVersion, 5 * 60 * 1000);
-setTimeout(window.checkAppVersion, 3500);
+// Vérification de version régulière et lors du retour sur l'onglet
+setInterval(window.checkAppVersion, 2 * 60 * 1000);
+setTimeout(window.checkAppVersion, 2000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    window.checkAppVersion();
+  }
+});
 
 // Écoute de lien de récupération de mot de passe dans l'URL
 if (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token=')) {
