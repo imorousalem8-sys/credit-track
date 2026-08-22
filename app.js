@@ -509,7 +509,7 @@ const AppState = {
 
   // Données persistantes multi-couches garanties à 100% et isolées par commerçant
   clients: getCachedArray('credittrack_clients'),
-  payments: getCachedArray('credittrack_payments'),
+  payments: (getCachedArray('credittrack_payments') || []).filter(p => p && !String(p.clientName || '').includes('Abonnement') && p.type !== 'subscription'),
   accountingEntries: getCachedArray('credittrack_accounting'),
 
   user: {
@@ -2273,8 +2273,9 @@ function initCharts() {
     gradient.addColorStop(0, 'rgba(37, 99, 235, 0.22)');
     gradient.addColorStop(1, 'rgba(37, 99, 235, 0.01)');
 
-    const hasPayments = AppState.payments.length > 0;
-    const chartData = hasPayments ? [0, 0, 0, 0, 0, AppState.payments.reduce((acc, p) => acc + (p.amount || 0), 0)] : [0, 0, 0, 0, 0, 0];
+    const realPayments = AppState.payments.filter(p => p && !String(p.clientName || '').includes('Abonnement') && p.type !== 'subscription');
+    const hasPayments = realPayments.length > 0;
+    const chartData = hasPayments ? [0, 0, 0, 0, 0, realPayments.reduce((acc, p) => acc + (p.amount || 0), 0)] : [0, 0, 0, 0, 0, 0];
 
     weeklyChartInstance = new Chart(ctxWeekly, {
       type: 'line',
@@ -4490,9 +4491,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.6)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.7)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.4.6";
+window.APP_VERSION = "2.4.7";
 
 window.checkAppVersion = async function() {
   try {

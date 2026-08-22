@@ -23,9 +23,45 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
-  <script src="dataStore.js?v=20260822_v2.4.6" defer></script>
-  <script src="app.js?v=20260822_v2.4.6" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260822_v2.4.6">
+  <script>
+    // SYNCHRONISATION & PURGE FORCÉE DU CACHE (MOBILE / PWA / DESKTOP)
+    (function() {
+      const CURRENT_BUILD = "20260822_v2.4.7";
+      const lastBuild = localStorage.getItem('ct_last_build');
+      if (lastBuild !== CURRENT_BUILD) {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(regs) {
+            regs.forEach(function(r) { r.unregister(); });
+          });
+        }
+        if ('caches' in window) {
+          caches.keys().then(function(keys) {
+            keys.forEach(function(k) { caches.delete(k); });
+          });
+        }
+        localStorage.setItem('ct_last_build', CURRENT_BUILD);
+        // Nettoyage immédiat des paiements d'abonnement résiduels dans localStorage
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (key.startsWith('credittrack_payments') || key.includes('payments'))) {
+            try {
+              const val = localStorage.getItem(key);
+              if (val && val.startsWith('[')) {
+                const parsed = JSON.parse(val);
+                if (Array.isArray(parsed)) {
+                  const cleaned = parsed.filter(p => p && !String(p.clientName || '').includes('Abonnement') && p.type !== 'subscription');
+                  localStorage.setItem(key, JSON.stringify(cleaned));
+                }
+              }
+            } catch(e) {}
+          }
+        }
+      }
+    })();
+  </script>
+  <script src="dataStore.js?v=20260822_v2.4.7" defer></script>
+  <script src="app.js?v=20260822_v2.4.7" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260822_v2.4.7">
 </head>
 <body class="is-landing-mode">
 
@@ -1325,7 +1361,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="totalClientsCard">Nombre Total de Clients</div>
-                <div class="metric-value" id="dir-total-clients">3 Clients</div>
+                <div class="metric-value" id="dir-total-clients">0 Client</div>
                 <div class="metric-trend"><i data-lucide="users"></i> <span data-i18n="registeredClients">Comptes enregistrés</span></div>
               </div>
               <div class="metric-icon-box blue"><i data-lucide="users"></i></div>
@@ -1334,7 +1370,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="clientsPaidCard">Clients à Jour (Payés)</div>
-                <div class="metric-value" style="color:#10B981;" id="dir-paid-clients">1 Client</div>
+                <div class="metric-value" style="color:#10B981;" id="dir-paid-clients">0 Client</div>
                 <div class="metric-trend"><i data-lucide="check-circle"></i> <span data-i18n="zeroDue">Aucune dette en cours</span></div>
               </div>
               <div class="metric-icon-box green"><i data-lucide="check-circle"></i></div>
@@ -1343,7 +1379,7 @@
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="clientsLateCard">Clients avec Dettes</div>
-                <div class="metric-value" style="color:#EF4444;" id="dir-due-clients">2 Clients</div>
+                <div class="metric-value" style="color:#EF4444;" id="dir-due-clients">0 Client</div>
                 <div class="metric-trend" style="color:#EF4444;"><i data-lucide="alert-triangle"></i> <span data-i18n="paymentPending">Rappels en cours</span></div>
               </div>
               <div class="metric-icon-box red"><i data-lucide="alert-triangle"></i></div>
