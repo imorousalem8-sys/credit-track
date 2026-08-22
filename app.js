@@ -1279,18 +1279,21 @@ function renderPaymentsTable() {
   const tbody = document.getElementById('payments-table-body');
   const activityList = document.getElementById('dash-activity-list');
 
+  // Filtrage STRICT : Afficher uniquement les VRAIS paiements de clients (exclure tout abonnement SAAS)
+  const realPayments = (AppState.payments || []).filter(p => p && !String(p.clientName || '').includes('Abonnement') && p.type !== 'subscription' && !String(p.ref || '').startsWith('SAAS-'));
+
   if (tbody) {
-    if (AppState.payments.length === 0) {
+    if (realPayments.length === 0) {
       tbody.innerHTML = `
         <tr>
           <td colspan="6" style="text-align:center;padding:45px 20px;color:#64748B;">
-            <strong style="font-size:0.95rem;color:#0F172A;display:block;">${AppState.lang === 'en' ? 'No collections recorded yet' : 'Aucun encaissement pour le moment'}</strong>
-            <p style="margin:6px 0 0 0;font-size:0.84rem;color:#94A3B8;">${AppState.lang === 'en' ? 'Customer payments and receipts will appear here automatically.' : 'Les règlements clients (Espèces, Wave, Orange, MTN, Moov) apparaîtront ici.'}</p>
+            <strong style="font-size:0.95rem;color:#0F172A;display:block;">${AppState.lang === 'en' ? 'No collections recorded yet' : 'Aucun encaissement client pour le moment'}</strong>
+            <p style="margin:6px 0 0 0;font-size:0.84rem;color:#94A3B8;">${AppState.lang === 'en' ? 'Customer payments and receipts will appear here automatically.' : 'Les règlements effectués par vos clients (Espèces, Wave, Orange, MTN, Moov) apparaîtront ici.'}</p>
           </td>
         </tr>
       `;
     } else {
-      tbody.innerHTML = AppState.payments.map(p => {
+      tbody.innerHTML = realPayments.map(p => {
         const clientObj = AppState.clients.find(c => c.name === p.clientName);
         const realPhone = clientObj ? clientObj.phone : '';
         return `
@@ -1307,19 +1310,19 @@ function renderPaymentsTable() {
     }
   }
 
-  // Métriques Paiements Dynamiques
+  // Métriques Paiements Dynamiques (basées UNIQUEMENT sur les encaissements clients réels)
   const payKpiTotal = document.getElementById('pay-kpi-total');
   const payKpiCount = document.getElementById('pay-kpi-count');
   const payKpiMethod = document.getElementById('pay-kpi-method');
 
-  const totalPaymentsAmount = AppState.payments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+  const totalPaymentsAmount = realPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
   if (payKpiTotal) payKpiTotal.textContent = formatCurrency(totalPaymentsAmount);
-  if (payKpiCount) payKpiCount.textContent = `${AppState.payments.length} Paiement${AppState.payments.length > 1 ? 's' : ''}`;
+  if (payKpiCount) payKpiCount.textContent = `${realPayments.length} Paiement${realPayments.length > 1 ? 's' : ''}`;
   
   if (payKpiMethod) {
-    if (AppState.payments.length > 0) {
+    if (realPayments.length > 0) {
       const methodCounts = {};
-      AppState.payments.forEach(p => { methodCounts[p.method] = (methodCounts[p.method] || 0) + 1; });
+      realPayments.forEach(p => { methodCounts[p.method] = (methodCounts[p.method] || 0) + 1; });
       const topMethod = Object.keys(methodCounts).reduce((a, b) => methodCounts[a] > methodCounts[b] ? a : b);
       payKpiMethod.textContent = topMethod;
     } else {
@@ -1328,16 +1331,14 @@ function renderPaymentsTable() {
   }
 
   if (activityList) {
-    // Filter out subscription payments — show only real client payments
-    const clientPayments = AppState.payments.filter(p => p.type !== 'subscription');
-    if (clientPayments.length === 0) {
+    if (realPayments.length === 0) {
       activityList.innerHTML = `
         <div style="text-align:center;padding:35px 15px;color:#94A3B8;font-size:0.85rem;">
           ${AppState.lang === 'en' ? 'No recent activity.' : 'Aucune activité récente.'}
         </div>
       `;
     } else {
-      activityList.innerHTML = clientPayments.slice(0, 4).map(p => `
+      activityList.innerHTML = realPayments.slice(0, 4).map(p => `
         <div class="activity-item">
           <div class="activity-left">
             <div class="activity-icon green">
@@ -3398,28 +3399,6 @@ window.triggerSaaSPayment = function(planTier, amount) {
 function activateProPlan(planTier, amount, method) {
   AppState.user.planTier = planTier;
   localStorage.setItem('userPlan', planTier);
-  
-  const paymentLog = {
-    id: Date.now(),
-    ref: `SAAS-${Math.floor(100000 + Math.random() * 900000)}`,
-    amount,
-    planTier,
-    date: new Date().toISOString().split('T')[0],
-    method
-  };
-
-  if (window.dataStore) {
-    window.dataStore.add("payments", {
-      id: Date.now(),
-      ref: paymentLog.ref,
-      clientName: `Abonnement ${planTier === 'pro_yearly' ? 'Annuel' : 'Mensuel'} PRO`,
-      amount,
-      date: 'À l\'instant',
-      method,
-      type: 'subscription'
-    });
-  }
-
   updateUserPlanBadgeUI();
   closeModal('modal-subscription-plans');
   showToast(`Félicitations ! Votre Forfait ${planTier === 'pro_yearly' ? 'PRO Annuel' : 'PRO Mensuel'} est ACTIF ! Toutes les fonctionnalités sont débloquées !`);
@@ -4491,9 +4470,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.8)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.4.9)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.4.8";
+window.APP_VERSION = "2.4.9";
 
 window.checkAppVersion = async function(isManual = false) {
   try {
