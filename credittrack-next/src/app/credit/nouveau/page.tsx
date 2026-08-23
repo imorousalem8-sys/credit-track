@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { formatAfricanCurrency } from '@/lib/africanCountries';
+import { getCountryPaymentMethods } from '@/lib/countryPaymentMethods';
 
 interface ProductItem {
   id: string;
@@ -27,7 +28,8 @@ interface ProductItem {
 }
 
 export default function NewCreditSalePage() {
-  const { clients, addClient, showToast, currency } = useApp();
+  const { clients, addClient, showToast, currency, country } = useApp();
+  const availablePaymentMethods = getCountryPaymentMethods(country);
   const [loading, setLoading] = useState(false);
 
   // Client Selection / Form State
@@ -430,12 +432,11 @@ export default function NewCreditSalePage() {
                     onChange={(e) => setPaymentMethod(e.target.value)}
                     className="w-full h-9 px-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none"
                   >
-                    <option value="Espèces (Paiement physique en boutique)">💵 Espèces (Comptoir)</option>
-                    <option value="Wave Money">📱 Wave Direct</option>
-                    <option value="Orange Money">🟠 Orange Money</option>
-                    <option value="MTN MoMo">🟡 MTN MoMo</option>
-                    <option value="Moov Money">🔵 Moov Money</option>
-                    <option value="Virement Bancaire">🏦 Virement Bancaire</option>
+                    {availablePaymentMethods.map((m) => (
+                      <option key={m.id} value={m.label}>
+                        {m.label}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
@@ -445,7 +446,7 @@ export default function NewCreditSalePage() {
                     type="text"
                     value={paymentAccount}
                     onChange={(e) => setPaymentAccount(e.target.value)}
-                    placeholder="Numéro Wave / MoMo..."
+                    placeholder={`Numéro ${availablePaymentMethods[0]?.label.split(' ')[0] || 'Wave'} / MoMo...`}
                     className="w-full h-9 px-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none"
                   />
                 </div>

@@ -35,6 +35,31 @@ Le contenu des cartes, des menus, des graphiques et des badges **ADAPTE UNIQUEME
 ### 4. Cohérence Totale sur TOUTES les Pages
 - Toutes les sous-pages de l'application conservent exactement la même grille large et le même header sans jamais revenir à une disposition étroite.
 
+### 5. Règles Critiques d'Ingénierie Mobile, PWA & Localisation
+
+#### A. Tiroir Latéral Mobile (Off-Canvas Sidebar)
+- **Jamais de `pointer-events: none`** non réinitialisé sur `.sidebar-fixed` ou ses enfants.
+- **Interdiction de `backdrop-filter: blur()` sur l'overlay mobile** : Provoque un piège de composition GPU sur Webkit (iOS Safari / Chrome Android) qui rend la sidebar invisible sous le flou. Toujours utiliser un fond uni semi-transparent (`background: rgba(0, 0, 0, 0.65)`).
+- **Z-Index & GPU Layering** : `.sidebar-fixed` doit avoir un z-index élevé (`1000000`) et utiliser `transform: translate3d(0, 0, 0)` pour une accélération matérielle fluide.
+- **Propagation Tactile** : Toujours synchroniser les 3 classes de déverrouillage (`.open`, `.active`, `body.mobile-sidebar-open`).
+
+#### B. Cache PWA & URLs Vercel
+- **Domaine Canonique de Production vs Snapshots Immuables** : Ne jamais partager d'URL contenant un hash de déploiement (ex: `*-eknipzr3b-*.vercel.app`). Toujours maintenir la redirection automatique vers le domaine de production officiel (`credit-track00.vercel.app`).
+- **Cache-Busting Strict** : Versionner les `<script src="app.js?v=...">` et `<link rel="stylesheet" href="styles.css?v=...">` avec un numéro de build horodaté.
+- **Service Worker** : Toujours appliquer `Network-First` sur les requêtes HTML, `updateViaCache: 'none'`, et purger les anciens caches avec `clients.claim()`.
+
+#### C. Localisation Panafricaine des Moyens de Paiement
+- L'application adapte automatiquement ses listes déroulantes de paiement au pays sélectionné :
+  - **Bénin (BJ)** : MTN MoMo, Moov Flooz, Celtiis Cash, Wave, Espèces.
+  - **Côte d’Ivoire (CI)** : Wave, Orange Money, MTN MoMo, Moov Money, Djamo, Espèces.
+  - **Sénégal (SN)** : Wave, Orange Money, Free Money, Wizall, Espèces.
+  - **Cameroun (CM)** : Orange Money, MTN MoMo, Express Union (EUM), Espèces.
+  - **Nigeria (NG)** : OPay, PalmPay, Moniepoint, Kuda, NIP Bank Transfer, USSD.
+  - **Kenya (KE)** : M-Pesa (Safaricom), Airtel Money, T-Kash, Pesalink.
+  - **Ghana (GH)** : MTN MoMo, Telecel (Vodafone) Cash, AT Money, G-Money.
+  - **RDC (CD)** : M-Pesa, Orange Money, Airtel Money, Afrimoney, Cash (USD/CDF).
+  - *(+ 12 autres pays d'Afrique du Nord, Australe, Centrale et de l'Ouest).*
+
 ---
 
 *Cette règle prend effet immédiatement et s'applique à l'ensemble des créations web de l'agence.*
