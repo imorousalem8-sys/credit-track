@@ -1060,25 +1060,30 @@ window.toggleMobileSidebar = function() {
   const overlay = document.getElementById('sidebar-overlay');
   if (!sb) return;
 
-  const isOpen = sb.classList.contains('open');
+  const isOpen = sb.classList.contains('open') || document.body.classList.contains('mobile-sidebar-open');
   if (isOpen) {
-    sb.classList.remove('open');
-    sb.style.removeProperty('transform');
+    sb.classList.remove('open', 'active');
+    document.body.classList.remove('mobile-sidebar-open');
+    sb.style.setProperty('transform', 'translate3d(-105%, 0, 0)', 'important');
     if (overlay) {
       overlay.classList.remove('active');
-      overlay.style.removeProperty('display');
-      overlay.style.removeProperty('opacity');
+      overlay.style.setProperty('display', 'none', 'important');
+      overlay.style.setProperty('pointer-events', 'none', 'important');
     }
   } else {
-    sb.classList.add('open');
+    sb.classList.add('open', 'active');
+    document.body.classList.add('mobile-sidebar-open');
     sb.style.setProperty('transform', 'translate3d(0, 0, 0)', 'important');
     sb.style.setProperty('display', 'flex', 'important');
     sb.style.setProperty('z-index', '1000000', 'important');
+    sb.style.setProperty('pointer-events', 'auto', 'important');
+    sb.style.setProperty('visibility', 'visible', 'important');
     if (overlay) {
       overlay.classList.add('active');
       overlay.style.setProperty('display', 'block', 'important');
       overlay.style.setProperty('opacity', '1', 'important');
       overlay.style.setProperty('z-index', '99990', 'important');
+      overlay.style.setProperty('pointer-events', 'auto', 'important');
     }
   }
 };
@@ -1086,8 +1091,9 @@ window.toggleMobileSidebar = function() {
 function closeMobileSidebarIfOpen() {
   const sb = document.getElementById('main-sidebar');
   const overlay = document.getElementById('sidebar-overlay');
+  document.body.classList.remove('mobile-sidebar-open');
   if (sb) {
-    sb.classList.remove('open');
+    sb.classList.remove('open', 'active');
     if (window.innerWidth <= 1024) {
       sb.style.setProperty('transform', 'translate3d(-105%, 0, 0)', 'important');
     } else {
@@ -1097,6 +1103,7 @@ function closeMobileSidebarIfOpen() {
   if (overlay) {
     overlay.classList.remove('active');
     overlay.style.setProperty('display', 'none', 'important');
+    overlay.style.setProperty('pointer-events', 'none', 'important');
   }
 }
 

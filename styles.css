@@ -2442,32 +2442,38 @@ body.is-app-mode #app-workspace-layout {
     bottom: 0 !important;
     width: 290px !important;
     max-width: 85vw !important;
-    transform: translateX(-100%) !important;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    z-index: 99999 !important;
-    box-shadow: 0 0 50px rgba(0,0,0,0.6) !important;
-    pointer-events: none !important;
-    visibility: hidden !important;
+    transform: translate3d(-105%, 0, 0) !important;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    z-index: 1000000 !important;
+    box-shadow: none !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    background: #1B3BBB !important;
+    color: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   body.mobile-sidebar-open .sidebar-fixed,
   body.mobile-sidebar-open .app-sidebar-left,
+  .sidebar-fixed.open,
   .sidebar-fixed.active {
-    transform: translateX(0) !important;
+    transform: translate3d(0, 0, 0) !important;
+    box-shadow: 10px 0 50px rgba(0,0,0,0.7) !important;
     pointer-events: auto !important;
     visibility: visible !important;
+    z-index: 1000000 !important;
   }
 
   .sidebar-overlay {
     position: fixed !important;
     inset: 0 !important;
-    background: rgba(15, 23, 42, 0.75) !important;
-    backdrop-filter: blur(4px) !important;
+    background: rgba(0, 0, 0, 0.65) !important;
     z-index: 99990 !important;
     opacity: 0 !important;
     pointer-events: none !important;
     display: none !important;
-    transition: opacity 0.3s ease !important;
+    transition: opacity 0.25s ease !important;
   }
 
   body.mobile-sidebar-open .sidebar-overlay,
@@ -2475,6 +2481,7 @@ body.is-app-mode #app-workspace-layout {
     display: block !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+    z-index: 99990 !important;
   }
 
   /* 2. WORKSPACE ADAPTÉ 100% LARGEUR PLEINE */
