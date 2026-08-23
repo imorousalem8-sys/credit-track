@@ -48,7 +48,7 @@ window.getCountryConfig = getCountryConfig;
 
 // Système de détection automatique des nouvelles versions en ligne pour tous les utilisateurs
 (function initAutoUpdateWatcher() {
-  const APP_VERSION = "20260823_v3.3.0";
+  const APP_VERSION = "20260823_v3.4.0";
   async function checkRemoteVersion() {
     try {
       const res = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
@@ -4626,11 +4626,11 @@ window.renderDailySalesBook = function() {
     if (s.method === 'Wave Direct' || s.method.includes('Wave')) {
       badgeHtml = `<span class="badge-pay badge-pay-wave">Wave</span>`;
     } else if (s.method.includes('Orange')) {
-      badgeHtml = `<span class="badge-pay badge-pay-orange">Orange</span>`;
+      badgeHtml = `<span class="badge-pay badge-pay-orange">Orange Money</span>`;
     } else if (s.method.includes('MTN')) {
-      badgeHtml = `<span class="badge-pay badge-pay-mtn">MTN</span>`;
+      badgeHtml = `<span class="badge-pay badge-pay-mtn">MTN MoMo</span>`;
     } else if (s.method.includes('Moov')) {
-      badgeHtml = `<span class="badge-pay badge-pay-moov">Moov</span>`;
+      badgeHtml = `<span class="badge-pay badge-pay-moov">Moov Money</span>`;
     } else {
       badgeHtml = `<span class="badge-pay badge-pay-cash">Espèces</span>`;
     }
@@ -4641,21 +4641,21 @@ window.renderDailySalesBook = function() {
           ${escapeHTML(s.time || '10:00:00')}
         </td>
         <td style="font-weight:800;color:#0F172A;font-size:0.94rem;">
-          <div style="display:flex;justify-content:space-between;align-items:center;">
-            <span>${escapeHTML(s.item)}</span>
-            <div style="display:flex;gap:4px;">
-              <button type="button" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#94A3B8;border:none;background:transparent;cursor:pointer;padding:2px;">
-                <i data-lucide="edit-2" style="width:13px;height:13px;"></i>
-              </button>
-              <button type="button" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:2px;">
-                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
-              </button>
-            </div>
-          </div>
+          ${escapeHTML(s.item)}
         </td>
         <td style="text-align:center;font-weight:800;color:#334155;">${s.qty || 1}</td>
         <td style="text-align:right;font-weight:900;color:#2563EB;font-size:0.98rem;">${Number(s.total || 0).toLocaleString('fr-FR')} FCFA</td>
         <td>${badgeHtml}</td>
+        <td style="text-align:center;">
+          <div style="display:flex;gap:4px;justify-content:center;">
+            <button type="button" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#94A3B8;border:none;background:transparent;cursor:pointer;padding:2px;">
+              <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
+            </button>
+            <button type="button" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:2px;">
+              <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+            </button>
+          </div>
+        </td>
       </tr>
     `;
   }).join('');
@@ -4675,7 +4675,7 @@ window.renderDailySalesBook = function() {
             type="text" 
             id="inline-row-item" 
             class="cashier-article-input" 
-            placeholder="Article vendu (ex: Sac de riz 50kg, Huile...)" 
+            placeholder="Article vendu (ex: Riz 50kg, Huile...)" 
             autocomplete="off"
             onkeydown="handleInlineRowKeydown(event)"
           >
@@ -4701,7 +4701,7 @@ window.renderDailySalesBook = function() {
           type="number" 
           id="inline-row-price" 
           class="cashier-input-field" 
-          placeholder="Montant FCFA..." 
+          placeholder="Montant..." 
           min="0" 
           step="any"
           style="text-align:right;font-weight:900;color:#2563EB;" 
@@ -4709,18 +4709,18 @@ window.renderDailySalesBook = function() {
         >
       </td>
       <td>
-        <div style="display:flex;gap:4px;align-items:center;">
-          <select id="inline-row-method" class="cashier-input-field" style="font-weight:800;font-size:0.82rem;padding:0 6px;" onkeydown="handleInlineRowKeydown(event)">
-            <option value="Espèces">Espèces</option>
-            <option value="Wave Direct">Wave</option>
-            <option value="Orange Money">Orange</option>
-            <option value="MTN MoMo">MTN</option>
-            <option value="Moov Money">Moov</option>
-          </select>
-          <button type="button" class="cashier-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Valider la vente (Entrée)" style="width:38px;flex-shrink:0;">
-            <i data-lucide="check" style="width:16px;height:16px;"></i>
-          </button>
-        </div>
+        <select id="inline-row-method" class="cashier-input-field" style="font-weight:800;font-size:0.86rem;padding:0 8px;" onkeydown="handleInlineRowKeydown(event)">
+          <option value="Espèces">Espèces</option>
+          <option value="Wave Direct">Wave</option>
+          <option value="Orange Money">Orange</option>
+          <option value="MTN MoMo">MTN</option>
+          <option value="Moov Money">Moov</option>
+        </select>
+      </td>
+      <td style="text-align:center;">
+        <button type="button" class="cashier-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Valider la vente (Entrée)">
+          <i data-lucide="check" style="width:18px;height:18px;"></i>
+        </button>
       </td>
     </tr>
   `;
