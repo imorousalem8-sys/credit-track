@@ -2405,6 +2405,68 @@ body.is-app-mode #app-workspace-layout {
 }
 
 /* --------------------------------------------------------------------------
+   PUCES VISUELLES DE MOYENS DE PAIEMENT PANAFRICAINS AVEC LOGOS DE MARQUE
+-------------------------------------------------------------------------- */
+.payment-methods-pill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+.payment-method-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.payment-method-chip:hover {
+  border-color: #93C5FD;
+  background: #F8FAFC;
+  transform: translateY(-1px);
+}
+
+.payment-method-chip.active {
+  border-color: #2563EB;
+  background: #EFF6FF;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
+}
+
+.payment-method-chip-logo {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.payment-method-chip-logo svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.payment-method-chip-text {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #1E293B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* --------------------------------------------------------------------------
    BARRE DE NAVIGATION MOBILE (MASQUÉE PAR DÉFAUT SUR ORDINATEUR)
 -------------------------------------------------------------------------- */
 .mobile-bottom-nav {

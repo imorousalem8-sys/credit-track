@@ -6,26 +6,26 @@
 // 1. LISTE DES PAYS PANAFRICAINS (54 PAYS)
 // --------------------------------------------------------------------------
 const AFRICAN_COUNTRIES = [
-  {code: "CI", nameFr: "Côte d’Ivoire",    nameEn: "Ivory Coast",      flag: "🇨🇮", currency: "XOF", system: "SYSCOHADA", vatRate: 18},
-  {code: "BJ", nameFr: "Bénin",            nameEn: "Benin",            flag: "🇧🇯", currency: "XOF", system: "SYSCOHADA", vatRate: 18},
-  {code: "SN", nameFr: "Sénégal",          nameEn: "Senegal",          flag: "🇸🇳", currency: "XOF", system: "SYSCOHADA", vatRate: 18},
-  {code: "GH", nameFr: "Ghana",            nameEn: "Ghana",            flag: "🇬🇭", currency: "GHS", system: "GRA / IFRS", vatRate: 21.9},
-  {code: "NG", nameFr: "Nigeria",          nameEn: "Nigeria",          flag: "🇳🇬", currency: "NGN", system: "FIRS / IFRS", vatRate: 7.5},
-  {code: "CM", nameFr: "Cameroun",         nameEn: "Cameroon",         flag: "🇨🇲", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 19.25},
-  {code: "KE", nameFr: "Kenya",            nameEn: "Kenya",            flag: "🇰🇪", currency: "KES", system: "KRA / IFRS", vatRate: 16},
-  {code: "ZA", nameFr: "Afrique du Sud",   nameEn: "South Africa",     flag: "🇿🇦", currency: "ZAR", system: "SARS / IFRS", vatRate: 15},
-  {code: "MA", nameFr: "Maroc",            nameEn: "Morocco",          flag: "🇲🇦", currency: "MAD", system: "Code Général Marocain", vatRate: 20},
-  {code: "DZ", nameFr: "Algérie",          nameEn: "Algeria",          flag: "🇩🇿", currency: "DZD", system: "NSC Algérie", vatRate: 19},
-  {code: "TN", nameFr: "Tunisie",          nameEn: "Tunisia",          flag: "🇹🇳", currency: "TND", system: "Comptabilité Tunisienne", vatRate: 19},
-  {code: "EG", nameFr: "Égypte",           nameEn: "Egypt",            flag: "🇪🇬", currency: "EGP", system: "Egyptian Accounting Code", vatRate: 14},
-  {code: "BF", nameFr: "Burkina Faso",     nameEn: "Burkina Faso",     flag: "🇧🇫", currency: "XOF", system: "SYSCOHADA", vatRate: 18},
-  {code: "ML", nameFr: "Mali",             nameEn: "Mali",             flag: "🇲🇱", currency: "XOF", system: "SYSCOHADA", vatRate: 18},
-  {code: "TG", nameFr: "Togo",             nameEn: "Togo",             flag: "🇹🇬", currency: "XOF", system: "SYSCOHADA", vatRate: 18},
-  {code: "CD", nameFr: "Congo (RDC)",      nameEn: "DR Congo",         flag: "🇨🇩", currency: "CDF", system: "OHADA / RDC", vatRate: 16},
-  {code: "GA", nameFr: "Gabon",            nameEn: "Gabon",            flag: "🇬🇦", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 18},
-  {code: "GN", nameFr: "Guinée",           nameEn: "Guinea",           flag: "🇬🇳", currency: "GNF", system: "SYSCOHADA", vatRate: 18},
-  {code: "NE", nameFr: "Niger",            nameEn: "Niger",            flag: "🇳🇪", currency: "XOF", system: "SYSCOHADA", vatRate: 19},
-  {code: "RW", nameFr: "Rwanda",           nameEn: "Rwanda",           flag: "🇷🇼", currency: "RWF", system: "RRA Rwanda", vatRate: 18}
+  {code: "CI", nameFr: "Côte d’Ivoire",    nameEn: "Ivory Coast",      flag: "🇨🇮", currency: "XOF", system: "SYSCOHADA", vatRate: 18, lang: "fr"},
+  {code: "BJ", nameFr: "Bénin",            nameEn: "Benin",            flag: "🇧🇯", currency: "XOF", system: "SYSCOHADA", vatRate: 18, lang: "fr"},
+  {code: "SN", nameFr: "Sénégal",          nameEn: "Senegal",          flag: "🇸🇳", currency: "XOF", system: "SYSCOHADA", vatRate: 18, lang: "fr"},
+  {code: "GH", nameFr: "Ghana",            nameEn: "Ghana",            flag: "🇬🇭", currency: "GHS", system: "GRA / IFRS", vatRate: 21.9, lang: "en"},
+  {code: "NG", nameFr: "Nigeria",          nameEn: "Nigeria",          flag: "🇳🇬", currency: "NGN", system: "FIRS / IFRS", vatRate: 7.5, lang: "en"},
+  {code: "CM", nameFr: "Cameroun",         nameEn: "Cameroon",         flag: "🇨🇲", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 19.25, lang: "fr"},
+  {code: "KE", nameFr: "Kenya",            nameEn: "Kenya",            flag: "🇰🇪", currency: "KES", system: "KRA / IFRS", vatRate: 16, lang: "en"},
+  {code: "ZA", nameFr: "Afrique du Sud",   nameEn: "South Africa",     flag: "🇿🇦", currency: "ZAR", system: "SARS / IFRS", vatRate: 15, lang: "en"},
+  {code: "MA", nameFr: "Maroc",            nameEn: "Morocco",          flag: "🇲🇦", currency: "MAD", system: "Code Général Marocain", vatRate: 20, lang: "fr"},
+  {code: "DZ", nameFr: "Algérie",          nameEn: "Algeria",          flag: "🇩🇿", currency: "DZD", system: "NSC Algérie", vatRate: 19, lang: "fr"},
+  {code: "TN", nameFr: "Tunisie",          nameEn: "Tunisia",          flag: "🇹🇳", currency: "TND", system: "Comptabilité Tunisienne", vatRate: 19, lang: "fr"},
+  {code: "EG", nameFr: "Égypte",           nameEn: "Egypt",            flag: "🇪🇬", currency: "EGP", system: "Egyptian Accounting Code", vatRate: 14, lang: "en"},
+  {code: "BF", nameFr: "Burkina Faso",     nameEn: "Burkina Faso",     flag: "🇧🇫", currency: "XOF", system: "SYSCOHADA", vatRate: 18, lang: "fr"},
+  {code: "ML", nameFr: "Mali",             nameEn: "Mali",             flag: "🇲🇱", currency: "XOF", system: "SYSCOHADA", vatRate: 18, lang: "fr"},
+  {code: "TG", nameFr: "Togo",             nameEn: "Togo",             flag: "🇹🇬", currency: "XOF", system: "SYSCOHADA", vatRate: 18, lang: "fr"},
+  {code: "CD", nameFr: "Congo (RDC)",      nameEn: "DR Congo",         flag: "🇨🇩", currency: "CDF", system: "OHADA / RDC", vatRate: 16, lang: "fr"},
+  {code: "GA", nameFr: "Gabon",            nameEn: "Gabon",            flag: "🇬🇦", currency: "XAF", system: "SYSCOHADA CEMAC", vatRate: 18, lang: "fr"},
+  {code: "GN", nameFr: "Guinée",           nameEn: "Guinea",           flag: "🇬🇳", currency: "GNF", system: "SYSCOHADA", vatRate: 18, lang: "fr"},
+  {code: "NE", nameFr: "Niger",            nameEn: "Niger",            flag: "🇳🇪", currency: "XOF", system: "SYSCOHADA", vatRate: 19, lang: "fr"},
+  {code: "RW", nameFr: "Rwanda",           nameEn: "Rwanda",           flag: "🇷🇼", currency: "RWF", system: "RRA Rwanda", vatRate: 18, lang: "en"}
 ];
 
 const ACCOUNTING_CHARTS = {
@@ -40,7 +40,47 @@ const ACCOUNTING_CHARTS = {
 };
 
 // --------------------------------------------------------------------------
-// 1.b MOYENS DE PAIEMENT LOCAUX PAR PAYS (PANAFRICAIN & INTERNATIONAL)
+// 1.b LOGOS VECTORIELS DES MARQUES DE PAIEMENT (SVG HAUTE DÉFINITION)
+// --------------------------------------------------------------------------
+const PAYMENT_LOGOS = {
+  wave: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#1DA1F2"/><path d="M7 17c2.5-4 5.5-4 8 0s5.5 4 8 0" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="16" cy="10" r="2.5" fill="#FFFFFF"/></svg>`,
+  orange: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#FF7900"/><rect x="7" y="19" width="18" height="6" rx="2" fill="#FFFFFF"/><text x="16" y="15" fill="#FFFFFF" font-size="7" font-weight="900" text-anchor="middle" font-family="sans-serif">OM</text></svg>`,
+  mtn: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#FFCC00"/><ellipse cx="16" cy="16" rx="13" ry="9" fill="none" stroke="#000" stroke-width="2"/><text x="16" y="19" fill="#000" font-size="8" font-weight="900" text-anchor="middle" font-family="sans-serif">MoMo</text></svg>`,
+  moov: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#005BA6"/><path d="M6 20l6-10 5 6 9-6" stroke="#78BE20" stroke-width="3" fill="none" stroke-linecap="round"/><text x="16" y="27" fill="#FFFFFF" font-size="6" font-weight="800" text-anchor="middle" font-family="sans-serif">MOOV</text></svg>`,
+  celtiis: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#00A3E0"/><circle cx="16" cy="16" r="9" fill="#FFFFFF"/><circle cx="16" cy="16" r="5" fill="#E6007E"/></svg>`,
+  opay: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#11C380"/><circle cx="16" cy="16" r="9" fill="none" stroke="#FFFFFF" stroke-width="3.5"/><circle cx="16" cy="16" r="3" fill="#FFFFFF"/></svg>`,
+  palmpay: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#6C2EB9"/><path d="M16 7c-4 0-7 3-7 7 0 5 7 11 7 11s7-6 7-11c0-4-3-7-7-7z" fill="#FFFFFF"/><circle cx="16" cy="13" r="2.5" fill="#6C2EB9"/></svg>`,
+  moniepoint: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#034EA2"/><path d="M8 23V9l8 8 8-8v14" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`,
+  kuda: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#40196D"/><text x="16" y="22" fill="#40D695" font-size="16" font-weight="900" text-anchor="middle" font-family="sans-serif">K</text></svg>`,
+  mpesa: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#008000"/><rect x="4" y="6" width="24" height="9" rx="2" fill="#E60000"/><text x="16" y="13" fill="#FFFFFF" font-size="6" font-weight="900" text-anchor="middle" font-family="sans-serif">M-PESA</text><text x="16" y="25" fill="#FFFFFF" font-size="6" font-weight="800" text-anchor="middle" font-family="sans-serif">SAFARICOM</text></svg>`,
+  telecel: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#E60000"/><circle cx="16" cy="16" r="8" fill="none" stroke="#FFFFFF" stroke-width="3"/><path d="M16 11v6l4 2" stroke="#FFFFFF" stroke-width="2.5" fill="none"/></svg>`,
+  airtel: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#ED1C24"/><path d="M10 22c0-6 3-12 6-12s6 6 6 12" stroke="#FFFFFF" stroke-width="3.5" fill="none" stroke-linecap="round"/></svg>`,
+  djamo: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#00D287"/><text x="16" y="21" fill="#0A2540" font-size="11" font-weight="900" text-anchor="middle" font-family="sans-serif">dj</text></svg>`,
+  cash: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#10B981"/><rect x="6" y="10" width="20" height="12" rx="2" fill="none" stroke="#FFFFFF" stroke-width="2"/><circle cx="16" cy="16" r="3" fill="#FFFFFF"/></svg>`,
+  bank: `<svg viewBox="0 0 32 32" width="24" height="24" style="border-radius:6px;"><rect width="32" height="32" rx="6" fill="#1E293B"/><path d="M6 13l10-6 10 6v2H6v-2zm3 4h3v6H9v-6zm5 0h4v6h-4v-6zm6 0h3v6h-3v-6zm-9 8h16v2H5v-2h4z" fill="#FFFFFF"/></svg>`
+};
+
+function getPaymentMethodLogo(label) {
+  const l = (label || '').toLowerCase();
+  if (l.includes('wave')) return PAYMENT_LOGOS.wave;
+  if (l.includes('orange')) return PAYMENT_LOGOS.orange;
+  if (l.includes('mtn') || l.includes('momo')) return PAYMENT_LOGOS.mtn;
+  if (l.includes('moov') || l.includes('flooz')) return PAYMENT_LOGOS.moov;
+  if (l.includes('celtiis')) return PAYMENT_LOGOS.celtiis;
+  if (l.includes('opay')) return PAYMENT_LOGOS.opay;
+  if (l.includes('palmpay')) return PAYMENT_LOGOS.palmpay;
+  if (l.includes('moniepoint')) return PAYMENT_LOGOS.moniepoint;
+  if (l.includes('kuda')) return PAYMENT_LOGOS.kuda;
+  if (l.includes('mpesa') || l.includes('m-pesa')) return PAYMENT_LOGOS.mpesa;
+  if (l.includes('telecel') || l.includes('vodafone')) return PAYMENT_LOGOS.telecel;
+  if (l.includes('airtel')) return PAYMENT_LOGOS.airtel;
+  if (l.includes('djamo')) return PAYMENT_LOGOS.djamo;
+  if (l.includes('espèce') || l.includes('cash')) return PAYMENT_LOGOS.cash;
+  return PAYMENT_LOGOS.bank;
+}
+
+// --------------------------------------------------------------------------
+// 1.c MOYENS DE PAIEMENT LOCAUX PAR PAYS (PANAFRICAIN & INTERNATIONAL)
 // --------------------------------------------------------------------------
 const COUNTRY_PAYMENT_METHODS = {
   CI: [
@@ -80,7 +120,7 @@ const COUNTRY_PAYMENT_METHODS = {
     { id: "palmpay_ng", label: "PalmPay" },
     { id: "moniepoint_ng", label: "Moniepoint" },
     { id: "kuda_ng", label: "Kuda Bank" },
-    { id: "bank_transfer_ng", label: "NIP Instant Bank Transfer (GTB, Zenith, Access...)" },
+    { id: "bank_transfer_ng", label: "NIP Instant Bank Transfer (GTB, Zenith...)" },
     { id: "ussd_ng", label: "USSD Transfer (*737#, *966#...)" },
     { id: "cash", label: "Cash (NGN)" }
   ],
@@ -202,6 +242,43 @@ function getCountryConfig(code) {
   return AFRICAN_COUNTRIES.find(c => c.code === code) || AFRICAN_COUNTRIES[0];
 }
 
+function selectPaymentMethodChip(targetSelectId, label, containerId) {
+  const select = document.getElementById(targetSelectId);
+  if (select) {
+    select.value = label;
+    select.dispatchEvent(new Event('change'));
+  }
+  const container = document.getElementById(containerId);
+  if (container) {
+    container.querySelectorAll('.payment-method-chip').forEach(chip => {
+      if (chip.getAttribute('data-value') === label) {
+        chip.classList.add('active');
+      } else {
+        chip.classList.remove('active');
+      }
+    });
+  }
+}
+
+function renderPaymentChipsGrid(containerId, targetSelectId, methods, selectedVal) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  const currentVal = selectedVal || methods[0]?.label || '';
+  const html = methods.map(m => {
+    const isActive = m.label === currentVal;
+    const logoSvg = getPaymentMethodLogo(m.label);
+    return `
+      <div class="payment-method-chip ${isActive ? 'active' : ''}" data-value="${m.label}" onclick="selectPaymentMethodChip('${targetSelectId}', '${m.label.replace(/'/g, "\\'")}', '${containerId}')">
+        <div class="payment-method-chip-logo">${logoSvg}</div>
+        <span class="payment-method-chip-text" title="${m.label}">${m.label}</span>
+      </div>
+    `;
+  }).join('');
+
+  container.innerHTML = html;
+}
+
 function updateCountryPaymentMethods(countryCode) {
   const code = countryCode || AppState.country || 'CI';
   const methods = COUNTRY_PAYMENT_METHODS[code] || COUNTRY_PAYMENT_METHODS['CI'];
@@ -214,6 +291,10 @@ function updateCountryPaymentMethods(countryCode) {
   const prefSelect = document.getElementById('credit-payment-method-pref');
   if (prefSelect) prefSelect.innerHTML = optionsHTML;
 
+  // Render visual chip grids with genuine brand logos
+  renderPaymentChipsGrid('credit-payment-methods-grid', 'credit-payment-method-pref', methods, methods[0]?.label);
+  renderPaymentChipsGrid('modal-pay-method-grid', 'modal-pay-method-select', methods, methods[0]?.label);
+
   const firstBrand = methods[0]?.label ? methods[0].label.split(' ')[0] : 'Wave';
   const accountInput = document.getElementById('credit-transfer-account');
   if (accountInput) {
@@ -223,7 +304,10 @@ function updateCountryPaymentMethods(countryCode) {
 
 window.AFRICAN_COUNTRIES = AFRICAN_COUNTRIES;
 window.COUNTRY_PAYMENT_METHODS = COUNTRY_PAYMENT_METHODS;
+window.PAYMENT_LOGOS = PAYMENT_LOGOS;
 window.getCountryConfig = getCountryConfig;
+window.getPaymentMethodLogo = getPaymentMethodLogo;
+window.selectPaymentMethodChip = selectPaymentMethodChip;
 window.updateCountryPaymentMethods = updateCountryPaymentMethods;
 
 // Système de détection automatique des nouvelles versions (sécurisé, sans rechargement en boucle)
@@ -1144,6 +1228,11 @@ function switchCountry(code, notify = true) {
   AppState.countryConfig = config;
   localStorage.setItem('country', code);
 
+  // Basculement automatique et intelligent de la langue officielle du pays
+  if (config.lang && config.lang !== AppState.lang) {
+    window.switchLanguage(config.lang);
+  }
+
   // Sync default currency with country unless user chose a custom one
   if (!localStorage.getItem('appCurrency')) {
     AppState.currency = config.currency;
@@ -1158,7 +1247,8 @@ function switchCountry(code, notify = true) {
 
   const sysInfoEl = document.getElementById('acc-country-sys-info');
   if (sysInfoEl) {
-    sysInfoEl.textContent = `Pays : ${config.flag} ${config.nameFr} — TVA : ${config.vatRate}% — Devise : ${config.currency}`;
+    const countryName = AppState.lang === 'en' ? (config.nameEn || config.nameFr) : config.nameFr;
+    sysInfoEl.textContent = `${AppState.lang === 'en' ? 'Country' : 'Pays'} : ${config.flag} ${countryName} — TVA/VAT : ${config.vatRate}% — ${AppState.lang === 'en' ? 'Currency' : 'Devise'} : ${config.currency}`;
   }
 
   const vatRateLabel = document.getElementById('acc-vat-rate-label');
@@ -1175,7 +1265,8 @@ function switchCountry(code, notify = true) {
   updateCountryPaymentMethods(code);
   if (typeof renderDailySalesBook === 'function') renderDailySalesBook();
 
-  if (notify) showToast(`Pays sélectionné : ${config.flag} ${config.nameFr} (${config.currency})`);
+  const countryDisplayName = AppState.lang === 'en' ? (config.nameEn || config.nameFr) : config.nameFr;
+  if (notify) showToast(`${AppState.lang === 'en' ? 'Selected country' : 'Pays sélectionné'} : ${config.flag} ${countryDisplayName} (${config.currency})`);
 }
 window.switchCountry = switchCountry;
 
