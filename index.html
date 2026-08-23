@@ -39,7 +39,7 @@
 
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260823_v4.2.2_mobile_drawer_fix";
+      const CURRENT_BUILD = "20260823_v4.2.3_drawer_zindex_fix";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('caches' in window) {
@@ -65,14 +65,13 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260823_v4.2.2_mobile_drawer_fix" defer></script>
-  <script src="app.js?v=20260823_v4.2.2_mobile_drawer_fix" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260823_v4.2.2_mobile_drawer_fix">
+  <script src="dataStore.js?v=20260823_v4.2.3_drawer_zindex_fix" defer></script>
+  <script src="app.js?v=20260823_v4.2.3_drawer_zindex_fix" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260823_v4.2.3_drawer_zindex_fix">
 </head>
 <body class="is-landing-mode">
 
   <div id="toast-container"></div>
-  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
   <!-- ============================================================
        MODALE AUTH : CONNEXION & INSCRIPTION COMMERÇANT (EMAIL / GOOGLE)
@@ -866,6 +865,8 @@
        PAGE 2 : ESPACE APPLICATION (SIDEBAR + WORKSPACE RESPONSIVE)
   ============================================================ -->
   <div id="app-workspace-layout" style="display: none;">
+    <!-- Overlay sombre mobile pour fermeture au toucher -->
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
     <!-- Sidebar Latérale Fixe & Tiroir Coulissant Mobile -->
     <aside class="sidebar-fixed" id="main-sidebar">
