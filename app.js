@@ -48,7 +48,7 @@ window.getCountryConfig = getCountryConfig;
 
 // Système de détection automatique des nouvelles versions en ligne pour tous les utilisateurs
 (function initAutoUpdateWatcher() {
-  const APP_VERSION = "20260823_v3.4.0";
+  const APP_VERSION = "20260823_v3.5.0";
   async function checkRemoteVersion() {
     try {
       const res = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });

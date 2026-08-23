@@ -26,7 +26,7 @@
   <script>
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260823_v3.4.0";
+      const CURRENT_BUILD = "20260823_v3.5.0";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('serviceWorker' in navigator) {
@@ -81,9 +81,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260823_v3.4.0" defer></script>
-  <script src="app.js?v=20260823_v3.4.0" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260823_v3.4.0">
+  <script src="dataStore.js?v=20260823_v3.5.0" defer></script>
+  <script src="app.js?v=20260823_v3.5.0" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260823_v3.5.0">
 </head>
 <body class="is-landing-mode">
 
@@ -2290,11 +2290,11 @@
               <thead>
                 <tr>
                   <th style="width:10%;">HEURE</th>
-                  <th style="width:46%;">ARTICLE / MARCHANDISE VENDUE</th>
+                  <th style="width:48%;">ARTICLE / DÉSIGNATION VENDUE</th>
                   <th style="text-align:center;width:8%;">QTÉ</th>
                   <th style="text-align:right;width:16%;">MONTANT TOTAL</th>
-                  <th style="width:14%;">PAIEMENT</th>
-                  <th style="text-align:center;width:6%;">VALIDER</th>
+                  <th style="width:12%;">PAIEMENT</th>
+                  <th style="text-align:center;width:6%;">ACTION</th>
                 </tr>
               </thead>
               <tbody id="daily-sales-table-body">
@@ -2305,42 +2305,28 @@
             <!-- Pied du Tableau : Total du Jour -->
             <div style="padding:14px 18px;background:#F8FAFC;border-top:1.5px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
               <div style="font-size:0.9rem;font-weight:700;color:#64748B;">
-                Total lignes : <strong id="salesbook-rows-count" style="color:#0F172A;font-size:1.05rem;">0</strong>
+                Total des ventes enregistrées : <strong id="salesbook-rows-count" style="color:#0F172A;font-size:1.1rem;">0</strong> lignes
               </div>
               <div style="display:flex;align-items:center;gap:8px;">
-                <span style="font-size:0.85rem;font-weight:800;color:#64748B;">TOTAL GÉNÉRAL :</span>
-                <span id="salesbook-grand-total-amount" style="font-size:1.4rem;font-weight:900;color:#2563EB;">0 FCFA</span>
+                <span style="font-size:0.85rem;font-weight:800;color:#64748B;">TOTAL GÉNÉRAL DU JOUR :</span>
+                <span id="salesbook-grand-total-amount" style="font-size:1.45rem;font-weight:900;color:#2563EB;">0 FCFA</span>
               </div>
             </div>
 
           </div>
 
-          <!-- Raccourci Clavier -->
-          <div style="margin-top:10px;font-size:0.78rem;color:#64748B;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-            <span>✓ Enregistrement instantané en local et en direct.</span>
-            <span style="font-weight:700;color:#2563EB;">
-              Tapez <kbd style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:4px;padding:2px 5px;font-weight:800;">Entrée</kbd> pour valider et passer à la vente suivante
-            </span>
-          </div>
-
-        </section>
-
-          <!-- Bas de page : Notification & Export -->
-          <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-            <div style="font-size:0.82rem;color:#64748B;display:flex;align-items:center;gap:8px;">
-              <i data-lucide="shield-check" style="width:16px;height:16px;color:#10B981;"></i>
-              <span>Toutes les ventes sont enregistrées localement et synchronisées en direct.</span>
+          <!-- Bas de page & Raccourci Clavier -->
+          <div style="margin-top:12px;font-size:0.8rem;color:#64748B;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="shield-check" style="width:15px;height:15px;color:#10B981;"></i>
+              <span>Toutes les ventes sont sauvegardées et synchronisées en direct.</span>
             </div>
-
-            <button type="button" class="btn btn-outline" onclick="exportSalesbookCSV()" style="display:flex;align-items:center;gap:6px;font-size:0.84rem;padding:8px 16px;border-radius:8px;font-weight:700;">
-              <i data-lucide="download" style="width:15px;height:15px;"></i>
-              <span>Télécharger le journal (CSV)</span>
-            </button>
+            <div style="font-weight:700;color:#2563EB;">
+              Appuyez sur <kbd style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:4px;padding:2px 6px;font-weight:800;">Entrée</kbd> pour valider et passer à la ligne suivante
+            </div>
           </div>
 
         </section>
-
-
 
       </main>
     </div>
