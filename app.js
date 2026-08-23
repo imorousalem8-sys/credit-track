@@ -4136,18 +4136,6 @@ window.downloadOfficialReportPDF = function() {
 // --------------------------------------------------------------------------
 AppState.selectedBranch = localStorage.getItem('ct_selected_branch') || 'all';
 
-// Catalogue d'articles fréquents pour pré-remplissage rapide en 1 clic ("TAC !")
-window.QUICK_ARTICLES_CATALOG = [
-  { item: 'Sac de Riz 50kg — Parfumé Supérieur', price: 24500, icon: '🌾' },
-  { item: 'Huile Végétale Dinor 5L', price: 6500, icon: '🛢️' },
-  { item: 'Carton Spaghetti Maman 500g', price: 7000, icon: '🍝' },
-  { item: 'Sucre Blanc 1kg St Louis', price: 900, icon: '🍬' },
-  { item: 'Savon OMO 1kg Poudre', price: 1200, icon: '🧼' },
-  { item: 'Lait Bonnet Rouge 410g', price: 600, icon: '🥛' },
-  { item: 'Pack Eau Minérale 1.5L', price: 2200, icon: '💧' },
-  { item: 'Bidon Huile 25L', price: 26000, icon: '🛢️' }
-];
-
 // Initialisation STRICTEMENT RÉELLE : Uniquement les vraies ventes enregistrées par l'utilisateur
 AppState.sales = [];
 try {
@@ -4563,18 +4551,11 @@ window.openDailyClosingModal = function() {
 };
 
 window.openSalesbookSettingsModal = function() {
-  if (confirm("Options du Cahier des Ventes :\n\nCliquez sur OK pour réinitialiser avec les 8 articles exemples de la maquette.\nCliquez sur Annuler pour vider le cahier.")) {
-    AppState.sales = [...DEFAULT_SAMPLE_SALES];
+  if (confirm("Options du Cahier des Ventes :\n\nVoulez-vous vider toutes les ventes enregistrées aujourd'hui pour repartir à zéro ?")) {
+    AppState.sales = [];
     saveSalesToStorage();
     renderDailySalesBook();
-    showToast("Données d'exemple restaurées.", "success");
-  } else {
-    if (confirm("Confirmer la suppression de TOUTES les ventes enregistrées ?")) {
-      AppState.sales = [];
-      saveSalesToStorage();
-      renderDailySalesBook();
-      showToast("Cahier des ventes vidé.", "info");
-    }
+    showToast("Le cahier des ventes a été réinitialisé à zéro.", "info");
   }
 };
 

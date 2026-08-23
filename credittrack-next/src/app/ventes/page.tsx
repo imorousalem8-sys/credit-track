@@ -514,7 +514,7 @@ export default function VentesPage() {
                 <th className="py-3 px-3.5 w-24 text-center">Heure</th>
                 <th className="py-3 px-4 min-w-[320px] sm:min-w-[400px]">Article / Désignation Vendue</th>
                 <th className="py-3 px-2 w-16 text-center">Qté</th>
-                <th className="py-3 px-3 w-32 text-right">Prix Unit. ({currency})</th>
+                <th className="py-3 px-3 w-32 text-right">Prix ({currency})</th>
                 <th className="py-3 px-3 w-36 text-right">Montant Total</th>
                 <th className="py-3 px-3 w-36 text-center">Paiement</th>
                 <th className="py-3 px-3 w-40">Client (Optionnel)</th>
@@ -720,45 +720,12 @@ export default function VentesPage() {
 
           </div>
 
-          {/* Étage 2 : BARRE DE SÉLECTION RAPIDE "TAC !" (ARTICLES FRÉQUENTS) */}
-          <div className="mb-3.5 p-2.5 bg-white/90 border border-blue-200 rounded-xl">
-            <div className="text-[11px] font-black text-blue-800 uppercase tracking-wider mb-2">
-              ⚡ Ajout rapide &quot;TAC&quot; — Cliquez sur un article fréquent :
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              {[
-                { name: 'Sac de Riz 50kg — Parfumé Supérieur', price: '24500', icon: '🌾' },
-                { name: 'Huile Végétale Dinor 5L', price: '6500', icon: '🛢️' },
-                { name: 'Carton Spaghetti Maman 500g', price: '7000', icon: '🍝' },
-                { name: 'Sucre Blanc 1kg St Louis', price: '900', icon: '🍬' },
-                { name: 'Savon OMO 1kg Poudre', price: '1200', icon: '🧼' },
-                { name: 'Lait Bonnet Rouge 410g', price: '600', icon: '🥛' },
-                { name: 'Pack Eau Minérale 1.5L', price: '2200', icon: '💧' },
-              ].map((p, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    setItemName(p.name);
-                    setUnitPrice(p.price);
-                    setQty(1);
-                    priceInputRef.current?.focus();
-                  }}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-400 text-slate-800 text-xs font-bold rounded-lg shadow-xs transition active:scale-95 cursor-pointer"
-                >
-                  <span>{p.icon} {p.name.split('—')[0]}</span>
-                  <span className="text-blue-600 font-extrabold">({parseInt(p.price).toLocaleString('fr-FR')} F)</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Étage 3 : DÉTAILS DU PRIX, QUANTITÉ, MODE & VALIDATION */}
+          {/* Étage 2 : DÉTAILS DU PRIX, QUANTITÉ, MODE & VALIDATION */}
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             
             {/* QTY INPUT */}
             <div className="flex items-center gap-1.5 bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 shadow-sm">
-              <span className="text-[11px] font-black text-slate-500 uppercase">Qté</span>
+              <span className="text-[11px] font-black text-slate-500 uppercase">Quantité</span>
               <input 
                 ref={qtyInputRef}
                 type="number"
@@ -770,9 +737,9 @@ export default function VentesPage() {
               />
             </div>
 
-            {/* UNIT PRICE INPUT */}
-            <div className="flex items-center gap-1.5 bg-white border border-slate-300 rounded-xl px-3 py-1.5 flex-1 min-w-[130px] max-w-[200px] shadow-sm">
-              <span className="text-[11px] font-black text-slate-500 uppercase">P.U.</span>
+            {/* PRICE INPUT */}
+            <div className="flex items-center gap-1.5 bg-white border border-slate-300 rounded-xl px-3 py-1.5 flex-1 min-w-[140px] max-w-[220px] shadow-sm">
+              <span className="text-[11px] font-black text-slate-500 uppercase whitespace-nowrap">Prix ({currency})</span>
               <input 
                 ref={priceInputRef}
                 type="number"
