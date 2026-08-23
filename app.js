@@ -46,6 +46,28 @@ function getCountryConfig(code) {
 window.AFRICAN_COUNTRIES = AFRICAN_COUNTRIES;
 window.getCountryConfig = getCountryConfig;
 
+// Système de détection automatique des nouvelles versions en ligne pour tous les utilisateurs
+(function initAutoUpdateWatcher() {
+  const APP_VERSION = "20260823_v3.0.0";
+  async function checkRemoteVersion() {
+    try {
+      const res = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+      if (res.ok) {
+        const html = await res.text();
+        const match = html.match(/CURRENT_BUILD\s*=\s*["']([^"']+)["']/);
+        if (match && match[1] && match[1] !== APP_VERSION) {
+          console.log(`[Auto-Update] Nouvelle version ${match[1]} détectée, actualisation.`);
+          window.location.reload(true);
+        }
+      }
+    } catch(e) {}
+  }
+  setInterval(checkRemoteVersion, 60000);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') checkRemoteVersion();
+  });
+})();
+
 // --------------------------------------------------------------------------
 // 2. DICTIONNAIRE DE TRADUCTION COMPLET BILINGUE (FR / EN)
 // --------------------------------------------------------------------------
