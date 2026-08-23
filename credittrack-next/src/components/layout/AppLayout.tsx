@@ -21,6 +21,15 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
   const isLandingPage = pathname === '/';
 
   useEffect(() => {
+    // Redirection automatique si un utilisateur a ouvert un ancien lien de preview snapshot Vercel
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      if (host.includes('vercel.app') && host !== 'credit-track00.vercel.app' && host.includes('projects.vercel.app')) {
+        window.location.replace('https://credit-track00.vercel.app' + window.location.pathname + window.location.search + window.location.hash);
+        return;
+      }
+    }
+
     if (isLandingPage) {
       document.body.classList.remove('is-app-mode');
       document.body.classList.add('is-landing-mode');

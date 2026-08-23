@@ -24,6 +24,19 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
   <script>
+    // REDIRECTION AUTOMATIQUE DE SECOURS VERS LE DOMAINE DE PRODUCTION OFFICIEL
+    // Si un utilisateur a ouvert un ancien lien de preview temporaire Vercel (hash figé)
+    (function() {
+      try {
+        const host = window.location.hostname;
+        if (host.includes('vercel.app') && host !== 'credit-track00.vercel.app' && host.includes('projects.vercel.app')) {
+          const targetUrl = 'https://credit-track00.vercel.app' + window.location.pathname + window.location.search + window.location.hash;
+          window.location.replace(targetUrl);
+          return;
+        }
+      } catch (e) {}
+    })();
+
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
       const CURRENT_BUILD = "20260823_v4.2.1_mobile_responsive";
