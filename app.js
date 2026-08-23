@@ -1084,7 +1084,7 @@ function closeMobileSidebarIfOpen() {
   if (overlay && overlay.classList.contains('active')) overlay.classList.remove('active');
 }
 
-function openPublicLanding() {
+window.openPublicLanding = function() {
   localStorage.setItem('activeView', 'landing');
   const landing = document.getElementById('public-landing-container');
   const appLayout = document.getElementById('app-workspace-layout');
@@ -1097,64 +1097,105 @@ function openPublicLanding() {
   closeMobileSidebarIfOpen();
   window.scrollTo(0, 0);
   if (window.lucide) lucide.createIcons();
-}
+};
 
-// ── FONCTIONS DU SIMULATEUR WHATSAPP EN DIRECT SUR LA LANDING PAGE ──
-window.updateLandingSimPreview = function() {
-  const clientName = document.getElementById('sim-client-name')?.value || 'Client';
-  const amount = parseInt(document.getElementById('sim-client-amount')?.value) || 0;
-  
-  const headerName = document.getElementById('sim-preview-header-name');
-  const waText = document.getElementById('sim-wa-text');
+window.openAuthModal = function(tab = 'register') {
+  window.switchAuthTab(tab);
+  window.openModal('modal-auth');
+};
 
-  if (headerName) headerName.textContent = clientName;
-  if (waText) {
-    waText.innerHTML = `Bonjour <strong>${escapeHTML(clientName)}</strong>, nous vous rappelons que votre solde de <strong>${formatCurrency(amount)}</strong> chez <strong>${escapeHTML(AppState.businessName)}</strong> est arrivé à échéance.`;
+window.switchAuthTab = function(tab) {
+  const regView = document.getElementById('auth-view-register');
+  const loginView = document.getElementById('auth-view-login');
+  const forgotView = document.getElementById('auth-view-forgot-password');
+  const resetView = document.getElementById('auth-view-reset-password');
+  const tabsContainer = document.getElementById('auth-tabs-container');
+  const tabReg = document.getElementById('tab-auth-register');
+  const tabLogin = document.getElementById('tab-auth-login');
+  const modalTitle = document.getElementById('auth-modal-title');
+
+  if (regView) regView.style.display = 'none';
+  if (loginView) loginView.style.display = 'none';
+  if (forgotView) forgotView.style.display = 'none';
+  if (resetView) resetView.style.display = 'none';
+  if (tabsContainer) tabsContainer.style.display = 'flex';
+
+  if (tab === 'register') {
+    if (regView) regView.style.display = 'block';
+    if (tabReg) { tabReg.classList.add('active'); tabReg.style.background = '#fff'; tabReg.style.color = '#0F172A'; }
+    if (tabLogin) { tabLogin.classList.remove('active'); tabLogin.style.background = 'transparent'; tabLogin.style.color = '#64748B'; }
+    if (modalTitle) modalTitle.innerHTML = `<i data-lucide="user-plus" style="width:18px;height:18px;color:#2563EB;"></i><span>Créer votre Compte Commerçant</span>`;
+  } else if (tab === 'login') {
+    if (loginView) loginView.style.display = 'block';
+    if (tabLogin) { tabLogin.classList.add('active'); tabLogin.style.background = '#fff'; tabLogin.style.color = '#0F172A'; }
+    if (tabReg) { tabReg.classList.remove('active'); tabReg.style.background = 'transparent'; tabReg.style.color = '#64748B'; }
+    if (modalTitle) modalTitle.innerHTML = `<i data-lucide="lock" style="width:18px;height:18px;color:#2563EB;"></i><span>Connexion à votre Espace</span>`;
+  } else if (tab === 'forgot-password') {
+    if (forgotView) forgotView.style.display = 'block';
+    if (tabsContainer) tabsContainer.style.display = 'none';
+  } else if (tab === 'reset-password') {
+    if (resetView) resetView.style.display = 'block';
+    if (tabsContainer) tabsContainer.style.display = 'none';
+  }
+
+  if (window.lucide) lucide.createIcons();
+};
+
+window.handleRegisterSubmit = function(e) {
+  e.preventDefault();
+  const bizName = document.getElementById('auth-reg-biz-name')?.value || 'Mon Commerce';
+  const phone = document.getElementById('auth-reg-phone')?.value || '';
+  const email = document.getElementById('auth-reg-email')?.value || 'commercant@credittrack.com';
+
+  AppState.businessName = bizName;
+  AppState.businessPhone = phone;
+  AppState.user.id = 'user_' + Date.now();
+  AppState.user.email = email;
+  AppState.user.businessName = bizName;
+
+  localStorage.setItem('bizName', bizName);
+  localStorage.setItem('bizPhone', phone);
+  localStorage.setItem('user_id', AppState.user.id);
+  localStorage.setItem('userEmail', email);
+
+  closeModal('modal-auth');
+  showToast(`Compte créé avec succès ! Bienvenue ${bizName}.`, 'success');
+  window.openAppWorkspace('menu-salesbook');
+};
+
+window.handleLoginSubmit = function(e) {
+  e.preventDefault();
+  const email = document.getElementById('auth-login-email')?.value || 'commercant@credittrack.com';
+
+  AppState.user.id = 'user_' + Date.now();
+  AppState.user.email = email;
+  localStorage.setItem('user_id', AppState.user.id);
+  localStorage.setItem('userEmail', email);
+
+  closeModal('modal-auth');
+  showToast("Connexion réussie.", 'success');
+  window.openAppWorkspace('menu-salesbook');
+};
+
+window.handleForgotPasswordSubmit = function(e) {
+  e.preventDefault();
+  showToast("Code de vérification envoyé à votre adresse e-mail.", 'info');
+  window.switchAuthTab('reset-password');
+};
+
+window.handleSignOut = function() {
+  if (confirm("Voulez-vous vous déconnecter de votre espace ?")) {
+    AppState.user.id = '';
+    AppState.user.email = '';
+    localStorage.removeItem('user_id');
+    localStorage.removeItem('userEmail');
+    window.openPublicLanding();
+    showToast("Vous avez été déconnecté.", "info");
   }
 };
 
-window.testSimWhatsAppSend = function() {
-  const clientName = document.getElementById('sim-client-name')?.value || 'Client';
-  const amount = parseInt(document.getElementById('sim-client-amount')?.value) || 75000;
-  
-  let msg = `Bonjour ${clientName}, nous vous rappelons que votre solde de ${formatCurrency(amount)} chez ${AppState.businessName} est arrivé à échéance. Merci pour votre confiance !`;
-  
-  // Ouvre WhatsApp avec le message de démonstration
-  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-  showToast("Simulateur : Démonstration WhatsApp lancée avec succès.");
-};
-
-window.toggleMobileSidebar = function() {
-  const sidebar = document.getElementById('main-sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  document.body.classList.toggle('mobile-sidebar-open');
-  if (sidebar) sidebar.classList.toggle('active');
-  if (overlay) overlay.classList.toggle('active');
-};
-
-window.closeMobileSidebar = function() {
-  const sidebar = document.getElementById('main-sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  document.body.classList.remove('mobile-sidebar-open');
-  if (sidebar) sidebar.classList.remove('active');
-  if (overlay) overlay.classList.remove('active');
-};
-
-function closeMobileSidebarIfOpen() {
-  window.closeMobileSidebar();
-}
-
-function openAppWorkspace(menuId = 'menu-2') {
+window.openAppWorkspace = function(menuId = 'menu-salesbook') {
   closeMobileSidebarIfOpen();
-
-  // AUTH GUARD STRICT : Seul un commerçant avec session validée peut entrer
-  const isAuth = AppState.user && AppState.user.id && AppState.user.email;
-  if (!isAuth) {
-    openAuthModal('register');
-    showToast("Veuillez créer ou vous connecter à votre compte pour accéder au tableau de bord.");
-    return;
-  }
 
   localStorage.setItem('activeView', 'workspace');
   const landing = document.getElementById('public-landing-container');
@@ -1166,11 +1207,11 @@ function openAppWorkspace(menuId = 'menu-2') {
   document.body.classList.remove('is-landing-mode');
   document.body.classList.add('is-app-mode');
 
-  switchMenu(menuId);
+  window.switchMenu(menuId);
   window.scrollTo(0, 0);
-}
+};
 
-function switchMenu(menuId) {
+window.switchMenu = function(menuId) {
   closeMobileSidebarIfOpen();
 
   localStorage.setItem('activeMenu', menuId);
@@ -4560,22 +4601,6 @@ window.exportSalesbookCSV = function() {
   link.click();
   document.body.removeChild(link);
   showToast("Fichier Excel (CSV) téléchargé avec succès !", "success");
-};
-
-  let csvContent = "\uFEFFHeure;Article / Marchandise;Quantite;Prix Unitaire (FCFA);Total (FCFA);Mode de Reglement;Client;Boutique\n";
-  salesToExport.forEach(s => {
-    csvContent += `"${s.time || ''}";"${(s.item || '').replace(/"/g, '""')}";${s.qty || 1};${s.unitPrice || 0};${s.total || 0};"${s.method || ''}";"${(s.client || '').replace(/"/g, '""')}";"${(s.branch || '').replace(/"/g, '""')}"\n`;
-  });
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.setAttribute("href", url);
-  link.setAttribute("download", `Cahier_Ventes_${selectedDate}.csv`);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  showToast("✓ Cahier des ventes exporté avec succès !");
 };
 
 // Ouverture de la modale de clôture journalière 24h
