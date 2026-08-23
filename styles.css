@@ -3383,82 +3383,37 @@ body.is-app-mode #app-workspace-layout {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 40px !important;
-    height: 40px !important;
+    width: 42px !important;
+    height: 42px !important;
     background: #EFF6FF !important;
-    border: 1.5px solid #BFDBFE !important;
+    border: 1.5px solid #3B82F6 !important;
     border-radius: 10px !important;
-    color: #1E40AF !important;
+    color: #1D4ED8 !important;
     cursor: pointer !important;
     flex-shrink: 0 !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+  .btn-hamburger-menu:active {
+    background: #DBEAFE !important;
+    transform: scale(0.95) !important;
+  }
+  .btn-hamburger-menu svg,
+  .btn-hamburger-menu i {
+    pointer-events: none !important;
   }
 
-  .header-left-title {
-    font-size: 0.95rem !important;
+  /* Barre de navigation landing page mobile */
+  .lp-nav {
+    padding: 0 16px !important;
+    height: 64px !important;
   }
-
-  .header-branch-pill {
-    width: 100% !important;
-    order: 3 !important;
-    margin-top: 4px !important;
+  .lp-nav-links .lp-nav-a {
+    display: none !important;
   }
-
-  .header-branch-select {
-    width: 100% !important;
-    max-width: none !important;
-  }
-
-  .header-right-actions {
-    gap: 6px !important;
-  }
-
-  .btn-header-primary {
-    padding: 8px 12px !important;
-    font-size: 0.76rem !important;
-  }
-
-  .content-viewport {
-    padding: 14px 12px 60px 12px !important;
-  }
-
-  /* 6. Grilles de Synthèse & KPIs Adaptatifs */
-  .credit-kpi-summary-grid,
-  .kpi-grid-4,
-  .dashboard-kpi-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 10px !important;
-  }
-
-  .form-grid-2,
-  .grid-2-col,
-  .dashboard-main-grid,
-  .team-cashier-grid {
-    grid-template-columns: 1fr !important;
-    gap: 14px !important;
-  }
-
-  /* 7. Tableaux Défilables et Lisibles */
-  .table-responsive {
-    width: 100% !important;
-    overflow-x: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    border-radius: 10px !important;
-  }
-
-  .table-responsive table {
-    min-width: 520px !important;
-  }
-
-  /* 8. Modales & Formulaires Mobile */
-  .modal-card {
-    width: 95vw !important;
-    max-width: 95vw !important;
-    padding: 16px !important;
-    margin: 10px auto !important;
-  }
-
-  .form-control, input, select, textarea {
-    font-size: 16px !important; /* Empêche le zoom automatique iOS Safari */
+  .lp-btn-cta {
+    padding: 8px 14px !important;
+    font-size: 0.8rem !important;
   }
 }
 
