@@ -1089,7 +1089,7 @@ function closeMobileSidebarIfOpen() {
   if (sb) {
     sb.classList.remove('open');
     if (window.innerWidth <= 1024) {
-      sb.style.setProperty('transform', 'translateX(-105%)', 'important');
+      sb.style.setProperty('transform', 'translate3d(-105%, 0, 0)', 'important');
     } else {
       sb.style.removeProperty('transform');
     }
@@ -1230,6 +1230,11 @@ window.openAppWorkspace = function(menuId = 'menu-salesbook') {
 window.switchMenu = function(menuId) {
   closeMobileSidebarIfOpen();
 
+  // Mapping de compatibilité des menus
+  if (menuId === 'menu-salesbook' || menuId === 'menu-products') {
+    menuId = 'menu-5';
+  }
+
   localStorage.setItem('activeMenu', menuId);
   localStorage.setItem('activeView', 'workspace');
 
@@ -1243,7 +1248,14 @@ window.switchMenu = function(menuId) {
   document.querySelectorAll('.mobile-nav-btn').forEach(btn => btn.classList.remove('active'));
 
   const targetView = document.getElementById(menuId);
-  if (targetView) targetView.classList.add('active');
+  if (targetView) {
+    targetView.classList.add('active');
+  } else {
+    // Si la vue demandée n'existe pas, afficher le tableau de bord par défaut
+    const defaultView = document.getElementById('menu-2');
+    if (defaultView) defaultView.classList.add('active');
+    menuId = 'menu-2';
+  }
 
   const activeBtn = document.getElementById(`nav-${menuId}`);
   if (activeBtn) activeBtn.classList.add('active');
@@ -1256,21 +1268,19 @@ window.switchMenu = function(menuId) {
     'menu-accounting': AppState.lang === 'en' ? 'Cash & Expenses' : 'Caisse & Dépenses',
     'menu-4-directory': AppState.lang === 'en' ? 'Clients & Debts' : 'Clients & Dettes',
     'menu-6': AppState.lang === 'en' ? 'Payments & Receipts' : 'Encaisser & Reçus',
-    'menu-salesbook': AppState.lang === 'en' ? 'Daily Sales Book (24h)' : 'Cahier des Ventes (24h)',
     'menu-8': AppState.lang === 'en' ? 'WhatsApp Reminders' : 'Rappels WhatsApp',
     'menu-settings': AppState.lang === 'en' ? 'Settings' : 'Paramètres',
-    'menu-5': AppState.lang === 'en' ? 'Record Credit Sale' : 'Noter un Nouveau Crédit'
+    'menu-5': AppState.lang === 'en' ? 'Record Credit Sale' : 'Vente à Crédit'
   };
 
   const pageIcons = {
     'menu-2': 'layout-grid',
-    'menu-accounting': 'calculator',
+    'menu-accounting': 'trending-up',
     'menu-4-directory': 'users',
     'menu-6': 'wallet',
-    'menu-salesbook': 'book-open',
     'menu-8': 'bell-ring',
     'menu-settings': 'settings',
-    'menu-5': 'plus-circle'
+    'menu-5': 'credit-card'
   };
 
   const titleEl = document.getElementById('page-desktop-title');
@@ -1286,49 +1296,49 @@ window.switchMenu = function(menuId) {
     if (menuId === 'menu-accounting') {
       headerBtn.setAttribute('onclick', "openModal('modal-accounting-entry')");
       headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Entry' : '+ Noter Dépense'}</span>`;
-    } else if (menuId === 'menu-salesbook') {
-      headerBtn.setAttribute('onclick', "document.getElementById('sale-item-name')?.focus()");
-      headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Sale' : '+ Vendre un Article'}</span>`;
     } else {
       headerBtn.setAttribute('onclick', "switchMenu('menu-5')");
       headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Credit' : '+ Noter un Crédit'}</span>`;
     }
   }
 
+  window.scrollTo(0, 0);
+
+  // Exécution sécurisée des rendus sans blocage d'erreur
+  try {
+    if (menuId === 'menu-2' || menuId === 'menu-accounting') {
+      if (typeof initCharts === 'function') setTimeout(initCharts, 60);
+    }
+    if (menuId === 'menu-6') {
+      if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
+    }
+    if (menuId === 'menu-4-directory') {
+      if (typeof renderClientDirectory === 'function') renderClientDirectory();
+      if (typeof renderCreditKPIs === 'function') renderCreditKPIs();
+    }
+    if (menuId === 'menu-5') {
+      if (typeof populateCreditClientSelect === 'function') populateCreditClientSelect();
+      const dueDateInput = document.getElementById('credit-due-date');
+      if (dueDateInput && !dueDateInput.value) {
+        dueDateInput.value = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+      }
+      if (typeof window.renderCreditProductsTable === 'function') {
+        window.renderCreditProductsTable();
+      }
+    }
+    if (menuId === 'menu-settings') {
+      const compInp = document.getElementById('setting-company-input');
+      if (compInp) compInp.value = AppState.businessName || '';
+      const addrInp = document.getElementById('setting-address-input');
+      if (addrInp) addrInp.value = AppState.businessAddress || '';
+      const phoneInp = document.getElementById('setting-phone-input');
+      if (phoneInp) phoneInp.value = AppState.businessPhone || '';
+    }
+  } catch (err) {
+    console.warn('[switchMenu] Render notice:', err);
+  }
+
   if (window.lucide) lucide.createIcons();
-
-  if (menuId === 'menu-2' || menuId === 'menu-accounting') {
-    setTimeout(initCharts, 60);
-  }
-  if (menuId === 'menu-salesbook') {
-    renderDailySalesBook();
-  }
-  if (menuId === 'menu-6') {
-    renderPaymentsTable();
-  }
-  if (menuId === 'menu-4-directory') {
-    renderClientDirectory();
-    renderCreditKPIs();
-  }
-  if (menuId === 'menu-5') {
-    populateCreditClientSelect();
-    const dueDateInput = document.getElementById('credit-due-date');
-    if (dueDateInput && !dueDateInput.value) {
-      dueDateInput.value = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    }
-    if (typeof window.renderCreditProductsTable === 'function') {
-      window.renderCreditProductsTable();
-    }
-  }
-  if (menuId === 'menu-settings') {
-
-    const compInp = document.getElementById('setting-company-input');
-    if (compInp) compInp.value = AppState.businessName || '';
-    const addrInp = document.getElementById('setting-address-input');
-    if (addrInp) addrInp.value = AppState.businessAddress || '';
-    const phoneInp = document.getElementById('setting-phone-input');
-    if (phoneInp) phoneInp.value = AppState.businessPhone || '';
-  }
 
   // Restauration immédiate des brouillons de champs pour cette vue
   setTimeout(() => {
@@ -1336,7 +1346,7 @@ window.switchMenu = function(menuId) {
       window.restoreAllDraftInputs();
     }
   }, 25);
-}
+};
 
 
 // --------------------------------------------------------------------------
