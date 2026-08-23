@@ -745,41 +745,46 @@ export default function VentesPage() {
           </div>
         )}
 
-        {/* 4. THE LIVE FAST INLINE ENTRY ROW (BLUE HIGHLIGHTED SECTION) */}
-        <div className="p-3 sm:p-4 bg-blue-50/40 border-t-2 border-blue-500 no-print">
+        {/* 4. THE LIVE FAST INLINE ENTRY ROW (XXL ULTRA-SPACIOUS ARTICLE INPUT) */}
+        <div className="p-4 sm:p-5 bg-blue-50/50 border-t-2 border-blue-600 no-print rounded-b-2xl">
           
           {/* Header Banner */}
-          <div className="flex items-center gap-1.5 text-blue-700 text-xs font-extrabold uppercase tracking-wide mb-2.5">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>NOUVELLE VENTE — Saisissez l&apos;article et validez avec Entrée</span>
+          <div className="flex items-center justify-between gap-2 text-blue-700 text-xs font-extrabold uppercase tracking-wide mb-3">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-blue-600" />
+              <span>NOUVELLE VENTE — Saisissez l&apos;article et validez avec Entrée</span>
+            </div>
+            <span className="hidden sm:inline-block text-[11px] font-bold text-blue-600 bg-white px-2.5 py-1 rounded-md border border-blue-200">
+              Appuyez sur <strong className="text-blue-700 font-black">Entrée</strong> pour valider
+            </span>
           </div>
 
-          {/* Form Row */}
-          <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 sm:gap-2.5">
+          {/* Étage 1 : CHAMP ARTICLE GÉANT (PLEINE LARGEUR) */}
+          <div className="flex items-center gap-3 mb-3">
             
             {/* Timestamp Badge */}
-            <div className="hidden lg:flex items-center justify-center px-3 py-2 bg-white border border-slate-300 rounded-xl font-mono text-xs font-extrabold text-slate-700 shrink-0 shadow-sm">
+            <div className="hidden sm:flex items-center justify-center px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl font-mono text-xs font-black text-slate-800 shrink-0 shadow-sm">
               {currentTime || '12:35:23'}
             </div>
 
-            {/* SUPER WIDE ARTICLE INPUT WITH MIC BUTTON */}
-            <div className="relative flex-1 min-w-[280px] sm:min-w-[380px]">
+            {/* GIGANTIC ARTICLE INPUT TAKING 100% OF WIDTH */}
+            <div className="relative flex-1 w-full">
               <input 
                 ref={itemInputRef}
                 type="text"
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Décrivez l'article vendu en détail... (ex: Riz 50kg, Huile 5L, Savon OMO 1kg...)"
-                className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-blue-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 rounded-xl text-xs sm:text-sm font-bold text-slate-900 placeholder-slate-400 shadow-sm outline-none transition"
+                placeholder="Article / Marchandise vendue en détail... (ex: Sac de riz parfumé 50 kg — Qualité supérieure — Marque X)"
+                className="w-full pl-4 pr-12 py-3 bg-white border-2 border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-xl text-sm font-extrabold text-slate-900 placeholder-slate-400 shadow-md shadow-blue-500/10 outline-none transition"
               />
               <button
                 type="button"
                 onClick={handleVoiceInput}
-                className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition ${
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition ${
                   isListening 
                     ? 'bg-red-500 text-white animate-pulse' 
-                    : 'text-blue-600 hover:bg-blue-50'
+                    : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
                 }`}
                 title="Dicter l'article à la voix"
               >
@@ -787,8 +792,14 @@ export default function VentesPage() {
               </button>
             </div>
 
+          </div>
+
+          {/* Étage 2 : DÉTAILS DU PRIX, QUANTITÉ, MODE & VALIDATION */}
+          <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
+            
             {/* QTY INPUT */}
-            <div className="w-full sm:w-20 shrink-0">
+            <div className="flex items-center gap-1.5 bg-white border border-slate-300 rounded-xl px-2.5 py-1.5 shadow-sm">
+              <span className="text-[11px] font-black text-slate-500 uppercase">Qté</span>
               <input 
                 ref={qtyInputRef}
                 type="number"
@@ -796,13 +807,13 @@ export default function VentesPage() {
                 value={qty}
                 onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
                 onKeyDown={handleKeyDown}
-                placeholder="Qté"
-                className="w-full py-2.5 px-2 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-black text-center text-slate-900 shadow-sm outline-none transition"
+                className="w-12 py-1 text-center font-black text-sm text-slate-900 bg-transparent outline-none"
               />
             </div>
 
             {/* UNIT PRICE INPUT */}
-            <div className="w-full sm:w-28 shrink-0">
+            <div className="flex items-center gap-1.5 bg-white border border-slate-300 rounded-xl px-3 py-1.5 flex-1 min-w-[130px] max-w-[200px] shadow-sm">
+              <span className="text-[11px] font-black text-slate-500 uppercase">P.U.</span>
               <input 
                 ref={priceInputRef}
                 type="number"
@@ -810,23 +821,26 @@ export default function VentesPage() {
                 value={unitPrice}
                 onChange={(e) => setUnitPrice(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Prix Unit."
-                className="w-full py-2.5 px-3 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-black text-right text-slate-900 shadow-sm outline-none transition"
+                placeholder="0"
+                className="w-full py-1 text-right font-black text-sm text-slate-900 bg-transparent outline-none"
               />
             </div>
 
             {/* TOTAL PREVIEW */}
-            <div className="hidden sm:flex items-center justify-end px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl font-mono text-xs sm:text-sm font-black text-slate-700 min-w-[100px] shrink-0">
-              {currentLineTotal > 0 ? currentLineTotal.toLocaleString('fr-FR') : '0'}
+            <div className="flex items-center justify-between gap-2 px-3.5 py-2.5 bg-blue-100 border border-blue-200 rounded-xl min-w-[140px] shadow-sm">
+              <span className="text-[11px] font-black text-blue-800 uppercase">Total :</span>
+              <span className="font-mono text-sm font-black text-blue-900">
+                {currentLineTotal > 0 ? `${currentLineTotal.toLocaleString('fr-FR')} ${currency}` : `0 ${currency}`}
+              </span>
             </div>
 
             {/* PAYMENT METHOD DROPDOWN */}
-            <div className="w-full sm:w-36 shrink-0">
+            <div className="min-w-[140px] flex-1 max-w-[180px]">
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value as any)}
                 onKeyDown={handleKeyDown}
-                className="w-full py-2.5 px-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-bold text-slate-800 shadow-sm outline-none transition cursor-pointer"
+                className="w-full py-2.5 px-3 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-bold text-slate-800 shadow-sm outline-none transition cursor-pointer"
               >
                 <option value="Espèces">💵 Espèces</option>
                 <option value="Wave">📱 Wave</option>
@@ -837,26 +851,27 @@ export default function VentesPage() {
             </div>
 
             {/* OPTIONAL CLIENT INPUT */}
-            <div className="relative w-full sm:w-44 shrink-0">
+            <div className="relative min-w-[160px] flex-1 max-w-[220px]">
               <input 
                 type="text"
                 value={client}
                 onChange={(e) => setClient(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Client (optionnel)"
-                className="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 shadow-sm outline-none transition"
+                className="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-bold text-slate-800 placeholder-slate-400 shadow-sm outline-none transition"
               />
               <User className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             </div>
 
-            {/* BLUE SUBMIT BUTTON (CHECKMARK) */}
+            {/* BLUE SUBMIT BUTTON (CHECKMARK + TEXT) */}
             <button
               type="button"
               onClick={handleAddSale}
-              className="w-full lg:w-12 h-10 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold rounded-xl flex items-center justify-center shrink-0 shadow-md shadow-blue-600/20 transition"
+              className="h-10 px-5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shrink-0 shadow-md shadow-blue-600/30 transition"
               title="Valider et enregistrer (Touche Entrée)"
             >
-              <Check className="w-5 h-5 stroke-[2.8]" />
+              <Check className="w-4 h-4 stroke-[3]" />
+              <span>Valider (Entrée)</span>
             </button>
 
           </div>

@@ -46,26 +46,11 @@ function getCountryConfig(code) {
 window.AFRICAN_COUNTRIES = AFRICAN_COUNTRIES;
 window.getCountryConfig = getCountryConfig;
 
-// Système de détection automatique des nouvelles versions en ligne pour tous les utilisateurs
+// Système de détection automatique des nouvelles versions (sécurisé, sans rechargement en boucle)
 (function initAutoUpdateWatcher() {
-  const APP_VERSION = "20260823_v3.5.0";
-  async function checkRemoteVersion() {
-    try {
-      const res = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
-      if (res.ok) {
-        const html = await res.text();
-        const match = html.match(/CURRENT_BUILD\s*=\s*["']([^"']+)["']/);
-        if (match && match[1] && match[1] !== APP_VERSION) {
-          console.log(`[Auto-Update] Nouvelle version ${match[1]} détectée, actualisation.`);
-          window.location.reload(true);
-        }
-      }
-    } catch(e) {}
-  }
-  setInterval(checkRemoteVersion, 60000);
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') checkRemoteVersion();
-  });
+  const CURRENT_APP_BUILD = "20260823_v4.0.0";
+  window.APP_VERSION = "4.0.0";
+  window.CURRENT_BUILD = CURRENT_APP_BUILD;
 })();
 
 // --------------------------------------------------------------------------
@@ -4922,9 +4907,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
 
 // --------------------------------------------------------------------------
-// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v2.5.2)
+// 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v4.0.0)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "2.5.2";
+window.APP_VERSION = "4.0.0";
 
 window.checkAppVersion = async function(isManual = false) {
   try {
@@ -4935,14 +4920,13 @@ window.checkAppVersion = async function(isManual = false) {
     }
     const data = await res.json();
     if (data && data.version && data.version !== window.APP_VERSION) {
-      console.log(`[Version Checker] Nouvelle version disponible : ${data.version} (actuelle : ${window.APP_VERSION})`);
       const banner = document.getElementById('app-update-banner');
       if (banner) {
         banner.style.display = 'block';
         if (window.lucide) lucide.createIcons();
       }
       if (isManual) {
-        showToast(`Une nouvelle version (${data.version}) est disponible ! Cliquez sur la bannière pour mettre à jour.`);
+        showToast(`Une nouvelle version (${data.version}) est disponible !`);
       }
     } else {
       if (isManual) {
@@ -4971,14 +4955,8 @@ window.dismissAppUpdate = function() {
   if (banner) banner.style.display = 'none';
 };
 
-// Vérification de version régulière et lors du retour sur l'onglet
-setInterval(window.checkAppVersion, 2 * 60 * 1000);
-setTimeout(window.checkAppVersion, 2000);
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    window.checkAppVersion();
-  }
-});
+// Vérification douce toutes les 15 minutes (sans nuisance)
+setInterval(() => window.checkAppVersion(false), 15 * 60 * 1000);
 
 // Écoute de lien de récupération de mot de passe dans l'URL
 if (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token=')) {
