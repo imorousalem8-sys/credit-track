@@ -197,353 +197,324 @@ export default function NewCreditSalePage() {
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Vente à Crédit</h1>
-          <p className="text-xs text-slate-500 mt-0.5">Enregistrez une nouvelle vente à crédit avec calcul automatique</p>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <ShoppingCart className="text-blue-600 w-7 h-7" />
+            <span>Facture de Vente à Crédit</span>
+          </h1>
+          <p className="text-xs text-slate-500 mt-0.5">Enregistrement direct en 1 seul tableau unifié (Client + Articles + Échéance + Garant)</p>
         </div>
 
         <Link 
           href="/credit" 
           className="btn btn-outline bg-white border-slate-300 text-slate-700 hover:text-slate-900 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold shadow-sm"
         >
-          <span>&lt;</span> Retour au cahier des crédits
+          <span>←</span> Retour au cahier des crédits
         </Link>
       </div>
 
-      {/* GRAND BLOC UNIFIÉ DE FACTURE */}
-      <div className="bg-white rounded-2xl border-2 border-slate-200 p-6 sm:p-7 shadow-sm space-y-6">
+      {/* LE GRAND TABLEAU UNIFIÉ TOUT-EN-UN */}
+      <form onSubmit={handleSubmit} className="bg-white rounded-2xl border-2 border-slate-300 shadow-md overflow-hidden">
+        
+        {/* ÉTAGE 1 : EN-TÊTE INTÉGRÉ DU TABLEAU (CLIENT & ÉCHÉANCE SUR LA MÊME LIGNE) */}
+        <div className="bg-slate-900 text-white p-4 sm:p-5 border-b border-slate-800">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+            
+            {/* Colonne Client (7 cols) */}
+            <div className="md:col-span-7">
+              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-1.5 flex items-center gap-2">
+                <User size={15} className="text-blue-400" />
+                <span>1. Client Bénéficiaire du Crédit *</span>
+              </label>
+              
+              <div className="flex items-center gap-2">
+                <select 
+                  value={selectedClientId}
+                  onChange={(e) => {
+                    setSelectedClientId(e.target.value);
+                    if (e.target.value === 'NEW') setIsNewClientInline(true);
+                    else setIsNewClientInline(false);
+                  }}
+                  className="flex-1 h-10 px-3 rounded-xl text-sm font-bold text-slate-900 bg-white border-2 border-slate-300 outline-none cursor-pointer"
+                >
+                  <option value="">-- Choisir un client existant --</option>
+                  {clients.map(c => (
+                    <option key={c.id} value={c.id}>{c.name} ({c.phone || 'Pas de tél'})</option>
+                  ))}
+                </select>
 
-        {/* 1. Bandeau de Synthèse 4 KPIs (1 Ligne Continue) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5">
-          {/* KPI 1 : Montant Total */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-100/80 text-purple-700 flex items-center justify-center shrink-0">
-              <BadgeDollarSign size={20} />
+                <button 
+                  type="button"
+                  onClick={() => setIsNewClientInline(!isNewClientInline)}
+                  className={`h-10 px-3.5 rounded-xl text-xs font-black flex items-center gap-1.5 transition shrink-0 ${
+                    isNewClientInline 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-slate-800 hover:bg-slate-700 text-blue-300 border border-slate-700'
+                  }`}
+                >
+                  <Plus size={15} />
+                  <span>{isNewClientInline ? 'Fermer' : '+ Nouveau'}</span>
+                </button>
+              </div>
+
+              {/* Formulaire Nouveau Client rétractable */}
+              {isNewClientInline && (
+                <div className="mt-3 p-3 bg-slate-800/90 border border-slate-700 rounded-xl grid grid-cols-1 sm:grid-cols-3 gap-2.5 animate-in fade-in">
+                  <div>
+                    <input 
+                      type="text" 
+                      value={newClientData.name}
+                      onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
+                      placeholder="Nom & Prénom *"
+                      className="w-full h-9 px-2.5 bg-slate-900 text-white text-xs rounded-lg border border-slate-600 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <input 
+                      type="tel" 
+                      value={newClientData.phone}
+                      onChange={(e) => setNewClientData({ ...newClientData, phone: e.target.value })}
+                      placeholder="WhatsApp / Tél *"
+                      className="w-full h-9 px-2.5 bg-slate-900 text-white text-xs rounded-lg border border-slate-600 outline-none"
+                    />
+                  </div>
+                  <div>
+                    <input 
+                      type="text" 
+                      value={newClientData.cni}
+                      onChange={(e) => setNewClientData({ ...newClientData, cni: e.target.value })}
+                      placeholder="N° CNI (Optionnel)"
+                      className="w-full h-9 px-2.5 bg-slate-900 text-white text-xs rounded-lg border border-slate-600 outline-none"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
-            <div>
-              <div className="text-[11px] font-bold text-slate-500 uppercase">Montant Total</div>
-              <div className="text-base font-black text-slate-900">
-                {formatAfricanCurrency(totalGrossAmount, currency)}
+
+            {/* Colonne Date & Échéance (5 cols) */}
+            <div className="md:col-span-5 grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1 flex items-center gap-1.5">
+                  <Calendar size={13} className="text-amber-400" />
+                  <span>Date d&apos;Émission</span>
+                </label>
+                <div className="h-10 px-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 flex items-center">
+                  {new Date().toLocaleDateString('fr-FR')}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-300 uppercase mb-1 flex items-center gap-1.5">
+                  <Calendar size={13} className="text-amber-400" />
+                  <span>Échéance Limite *</span>
+                </label>
+                <input 
+                  type="date"
+                  required
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                  className="w-full h-10 px-3 bg-white text-slate-900 text-xs font-black rounded-xl border-2 border-amber-400 outline-none"
+                />
               </div>
             </div>
-          </div>
 
-          {/* KPI 2 : Articles */}
-          <div className="flex items-center gap-3 lg:border-l lg:border-slate-200 lg:pl-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-100/80 text-emerald-700 flex items-center justify-center shrink-0">
-              <Package size={20} />
-            </div>
-            <div>
-              <div className="text-[11px] font-bold text-slate-500 uppercase">Articles</div>
-              <div className="text-base font-black text-slate-900">
-                {totalArticlesCount}
-              </div>
-            </div>
-          </div>
-
-          {/* KPI 3 : Date Limite */}
-          <div className="flex items-center gap-3 lg:border-l lg:border-slate-200 lg:pl-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-100/80 text-amber-700 flex items-center justify-center shrink-0">
-              <Calendar size={20} />
-            </div>
-            <div>
-              <div className="text-[11px] font-bold text-slate-500 uppercase">Date Limite</div>
-              <div className="text-base font-black text-slate-900">
-                {formattedDueDate}
-              </div>
-            </div>
-          </div>
-
-          {/* KPI 4 : Mode de Paiement */}
-          <div className="flex items-center gap-3 lg:border-l lg:border-slate-200 lg:pl-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-100/80 text-blue-700 flex items-center justify-center shrink-0">
-              <CreditCard size={20} />
-            </div>
-            <div>
-              <div className="text-[11px] font-bold text-slate-500 uppercase">Mode de Paiement</div>
-              <div className="text-base font-black text-slate-900">
-                {formattedPaymentMethod}
-              </div>
-            </div>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* ÉTAGE 2 : CORPS DU TABLEAU DES ARTICLES (LE CŒUR DU REGISTRE) */}
+        <div className="p-4 sm:p-6 space-y-3">
           
-          {/* 2. Client Selection */}
-          <div>
-            <div className="text-sm font-extrabold text-slate-900 flex items-center gap-2 mb-2">
-              <User size={18} className="text-blue-600" /> Client
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <select 
-                value={selectedClientId}
-                onChange={(e) => {
-                  setSelectedClientId(e.target.value);
-                  if (e.target.value === 'NEW') setIsNewClientInline(true);
-                  else setIsNewClientInline(false);
-                }}
-                className="form-control flex-1 h-11 rounded-xl text-sm font-medium border-slate-300"
-              >
-                <option value="">-- Sélectionner un client existant --</option>
-                {clients.map(c => (
-                  <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>
-                ))}
-              </select>
-
-              <span className="text-xs font-bold text-slate-400 self-center">ou</span>
-
-              <button 
-                type="button"
-                onClick={() => setIsNewClientInline(!isNewClientInline)}
-                className="btn btn-outline text-blue-600 border-blue-200 bg-blue-50/60 hover:bg-blue-100 font-bold text-xs h-11 px-5 rounded-xl flex items-center justify-center gap-1.5 transition shrink-0"
-              >
-                <Plus size={16} /> Nouveau client
-              </button>
-            </div>
-
-            {/* Inline New Client Form */}
-            {isNewClientInline && (
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3 animate-in fade-in duration-200">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Nom & Prénoms *</label>
-                  <input 
-                    type="text" 
-                    value={newClientData.name}
-                    onChange={(e) => setNewClientData({ ...newClientData, name: e.target.value })}
-                    placeholder="Nom complet du client"
-                    className="form-control h-10 text-sm bg-white rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Numéro WhatsApp / Téléphone *</label>
-                  <input 
-                    type="tel" 
-                    value={newClientData.phone}
-                    onChange={(e) => setNewClientData({ ...newClientData, phone: e.target.value })}
-                    placeholder="Numéro WhatsApp"
-                    className="form-control h-10 text-sm bg-white rounded-lg"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">N° CNI / RCCM (Optionnel)</label>
-                  <input 
-                    type="text" 
-                    value={newClientData.cni}
-                    onChange={(e) => setNewClientData({ ...newClientData, cni: e.target.value })}
-                    placeholder="N° Pièce d'identité"
-                    className="form-control h-10 text-sm bg-white rounded-lg"
-                  />
-                </div>
-              </div>
-            )}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-2">
+              <Package size={16} className="text-blue-600" />
+              <span>2. Liste des Articles & Marchandises Vendues à Crédit</span>
+            </span>
+            <span className="text-xs font-bold text-slate-500">
+              {totalArticlesCount} article{totalArticlesCount > 1 ? 's' : ''} au total
+            </span>
           </div>
 
-          <hr className="border-slate-100" />
-
-          {/* 3. Articles Table */}
-          <div>
-            <div className="text-sm font-extrabold text-slate-900 flex items-center gap-2 mb-3">
-              <ShoppingCart size={18} className="text-blue-600" /> Articles de la vente à crédit
-            </div>
-
-            <div className="overflow-x-auto border border-slate-200 rounded-xl">
-              <table className="w-full text-left border-collapse">
-                <thead className="bg-slate-50">
-                  <tr className="border-b border-slate-200 text-xs font-bold text-slate-600">
-                    <th className="py-2.5 px-3 w-[40%]">Article</th>
-                    <th className="py-2.5 px-3 text-center w-[15%]">Quantité</th>
-                    <th className="py-2.5 px-3 text-right w-[20%]">Prix Unitaire (FCFA)</th>
-                    <th className="py-2.5 px-3 text-right w-[20%]">Sous-total (FCFA)</th>
-                    <th className="py-2.5 px-3 text-center w-[5%]">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {items.map((item, idx) => {
-                    const subtotal = item.quantity * item.unitPrice;
-                    return (
-                      <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                        <td className="py-2 px-3">
-                          <input 
-                            type="text"
-                            value={item.name}
-                            onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
-                            placeholder="Désignation de l'article"
-                            className="form-control h-9 text-sm rounded-lg border-slate-200"
-                          />
-                        </td>
-                        <td className="py-2 px-3 text-center">
-                          <input 
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)}
-                            className="form-control h-9 text-sm text-center rounded-lg border-slate-200 max-w-[80px] mx-auto"
-                          />
-                        </td>
-                        <td className="py-2 px-3 text-right">
-                          <input 
-                            type="number"
-                            min="0"
-                            value={item.unitPrice || ''}
-                            onChange={(e) => handleItemChange(idx, 'unitPrice', e.target.value)}
-                            placeholder="0"
-                            className="form-control h-9 text-sm text-right rounded-lg border-slate-200 max-w-[130px] ml-auto"
-                          />
-                        </td>
-                        <td className="py-2 px-3 text-right font-extrabold text-blue-600 text-sm">
-                          {formatAfricanCurrency(subtotal, currency)}
-                        </td>
-                        <td className="py-2 px-3 text-center">
-                          <button 
-                            type="button"
-                            onClick={() => removeRow(idx)}
-                            className="text-red-500 hover:text-red-700 p-1 rounded-lg hover:bg-red-50 transition"
-                            title="Supprimer la ligne"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Dashed Add Article Button */}
-            <button 
-              type="button"
-              onClick={addRow}
-              className="w-full mt-3 py-2.5 border-2 border-dashed border-blue-200 bg-blue-50/30 hover:bg-blue-50/70 text-blue-600 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition"
-            >
-              <Plus size={16} /> Ajouter un article
-            </button>
-
-            {/* Table Footer Grand Total */}
-            <div className="flex justify-end items-center gap-4 pt-4">
-              <span className="text-xs font-black tracking-wider text-slate-500 uppercase">TOTAL GÉNÉRAL</span>
-              <div className="bg-blue-50 text-blue-600 text-lg font-black px-6 py-2 rounded-xl border border-blue-200">
-                {formatAfricanCurrency(totalGrossAmount, currency)}
-              </div>
-            </div>
+          <div className="overflow-x-auto border-2 border-slate-200 rounded-xl">
+            <table className="w-full text-left border-collapse min-w-[700px]">
+              <thead className="bg-slate-100 border-b-2 border-slate-200">
+                <tr className="text-xs font-black text-slate-700 uppercase">
+                  <th className="py-3 px-3 w-10 text-center">#</th>
+                  <th className="py-3 px-3 w-[45%]">Désignation / Article</th>
+                  <th className="py-3 px-3 w-[15%] text-center">Quantité</th>
+                  <th className="py-3 px-3 w-[20%] text-right">Prix (FCFA)</th>
+                  <th className="py-3 px-3 w-[20%] text-right">Total Ligne</th>
+                  <th className="py-3 px-2 w-12 text-center">✕</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {items.map((item, idx) => {
+                  const subtotal = item.quantity * item.unitPrice;
+                  return (
+                    <tr key={item.id} className="hover:bg-blue-50/30 transition-colors">
+                      <td className="py-2.5 px-3 text-center text-xs font-bold text-slate-400">
+                        {idx + 1}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <input 
+                          type="text"
+                          value={item.name}
+                          onChange={(e) => handleItemChange(idx, 'name', e.target.value)}
+                          placeholder="Ex: Sac de Riz 50kg / Huile 5L..."
+                          className="w-full h-10 px-3 text-sm font-bold text-slate-900 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-600"
+                        />
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <input 
+                          type="number"
+                          min="1"
+                          value={item.quantity}
+                          onChange={(e) => handleItemChange(idx, 'quantity', e.target.value)}
+                          className="w-20 h-10 px-2 text-center text-sm font-black text-slate-900 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-600 mx-auto"
+                        />
+                      </td>
+                      <td className="py-2.5 px-3 text-right">
+                        <input 
+                          type="number"
+                          min="0"
+                          value={item.unitPrice || ''}
+                          onChange={(e) => handleItemChange(idx, 'unitPrice', e.target.value)}
+                          placeholder="0"
+                          className="w-32 h-10 px-3 text-right text-sm font-black text-slate-900 bg-white border border-slate-300 rounded-lg outline-none focus:border-blue-600 ml-auto"
+                        />
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-black text-slate-900 font-mono text-sm">
+                        {formatAfricanCurrency(subtotal, currency)}
+                      </td>
+                      <td className="py-2.5 px-2 text-center">
+                        <button 
+                          type="button"
+                          onClick={() => removeRow(idx)}
+                          className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                          title="Supprimer la ligne"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
 
-          <hr className="border-slate-100" />
+          <button 
+            type="button"
+            onClick={addRow}
+            className="w-full py-2.5 border-2 border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-100/70 text-blue-700 rounded-xl font-extrabold text-xs flex items-center justify-center gap-2 transition cursor-pointer"
+          >
+            <Plus size={16} />
+            <span>+ Ajouter un autre article dans ce crédit</span>
+          </button>
 
-          {/* 4. Payment Details & Warranty (2 Equal Columns 50% / 50%) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        </div>
+
+        {/* ÉTAGE 3 : BAS DU TABLEAU UNIFIÉ (PAIEMENT, GARANT, OBSERVATIONS & GRAND TOTAL) */}
+        <div className="bg-slate-50 border-t-2 border-slate-200 p-4 sm:p-6">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-end">
             
-            {/* Left: Détails de paiement */}
-            <div className="bg-slate-50/80 border border-slate-200 rounded-xl p-4 space-y-3.5">
-              <div className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <CreditCard size={17} className="text-blue-600" /> Détails de paiement
+            {/* Colonne Paiement & Garant (7 cols) */}
+            <div className="md:col-span-7 space-y-3">
+              <span className="text-xs font-black text-slate-700 uppercase tracking-wider block">
+                3. Modalités de Remboursement & Garantie
+              </span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Mode de paiement prévu</label>
+                  <select 
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full h-9 px-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none"
+                  >
+                    <option value="Espèces (Paiement physique en boutique)">💵 Espèces (Comptoir)</option>
+                    <option value="Wave Money">📱 Wave Direct</option>
+                    <option value="Orange Money">🟠 Orange Money</option>
+                    <option value="MTN MoMo">🟡 MTN MoMo</option>
+                    <option value="Moov Money">🔵 Moov Money</option>
+                    <option value="Virement Bancaire">🏦 Virement Bancaire</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Compte / N° Paiement (optionnel)</label>
+                  <input 
+                    type="text"
+                    value={paymentAccount}
+                    onChange={(e) => setPaymentAccount(e.target.value)}
+                    placeholder="Numéro Wave / MoMo..."
+                    className="w-full h-9 px-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Nom du garant (optionnel)</label>
+                  <input 
+                    type="text"
+                    value={guarantorName}
+                    onChange={(e) => setGuarantorName(e.target.value)}
+                    placeholder="Ex: KONE Drissa"
+                    className="w-full h-9 px-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Tél du garant (optionnel)</label>
+                  <input 
+                    type="tel"
+                    value={guarantorPhone}
+                    onChange={(e) => setGuarantorPhone(e.target.value)}
+                    placeholder="+225 01 02 03 04 05"
+                    className="w-full h-9 px-2.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 outline-none"
+                  />
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Comment le client prévoit de payer ?</label>
-                <select 
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="form-control h-10 text-sm rounded-lg border-slate-200 bg-white"
+                <input 
+                  type="text"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Notes complémentaires (ex: accord verbal de paiement en 2 tranches...)"
+                  className="w-full h-8 px-2.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Colonne Grand Total & Validation (5 cols) */}
+            <div className="md:col-span-5 flex flex-col justify-end space-y-3 bg-white p-4 rounded-xl border-2 border-blue-200 shadow-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-slate-500 uppercase">TOTAL GÉNÉRAL :</span>
+                <span className="text-2xl font-black text-blue-600 font-mono">
+                  {formatAfricanCurrency(totalGrossAmount, currency)}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                <Link 
+                  href="/credit"
+                  className="w-1/3 h-11 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center justify-center transition"
                 >
-                  <option value="Espèces (Paiement physique en boutique)">Espèces (Paiement physique en boutique)</option>
-                  <option value="Wave Money">Wave Money</option>
-                  <option value="Orange Money">Orange Money</option>
-                  <option value="MTN MoMo">MTN MoMo</option>
-                  <option value="Moov Money">Moov Money</option>
-                  <option value="Virement Bancaire">Virement Bancaire</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Numéro / Compte de paiement client (optionnel)</label>
-                <input 
-                  type="text"
-                  value={paymentAccount}
-                  onChange={(e) => setPaymentAccount(e.target.value)}
-                  placeholder="Numéro Wave / MoMo ou RIB"
-                  className="form-control h-10 text-sm rounded-lg border-slate-200 bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Date limite de remboursement *</label>
-                <input 
-                  required
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="form-control h-10 text-sm rounded-lg border-slate-200 font-bold text-blue-600 bg-white"
-                />
-              </div>
-            </div>
-
-            {/* Right: Garantie (optionnel) */}
-            <div className="bg-slate-50/80 border border-slate-200 rounded-xl p-4 space-y-3.5">
-              <div className="text-sm font-extrabold text-slate-900 flex items-center gap-2">
-                <ShieldCheck size={17} className="text-blue-600" /> Garantie <span className="text-xs text-slate-400 font-medium">(optionnel)</span>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Nom du garant</label>
-                <input 
-                  type="text"
-                  value={guarantorName}
-                  onChange={(e) => setGuarantorName(e.target.value)}
-                  placeholder="Ex: KONE Drissa"
-                  className="form-control h-10 text-sm rounded-lg border-slate-200 bg-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Téléphone du garant</label>
-                <input 
-                  type="tel"
-                  value={guarantorPhone}
-                  onChange={(e) => setGuarantorPhone(e.target.value)}
-                  placeholder="+225 01 02 03 04 05"
-                  className="form-control h-10 text-sm rounded-lg border-slate-200 bg-white"
-                />
+                  Annuler
+                </Link>
+                <button 
+                  type="submit"
+                  disabled={loading}
+                  className="w-2/3 h-11 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 transition cursor-pointer disabled:opacity-50"
+                >
+                  <Check size={18} className="stroke-[3]" />
+                  <span>{loading ? 'Enregistrement...' : 'Valider ce Crédit'}</span>
+                </button>
               </div>
             </div>
 
           </div>
+        </div>
 
-          {/* 5. Notes Card */}
-          <div>
-            <div className="text-sm font-extrabold text-slate-900 flex items-center gap-2 mb-1.5">
-              <FileText size={17} className="text-blue-600" /> Notes ou informations complémentaires <span className="text-xs text-slate-400 font-medium">(optionnel)</span>
-            </div>
-            <input 
-              type="text"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Toute information utile concernant cette vente à crédit..."
-              className="form-control h-10 text-sm rounded-lg border-slate-200"
-            />
-          </div>
-
-          {/* 6. Bottom Actions */}
-          <div className="flex justify-end items-center gap-3 pt-3 border-t border-slate-100">
-            <Link 
-              href="/credit"
-              className="btn btn-outline bg-white border-slate-300 text-slate-600 hover:text-slate-900 px-6 py-2 rounded-xl text-sm font-bold shadow-sm"
-            >
-              Annuler
-            </Link>
-            <button 
-              type="submit"
-              disabled={loading}
-              className="btn bg-blue-600 hover:bg-blue-700 text-white px-8 py-2.5 rounded-xl text-sm font-extrabold flex items-center gap-2 shadow-md shadow-blue-600/20 transition disabled:opacity-50"
-            >
-              <Check size={18} /> {loading ? 'Enregistrement...' : 'Enregistrer la vente à crédit'}
-            </button>
-          </div>
-
-        </form>
-
-      </div>
+      </form>
     </div>
   );
 }
