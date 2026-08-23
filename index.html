@@ -2346,55 +2346,97 @@
               </button>
             </div>
 
-            <!-- LIGNE BLEUE PERMANENTE : NOUVELLE VENTE (SAISIE RAPIDE XXL GRAND FORMAT) -->
-            <div style="background:#EFF6FF;border-top:2.5px solid #2563EB;padding:16px 20px;">
+            <!-- LIGNE BLEUE PERMANENTE : NOUVELLE VENTE (GRAND FORMAT RECTANGULAIRE VERTICAL + CATALOGUE TAC) -->
+            <div style="background:#EFF6FF;border-top:3px solid #2563EB;padding:18px 22px;border-radius:0 0 16px 16px;">
               
               <!-- Titre de la ligne -->
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
-                <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:900;color:#1D4ED8;text-transform:uppercase;letter-spacing:0.5px;">
-                  <i data-lucide="zap" style="width:15px;height:15px;"></i>
-                  <span>NOUVELLE VENTE — Saisissez l'article et validez avec Entrée</span>
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;font-weight:900;color:#1D4ED8;text-transform:uppercase;letter-spacing:0.5px;">
+                  <i data-lucide="zap" style="width:16px;height:16px;"></i>
+                  <span>NOUVELLE VENTE — Saisissez ou choisissez l'article dans la liste</span>
                 </div>
-                <div style="font-size:0.75rem;font-weight:700;color:#3B82F6;">
-                  Appuyez sur <kbd style="background:#FFFFFF;border:1px solid #93C5FD;padding:1px 5px;border-radius:4px;color:#1D4ED8;font-weight:900;">Entrée</kbd> pour valider
+                <div style="font-size:0.75rem;font-weight:700;color:#3B82F6;display:flex;align-items:center;gap:6px;">
+                  <span>Validation directe :</span>
+                  <kbd style="background:#FFFFFF;border:1px solid #93C5FD;padding:2px 7px;border-radius:6px;color:#1D4ED8;font-weight:900;box-shadow:0 1px 2px rgba(0,0,0,0.05);">Entrée ↵</kbd>
                 </div>
               </div>
 
-              <!-- Étage 1 : CHAMP ARTICLE GÉANT (PLEINE LARGEUR) -->
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <!-- Étage 1 : CHAMP ARTICLE GÉANT RECTANGULAIRE (HAUT ET LARGE) -->
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
                 
-                <!-- Horloge Live -->
-                <div id="inline-row-clock" style="font-family:monospace;font-weight:900;font-size:0.85rem;color:#1E293B;background:#FFFFFF;padding:10px 14px;border-radius:10px;border:1.5px solid #CBD5E1;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
-                  12:35:23
+                <!-- Horloge Live Stylisée -->
+                <div id="inline-row-clock" style="font-family:monospace;font-weight:900;font-size:0.9rem;color:#1E293B;background:#FFFFFF;padding:12px 14px;border-radius:12px;border:2px solid #CBD5E1;flex-shrink:0;box-shadow:0 2px 4px rgba(0,0,0,0.04);text-align:center;">
+                  13:14:24
                 </div>
 
-                <!-- CHAMP ARTICLE XXL : OCCUPE TOUT L'ESPACE DISPONIBLE -->
+                <!-- GRAND RECTANGLE VERTICAL DE SAISIE DE L'ARTICLE (TEXTAREA / INPUT ÉTENDU) -->
                 <div style="position:relative;flex:1;width:100%;">
-                  <input 
-                    type="text" 
+                  <textarea 
                     id="inline-row-item" 
-                    placeholder="Article / Marchandise vendue en détail... (ex: Sac de riz parfumé 50 kg — Qualité supérieure — Marque X)"
-                    style="width:100%;height:44px;padding:0 42px 0 14px;font-size:0.95rem;font-weight:800;color:#0F172A;background:#FFFFFF;border:2px solid #2563EB;border-radius:10px;outline:none;box-sizing:border-box;box-shadow:0 2px 8px rgba(37,99,235,0.12);transition:all 0.2s;"
+                    placeholder="Écrivez ici l'article ou la marchandise vendue en détail...&#10;(ex: Sac de riz parfumé 50 kg — Qualité supérieure — Marque Mémé / Huile 5L / Savon OMO...)"
+                    style="width:100%;height:76px;padding:12px 48px 12px 16px;font-size:0.98rem;font-weight:800;color:#0F172A;background:#FFFFFF;border:2.5px solid #2563EB;border-radius:12px;outline:none;box-sizing:border-box;box-shadow:0 3px 12px rgba(37,99,235,0.15);resize:none;line-height:1.4;transition:border-color 0.2s;"
                     onkeydown="handleInlineRowKeydown(event)"
                     autocomplete="off"
-                  >
+                  ></textarea>
+                  
+                  <!-- Micro Dictée Vocale -->
                   <button 
                     type="button" 
                     onclick="toggleSalesbookVoiceDictation()" 
-                    title="Dicter à la voix"
-                    style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:#EFF6FF;border:none;color:#2563EB;cursor:pointer;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background 0.2s;"
+                    title="Dicter l'article à la voix"
+                    style="position:absolute;right:10px;top:12px;background:#DBEAFE;border:none;color:#1D4ED8;cursor:pointer;padding:8px;border-radius:10px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"
                   >
-                    <i data-lucide="mic" style="width:18px;height:18px;"></i>
+                    <i data-lucide="mic" style="width:20px;height:20px;"></i>
                   </button>
                 </div>
 
               </div>
 
-              <!-- Étage 2 : DÉTAILS DU PRIX, QUANTITÉ, MODE & VALIDATION -->
+              <!-- Étage 2 : BARRE DE SÉLECTION RAPIDE "TAC !" (ARTICLES FRÉQUENTS DU COMMERCE) -->
+              <div style="margin-bottom:14px;background:rgba(255,255,255,0.8);border:1.5px solid #BFDBFE;border-radius:12px;padding:10px 14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                  <span style="font-size:0.72rem;font-weight:900;color:#1E40AF;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;gap:5px;">
+                    <span>⚡ AJOUT RAPIDE "TAC" — Cliquez sur un article fréquent pour le charger :</span>
+                  </span>
+                </div>
+                
+                <!-- Puces Interactives Cliquables "TAC" -->
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                  <button type="button" onclick="selectQuickProduct('Sac de Riz 50kg — Parfumé Supérieur', 24500)" style="background:#FFFFFF;border:1.5px solid #93C5FD;color:#1E3A8A;padding:5px 11px;border-radius:8px;font-size:0.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 1px 2px rgba(0,0,0,0.05);transition:all 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#FFFFFF'">
+                    <span>🌾 Sac de Riz 50kg</span> <strong style="color:#2563EB;">(24 500 F)</strong>
+                  </button>
+
+                  <button type="button" onclick="selectQuickProduct('Huile Végétale Dinor 5L', 6500)" style="background:#FFFFFF;border:1.5px solid #93C5FD;color:#1E3A8A;padding:5px 11px;border-radius:8px;font-size:0.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 1px 2px rgba(0,0,0,0.05);transition:all 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#FFFFFF'">
+                    <span>🛢️ Huile Dinor 5L</span> <strong style="color:#2563EB;">(6 500 F)</strong>
+                  </button>
+
+                  <button type="button" onclick="selectQuickProduct('Carton Spaghetti Maman 500g', 7000)" style="background:#FFFFFF;border:1.5px solid #93C5FD;color:#1E3A8A;padding:5px 11px;border-radius:8px;font-size:0.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 1px 2px rgba(0,0,0,0.05);transition:all 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#FFFFFF'">
+                    <span>🍝 Carton Spaghetti</span> <strong style="color:#2563EB;">(7 000 F)</strong>
+                  </button>
+
+                  <button type="button" onclick="selectQuickProduct('Sucre Blanc 1kg St Louis', 900)" style="background:#FFFFFF;border:1.5px solid #93C5FD;color:#1E3A8A;padding:5px 11px;border-radius:8px;font-size:0.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 1px 2px rgba(0,0,0,0.05);transition:all 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#FFFFFF'">
+                    <span>🍬 Sucre 1kg</span> <strong style="color:#2563EB;">(900 F)</strong>
+                  </button>
+
+                  <button type="button" onclick="selectQuickProduct('Savon OMO 1kg Poudre', 1200)" style="background:#FFFFFF;border:1.5px solid #93C5FD;color:#1E3A8A;padding:5px 11px;border-radius:8px;font-size:0.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 1px 2px rgba(0,0,0,0.05);transition:all 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#FFFFFF'">
+                    <span>🧼 Savon OMO 1kg</span> <strong style="color:#2563EB;">(1 200 F)</strong>
+                  </button>
+
+                  <button type="button" onclick="selectQuickProduct('Lait Bonnet Rouge 410g', 600)" style="background:#FFFFFF;border:1.5px solid #93C5FD;color:#1E3A8A;padding:5px 11px;border-radius:8px;font-size:0.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 1px 2px rgba(0,0,0,0.05);transition:all 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#FFFFFF'">
+                    <span>🥛 Lait 410g</span> <strong style="color:#2563EB;">(600 F)</strong>
+                  </button>
+
+                  <button type="button" onclick="selectQuickProduct('Pack Eau Minérale 1.5L', 2200)" style="background:#FFFFFF;border:1.5px solid #93C5FD;color:#1E3A8A;padding:5px 11px;border-radius:8px;font-size:0.76rem;font-weight:800;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 1px 2px rgba(0,0,0,0.05);transition:all 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='#FFFFFF'">
+                    <span>💧 Eau 1.5L</span> <strong style="color:#2563EB;">(2 200 F)</strong>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Étage 3 : DÉTAILS DU PRIX, QUANTITÉ, MODE & BOUTON VALIDATION -->
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 
                 <!-- Quantité -->
-                <div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;padding:2px 8px;height:40px;box-sizing:border-box;">
+                <div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;padding:2px 10px;height:42px;box-sizing:border-box;">
                   <span style="font-size:0.75rem;font-weight:800;color:#64748B;text-transform:uppercase;">Qté</span>
                   <input 
                     type="number" 
@@ -2402,14 +2444,14 @@
                     value="1" 
                     min="1" 
                     step="any"
-                    style="width:50px;border:none;outline:none;font-weight:900;font-size:0.9rem;text-align:center;color:#0F172A;background:transparent;"
+                    style="width:55px;border:none;outline:none;font-weight:900;font-size:0.95rem;text-align:center;color:#0F172A;background:transparent;"
                     onkeydown="handleInlineRowKeydown(event)"
                     oninput="updateInlineRowTotalPreview()"
                   >
                 </div>
 
                 <!-- Prix Unitaire -->
-                <div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;padding:2px 10px;height:40px;box-sizing:border-box;min-width:140px;flex:1;max-width:200px;">
+                <div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;padding:2px 12px;height:42px;box-sizing:border-box;min-width:150px;flex:1;max-width:220px;">
                   <span style="font-size:0.75rem;font-weight:800;color:#64748B;text-transform:uppercase;">P.U.</span>
                   <input 
                     type="number" 
@@ -2417,16 +2459,16 @@
                     placeholder="0" 
                     min="0" 
                     step="any"
-                    style="width:100%;border:none;outline:none;font-weight:900;font-size:0.92rem;text-align:right;color:#0F172A;background:transparent;"
+                    style="width:100%;border:none;outline:none;font-weight:900;font-size:0.95rem;text-align:right;color:#0F172A;background:transparent;"
                     onkeydown="handleInlineRowKeydown(event)"
                     oninput="updateInlineRowTotalPreview()"
                   >
                 </div>
 
                 <!-- Total Auto Calculé -->
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#DBEAFE;border:1.5px solid #93C5FD;border-radius:10px;padding:0 12px;height:40px;box-sizing:border-box;min-width:150px;">
-                  <span style="font-size:0.72rem;font-weight:800;color:#1E40AF;text-transform:uppercase;">Total :</span>
-                  <div id="inline-row-total-preview" style="font-size:0.95rem;font-weight:900;color:#1E3A8A;font-family:monospace;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:#DBEAFE;border:1.5px solid #93C5FD;border-radius:10px;padding:0 14px;height:42px;box-sizing:border-box;min-width:160px;">
+                  <span style="font-size:0.74rem;font-weight:800;color:#1E40AF;text-transform:uppercase;">Total :</span>
+                  <div id="inline-row-total-preview" style="font-size:1rem;font-weight:900;color:#1E3A8A;font-family:monospace;">
                     0 FCFA
                   </div>
                 </div>
@@ -2435,7 +2477,7 @@
                 <div style="min-width:140px;flex:1;max-width:180px;">
                   <select 
                     id="inline-row-method" 
-                    style="width:100%;height:40px;font-size:0.86rem;font-weight:800;color:#1E293B;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;outline:none;padding:0 10px;box-sizing:border-box;cursor:pointer;"
+                    style="width:100%;height:42px;font-size:0.88rem;font-weight:800;color:#1E293B;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;outline:none;padding:0 10px;box-sizing:border-box;cursor:pointer;"
                     onkeydown="handleInlineRowKeydown(event)"
                   >
                     <option value="Espèces">💵 Espèces</option>
@@ -2453,7 +2495,7 @@
                     type="text" 
                     id="inline-row-client" 
                     placeholder="Client (optionnel)"
-                    style="width:100%;height:40px;padding:0 28px 0 10px;font-size:0.84rem;font-weight:700;color:#1E293B;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;outline:none;box-sizing:border-box;"
+                    style="width:100%;height:42px;padding:0 28px 0 10px;font-size:0.86rem;font-weight:700;color:#1E293B;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;outline:none;box-sizing:border-box;"
                     onkeydown="handleInlineRowKeydown(event)"
                   >
                   <i data-lucide="user" style="width:14px;height:14px;position:absolute;right:9px;top:50%;transform:translateY(-50%);color:#94A3B8;pointer-events:none;"></i>
@@ -2464,9 +2506,9 @@
                   type="button" 
                   onclick="submitSalesbookSale('inline_row')" 
                   title="Enregistrer cette vente (Entrée)"
-                  style="height:40px;padding:0 18px;background:#2563EB;color:#FFFFFF;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;flex-shrink:0;box-shadow:0 3px 10px rgba(37,99,235,0.3);font-weight:900;font-size:0.85rem;transition:all 0.2s;"
+                  style="height:42px;padding:0 22px;background:#2563EB;color:#FFFFFF;border:none;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;flex-shrink:0;box-shadow:0 3px 12px rgba(37,99,235,0.35);font-weight:900;font-size:0.9rem;transition:all 0.2s;"
                 >
-                  <i data-lucide="check" style="width:18px;height:18px;stroke-width:3;"></i>
+                  <i data-lucide="check" style="width:20px;height:20px;stroke-width:3;"></i>
                   <span>Valider (Entrée)</span>
                 </button>
 

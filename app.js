@@ -4132,24 +4132,39 @@ window.downloadOfficialReportPDF = function() {
 };
 
 // --------------------------------------------------------------------------
-// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — STYLE A + DICTÉE VOCALE
+// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — DÉMONSTRATION DU DIMANCHE & AJOUT RAPIDE "TAC"
 // --------------------------------------------------------------------------
 AppState.selectedBranch = localStorage.getItem('ct_selected_branch') || 'all';
 
+// Échantillon réaliste et complet du Dimanche 23 Août 2026
 const DEFAULT_SAMPLE_SALES = [
-  { id: 'sale_1', time: '12:32:15', date: '2026-08-23', item: 'Sac de Riz 50kg - Parfumé Qualité Supérieure', qty: 2, unitPrice: 25000, total: 50000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_2', time: '12:28:41', date: '2026-08-23', item: 'Huile Végétale 5 Litres - Crispa', qty: 3, unitPrice: 8000, total: 24000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_3', time: '12:24:03', date: '2026-08-23', item: 'Savon en Poudre 1kg - OMO', qty: 5, unitPrice: 1200, total: 6000, method: 'Wave Direct', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_4', time: '12:18:59', date: '2026-08-23', item: 'Sucre Blanc 1kg - Sucrivoire', qty: 4, unitPrice: 1000, total: 4000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_5', time: '12:15:45', date: '2026-08-23', item: 'Lait Bonnet Rouge 410g', qty: 2, unitPrice: 2500, total: 5000, method: 'Mobile Money', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_6', time: '12:11:30', date: '2026-08-23', item: 'Tomate Concentrée 70g - Sahel', qty: 6, unitPrice: 850, total: 5100, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_7', time: '12:08:12', date: '2026-08-23', item: 'Oignon Frais - Gros', qty: 1, unitPrice: 2000, total: 2000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_8', time: '12:05:27', date: '2026-08-23', item: 'Piment en Poudre 100g', qty: 1, unitPrice: 1000, total: 1000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' }
+  { id: 'sale_1', time: '13:28:15', date: '2026-08-23', item: 'Sac de Riz 50kg — Parfumé Qualité Supérieure (Marque Mémé)', qty: 2, unitPrice: 24500, total: 49000, method: 'Espèces', client: 'Mme Koné (Restaurant)', branch: 'Boutique Centrale' },
+  { id: 'sale_2', time: '13:15:40', date: '2026-08-23', item: 'Huile Végétale Dinor 5 Litres (Bidon renforcé)', qty: 3, unitPrice: 6500, total: 19500, method: 'Wave Direct', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_3', time: '12:54:12', date: '2026-08-23', item: 'Carton Spaghetti Maman 500g (20 paquets)', qty: 2, unitPrice: 7000, total: 14000, method: 'Mobile Money', client: 'Kouamé Épicerie', branch: 'Boutique Centrale' },
+  { id: 'sale_4', time: '12:40:05', date: '2026-08-23', item: 'Savon en Poudre OMO 1kg (Lavage Express)', qty: 6, unitPrice: 1200, total: 7200, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_5', time: '12:22:30', date: '2026-08-23', item: 'Sucre Blanc en Morceaux St Louis 1kg', qty: 5, unitPrice: 900, total: 4500, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_6', time: '11:58:19', date: '2026-08-23', item: 'Lait Concentré Sucré Bonnet Rouge 410g', qty: 12, unitPrice: 600, total: 7200, method: 'Wave Direct', client: 'Cafétéria du Marché', branch: 'Boutique Centrale' },
+  { id: 'sale_7', time: '11:35:00', date: '2026-08-23', item: 'Pack Eau Minérale AWA 1.5L (Pack de 6 bouteilles)', qty: 4, unitPrice: 2200, total: 8800, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_8', time: '11:10:44', date: '2026-08-23', item: 'Boîte de Tomate Concentrée Gino 400g', qty: 8, unitPrice: 650, total: 5200, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_9', time: '10:45:10', date: '2026-08-23', item: 'Sac d\'Oignons Violets de Galmi 25kg', qty: 1, unitPrice: 18500, total: 18500, method: 'Mobile Money', client: 'Traoré Grossiste', branch: 'Boutique Centrale' },
+  { id: 'sale_10', time: '10:12:05', date: '2026-08-23', item: 'Bidon d\'Huile de Palme Raffinée 25 Litres', qty: 1, unitPrice: 26000, total: 26000, method: 'Espèces', client: 'Mme Bamba', branch: 'Boutique Centrale' }
 ];
 
-// Initialisation des ventes du jour (données réelles sauvegardées ou échantillon réaliste)
+// Catalogue d'articles fréquents pour ajout instantané en 1 clic ("TAC !")
+window.QUICK_ARTICLES_CATALOG = [
+  { item: 'Sac de Riz 50kg — Parfumé Supérieur', price: 24500, icon: '🌾' },
+  { item: 'Huile Végétale Dinor 5L', price: 6500, icon: '🛢️' },
+  { item: 'Carton Spaghetti Maman 500g', price: 7000, icon: '🍝' },
+  { item: 'Sucre Blanc 1kg St Louis', price: 900, icon: '🍬' },
+  { item: 'Savon OMO 1kg Poudre', price: 1200, icon: '🧼' },
+  { item: 'Lait Bonnet Rouge 410g', price: 600, icon: '🥛' },
+  { item: 'Pack Eau Minérale 1.5L', price: 2200, icon: '💧' },
+  { item: 'Bidon Huile 25L', price: 26000, icon: '🛢️' }
+];
+
+// Initialisation des ventes du jour (données réelles sauvegardées ou échantillon réaliste du dimanche)
 try {
-  const saved = localStorage.getItem('ct_daily_sales_v2') || localStorage.getItem('ct_daily_sales');
+  const saved = localStorage.getItem('ct_daily_sales_v2');
   if (saved) {
     const parsed = JSON.parse(saved);
     AppState.sales = Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_SAMPLE_SALES;
@@ -4162,7 +4177,6 @@ try {
 
 function saveSalesToStorage() {
   localStorage.setItem('ct_daily_sales_v2', JSON.stringify(AppState.sales));
-  localStorage.setItem('ct_daily_sales', JSON.stringify(AppState.sales));
 }
 
 // Horloge temps réel pour l'en-tête du cahier et la ligne bleue
@@ -4179,7 +4193,7 @@ setInterval(() => {
 window.setSalesbookTodayDate = function() {
   const datePicker = document.getElementById('salesbook-date-picker');
   if (datePicker) {
-    datePicker.value = new Date().toISOString().split('T')[0];
+    datePicker.value = '2026-08-23';
     renderDailySalesBook();
   }
 };
@@ -4187,9 +4201,31 @@ window.setSalesbookTodayDate = function() {
 window.setSalesbookYesterdayDate = function() {
   const datePicker = document.getElementById('salesbook-date-picker');
   if (datePicker) {
-    const yesterday = new Date(Date.now() - 86400000);
-    datePicker.value = yesterday.toISOString().split('T')[0];
+    datePicker.value = '2026-08-22';
     renderDailySalesBook();
+  }
+};
+
+// ==========================================================================
+// FONCTION AJOUT INSTANTANÉ EN 1 CLIC ("TAC !") DEPUIS LE CATALOGUE RAPIDE
+// ==========================================================================
+window.selectQuickProduct = function(item, unitPrice, autoSubmit = false) {
+  const itemInput = document.getElementById('inline-row-item');
+  const qtyInput = document.getElementById('inline-row-qty');
+  const priceInput = document.getElementById('inline-row-price');
+
+  if (itemInput) itemInput.value = item;
+  if (qtyInput) qtyInput.value = '1';
+  if (priceInput) priceInput.value = unitPrice;
+
+  window.updateInlineRowTotalPreview();
+
+  if (autoSubmit) {
+    window.submitSalesbookSale('inline_row');
+  } else {
+    // Focus sur la quantité ou le bouton valider pour aller ultra vite
+    priceInput?.focus();
+    showToast(`⚡ Article sélectionné : "${item}" (${Number(unitPrice).toLocaleString('fr-FR')} FCFA). Appuyez sur Entrée pour valider.`, "info");
   }
 };
 
@@ -4223,7 +4259,7 @@ window.toggleSalesbookVoiceDictation = function() {
 
     salesbookSpeechRecognizer.onstart = function() {
       isVoiceDictationActive = true;
-      showToast("🎙️ Parlez maintenant (ex: Sac de riz 50kg)...", "info");
+      showToast("🎙️ Parlez maintenant (ex: Sac de riz 50kg 24500)...", "info");
     };
 
     salesbookSpeechRecognizer.onresult = function(event) {
@@ -4253,7 +4289,7 @@ window.toggleSalesbookVoiceDictation = function() {
 
 // Validation et enregistrement d'une vente (saisie continue)
 window.handleInlineRowKeydown = function(e) {
-  if (e.key === 'Enter') {
+  if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
     submitSalesbookSale('inline_row');
   }
@@ -4265,7 +4301,7 @@ window.updateInlineRowTotalPreview = function() {
   const total = qty * price;
   const previewEl = document.getElementById('inline-row-total-preview');
   if (previewEl) {
-    previewEl.textContent = total > 0 ? total.toLocaleString('fr-FR') : '0';
+    previewEl.textContent = total > 0 ? `${total.toLocaleString('fr-FR')} FCFA` : '0 FCFA';
   }
 };
 
@@ -4284,7 +4320,7 @@ window.submitSalesbookSale = function(source = 'inline_row') {
   const branch = AppState.selectedBranch === 'all' ? 'Boutique Centrale' : (AppState.selectedBranch || 'Boutique Centrale');
 
   if (!item) {
-    showToast("Veuillez saisir ou dicter l'article vendu.", "error");
+    showToast("Veuillez saisir, choisir ou dicter l'article vendu.", "error");
     itemInput?.focus();
     return;
   }
@@ -4298,7 +4334,7 @@ window.submitSalesbookSale = function(source = 'inline_row') {
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   const datePicker = document.getElementById('salesbook-date-picker');
-  const dateStr = datePicker?.value || now.toISOString().split('T')[0];
+  const dateStr = datePicker?.value || '2026-08-23';
   const total = qty * unitPrice;
 
   const newSale = {
@@ -4324,7 +4360,7 @@ window.submitSalesbookSale = function(source = 'inline_row') {
   if (priceInput) priceInput.value = '';
   if (clientInput) clientInput.value = '';
   const previewEl = document.getElementById('inline-row-total-preview');
-  if (previewEl) previewEl.textContent = '0';
+  if (previewEl) previewEl.textContent = '0 FCFA';
 
   renderDailySalesBook();
 
@@ -4336,7 +4372,7 @@ window.submitSalesbookSale = function(source = 'inline_row') {
     }
   }, 30);
 
-  showToast(`✓ Vente enregistrée : ${item} (${Number(total).toLocaleString('fr-FR')} FCFA) !`, "success");
+  showToast(`⚡ Vente enregistrée avec succès : ${item} (${Number(total).toLocaleString('fr-FR')} FCFA) !`, "success");
 };
 
 // Suppression d'un article

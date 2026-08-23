@@ -745,43 +745,48 @@ export default function VentesPage() {
           </div>
         )}
 
-        {/* 4. THE LIVE FAST INLINE ENTRY ROW (XXL ULTRA-SPACIOUS ARTICLE INPUT) */}
+        {/* 4. THE LIVE FAST INLINE ENTRY ROW (XXL ULTRA-SPACIOUS VERTICAL TEXTAREA & TAC QUICK CHIPS) */}
         <div className="p-4 sm:p-5 bg-blue-50/50 border-t-2 border-blue-600 no-print rounded-b-2xl">
           
           {/* Header Banner */}
           <div className="flex items-center justify-between gap-2 text-blue-700 text-xs font-extrabold uppercase tracking-wide mb-3">
             <div className="flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-blue-600" />
-              <span>NOUVELLE VENTE — Saisissez l&apos;article et validez avec Entrée</span>
+              <span>NOUVELLE VENTE — Saisissez ou choisissez l&apos;article dans la liste</span>
             </div>
-            <span className="hidden sm:inline-block text-[11px] font-bold text-blue-600 bg-white px-2.5 py-1 rounded-md border border-blue-200">
-              Appuyez sur <strong className="text-blue-700 font-black">Entrée</strong> pour valider
+            <span className="hidden sm:inline-block text-[11px] font-bold text-blue-600 bg-white px-2.5 py-1 rounded-md border border-blue-200 shadow-sm">
+              Validation directe : <strong className="text-blue-700 font-black">Entrée ↵</strong>
             </span>
           </div>
 
-          {/* Étage 1 : CHAMP ARTICLE GÉANT (PLEINE LARGEUR) */}
-          <div className="flex items-center gap-3 mb-3">
+          {/* Étage 1 : CHAMP ARTICLE GÉANT RECTANGULAIRE VERTICAL (TEXTAREA HAUT ET CONFORTABLE) */}
+          <div className="flex items-start gap-3 mb-3">
             
             {/* Timestamp Badge */}
-            <div className="hidden sm:flex items-center justify-center px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl font-mono text-xs font-black text-slate-800 shrink-0 shadow-sm">
-              {currentTime || '12:35:23'}
+            <div className="hidden sm:flex items-center justify-center px-3.5 py-3 bg-white border-2 border-slate-300 rounded-xl font-mono text-xs font-black text-slate-800 shrink-0 shadow-sm">
+              {currentTime || '13:14:24'}
             </div>
 
-            {/* GIGANTIC ARTICLE INPUT TAKING 100% OF WIDTH */}
+            {/* GIGANTIC VERTICAL ARTICLE TEXTAREA */}
             <div className="relative flex-1 w-full">
-              <input 
-                ref={itemInputRef}
-                type="text"
+              <textarea 
+                ref={itemInputRef as any}
+                rows={2}
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Article / Marchandise vendue en détail... (ex: Sac de riz parfumé 50 kg — Qualité supérieure — Marque X)"
-                className="w-full pl-4 pr-12 py-3 bg-white border-2 border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-xl text-sm font-extrabold text-slate-900 placeholder-slate-400 shadow-md shadow-blue-500/10 outline-none transition"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAddSale();
+                  }
+                }}
+                placeholder="Écrivez ici l'article ou la marchandise vendue en détail...&#10;(ex: Sac de riz parfumé 50 kg — Qualité supérieure — Marque Mémé / Huile Dinor 5L...)"
+                className="w-full pl-4 pr-12 py-2.5 bg-white border-2 border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-xl text-sm font-black text-slate-900 placeholder-slate-400 shadow-md shadow-blue-500/10 outline-none resize-none transition"
               />
               <button
                 type="button"
                 onClick={handleVoiceInput}
-                className={`absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-lg transition ${
+                className={`absolute right-3 top-3 p-2 rounded-lg transition ${
                   isListening 
                     ? 'bg-red-500 text-white animate-pulse' 
                     : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
@@ -794,7 +799,40 @@ export default function VentesPage() {
 
           </div>
 
-          {/* Étage 2 : DÉTAILS DU PRIX, QUANTITÉ, MODE & VALIDATION */}
+          {/* Étage 2 : BARRE DE SÉLECTION RAPIDE "TAC !" (ARTICLES FRÉQUENTS) */}
+          <div className="mb-3.5 p-2.5 bg-white/90 border border-blue-200 rounded-xl">
+            <div className="text-[11px] font-black text-blue-800 uppercase tracking-wider mb-2">
+              ⚡ Ajout rapide &quot;TAC&quot; — Cliquez sur un article fréquent :
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {[
+                { name: 'Sac de Riz 50kg — Parfumé Supérieur', price: '24500', icon: '🌾' },
+                { name: 'Huile Végétale Dinor 5L', price: '6500', icon: '🛢️' },
+                { name: 'Carton Spaghetti Maman 500g', price: '7000', icon: '🍝' },
+                { name: 'Sucre Blanc 1kg St Louis', price: '900', icon: '🍬' },
+                { name: 'Savon OMO 1kg Poudre', price: '1200', icon: '🧼' },
+                { name: 'Lait Bonnet Rouge 410g', price: '600', icon: '🥛' },
+                { name: 'Pack Eau Minérale 1.5L', price: '2200', icon: '💧' },
+              ].map((p, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setItemName(p.name);
+                    setUnitPrice(p.price);
+                    setQty(1);
+                    priceInputRef.current?.focus();
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-400 text-slate-800 text-xs font-bold rounded-lg shadow-xs transition active:scale-95 cursor-pointer"
+                >
+                  <span>{p.icon} {p.name.split('—')[0]}</span>
+                  <span className="text-blue-600 font-extrabold">({parseInt(p.price).toLocaleString('fr-FR')} F)</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Étage 3 : DÉTAILS DU PRIX, QUANTITÉ, MODE & VALIDATION */}
           <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
             
             {/* QTY INPUT */}
@@ -867,7 +905,7 @@ export default function VentesPage() {
             <button
               type="button"
               onClick={handleAddSale}
-              className="h-10 px-5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shrink-0 shadow-md shadow-blue-600/30 transition"
+              className="h-10 px-5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs sm:text-sm rounded-xl flex items-center justify-center gap-2 shrink-0 shadow-md shadow-blue-600/30 transition cursor-pointer"
               title="Valider et enregistrer (Touche Entrée)"
             >
               <Check className="w-4 h-4 stroke-[3]" />
