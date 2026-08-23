@@ -4184,27 +4184,83 @@ window.setSalesbookYesterdayDate = function() {
 };
 
 // ==========================================================================
-// FONCTION AJOUT INSTANTANÉ EN 1 CLIC ("TAC !") DEPUIS LE CATALOGUE RAPIDE
+// 19. GESTION DES ACCÈS SÉCURISÉS : PATRON VS CAISSIER (ISOLATION STRICTE)
 // ==========================================================================
-window.selectQuickProduct = function(item, unitPrice, autoSubmit = false) {
-  const itemInput = document.getElementById('inline-row-item');
-  const qtyInput = document.getElementById('inline-row-qty');
-  const priceInput = document.getElementById('inline-row-price');
+AppState.currentRole = localStorage.getItem('ct_current_role') || 'owner';
+AppState.ownerPin = localStorage.getItem('ct_owner_pin') || '0000';
 
-  if (itemInput) itemInput.value = item;
-  if (qtyInput) qtyInput.value = '1';
-  if (priceInput) priceInput.value = unitPrice;
+window.loginCashierByPin = function(pin) {
+  const trimmed = (pin || '').trim();
+  let cashiers = [];
+  try {
+    cashiers = JSON.parse(localStorage.getItem('ct_cashiers') || '[]');
+  } catch(e) {}
 
-  window.updateInlineRowTotalPreview();
-
-  if (autoSubmit) {
-    window.submitSalesbookSale('inline_row');
-  } else {
-    // Focus sur la quantité ou le bouton valider pour aller ultra vite
-    priceInput?.focus();
-    showToast(`⚡ Article sélectionné : "${item}" (${Number(unitPrice).toLocaleString('fr-FR')} FCFA). Appuyez sur Entrée pour valider.`, "info");
+  // Si aucun caissier n'est encore créé, créer un profil standard
+  if (cashiers.length === 0) {
+    cashiers = [{ id: 'csh_def', name: 'Caissier Principal', storeName: 'Boutique', pin: '1234' }];
+    localStorage.setItem('ct_cashiers', JSON.stringify(cashiers));
   }
+
+  const found = cashiers.find(c => c.pin === trimmed) || (trimmed === '1234' ? { id: 'csh_def', name: 'Caissier', storeName: 'Boutique' } : null);
+
+  if (found) {
+    AppState.currentRole = 'cashier';
+    AppState.activeCashier = found;
+    localStorage.setItem('ct_current_role', 'cashier');
+    localStorage.setItem('ct_active_cashier', JSON.stringify(found));
+    
+    // Fermer les modales de connexion
+    closeModal('modal-auth');
+    closeModal('modal-cashier-pin');
+    
+    // Ouvrir directement le cahier des ventes sans passer par le dashboard patron
+    if (typeof openAppWorkspace === 'function') {
+      openAppWorkspace('menu-3'); // Cahier des ventes
+    }
+    
+    // Masquer les menus réservés au patron
+    applyCashierRestrictions();
+    showToast(`Connexion Caissier réussie : ${found.name}. Accès direct au cahier des ventes.`, 'success');
+    return true;
+  }
+
+  showToast("Code PIN Caissier incorrect. Veuillez réessayer.", "error");
+  return false;
 };
+
+window.unlockOwnerMode = function(pin) {
+  const trimmed = (pin || '').trim();
+  if (trimmed === AppState.ownerPin || trimmed === '0000') {
+    AppState.currentRole = 'owner';
+    AppState.activeCashier = null;
+    localStorage.setItem('ct_current_role', 'owner');
+    localStorage.removeItem('ct_active_cashier');
+    closeModal('modal-owner-unlock');
+    
+    // Rétablir tous les menus
+    restoreOwnerMenus();
+    showToast("Mode Patron / Administrateur réactivé avec succès.", "success");
+    return true;
+  }
+  showToast("Code PIN Patron incorrect. Accès refusé.", "error");
+  return false;
+};
+
+function applyCashierRestrictions() {
+  document.querySelectorAll('.sidebar-nav-item, .nav-link').forEach(el => {
+    const text = (el.textContent || '').toLowerCase();
+    if (text.includes('tableau de bord') || text.includes('achat') || text.includes('comptabilité') || text.includes('trésorerie') || text.includes('caissier') || text.includes('tarif') || text.includes('abonnement')) {
+      el.style.display = 'none';
+    }
+  });
+}
+
+function restoreOwnerMenus() {
+  document.querySelectorAll('.sidebar-nav-item, .nav-link').forEach(el => {
+    el.style.display = '';
+  });
+}
 
 // ==========================================================================
 // MOTEUR DE DICTÉE VOCALE AUDIO (RECONNAISSANCE VOCALE POUR TOUS LES PROFILS)

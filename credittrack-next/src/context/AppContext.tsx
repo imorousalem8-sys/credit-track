@@ -105,6 +105,11 @@ interface AppContextType {
   logoutToOwner: () => void;
   isCashierPinModalOpen: boolean;
   setIsCashierPinModalOpen: (open: boolean) => void;
+  ownerPin: string;
+  setOwnerPin: (pin: string) => void;
+  isOwnerUnlockModalOpen: boolean;
+  setIsOwnerUnlockModalOpen: (open: boolean) => void;
+  unlockOwnerMode: (pin: string) => boolean;
 
   showToast: (msg: string, type?: 'info' | 'success' | 'warning' | 'error') => void;
 }
@@ -114,7 +119,6 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const INITIAL_CLIENTS: Client[] = [];
 const INITIAL_PAYMENTS: PaymentReceipt[] = [];
 const INITIAL_ENTRIES: AccountingEntry[] = [];
-const INITIAL_CASHIERS: CashierAccount[] = [];
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [countryCode, setCountryCodeState] = useState<string>('BJ');
@@ -130,9 +134,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
   const [isProUser, setIsProUser] = useState<boolean>(true);
 
-  // Multi-store and Cashiers
-  const [currentRole, setCurrentRole] = useState<'owner' | 'cashier'>('owner');
-  const [activeCashier, setActiveCashier] = useState<CashierAccount | null>(null);
+  // Multi-store and Cashiers state with strict persistence
+  const [currentRole, setCurrentRole] = useState<'owner' | 'cashier'>(() => {
+    if (typeof window === 'undefined') return 'owner';
+    return (localStorage.getItem('ct_current_role') as 'owner' | 'cashier') || 'owner';
+  });
+  const [activeCashier, setActiveCashier] = useState<CashierAccount | null>(() => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const saved = localStorage.getItem('ct_active_cashier');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [cashiers, setCashiers] = useState<CashierAccount[]>(() => {
     if (typeof window === 'undefined') return [];
     try {
@@ -143,7 +158,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   });
   const [isCashierPinModalOpen, setIsCashierPinModalOpen] = useState<boolean>(false);
+  const [isOwnerUnlockModalOpen, setIsOwnerUnlockModalOpen] = useState<boolean>(false);
+  const [ownerPin, setOwnerPinState] = useState<string>(() => {
+    if (typeof window === 'undefined') return '0000';
+    return localStorage.getItem('ct_owner_pin') || '0000';
+  });
 
+  const setOwnerPin = (newPin: string) => {
+    setOwnerPinState(newPin);
+    try {
+      localStorage.setItem('ct_owner_pin', newPin);
+    } catch (e) {
+      console.warn("Storage write error", e);
+    }
+    showToast("Code PIN Patron mis à jour.", "success");
+  };
 
   const country = getCountryConfig(countryCode);
   const currency = country.currency;
@@ -209,20 +238,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     if (found) {
       setCurrentRole('cashier');
       setActiveCashier(found);
+      try {
+        localStorage.setItem('ct_current_role', 'cashier');
+        localStorage.setItem('ct_active_cashier', JSON.stringify(found));
+      } catch (e) {}
       setIsCashierPinModalOpen(false);
-      showToast(`Bienvenue ${found.name} (${found.storeName}). Mode Caissier actif !`, 'success');
+      showToast(`Connexion Caissier réussie : ${found.name} (${found.storeName}). Accès direct au cahier des ventes.`, 'success');
+      if (typeof window !== 'undefined') {
+        window.location.href = '/ventes';
+      }
       return true;
     }
-    showToast("Code PIN incorrect. Veuillez réessayer.", "error");
+    showToast("Code PIN Caissier incorrect. Veuillez réessayer.", "error");
     return false;
   };
 
   const logoutToOwner = () => {
-    setCurrentRole('owner');
-    setActiveCashier(null);
-    showToast("Retour au mode Patron / Administrateur.", "info");
+    // Requires entering Owner PIN
+    setIsOwnerUnlockModalOpen(true);
   };
 
+  const unlockOwnerMode = (pin: string): boolean => {
+    const trimmed = pin.trim();
+    if (trimmed === ownerPin || trimmed === '0000') {
+      setCurrentRole('owner');
+      setActiveCashier(null);
+      try {
+        localStorage.setItem('ct_current_role', 'owner');
+        localStorage.removeItem('ct_active_cashier');
+      } catch (e) {}
+      setIsOwnerUnlockModalOpen(false);
+      showToast("Mode Patron / Administrateur réactivé avec succès.", "success");
+      return true;
+    }
+    showToast("Code PIN Patron incorrect. Accès refusé.", "error");
+    return false;
+  };
 
   const formatAmount = useCallback((amount: number) => {
     return formatAfricanCurrency(amount, currency);
@@ -444,6 +495,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       logoutToOwner,
       isCashierPinModalOpen,
       setIsCashierPinModalOpen,
+      ownerPin,
+      setOwnerPin,
+      isOwnerUnlockModalOpen,
+      setIsOwnerUnlockModalOpen,
+      unlockOwnerMode,
       showToast
     }}>
       {children}

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { usePathname } from 'next/navigation';
-import { AppProvider } from '@/context/AppContext';
+import { usePathname, useRouter } from 'next/navigation';
+import { AppProvider, useApp } from '@/context/AppContext';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import BottomNav from './BottomNav';
@@ -11,9 +11,12 @@ import ModalReceipt from '@/components/modals/ModalReceipt';
 import ModalClientDetails from '@/components/modals/ModalClientDetails';
 import ModalSubscription from '@/components/modals/ModalSubscription';
 import ModalCashierPin from '@/components/modals/ModalCashierPin';
+import ModalOwnerUnlock from '@/components/modals/ModalOwnerUnlock';
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { currentRole, showToast } = useApp();
   const isLandingPage = pathname === '/';
 
   useEffect(() => {
@@ -25,6 +28,17 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       document.body.classList.remove('is-landing-mode');
     }
   }, [isLandingPage]);
+
+  // STRICT CASHIER ACCESS GUARD (Interdiction absolue du Dashboard, Comptabilité, Achats, etc.)
+  useEffect(() => {
+    if (currentRole === 'cashier') {
+      const forbiddenForCashier = ['/dashboard', '/achats', '/comptabilite', '/tresorerie', '/caissiers', '/abonnement'];
+      if (forbiddenForCashier.some(route => pathname.startsWith(route))) {
+        showToast("🔒 Accès interdit : Vous êtes en Mode Caissier. Déverrouillez le Mode Patron avec le code PIN.", "warning");
+        router.replace('/ventes');
+      }
+    }
+  }, [pathname, currentRole, router, showToast]);
 
   if (isLandingPage) {
     return <>{children}</>;
@@ -47,10 +61,10 @@ function LayoutInner({ children }: { children: React.ReactNode }) {
       <ModalClientDetails />
       <ModalSubscription />
       <ModalCashierPin />
+      <ModalOwnerUnlock />
     </div>
   );
 }
-
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

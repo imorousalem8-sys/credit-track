@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useApp } from '@/context/AppContext';
 import {
   ShieldCheck,
   Users,
@@ -17,10 +18,14 @@ import {
   Lock,
   Smartphone,
   ChevronRight,
-  TrendingUp
+  TrendingUp,
+  Store,
+  Crown
 } from 'lucide-react';
 
 export default function LandingPage() {
+  const { setIsCashierPinModalOpen } = useApp();
+
   return (
     <div className="landing-page-root" style={{ background: '#0B1120', color: '#F8FAFC', minHeight: '100vh', width: '100%', overflowX: 'hidden' }}>
       
@@ -57,35 +62,60 @@ export default function LandingPage() {
               CréditTrack <span style={{ color: '#38BDF8', fontSize: '0.85rem' }}>PRO</span>
             </div>
             <div style={{ fontSize: '0.62rem', color: '#94A3B8', fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>
-              GESTION CRÉANCES & RECOUVREMENT
+              GESTION COMMERCE, CRÉANCES & CAISSES
             </div>
           </div>
         </div>
 
         {/* Nav Links (Desktop) */}
-        <nav className="landing-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+        <nav className="landing-nav-links" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <a href="#features" style={{ color: '#CBD5E1', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 600, transition: 'color 0.2s' }}>Fonctionnalités</a>
           <a href="#comparison" style={{ color: '#CBD5E1', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 600, transition: 'color 0.2s' }}>Comparatif</a>
           <a href="#pricing" style={{ color: '#CBD5E1', textDecoration: 'none', fontSize: '0.88rem', fontWeight: 600, transition: 'color 0.2s' }}>Tarifs</a>
+          
+          {/* Cashier Direct Login Button */}
+          <button
+            type="button"
+            onClick={() => setIsCashierPinModalOpen(true)}
+            style={{
+              background: 'rgba(245, 158, 11, 0.15)',
+              color: '#FBBF24',
+              border: '1.5px solid #F59E0B',
+              padding: '8px 16px',
+              borderRadius: '10px',
+              fontWeight: 800,
+              fontSize: '0.82rem',
+              cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Lock size={15} />
+            <span>Espace Caisse (PIN)</span>
+          </button>
+
+          {/* Owner Dashboard Access Button */}
           <Link
             href="/dashboard"
             className="btn-commencer-glow"
             style={{
               background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
               color: '#fff',
-              padding: '10px 22px',
+              padding: '10px 20px',
               borderRadius: '10px',
               fontWeight: 800,
-              fontSize: '0.88rem',
+              fontSize: '0.85rem',
               textDecoration: 'none',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px',
+              gap: '6px',
               boxShadow: '0 4px 16px rgba(37, 99, 235, 0.4)'
             }}
           >
-            <span>Accéder au Dashboard</span>
-            <ArrowRight size={16} />
+            <Crown size={15} />
+            <span>Espace Patron</span>
           </Link>
         </nav>
       </header>
@@ -110,62 +140,72 @@ export default function LandingPage() {
           textTransform: 'uppercase'
         }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38BDF8', display: 'inline-block', boxShadow: '0 0 8px #38BDF8' }}></span>
-          <span>GESTION DES CRÉANCES CLIENTS & RECOUVREMENT B2B</span>
+          <span>MULTI-MAGASINS & SOUS-COMPTES CAISSIERS SÉCURISÉS</span>
         </div>
 
         {/* Hero Title */}
         <h1 style={{ fontSize: 'clamp(2.2rem, 5vw, 3.8rem)', fontWeight: 800, lineHeight: 1.15, margin: '0 auto 20px', maxWidth: '960px', letterSpacing: '-1px' }}>
-          <span style={{ color: '#FFFFFF' }}>Zéro Créance Oubliée.</span><br />
+          <span style={{ color: '#FFFFFF' }}>Confiez la Caisse en Toute Sécurité.</span><br />
           <span style={{ background: 'linear-gradient(135deg, #38BDF8 0%, #2563EB 50%, #60A5FA 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Recouvrez Vos Factures 3x Plus Vite.
+            Gardez Vos Chiffres Confidentiels.
           </span>
         </h1>
 
         {/* Hero Subtitle */}
-        <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: '#94A3B8', maxWidth: '720px', margin: '0 auto 32px', lineHeight: 1.6 }}>
-          Remplacez les carnets manuels et sécurisez votre trésorerie d'entreprise. Suivez vos clients en temps réel, encaissez par <strong>Wave et Mobile Money</strong> et délivrez des reçus officiels certifiés.
+        <p style={{ fontSize: 'clamp(1rem, 2vw, 1.15rem)', color: '#94A3B8', maxWidth: '750px', margin: '0 auto 32px', lineHeight: 1.6 }}>
+          Vos vendeurs enregistrent les ventes en continu par <strong>Code PIN</strong> sans jamais accéder à vos marges, bilans ou finances globales. Le patron pilote l&apos;ensemble en temps réel depuis son bureau.
         </p>
 
         {/* Hero Actions */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '40px' }}>
+          
+          {/* Owner Button */}
           <Link
             href="/dashboard"
             style={{
               background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
               color: '#fff',
-              padding: '14px 32px',
+              padding: '14px 28px',
               borderRadius: '12px',
               fontWeight: 800,
-              fontSize: '1rem',
+              fontSize: '0.95rem',
               textDecoration: 'none',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '10px',
+              gap: '8px',
               boxShadow: '0 6px 24px rgba(37, 99, 235, 0.45)',
               transition: 'transform 0.2s ease, box-shadow 0.2s ease'
             }}
           >
-            <span>Ouvrir l'Espace Pro Démo</span>
-            <ArrowRight size={18} />
+            <Crown size={18} />
+            <span>Accéder à l&apos;Espace Patron</span>
+            <ArrowRight size={16} />
           </Link>
-          <a
-            href="#features"
+
+          {/* Cashier Direct Access */}
+          <button
+            type="button"
+            onClick={() => setIsCashierPinModalOpen(true)}
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
-              color: '#CBD5E1',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
+              background: 'linear-gradient(135deg, #D97706 0%, #B45309 100%)',
+              color: '#FFFFFF',
+              border: 'none',
               padding: '14px 28px',
               borderRadius: '12px',
-              fontWeight: 700,
-              fontSize: '1rem',
-              textDecoration: 'none',
+              fontWeight: 800,
+              fontSize: '0.95rem',
+              cursor: 'pointer',
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '8px'
+              gap: '8px',
+              boxShadow: '0 6px 24px rgba(217, 119, 6, 0.35)',
+              transition: 'all 0.2s ease'
             }}
           >
-            <span>Voir les Fonctionnalités</span>
-          </a>
+            <Lock size={18} />
+            <span>Connexion Caissier (Code PIN)</span>
+          </button>
+
         </div>
 
         {/* Payment badges */}

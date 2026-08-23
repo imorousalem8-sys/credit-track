@@ -33,7 +33,7 @@ export default function Sidebar() {
     logoutToOwner
   } = useApp();
 
-  const navigation = [
+  const ownerNavigation = [
     { name: 'Tableau de bord', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Clients & Solvabilité', href: '/clients', icon: Users },
     { name: 'Factures & Ventes', href: '/ventes', icon: ShoppingCart },
@@ -43,6 +43,13 @@ export default function Sidebar() {
     { name: 'Caissiers & Boutiques', href: '/caissiers', icon: Store },
     { name: 'Abonnement & Tarifs', href: '/abonnement', icon: Crown },
   ];
+
+  const cashierNavigation = [
+    { name: 'Cahier des Ventes', href: '/ventes', icon: ShoppingCart },
+    { name: 'Clients & Solvabilité', href: '/clients', icon: Users },
+  ];
+
+  const navigation = currentRole === 'cashier' ? cashierNavigation : ownerNavigation;
 
   const handleLinkClick = () => {
     setIsMobileMenuOpen(false);
@@ -89,26 +96,40 @@ export default function Sidebar() {
           </div>
         </div>
 
-        {/* Role Banner if in Cashier Mode */}
-        {currentRole === 'cashier' && activeCashier && (
-          <div style={{ margin: '12px 14px 4px 14px', background: '#FEF3C7', border: '1.5px solid #F59E0B', borderRadius: '12px', padding: '10px 12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: '#B45309', textTransform: 'uppercase' }}>
-                  ● Session Caissier
-                </span>
-                <div style={{ fontWeight: 800, fontSize: '0.82rem', color: '#0F172A' }}>{activeCashier.name}</div>
-                <div style={{ fontSize: '0.7rem', color: '#78350F' }}>{activeCashier.storeName}</div>
-              </div>
-              <button
-                type="button"
-                onClick={logoutToOwner}
-                title="Quitter le mode caissier"
-                style={{ background: '#F59E0B', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '6px', cursor: 'pointer' }}
-              >
-                <LogOut size={15} />
-              </button>
+        {/* Role Banner */}
+        {currentRole === 'cashier' ? (
+          <div style={{ margin: '12px 14px 8px 14px', background: '#FEF3C7', border: '1.5px solid #F59E0B', borderRadius: '12px', padding: '10px 12px' }}>
+            <div style={{ marginBottom: '8px' }}>
+              <span style={{ fontSize: '0.68rem', fontWeight: 900, color: '#B45309', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                🔒 Session Caissier
+              </span>
+              <div style={{ fontWeight: 800, fontSize: '0.84rem', color: '#0F172A' }}>{activeCashier?.name || 'Vendeur de Comptoir'}</div>
+              <div style={{ fontSize: '0.72rem', color: '#78350F' }}>{activeCashier?.storeName || 'Magasin'}</div>
             </div>
+            <button
+              type="button"
+              onClick={logoutToOwner}
+              title="Déverrouiller le mode patron avec le code PIN"
+              style={{ width: '100%', background: '#B45309', color: '#FFFFFF', border: 'none', borderRadius: '8px', padding: '6px 8px', fontSize: '0.74rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
+              <Lock size={13} />
+              <span>Déverrouiller Mode Patron</span>
+            </button>
+          </div>
+        ) : (
+          <div style={{ margin: '12px 14px 4px 14px', background: '#EFF6FF', border: '1.5px solid #BFDBFE', borderRadius: '12px', padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <span style={{ fontSize: '0.68rem', fontWeight: 900, color: '#1E40AF', textTransform: 'uppercase' }}>
+                👑 Mode Patron
+              </span>
+              <div style={{ fontWeight: 800, fontSize: '0.8rem', color: '#0F172A' }}>Gérant Principal</div>
+            </div>
+            <Link
+              href="/caissiers"
+              style={{ fontSize: '0.7rem', fontWeight: 800, color: '#2563EB', textDecoration: 'none', background: '#FFFFFF', padding: '4px 8px', borderRadius: '6px', border: '1px solid #93C5FD' }}
+            >
+              Gérer Caisses
+            </Link>
           </div>
         )}
 
@@ -133,24 +154,27 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {/* Quick Upgrade / Interactive Subscription Card */}
-        <div 
-          className="sidebar-pro-card"
-          onClick={() => setIsSubscriptionModalOpen(true)}
-          style={{ cursor: 'pointer', transition: 'transform 0.15s ease' }}
-          title="Cliquez pour gérer votre abonnement et forfaits"
-        >
-          <div className="pro-card-title">
-            <Sparkles size={16} className="text-amber-300" />
-            <span>Licence Pro Illimitée</span>
+        {/* Quick Upgrade / Interactive Subscription Card (Owner only) */}
+        {currentRole === 'owner' && (
+          <div 
+            className="sidebar-pro-card"
+            onClick={() => setIsSubscriptionModalOpen(true)}
+            style={{ cursor: 'pointer', transition: 'transform 0.15s ease' }}
+            title="Cliquez pour gérer votre abonnement et forfaits"
+          >
+            <div className="pro-card-title">
+              <Sparkles size={16} className="text-amber-300" />
+              <span>Licence Pro Illimitée</span>
+            </div>
+            <div className="pro-card-desc">
+              Régime fiscal : <strong>{country.system}</strong> (TVA {country.vatRate}%).
+            </div>
+            <div style={{ marginTop: '8px', fontSize: '0.72rem', color: '#FCD34D', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span>Gérer les forfaits</span>
+              <Crown size={13} />
+            </div>
           </div>
-          <div className="pro-card-desc">
-            Régime fiscal : <strong>{country.system}</strong> (TVA {country.vatRate}%).
-          </div>
-          <div style={{ marginTop: '8px', fontSize: '0.72rem', color: '#FCD34D', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span>Voir les forfaits & paiements</span> →
-          </div>
-        </div>
+        )}
 
         {/* User Footer Profile & Compliance */}
         <div className="sidebar-user-footer">
