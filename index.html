@@ -26,7 +26,7 @@
   <script>
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260822_v2.5.2";
+      const CURRENT_BUILD = "20260823_v3.0.0";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('serviceWorker' in navigator) {
@@ -81,9 +81,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260822_v2.5.2" defer></script>
-  <script src="app.js?v=20260822_v2.5.2" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260822_v2.5.2">
+  <script src="dataStore.js?v=20260823_v3.0.0" defer></script>
+  <script src="app.js?v=20260823_v3.0.0" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260823_v3.0.0">
 </head>
 <body class="is-landing-mode">
 
@@ -1984,49 +1984,63 @@
 
 
         <!-- ============================================================
-             VUE : CAHIER DES VENTES – AUJOURD'HUI (#menu-salesbook)
-             REPRODUCTION STRICTE & EXACTE DU DESIGN DU MOCKUP CLIENT
+             VUE : CAHIER DES VENTES DU JOUR (#menu-salesbook)
+             REGISTRE DE CAISSE NUMÉRIQUE UNIFIÉ — STYLE A PREMIUM
         ============================================================ -->
         <section id="menu-salesbook" class="view-container">
           
-          <!-- En-tête Supérieur : Titre, Date & Actions Clôture -->
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:20px;">
+          <!-- En-tête Supérieur : Titre, Horodatage Temps Réel & Actions Clôture -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:22px;">
             <div>
-              <h2 style="font-size:1.45rem;font-weight:900;margin:0 0 8px 0;color:#0F172A;">Cahier des Ventes – Aujourd'hui</h2>
-              <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                <div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:8px;padding:6px 12px;box-shadow:0 1px 2px rgba(0,0,0,0.03);">
-                  <input type="date" id="salesbook-date-picker" onchange="renderDailySalesBook()" style="border:none;outline:none;font-weight:700;font-size:0.84rem;color:#1E293B;background:transparent;cursor:pointer;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                <h2 style="font-size:1.55rem;font-weight:900;margin:0;color:#0F172A;letter-spacing:-0.5px;">Cahier des Ventes – Journal du Jour</h2>
+                <span class="salesbook-live-pill">
+                  <span class="pulse-green-dot"></span>
+                  <span>En temps réel</span>
+                </span>
+              </div>
+              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+                <!-- Sélecteur de date avec raccourcis rapides -->
+                <div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;padding:6px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+                  <i data-lucide="calendar" style="width:15px;height:15px;color:#2563EB;"></i>
+                  <input type="date" id="salesbook-date-picker" onchange="renderDailySalesBook()" style="border:none;outline:none;font-weight:800;font-size:0.86rem;color:#1E293B;background:transparent;cursor:pointer;">
                 </div>
-                <div style="display:flex;align-items:center;gap:10px;font-size:0.8rem;color:#64748B;font-weight:600;">
-                  <span><i data-lucide="clock" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:3px;"></i> Dernière mise à jour : <strong id="salesbook-live-time" style="color:#0F172A;">10:45:30</strong></span>
-                  <span style="display:inline-flex;align-items:center;gap:5px;color:#10B981;font-weight:800;background:#ECFDF5;padding:3px 8px;border-radius:9999px;font-size:0.75rem;">
-                    <span style="width:7px;height:7px;border-radius:50%;background:#10B981;display:inline-block;box-shadow:0 0 0 2px rgba(16,185,129,0.25);"></span>
-                    En temps réel
-                  </span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <button type="button" class="salesbook-chip-btn" onclick="setSalesbookTodayDate()" style="font-weight:800;padding:5px 12px;">Aujourd'hui</button>
+                  <button type="button" class="salesbook-chip-btn" onclick="setSalesbookYesterdayDate()" style="font-weight:700;padding:5px 12px;">Hier</button>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.82rem;color:#64748B;font-weight:700;">
+                  <i data-lucide="clock" style="width:14px;height:14px;color:#2563EB;"></i>
+                  <span>Dernière mise à jour : <strong id="salesbook-live-time" style="color:#0F172A;font-family:monospace;font-size:0.9rem;">--:--:--</strong></span>
                 </div>
               </div>
             </div>
 
-            <div style="display:flex;align-items:center;gap:10px;">
-              <button type="button" class="btn btn-outline" onclick="window.print()" style="display:flex;align-items:center;gap:6px;font-size:0.84rem;padding:9px 16px;border-radius:10px;font-weight:700;">
-                <i data-lucide="printer" style="width:16px;height:16px;"></i> Imprimer
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-outline" onclick="window.print()" style="display:flex;align-items:center;gap:8px;font-size:0.86rem;padding:10px 18px;border-radius:10px;font-weight:800;">
+                <i data-lucide="printer" style="width:16px;height:16px;"></i>
+                <span>Imprimer</span>
               </button>
-              <button type="button" class="btn btn-primary" onclick="openDailyClosingModal()" style="background:#10B981;border:none;color:#FFFFFF;padding:10px 18px;border-radius:10px;font-weight:800;font-size:0.86rem;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(16,185,129,0.3);">
+              <button type="button" class="btn btn-outline" onclick="exportSalesbookCSV()" style="display:flex;align-items:center;gap:8px;font-size:0.86rem;padding:10px 18px;border-radius:10px;font-weight:800;">
+                <i data-lucide="file-spreadsheet" style="width:16px;height:16px;color:#10B981;"></i>
+                <span>Exporter Excel</span>
+              </button>
+              <button type="button" class="btn btn-primary" onclick="openDailyClosingModal()" style="background:linear-gradient(135deg, #10B981 0%, #059669 100%);border:none;color:#FFFFFF;padding:10px 20px;border-radius:10px;font-weight:800;font-size:0.88rem;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(16,185,129,0.35);">
                 <i data-lucide="send" style="width:16px;height:16px;"></i>
                 <span>Clôturer &amp; Transmettre au Patron</span>
               </button>
             </div>
           </div>
 
-          <!-- 5 Cartes KPI Horizontales (Style A) -->
+          <!-- 5 Cartes KPI Horizontales (Style A Standard) -->
           <div class="salesbook-kpis-container">
             
             <!-- KPI 1 : Chiffre d'Affaires -->
             <div class="salesbook-kpi-card">
               <div class="salesbook-kpi-icon blue">
-                <i data-lucide="shopping-cart" style="width:22px;height:22px;"></i>
+                <i data-lucide="shopping-cart" style="width:24px;height:24px;"></i>
               </div>
-              <div>
+              <div style="min-width:0;">
                 <div class="salesbook-kpi-label">Chiffre d'Affaires</div>
                 <div id="salesbook-kpi-revenue" class="salesbook-kpi-val" style="color:#2563EB;">0 FCFA</div>
               </div>
@@ -2035,9 +2049,9 @@
             <!-- KPI 2 : Articles Vendus -->
             <div class="salesbook-kpi-card">
               <div class="salesbook-kpi-icon green">
-                <i data-lucide="package" style="width:22px;height:22px;"></i>
+                <i data-lucide="package" style="width:24px;height:24px;"></i>
               </div>
-              <div>
+              <div style="min-width:0;">
                 <div class="salesbook-kpi-label">Articles Vendus</div>
                 <div id="salesbook-kpi-items" class="salesbook-kpi-val" style="color:#10B981;">0</div>
               </div>
@@ -2046,9 +2060,9 @@
             <!-- KPI 3 : Espèces en Caisse -->
             <div class="salesbook-kpi-card">
               <div class="salesbook-kpi-icon orange">
-                <i data-lucide="banknote" style="width:22px;height:22px;"></i>
+                <i data-lucide="banknote" style="width:24px;height:24px;"></i>
               </div>
-              <div>
+              <div style="min-width:0;">
                 <div class="salesbook-kpi-label">Espèces en Caisse</div>
                 <div id="salesbook-kpi-cash" class="salesbook-kpi-val" style="color:#D97706;">0 FCFA</div>
               </div>
@@ -2057,9 +2071,9 @@
             <!-- KPI 4 : Paiements Électroniques -->
             <div class="salesbook-kpi-card">
               <div class="salesbook-kpi-icon purple">
-                <i data-lucide="smartphone" style="width:22px;height:22px;"></i>
+                <i data-lucide="smartphone" style="width:24px;height:24px;"></i>
               </div>
-              <div>
+              <div style="min-width:0;">
                 <div class="salesbook-kpi-label">Paiements Électroniques</div>
                 <div id="salesbook-kpi-electronic" class="salesbook-kpi-val" style="color:#7C3AED;">0 FCFA</div>
               </div>
@@ -2068,9 +2082,9 @@
             <!-- KPI 5 : Nombre de Ventes -->
             <div class="salesbook-kpi-card">
               <div class="salesbook-kpi-icon cyan">
-                <i data-lucide="receipt" style="width:22px;height:22px;"></i>
+                <i data-lucide="receipt" style="width:24px;height:24px;"></i>
               </div>
-              <div>
+              <div style="min-width:0;">
                 <div class="salesbook-kpi-label">Nombre de Ventes</div>
                 <div id="salesbook-kpi-salescount" class="salesbook-kpi-val" style="color:#0284C7;">0</div>
               </div>
@@ -2078,179 +2092,66 @@
 
           </div>
 
-          <!-- SECTION 1 : SAISIE RAPIDE D'UNE VENTE (CARTE DU HAUT) -->
-          <div class="salesbook-section-card">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
-              <div>
-                <div style="display:flex;align-items:center;gap:8px;">
-                  <i data-lucide="zap" style="width:18px;height:18px;color:#2563EB;"></i>
-                  <h3 style="font-size:1rem;font-weight:900;color:#0F172A;margin:0;">Saisie rapide d'une vente</h3>
-                </div>
-                <p style="font-size:0.8rem;color:#64748B;margin:3px 0 0 0;">Remplissez les champs et appuyez sur Entrée pour enregistrer rapidement.</p>
-              </div>
-
-              <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;font-weight:700;color:#334155;">
-                <label class="toggle-switch-ui">
-                  <input type="checkbox" id="salesbook-quick-toggle" checked onchange="toggleQuickSaleBanner(this.checked)">
-                  <span class="toggle-slider"></span>
-                </label>
-                <span>Saisie rapide activée</span>
-              </div>
-            </div>
-
-            <form id="salesbook-quick-form" onsubmit="event.preventDefault(); submitSalesbookSale('top');" class="salesbook-quick-grid">
-              
-              <!-- 1. Article / Marchandise -->
-              <div class="salesbook-input-wrapper">
-                <label class="salesbook-form-label">Article / Marchandise <span style="color:#EF4444;">*</span></label>
-                <input 
-                  type="text" 
-                  id="sale-input-item" 
-                  class="salesbook-form-input" 
-                  placeholder="Ex: Sac de riz 50kg, Huile 5L, Savon..." 
-                  required
-                >
-                <i data-lucide="search" class="salesbook-input-icon" style="width:16px;height:16px;"></i>
-              </div>
-
-              <!-- 2. Quantité -->
-              <div>
-                <label class="salesbook-form-label">Quantité <span style="color:#EF4444;">*</span></label>
-                <input 
-                  type="number" 
-                  id="sale-input-qty" 
-                  class="salesbook-form-input" 
-                  value="1" 
-                  min="1" 
-                  style="text-align:center;"
-                  oninput="updateSalesbookQuickTotal()"
-                  required
-                >
-              </div>
-
-              <!-- 3. Prix unitaire (FCFA) -->
-              <div>
-                <label class="salesbook-form-label">Prix unitaire (FCFA) <span style="color:#EF4444;">*</span></label>
-                <input 
-                  type="number" 
-                  id="sale-input-price" 
-                  class="salesbook-form-input" 
-                  placeholder="0" 
-                  min="0" 
-                  oninput="updateSalesbookQuickTotal()"
-                  required
-                >
-              </div>
-
-              <!-- 4. Total (FCFA) -->
-              <div>
-                <label class="salesbook-form-label">Total (FCFA)</label>
-                <input 
-                  type="text" 
-                  id="sale-input-total" 
-                  class="salesbook-form-input" 
-                  placeholder="0" 
-                  readonly 
-                  style="background:#F8FAFC;font-weight:800;color:#2563EB;"
-                >
-              </div>
-
-              <!-- 5. Paiement -->
-              <div>
-                <label class="salesbook-form-label">Paiement <span style="color:#EF4444;">*</span></label>
-                <select id="sale-input-method" class="salesbook-form-input" style="font-weight:700;">
-                  <option value="Espèces">💵 Espèces</option>
-                  <option value="Wave Direct">🟣 Wave</option>
-                  <option value="Orange Money">🟠 Orange Money</option>
-                  <option value="MTN MoMo">🟡 MTN MoMo</option>
-                  <option value="Moov Money">🔵 Moov Money</option>
-                </select>
-              </div>
-
-              <!-- 6. Client (Optionnel) -->
-              <div>
-                <label class="salesbook-form-label">Client (Optionnel)</label>
-                <input 
-                  type="text" 
-                  id="sale-input-client" 
-                  class="salesbook-form-input" 
-                  placeholder="Nom du client..."
-                >
-              </div>
-
-              <!-- 7. Bouton Valider -->
-              <div>
-                <button type="submit" class="salesbook-btn-submit">
-                  <i data-lucide="check" style="width:16px;height:16px;"></i>
-                  <span>Enregistrer (Entrée)</span>
-                </button>
-              </div>
-
-            </form>
-
-            <div style="margin-top:12px;font-size:0.78rem;color:#64748B;display:flex;align-items:center;gap:6px;">
-              <i data-lucide="lightbulb" style="width:14px;height:14px;color:#F59E0B;flex-shrink:0;"></i>
-              <span><strong>Astuce :</strong> Tapez le nom de l'article, la quantité, le prix et appuyez sur Entrée pour enregistrer et passer à la ligne suivante.</span>
-            </div>
-          </div>
-
           <!-- SECTION 2 : REGISTRE DES VENTES D'AUJOURD'HUI (TABLEAU COMPLET) -->
           <div class="salesbook-table-card">
             
             <div class="salesbook-table-header-bar">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <i data-lucide="table" style="width:18px;height:18px;color:#2563EB;"></i>
-                <h3 style="font-size:0.98rem;font-weight:900;color:#0F172A;margin:0;">Registre des ventes d'aujourd'hui</h3>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:32px;height:32px;border-radius:8px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;">
+                  <i data-lucide="clipboard-list" style="width:18px;height:18px;"></i>
+                </div>
+                <div>
+                  <h3 style="font-size:1.02rem;font-weight:900;color:#0F172A;margin:0;">Registre des ventes d'aujourd'hui</h3>
+                  <div style="font-size:0.76rem;color:#64748B;font-weight:600;">Saisie directe et continue dans le tableau ci-dessous</div>
+                </div>
               </div>
 
-              <div style="display:flex;align-items:center;gap:8px;">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <div style="position:relative;">
                   <input 
                     type="text" 
                     id="salesbook-table-search" 
                     placeholder="Rechercher..." 
                     oninput="filterDailySalesTable(this.value)"
-                    style="height:36px;padding:0 12px 0 32px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:0.82rem;outline:none;width:180px;"
+                    style="height:38px;padding:0 12px 0 34px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:0.84rem;outline:none;width:200px;font-weight:600;"
                   >
-                  <i data-lucide="search" style="width:14px;height:14px;position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#94A3B8;"></i>
+                  <i data-lucide="search" style="width:15px;height:15px;position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#94A3B8;"></i>
                 </div>
-                <button type="button" class="btn btn-outline" style="padding:6px 10px;height:36px;border-radius:8px;" title="Filtrer">
-                  <i data-lucide="filter" style="width:14px;height:14px;"></i>
-                </button>
-                <button type="button" class="btn btn-outline" style="padding:6px 10px;height:36px;border-radius:8px;" title="Plein Écran" onclick="toggleSalesbookFullscreen()">
-                  <i data-lucide="maximize" style="width:14px;height:14px;"></i>
+                <button type="button" class="btn btn-outline" style="padding:6px 12px;height:38px;border-radius:8px;font-weight:700;font-size:0.82rem;display:flex;align-items:center;gap:6px;" title="Plein Écran" onclick="toggleSalesbookFullscreen()">
+                  <i data-lucide="maximize-2" style="width:15px;height:15px;"></i>
+                  <span>Plein écran</span>
                 </button>
               </div>
             </div>
 
-            <div class="table-responsive" style="margin-bottom:0;border:none;overflow-x:auto;">
+            <div class="salesbook-scroll-wrapper">
               <table class="salesbook-main-table">
                 <thead>
                   <tr>
-                    <th style="width:90px;">HEURE</th>
-                    <th>ARTICLE / MARCHANDISE</th>
-                    <th style="text-align:center;width:70px;">QTÉ</th>
+                    <th style="width:100px;">HEURE</th>
+                    <th style="min-width:260px;">ARTICLE / MARCHANDISE</th>
+                    <th style="text-align:center;width:75px;">QTÉ</th>
                     <th style="text-align:right;width:120px;">PRIX UNIT.</th>
-                    <th style="text-align:right;width:120px;">TOTAL</th>
+                    <th style="text-align:right;width:130px;">TOTAL</th>
                     <th style="width:140px;">PAIEMENT</th>
                     <th style="width:150px;">CLIENT</th>
-                    <th style="width:150px;">BOUTIQUE</th>
-                    <th style="text-align:center;width:80px;">ACTIONS</th>
+                    <th style="width:140px;">BOUTIQUE</th>
+                    <th style="text-align:center;width:70px;">ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody id="daily-sales-table-body">
-                  <!-- Rendu dynamique par renderDailySalesBook() -->
+                  <!-- Rendu dynamique par renderDailySalesBook() + Ligne active de saisie -->
                 </tbody>
               </table>
             </div>
 
             <!-- Footer Résumé du Tableau -->
-            <div style="padding:14px 20px;background:#F8FAFC;border-top:1.5px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-              <div style="font-size:0.86rem;font-weight:700;color:#64748B;">
-                Total des lignes : <strong id="salesbook-rows-count" style="color:#0F172A;">0</strong>
+            <div style="padding:16px 22px;background:#F8FAFC;border-top:1.5px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+              <div style="font-size:0.9rem;font-weight:700;color:#64748B;display:flex;align-items:center;gap:8px;">
+                <span>Total des lignes : <strong id="salesbook-rows-count" style="color:#0F172A;font-size:1.05rem;">0</strong></span>
               </div>
-              <div style="font-size:1.15rem;font-weight:900;color:#2563EB;">
-                <span id="salesbook-grand-total-amount">0 FCFA</span>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <span id="salesbook-grand-total-amount" style="font-size:1.35rem;font-weight:900;color:#2563EB;">0 FCFA</span>
               </div>
             </div>
 
@@ -2258,14 +2159,14 @@
 
           <!-- Bas de page : Notification & Export -->
           <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-            <div style="font-size:0.8rem;color:#64748B;display:flex;align-items:center;gap:6px;">
-              <i data-lucide="shield-check" style="width:16px;height:16px;color:#2563EB;"></i>
-              <span>Toutes les ventes sont sauvegardées automatiquement en temps réel.</span>
+            <div style="font-size:0.82rem;color:#64748B;display:flex;align-items:center;gap:8px;">
+              <i data-lucide="shield-check" style="width:16px;height:16px;color:#10B981;"></i>
+              <span>Toutes les ventes sont enregistrées localement et synchronisées en direct.</span>
             </div>
 
-            <button type="button" class="btn btn-outline" onclick="exportSalesbookCSV()" style="display:flex;align-items:center;gap:6px;font-size:0.82rem;padding:8px 14px;border-radius:8px;font-weight:700;">
+            <button type="button" class="btn btn-outline" onclick="exportSalesbookCSV()" style="display:flex;align-items:center;gap:6px;font-size:0.84rem;padding:8px 16px;border-radius:8px;font-weight:700;">
               <i data-lucide="download" style="width:15px;height:15px;"></i>
-              <span>Exporter le cahier</span>
+              <span>Télécharger le journal (CSV)</span>
             </button>
           </div>
 

@@ -4084,7 +4084,7 @@ window.downloadOfficialReportPDF = function() {
 };
 
 // --------------------------------------------------------------------------
-// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — TABLEUR EXACT STYLE MOCKUP
+// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — STYLE A + DICTÉE VOCALE
 // --------------------------------------------------------------------------
 AppState.selectedBranch = localStorage.getItem('ct_selected_branch') || 'all';
 
@@ -4095,7 +4095,7 @@ function saveSalesToStorage() {
   localStorage.setItem('ct_daily_sales', JSON.stringify(AppState.sales));
 }
 
-// Horloge temps réel pour l'en-tête du cahier
+// Horloge temps réel pour l'en-tête du cahier (horodatage précis à la seconde)
 setInterval(() => {
   const clockEl = document.getElementById('salesbook-live-time');
   if (clockEl) {
@@ -4104,25 +4104,60 @@ setInterval(() => {
   }
 }, 1000);
 
+// Raccourcis de sélection de date (Aujourd'hui / Hier)
+window.setSalesbookTodayDate = function() {
+  const datePicker = document.getElementById('salesbook-date-picker');
+  if (datePicker) {
+    datePicker.value = new Date().toISOString().split('T')[0];
+    renderDailySalesBook();
+  }
+};
+
+window.setSalesbookYesterdayDate = function() {
+  const datePicker = document.getElementById('salesbook-date-picker');
+  if (datePicker) {
+    const yesterday = new Date(Date.now() - 86400000);
+    datePicker.value = yesterday.toISOString().split('T')[0];
+    renderDailySalesBook();
+  }
+};
+
+// Remplissage rapide 1-clic pour articles fréquents
+window.quickFillSaleItem = function(itemName, qty = 1, price = 0) {
+  const itemInput = document.getElementById('sale-input-item');
+  const qtyInput = document.getElementById('sale-input-qty');
+  const priceInput = document.getElementById('sale-input-price');
+
+  if (itemInput) itemInput.value = itemName;
+  if (qtyInput) qtyInput.value = qty;
+  if (priceInput) priceInput.value = price;
+  updateSalesbookQuickTotal();
+  if (priceInput && (!price || price <= 0)) {
+    priceInput.focus();
+  } else {
+    itemInput?.focus();
+  }
+};
+
 // Calcul instantané du total dans le formulaire de saisie rapide du haut
 window.updateSalesbookQuickTotal = function() {
   const qtyInput = document.getElementById('sale-input-qty');
   const priceInput = document.getElementById('sale-input-price');
-  const totalInput = document.getElementById('sale-input-total');
+  const totalDisplay = document.getElementById('sale-input-total');
 
   const qty = parseFloat(qtyInput?.value || 0) || 1;
   const price = parseFloat(priceInput?.value || 0) || 0;
   const total = qty * price;
 
-  if (totalInput) {
-    totalInput.value = formatCurrency(total);
+  if (totalDisplay) {
+    totalDisplay.textContent = formatCurrency(total);
   }
 };
 
 // Afficher / Masquer la bannière de saisie rapide
 window.toggleQuickSaleBanner = function(show) {
   const form = document.getElementById('salesbook-quick-form');
-  if (form) form.style.display = show ? 'grid' : 'none';
+  if (form) form.style.display = show ? 'block' : 'none';
 };
 
 // Basculer en mode plein écran pour le tableau
@@ -4133,7 +4168,218 @@ window.toggleSalesbookFullscreen = function() {
   }
 };
 
+// ==========================================================================
+// MOTEUR DE DICTÉE VOCALE AUDIO (RECONNAISSANCE VOCALE POUR TOUS LES PROFILS)
+// ==========================================================================
+let salesbookSpeechRecognizer = null;
+let isVoiceDictationActive = false;
+
+// Bip sonore de confirmation (Web Audio API)
+function playAudioFeedbackChime(type = 'start') {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    if (type === 'start') {
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+    } else {
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.2);
+      gain.gain.setValueAtTime(0.2, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.2);
+    }
+  } catch (e) {}
+}
+
+// Convertisseur de nombres en mots vers chiffres (français)
+function frenchWordsToNumbers(text) {
+  if (!text) return text;
+  const numberWords = {
+    'un': 1, 'une': 1, 'deux': 2, 'trois': 3, 'quatre': 4, 'cinq': 5,
+    'six': 6, 'sept': 7, 'huit': 8, 'neuf': 9, 'dix': 10,
+    'onze': 11, 'douze': 12, 'treize': 13, 'quatorze': 14, 'quinze': 15,
+    'seize': 16, 'vingt': 20, 'trente': 30, 'quarante': 40, 'cinquante': 50,
+    'cent': 100, 'mille': 1000
+  };
+  return text;
+}
+
+// Analyse intelligente de la parole dictée
+function parseSalesVoiceTranscript(transcript) {
+  if (!transcript) return;
+  const clean = transcript.trim();
+  const transcriptEl = document.getElementById('salesbook-voice-transcript');
+  if (transcriptEl) {
+    transcriptEl.textContent = `🎙️ Reconnu : "${clean}"`;
+  }
+
+  // Regex pour détecter les motifs de vente courants en français :
+  // Ex: "2 sacs de riz à 25000", "trois bidons d'huile à 6500 francs", "Savon 500", "5 cartons à 12000"
+  let parsedQty = 1;
+  let parsedPrice = null;
+  let parsedItem = clean;
+
+  // 1. Détection de quantité au début (chiffre ou mot)
+  const qtyMatch = clean.match(/^(\d+|\b(?:un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|douze|quinze|vingt)\b)\s+(.+)/i);
+  let remainingText = clean;
+  if (qtyMatch) {
+    const rawQty = qtyMatch[1].toLowerCase();
+    const wordsMap = { 'un':1, 'une':1, 'deux':2, 'trois':3, 'quatre':4, 'cinq':5, 'six':6, 'sept':7, 'huit':8, 'neuf':9, 'dix':10, 'douze':12, 'quinze':15, 'vingt':20 };
+    parsedQty = wordsMap[rawQty] || parseInt(rawQty, 10) || 1;
+    remainingText = qtyMatch[2];
+  }
+
+  // 2. Détection du prix à la fin : "à 25000", "pour 15000 francs", "prix 5000", "25000 f"
+  const priceMatch = remainingText.match(/(?:à|pour|prix|au\s+prix\s+de|=)?\s*(\d+[\d\s]*)\s*(?:francs?|fcfa|f|naira|gnf|\$|€)?\s*$/i);
+  if (priceMatch && priceMatch[1]) {
+    const rawPrice = priceMatch[1].replace(/\s+/g, '');
+    parsedPrice = parseFloat(rawPrice);
+    if (!isNaN(parsedPrice) && parsedPrice > 0) {
+      // Retirer le morceau de prix du nom de l'article
+      parsedItem = remainingText.substring(0, priceMatch.index).trim();
+    }
+  } else {
+    parsedItem = remainingText.trim();
+  }
+
+  // Si l'article nettoyé se termine par "à" ou virgule
+  parsedItem = parsedItem.replace(/(?:à|au prix de)\s*$/i, '').trim();
+  if (parsedItem) {
+    // Mettre la première lettre en majuscule
+    parsedItem = parsedItem.charAt(0).toUpperCase() + parsedItem.slice(1);
+  }
+
+  // Remplissage des champs
+  const itemInput = document.getElementById('sale-input-item');
+  const qtyInput = document.getElementById('sale-input-qty');
+  const priceInput = document.getElementById('sale-input-price');
+
+  if (itemInput && parsedItem) itemInput.value = parsedItem;
+  if (qtyInput && parsedQty) qtyInput.value = parsedQty;
+  if (priceInput && parsedPrice !== null && parsedPrice > 0) {
+    priceInput.value = parsedPrice;
+  }
+
+  updateSalesbookQuickTotal();
+
+  if (!parsedPrice || parsedPrice <= 0) {
+    priceInput?.focus();
+    showToast(`✓ Article dicté : "${parsedItem}". Entrez le prix.`, "info");
+  } else {
+    showToast(`✓ Vente dictée : ${parsedQty}x ${parsedItem} à ${formatCurrency(parsedPrice)} !`, "success");
+  }
+}
+
+window.toggleSalesbookVoiceDictation = function() {
+  if (isVoiceDictationActive) {
+    stopSalesbookVoiceDictation();
+  } else {
+    startSalesbookVoiceDictation();
+  }
+};
+
+window.startSalesbookVoiceDictation = function() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    showToast("La reconnaissance vocale n'est pas supportée par ce navigateur. Utilisez Chrome, Edge ou Safari.", "error");
+    return;
+  }
+
+  try {
+    salesbookSpeechRecognizer = new SpeechRecognition();
+    salesbookSpeechRecognizer.lang = 'fr-FR';
+    salesbookSpeechRecognizer.continuous = false;
+    salesbookSpeechRecognizer.interimResults = true;
+
+    const micBtn = document.getElementById('salesbook-voice-btn');
+    const micBtnText = document.getElementById('salesbook-voice-btn-text');
+    const voiceBar = document.getElementById('salesbook-voice-bar');
+    const voiceTranscript = document.getElementById('salesbook-voice-transcript');
+
+    salesbookSpeechRecognizer.onstart = function() {
+      isVoiceDictationActive = true;
+      playAudioFeedbackChime('start');
+      if (micBtn) micBtn.classList.add('listening');
+      if (micBtnText) micBtnText.textContent = "🔴 Écoute en cours...";
+      if (voiceBar) voiceBar.classList.add('active');
+      if (voiceTranscript) voiceTranscript.textContent = "🎙️ Parlez maintenant (ex: '2 Sacs de riz à 25000' ou nom de l'article)...";
+    };
+
+    salesbookSpeechRecognizer.onresult = function(event) {
+      let interim = '';
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      if (voiceTranscript) {
+        voiceTranscript.textContent = `🎙️ ${finalTranscript || interim || 'Écoute en cours...'}`;
+      }
+      if (finalTranscript) {
+        parseSalesVoiceTranscript(finalTranscript);
+      }
+    };
+
+    salesbookSpeechRecognizer.onerror = function(event) {
+      console.warn("Erreur reconnaissance vocale:", event.error);
+      stopSalesbookVoiceDictation();
+      if (event.error === 'not-allowed') {
+        showToast("Veuillez autoriser l'accès au micro dans votre navigateur.", "error");
+      }
+    };
+
+    salesbookSpeechRecognizer.onend = function() {
+      stopSalesbookVoiceDictation();
+    };
+
+    salesbookSpeechRecognizer.start();
+  } catch (err) {
+    console.error("Erreur lancement micro:", err);
+    stopSalesbookVoiceDictation();
+  }
+};
+
+window.stopSalesbookVoiceDictation = function() {
+  isVoiceDictationActive = false;
+  try {
+    if (salesbookSpeechRecognizer) {
+      salesbookSpeechRecognizer.stop();
+      salesbookSpeechRecognizer = null;
+    }
+  } catch (e) {}
+
+  const micBtn = document.getElementById('salesbook-voice-btn');
+  const micBtnText = document.getElementById('salesbook-voice-btn-text');
+  const voiceBar = document.getElementById('salesbook-voice-bar');
+
+  if (micBtn) micBtn.classList.remove('listening');
+  if (micBtnText) micBtnText.textContent = "🎙️ Dictée vocale";
+  if (voiceBar) voiceBar.classList.remove('active');
+};
+
 // Validation et enregistrement d'une vente (depuis le haut ou depuis la ligne du tableau)
+window.handleInlineRowKeydown = function(e) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    submitSalesbookSale('inline_row');
+  }
+};
+
 window.submitSalesbookSale = function(source = 'top') {
   let item = '', qty = 1, unitPrice = 0, method = 'Espèces', client = '', branch = 'Boutique Centrale';
 
@@ -4152,7 +4398,7 @@ window.submitSalesbookSale = function(source = 'top') {
     branch = AppState.selectedBranch === 'all' ? 'Boutique Centrale' : AppState.selectedBranch;
 
     if (!item) {
-      showToast("Veuillez saisir le nom de l'article.", "error");
+      showToast("Veuillez saisir ou dicter le nom de l'article.", "error");
       itemInput?.focus();
       return;
     }
@@ -4162,12 +4408,12 @@ window.submitSalesbookSale = function(source = 'top') {
       return;
     }
 
-    // Réinitialiser les champs et purger le brouillon
-    window.clearDraftFields(['sale-input-item', 'sale-input-qty', 'sale-input-price', 'sale-input-total', 'sale-input-client']);
+    // Réinitialiser les champs
     if (itemInput) itemInput.value = '';
     if (qtyInput) qtyInput.value = '1';
     if (priceInput) priceInput.value = '';
-    if (document.getElementById('sale-input-total')) document.getElementById('sale-input-total').value = '';
+    const totalDisplay = document.getElementById('sale-input-total');
+    if (totalDisplay) totalDisplay.textContent = '0 FCFA';
     if (clientInput) clientInput.value = '';
     setTimeout(() => itemInput?.focus(), 40);
 
@@ -4187,7 +4433,7 @@ window.submitSalesbookSale = function(source = 'top') {
     branch = branchSelect?.value || 'Boutique Centrale';
 
     if (!item) {
-      showToast("Veuillez saisir le nom de l'article.", "error");
+      showToast("Veuillez saisir le nom de l'article dans le tableau.", "error");
       itemInput?.focus();
       return;
     }
@@ -4202,9 +4448,9 @@ window.submitSalesbookSale = function(source = 'top') {
     if (priceInput) priceInput.value = '';
     if (document.getElementById('inline-row-total')) document.getElementById('inline-row-total').value = '0';
     if (clientInput) clientInput.value = '';
-    setTimeout(() => itemInput?.focus(), 40);
   }
 
+  // Horodatage automatique à la seconde exacte
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   const dateStr = now.toISOString().split('T')[0];
@@ -4223,7 +4469,7 @@ window.submitSalesbookSale = function(source = 'top') {
     date: dateStr
   };
 
-  AppState.sales.unshift(newSale);
+  AppState.sales.push(newSale);
   saveSalesToStorage();
 
   // Mettre à jour les encaissements du caissier connecté
@@ -4237,6 +4483,18 @@ window.submitSalesbookSale = function(source = 'top') {
   }
 
   renderDailySalesBook();
+
+  // Si saisie dans le tableau, redonner immédiatement le focus au champ article pour la vente suivante
+  if (source === 'inline_row') {
+    setTimeout(() => {
+      const nextInput = document.getElementById('inline-row-item');
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }, 40);
+  }
+
   showToast(`✓ Vente enregistrée : ${item} (${formatCurrency(total)}) !`, "success");
 };
 
@@ -4286,7 +4544,13 @@ window.renderDailySalesBook = function() {
   }
   const selectedDate = datePicker?.value || todayStr;
 
-  // Filtrer par date et recherche
+  // Remplir le datalist des clients pour suggestions automatiques
+  const clientsDatalist = document.getElementById('salesbook-clients-datalist');
+  if (clientsDatalist && AppState.clients) {
+    clientsDatalist.innerHTML = AppState.clients.map(c => `<option value="${escapeHTML(c.name)}">${escapeHTML(c.phone || '')}</option>`).join('');
+  }
+
+  // Filtrer par date et boutique
   let filteredSales = AppState.sales.filter(s => s.date === selectedDate);
   if (AppState.selectedBranch && AppState.selectedBranch !== 'all') {
     filteredSales = filteredSales.filter(s => s.branch === AppState.selectedBranch);
@@ -4317,10 +4581,10 @@ window.renderDailySalesBook = function() {
   const kpiCount = document.getElementById('salesbook-kpi-salescount');
 
   if (kpiRevenue) kpiRevenue.textContent = formatCurrency(totalRevenue);
-  if (kpiItems) kpiItems.textContent = totalItems;
+  if (kpiItems) kpiItems.textContent = totalItems.toLocaleString('fr-FR');
   if (kpiCash) kpiCash.textContent = formatCurrency(totalCash);
   if (kpiElectronic) kpiElectronic.textContent = formatCurrency(totalElectronic);
-  if (kpiCount) kpiCount.textContent = totalSalesCount;
+  if (kpiCount) kpiCount.textContent = totalSalesCount.toLocaleString('fr-FR');
 
   // Footer résumé
   const rowsCountEl = document.getElementById('salesbook-rows-count');
@@ -4338,38 +4602,43 @@ window.renderDailySalesBook = function() {
     );
   }
 
-  // Génération des lignes du tableau
+  // Génération des lignes du tableau (enregistrées)
   const rowsHtml = filteredSales.map(s => {
     let badgeHtml = '';
     if (s.method === 'Wave Direct' || s.method.includes('Wave')) {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-wave">🟣 Wave</span>`;
+      badgeHtml = `<span class="sales-badge-payment sales-badge-wave">Wave</span>`;
     } else if (s.method.includes('Orange')) {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-orange">🟠 Orange Money</span>`;
+      badgeHtml = `<span class="sales-badge-payment sales-badge-orange">Orange Money</span>`;
     } else if (s.method.includes('MTN')) {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-mtn">🟡 MTN MoMo</span>`;
+      badgeHtml = `<span class="sales-badge-payment sales-badge-mtn">MTN MoMo</span>`;
     } else if (s.method.includes('Moov')) {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-moov">🔵 Moov Money</span>`;
+      badgeHtml = `<span class="sales-badge-payment sales-badge-moov">Moov Money</span>`;
     } else {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-cash">💵 Espèces</span>`;
+      badgeHtml = `<span class="sales-badge-payment sales-badge-cash">Espèces</span>`;
     }
 
     return `
       <tr>
-        <td style="color:#64748B;font-family:monospace;font-size:0.82rem;font-weight:700;">${escapeHTML(s.time || '10:00:00')}</td>
-        <td style="font-weight:800;color:#0F172A;font-size:0.88rem;">${escapeHTML(s.item)}</td>
-        <td style="text-align:center;font-weight:700;color:#334155;">${s.qty || 1}</td>
+        <td style="color:#64748B;font-family:monospace;font-size:0.84rem;font-weight:800;">
+          <span style="display:inline-flex;align-items:center;gap:4px;">
+            <i data-lucide="clock" style="width:13px;height:13px;color:#94A3B8;"></i>
+            ${escapeHTML(s.time || '10:00:00')}
+          </span>
+        </td>
+        <td style="font-weight:800;color:#0F172A;font-size:0.92rem;">${escapeHTML(s.item)}</td>
+        <td style="text-align:center;font-weight:800;color:#334155;font-size:0.9rem;">${s.qty || 1}</td>
         <td style="text-align:right;color:#64748B;font-weight:700;">${Number(s.unitPrice || 0).toLocaleString('fr-FR')}</td>
-        <td style="text-align:right;font-weight:900;color:#0F172A;font-size:0.9rem;">${Number(s.total || 0).toLocaleString('fr-FR')}</td>
+        <td style="text-align:right;font-weight:900;color:#2563EB;font-size:0.96rem;">${Number(s.total || 0).toLocaleString('fr-FR')}</td>
         <td>${badgeHtml}</td>
-        <td style="color:#64748B;font-size:0.84rem;">${escapeHTML(s.client || '—')}</td>
+        <td style="color:#64748B;font-size:0.86rem;font-weight:600;">${escapeHTML(s.client || '—')}</td>
         <td style="color:#475569;font-size:0.82rem;font-weight:600;">${escapeHTML(s.branch || 'Boutique Centrale')}</td>
         <td style="text-align:center;">
           <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
-            <button type="button" class="btn-icon-tiny" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#64748B;border:none;background:transparent;cursor:pointer;padding:4px;">
-              <i data-lucide="edit-2" style="width:15px;height:15px;"></i>
+            <button type="button" class="btn-icon-tiny" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#64748B;border:none;background:transparent;cursor:pointer;padding:5px;border-radius:6px;">
+              <i data-lucide="edit-3" style="width:16px;height:16px;"></i>
             </button>
-            <button type="button" class="btn-icon-tiny" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:4px;">
-              <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+            <button type="button" class="btn-icon-tiny" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:5px;border-radius:6px;">
+              <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
             </button>
           </div>
         </td>
@@ -4377,54 +4646,106 @@ window.renderDailySalesBook = function() {
     `;
   }).join('');
 
-  // Ligne de saisie interactive directe en bas de tableau (comme dans le mockup)
+  // LIGNE PERMANENTE DE NOUVELLE SAISIE DIRECTE EN BAS DE TABLEAU (CENTRE DE TRAVAIL)
   const now = new Date();
-  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:00`;
+  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  
   const inlineEntryRowHtml = `
-    <tr style="background:#F8FAFC;border-top:2px solid #E2E8F0;">
-      <td style="color:#94A3B8;font-family:monospace;font-size:0.8rem;white-space:nowrap;">
-        ${currentTime} 🕒
+    <tr class="salesbook-inline-entry-row">
+      <td style="color:#64748B;font-family:monospace;font-size:0.84rem;font-weight:800;white-space:nowrap;">
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <i data-lucide="clock" style="width:13px;height:13px;color:#2563EB;"></i>
+          ${currentTime}
+        </span>
       </td>
-      <td>
-        <input type="text" id="inline-row-item" class="salesbook-inline-table-input" placeholder="Nom de l'article..." onkeydown="if(event.key==='Enter') submitSalesbookSale('inline_row')">
+      <td style="min-width:260px;">
+        <div class="salesbook-inline-item-container">
+          <input 
+            type="text" 
+            id="inline-row-item" 
+            class="salesbook-inline-article-input" 
+            placeholder="Nom de l'article ou référence..." 
+            autocomplete="off"
+            onkeydown="handleInlineRowKeydown(event)"
+          >
+          <button type="button" class="salesbook-inline-mic-btn" onclick="toggleSalesbookVoiceDictation()" title="Dicter à la voix">
+            <i data-lucide="mic" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
       </td>
-      <td style="text-align:center;">
-        <input type="number" id="inline-row-qty" class="salesbook-inline-table-input" value="1" min="1" style="text-align:center;" oninput="updateInlineRowTotal()" onkeydown="if(event.key==='Enter') submitSalesbookSale('inline_row')">
+      <td style="text-align:center;width:75px;">
+        <input 
+          type="number" 
+          id="inline-row-qty" 
+          class="salesbook-inline-table-input" 
+          value="1" 
+          min="1" 
+          step="any"
+          style="text-align:center;font-weight:800;" 
+          oninput="updateInlineRowTotal()" 
+          onkeydown="handleInlineRowKeydown(event)"
+        >
       </td>
-      <td style="text-align:right;">
-        <input type="number" id="inline-row-price" class="salesbook-inline-table-input" placeholder="0" min="0" style="text-align:right;" oninput="updateInlineRowTotal()" onkeydown="if(event.key==='Enter') submitSalesbookSale('inline_row')">
+      <td style="text-align:right;width:120px;">
+        <input 
+          type="number" 
+          id="inline-row-price" 
+          class="salesbook-inline-table-input" 
+          placeholder="0" 
+          min="0" 
+          step="any"
+          style="text-align:right;font-weight:800;" 
+          oninput="updateInlineRowTotal()" 
+          onkeydown="handleInlineRowKeydown(event)"
+        >
       </td>
-      <td style="text-align:right;">
-        <input type="text" id="inline-row-total" class="salesbook-inline-table-input" placeholder="0" readonly style="text-align:right;background:#F1F5F9;font-weight:800;color:#2563EB;">
+      <td style="text-align:right;width:130px;">
+        <input 
+          type="text" 
+          id="inline-row-total" 
+          class="salesbook-inline-table-input" 
+          placeholder="0" 
+          readonly 
+          style="text-align:right;background:#EFF6FF;font-weight:900;color:#2563EB;border-color:#BFDBFE;"
+        >
       </td>
-      <td>
-        <select id="inline-row-method" class="salesbook-inline-table-input" style="font-weight:700;">
-          <option value="Espèces">💵 Espèces</option>
-          <option value="Wave Direct">🟣 Wave</option>
-          <option value="Orange Money">🟠 Orange Money</option>
-          <option value="MTN MoMo">🟡 MTN MoMo</option>
-          <option value="Moov Money">🔵 Moov Money</option>
+      <td style="width:140px;">
+        <select id="inline-row-method" class="salesbook-inline-table-input" style="font-weight:700;" onkeydown="handleInlineRowKeydown(event)">
+          <option value="Espèces">Espèces</option>
+          <option value="Wave Direct">Wave</option>
+          <option value="Orange Money">Orange Money</option>
+          <option value="MTN MoMo">MTN MoMo</option>
+          <option value="Moov Money">Moov Money</option>
+          <option value="Virement / Carte">Carte / Autre</option>
         </select>
       </td>
-      <td>
-        <input type="text" id="inline-row-client" class="salesbook-inline-table-input" placeholder="Client (optionnel)..." onkeydown="if(event.key==='Enter') submitSalesbookSale('inline_row')">
+      <td style="width:150px;">
+        <input 
+          type="text" 
+          id="inline-row-client" 
+          class="salesbook-inline-table-input" 
+          placeholder="Client (optionnel)..." 
+          list="salesbook-clients-datalist"
+          onkeydown="handleInlineRowKeydown(event)"
+        >
       </td>
-      <td>
+      <td style="width:140px;">
         <select id="inline-row-branch" class="salesbook-inline-table-input" style="font-weight:600;">
           <option value="Boutique Centrale">Boutique Centrale</option>
           <option value="Boutique Annexe">Boutique Annexe</option>
           <option value="Boutique Siège">Boutique Siège</option>
         </select>
       </td>
-      <td style="text-align:center;">
-        <button type="button" class="btn btn-primary" onclick="submitSalesbookSale('inline_row')" style="padding:6px 12px;border-radius:6px;font-size:0.8rem;background:#2563EB;color:#fff;border:none;box-shadow:none;">
-          <i data-lucide="check" style="width:15px;height:15px;"></i>
+      <td style="text-align:center;width:70px;">
+        <button type="button" class="salesbook-inline-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Enregistrer la vente (Entrée)">
+          <i data-lucide="check" style="width:18px;height:18px;"></i>
         </button>
       </td>
     </tr>
   `;
 
   tableBody.innerHTML = rowsHtml + inlineEntryRowHtml;
+
   if (window.lucide) lucide.createIcons();
 };
 
