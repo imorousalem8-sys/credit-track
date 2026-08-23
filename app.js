@@ -1063,21 +1063,22 @@ window.toggleMobileSidebar = function() {
   const isOpen = sb.classList.contains('open');
   if (isOpen) {
     sb.classList.remove('open');
-    sb.style.setProperty('transform', 'translateX(-105%)', 'important');
+    sb.style.removeProperty('transform');
     if (overlay) {
       overlay.classList.remove('active');
-      overlay.style.setProperty('display', 'none', 'important');
+      overlay.style.removeProperty('display');
+      overlay.style.removeProperty('opacity');
     }
   } else {
     sb.classList.add('open');
-    sb.style.setProperty('transform', 'translateX(0)', 'important');
+    sb.style.setProperty('transform', 'translate3d(0, 0, 0)', 'important');
     sb.style.setProperty('display', 'flex', 'important');
-    sb.style.setProperty('z-index', '99999', 'important');
+    sb.style.setProperty('z-index', '1000000', 'important');
     if (overlay) {
       overlay.classList.add('active');
       overlay.style.setProperty('display', 'block', 'important');
       overlay.style.setProperty('opacity', '1', 'important');
-      overlay.style.setProperty('z-index', '99998', 'important');
+      overlay.style.setProperty('z-index', '99990', 'important');
     }
   }
 };
