@@ -203,9 +203,26 @@ export default function Sidebar() {
               Confidentialité
             </Link>
             <span>•</span>
-            <span style={{ background: 'rgba(59, 130, 246, 0.2)', color: '#93C5FD', padding: '1px 6px', borderRadius: '4px', fontWeight: 800, fontSize: '0.62rem' }}>
-              v2.4.3
-            </span>
+            <button 
+              onClick={() => {
+                if (typeof window !== 'undefined' && (window as any).__CREDITTRACK_DIAGNOSTIC__?.openDiagnostic) {
+                  (window as any).__CREDITTRACK_DIAGNOSTIC__.openDiagnostic();
+                }
+              }}
+              style={{
+                background: 'rgba(59, 130, 246, 0.2)',
+                color: '#93C5FD',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontWeight: 800,
+                fontSize: '0.62rem',
+                border: '1px solid rgba(59, 130, 246, 0.4)',
+                cursor: 'pointer'
+              }}
+              title="Cliquez pour ouvrir le diagnostic système et vérifier les mises à jour"
+            >
+              v4.2.0 • PRO
+            </button>
           </div>
         </div>
 

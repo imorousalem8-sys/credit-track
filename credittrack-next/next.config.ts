@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // Headers de sécurité appliqués à toutes les routes
         source: "/:path*",
         headers: [
           {
@@ -35,6 +36,64 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=(), payment=(self)"
+          }
+        ]
+      },
+      {
+        // Service Worker : INTERDICTION TOTALE DE CACHE + Scope racine
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+          },
+          {
+            key: "Pragma",
+            value: "no-cache"
+          },
+          {
+            key: "Expires",
+            value: "0"
+          },
+          {
+            key: "Service-Worker-Allowed",
+            value: "/"
+          },
+          {
+            key: "Content-Type",
+            value: "application/javascript; charset=utf-8"
+          }
+        ]
+      },
+      {
+        // Point de contrôle de version : INTERDICTION TOTALE DE CACHE
+        source: "/version.json",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+          },
+          {
+            key: "Pragma",
+            value: "no-cache"
+          },
+          {
+            key: "Expires",
+            value: "0"
+          },
+          {
+            key: "Content-Type",
+            value: "application/json; charset=utf-8"
+          }
+        ]
+      },
+      {
+        // Manifest PWA : Revalidation obligatoire
+        source: "/manifest.json",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate"
           }
         ]
       }

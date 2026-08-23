@@ -12,6 +12,7 @@ import ModalClientDetails from '@/components/modals/ModalClientDetails';
 import ModalSubscription from '@/components/modals/ModalSubscription';
 import ModalCashierPin from '@/components/modals/ModalCashierPin';
 import ModalOwnerUnlock from '@/components/modals/ModalOwnerUnlock';
+import VersionUpdateManager from '@/components/common/VersionUpdateManager';
 
 function LayoutInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -72,6 +73,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <LayoutInner>
         {children}
       </LayoutInner>
+      <VersionUpdateManager />
     </AppProvider>
   );
 }

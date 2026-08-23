@@ -26,78 +26,35 @@
   <script>
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260823_v4.2.0";
+      const CURRENT_BUILD = "20260823_v4.2.1_mobile_responsive";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.getRegistrations().then(function(regs) {
-            regs.forEach(function(r) { r.unregister(); });
-          });
-        }
         if ('caches' in window) {
           caches.keys().then(function(keys) {
             keys.forEach(function(k) { caches.delete(k); });
           });
         }
         localStorage.setItem('ct_last_build', CURRENT_BUILD);
-        
-        // Nettoyage immédiat et exhaustif des faux paiements d'abonnement dans localStorage
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i);
-          if (key && (key.startsWith('credittrack_payments') || key.includes('payments'))) {
-            try {
-              const val = localStorage.getItem(key);
-              if (val && val.startsWith('[')) {
-                const parsed = JSON.parse(val);
-                if (Array.isArray(parsed)) {
-                  const cleaned = parsed.filter(p => p && !String(p.clientName || '').includes('Abonnement') && p.type !== 'subscription' && !String(p.ref || '').startsWith('SAAS-'));
-                  localStorage.setItem(key, JSON.stringify(cleaned));
-                }
-              }
-            } catch(e) {}
-          }
-        }
+        localStorage.setItem('ct_app_build', CURRENT_BUILD);
+      }
 
-        // Nettoyage immédiat des anciennes ventes démo dans localStorage
-        ['ct_daily_sales_v2', 'ct_daily_sales'].forEach(k => {
-          const val = localStorage.getItem(k);
-          if (val) {
-            try {
-              const parsed = JSON.parse(val);
-              if (Array.isArray(parsed)) {
-                const realOnly = parsed.filter(s => s && s.id && !String(s.id).startsWith('sale_1') && !String(s.id).startsWith('sale_2') && !String(s.id).startsWith('sale_3') && !String(s.id).startsWith('sale_4') && !String(s.id).startsWith('sale_5') && !String(s.id).startsWith('sale_6') && !String(s.id).startsWith('sale_7') && !String(s.id).startsWith('sale_8') && !String(s.id).startsWith('sale_9') && !String(s.id).startsWith('sale_10'));
-                localStorage.setItem(k, JSON.stringify(realOnly));
-              }
-            } catch(e) {}
-          }
+      // Enregistrement proactif du Service Worker moderne avec updateViaCache: none
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+            .then(function(reg) {
+              reg.update();
+            })
+            .catch(function(err) {
+              console.warn('[SW] register error:', err);
+            });
         });
-
-        // Nettoyage immédiat dans IndexedDB
-        try {
-          const req = indexedDB.open("CreditTrackDB", 2);
-          req.onsuccess = function(e) {
-            const db = e.target.result;
-            if (db.objectStoreNames.contains("payments")) {
-              const tx = db.transaction("payments", "readwrite");
-              const store = tx.objectStore("payments");
-              const getAllReq = store.getAll();
-              getAllReq.onsuccess = function() {
-                const all = getAllReq.result || [];
-                all.forEach(function(item) {
-                  if (item && (String(item.clientName || '').includes('Abonnement') || String(item.ref || '').startsWith('SAAS-') || item.type === 'subscription')) {
-                    store.delete(item.id);
-                  }
-                });
-              };
-            }
-          };
-        } catch(e) {}
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260823_v4.2.0" defer></script>
-  <script src="app.js?v=20260823_v4.2.0" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260823_v4.2.0">
+  <script src="dataStore.js?v=20260823_v4.2.1_mobile_responsive" defer></script>
+  <script src="app.js?v=20260823_v4.2.1_mobile_responsive" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260823_v4.2.1_mobile_responsive">
 </head>
 <body class="is-landing-mode">
 
@@ -1786,8 +1743,8 @@
           <!-- UN SEUL GRAND BLOC UNIFIÉ DE FACTURE & CRÉDIT -->
           <div class="card" style="background:#FFFFFF;border:1.5px solid #E2E8F0;border-radius:16px;padding:24px;box-shadow:0 2px 10px rgba(0,0,0,0.03);">
             
-            <!-- 1. BANDEAU DE SYNTHÈSE HORIZONTAL (4 KPIs Intégrés en 1 Ligne Continue) -->
-            <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:12px 16px;margin-bottom:24px;">
+            <!-- 1. BANDEAU DE SYNTHÈSE HORIZONTAL (4 KPIs Adaptatifs) -->
+            <div class="credit-kpi-summary-grid" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:12px 16px;margin-bottom:24px;">
               
               <!-- KPI 1 : Montant Total (0 FCFA Réel par défaut) -->
               <div style="display:flex;align-items:center;gap:12px;">
@@ -1911,8 +1868,8 @@
 
               <div style="height:1px;background:#E2E8F0;margin:20px 0;"></div>
 
-              <!-- 4. RÈGLEMENT & GARANTIE (2 COLONNES ALIGNÉES 50% / 50%) -->
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
+              <!-- 4. RÈGLEMENT & GARANTIE (2 COLONNES ADAPTATIVES) -->
+              <div class="form-grid-2" style="margin-bottom:20px;">
                 
                 <!-- Colonne Gauche : Détails de paiement -->
                 <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:18px;">

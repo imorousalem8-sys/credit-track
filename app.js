@@ -4942,24 +4942,35 @@ window.addEventListener('DOMContentLoaded', () => {
 // --------------------------------------------------------------------------
 // 19. GESTION DE VERSION & DÉTECTION DE MISE À JOUR EN TEMPS RÉEL (v4.0.0)
 // --------------------------------------------------------------------------
-window.APP_VERSION = "4.0.0";
+window.APP_VERSION = "4.2.0";
 
 window.checkAppVersion = async function(isManual = false) {
   try {
-    const res = await fetch('/version.json?t=' + Date.now(), { cache: 'no-store' });
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.update(); });
+    }
+    const res = await fetch('/version.json?t=' + Date.now(), { 
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate', 'Pragma': 'no-cache' }
+    });
     if (!res.ok) {
       if (isManual) showToast("Impossible de vérifier les mises à jour pour le moment.", "error");
       return;
     }
     const data = await res.json();
-    if (data && data.version && data.version !== window.APP_VERSION) {
+    const localBuild = localStorage.getItem('ct_app_build');
+    
+    if (!localBuild) {
+      localStorage.setItem('ct_app_build', data.build || 'initial');
+      localStorage.setItem('ct_app_version', data.version || window.APP_VERSION);
+    } else if (data && data.build && data.build !== localBuild) {
       const banner = document.getElementById('app-update-banner');
       if (banner) {
         banner.style.display = 'block';
         if (window.lucide) lucide.createIcons();
       }
       if (isManual) {
-        showToast(`Une nouvelle version (${data.version}) est disponible !`);
+        showToast(`Une nouvelle version (${data.version} - ${data.build}) est disponible !`);
       }
     } else {
       if (isManual) {
@@ -4973,14 +4984,18 @@ window.checkAppVersion = async function(isManual = false) {
 
 window.applyAppUpdate = function() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(regs => {
-      regs.forEach(r => r.unregister());
+    navigator.serviceWorker.getRegistration().then(reg => {
+      if (reg && reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
     });
   }
-  if ('caches' in window) {
-    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
-  }
-  window.location.reload(true);
+  fetch('/version.json?t=' + Date.now(), { cache: 'no-store' })
+    .then(r => r.json())
+    .then(d => { if (d && d.build) localStorage.setItem('ct_app_build', d.build); })
+    .finally(() => {
+      window.location.reload();
+    });
 };
 
 window.dismissAppUpdate = function() {
@@ -4988,8 +5003,15 @@ window.dismissAppUpdate = function() {
   if (banner) banner.style.display = 'none';
 };
 
-// Vérification douce toutes les 15 minutes (sans nuisance)
-setInterval(() => window.checkAppVersion(false), 15 * 60 * 1000);
+// Écouteurs automatiques : focus, retour d'arrière-plan et reconnexion réseau
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') window.checkAppVersion(false);
+});
+window.addEventListener('focus', () => window.checkAppVersion(false));
+window.addEventListener('online', () => window.checkAppVersion(false));
+
+// Vérification douce toutes les 10 minutes
+setInterval(() => window.checkAppVersion(false), 10 * 60 * 1000);
 
 // Écoute de lien de récupération de mot de passe dans l'URL
 if (window.location.hash.includes('type=recovery') || window.location.hash.includes('access_token=')) {
