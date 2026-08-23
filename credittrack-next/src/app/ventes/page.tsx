@@ -1,20 +1,33 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '@/context/AppContext';
 import { 
-  ShoppingCart, 
-  Plus, 
-  PlusCircle, 
-  Trash2, 
+  BookOpen,
+  Calendar, 
+  Clock, 
   Printer, 
+  FileSpreadsheet, 
   Send, 
-  Sparkles, 
-  Package, 
+  Search, 
+  Mic, 
+  MicOff,
+  Check, 
+  Edit3, 
+  Trash2, 
+  ShoppingCart, 
   Banknote, 
   Smartphone, 
-  CheckCircle2, 
-  RefreshCw 
+  DollarSign, 
+  ShieldCheck, 
+  Settings, 
+  X, 
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  User,
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 import { formatAfricanCurrency } from '@/lib/africanCountries';
 
@@ -25,95 +38,268 @@ interface DailySaleItem {
   qty: number;
   unitPrice: number;
   total: number;
-  method: string;
-  branch: string;
+  method: 'Espèces' | 'Wave' | 'Mobile Money' | 'Carte' | 'Crédit';
   client: string;
-  cashier: string;
+  cashier?: string;
+  branch?: string;
 }
 
+const DEFAULT_SAMPLE_SALES: DailySaleItem[] = [
+  {
+    id: 'sale_1',
+    time: '12:32:15',
+    item: 'Sac de Riz 50kg - Parfumé Qualité Supérieure',
+    qty: 2,
+    unitPrice: 25000,
+    total: 50000,
+    method: 'Espèces',
+    client: 'Client comptoir'
+  },
+  {
+    id: 'sale_2',
+    time: '12:28:41',
+    item: 'Huile Végétale 5 Litres - Crispa',
+    qty: 3,
+    unitPrice: 8000,
+    total: 24000,
+    method: 'Espèces',
+    client: 'Client comptoir'
+  },
+  {
+    id: 'sale_3',
+    time: '12:24:03',
+    item: 'Savon en Poudre 1kg - OMO',
+    qty: 5,
+    unitPrice: 1200,
+    total: 6000,
+    method: 'Wave',
+    client: 'Client comptoir'
+  },
+  {
+    id: 'sale_4',
+    time: '12:18:59',
+    item: 'Sucre Blanc 1kg - Sucrivoire',
+    qty: 4,
+    unitPrice: 1000,
+    total: 4000,
+    method: 'Espèces',
+    client: 'Client comptoir'
+  },
+  {
+    id: 'sale_5',
+    time: '12:15:45',
+    item: 'Lait Bonnet Rouge 410g',
+    qty: 2,
+    unitPrice: 2500,
+    total: 5000,
+    method: 'Mobile Money',
+    client: 'Client comptoir'
+  },
+  {
+    id: 'sale_6',
+    time: '12:11:30',
+    item: 'Tomate Concentrée 70g - Sahel',
+    qty: 6,
+    unitPrice: 850,
+    total: 5100,
+    method: 'Espèces',
+    client: 'Client comptoir'
+  },
+  {
+    id: 'sale_7',
+    time: '12:08:12',
+    item: 'Oignon Frais - Gros',
+    qty: 1,
+    unitPrice: 2000,
+    total: 2000,
+    method: 'Espèces',
+    client: 'Client comptoir'
+  },
+  {
+    id: 'sale_8',
+    time: '12:05:27',
+    item: 'Piment en Poudre 100g',
+    qty: 1,
+    unitPrice: 1000,
+    total: 1000,
+    method: 'Espèces',
+    client: 'Client comptoir'
+  }
+];
+
 export default function VentesPage() {
-  const { 
-    currency, 
-    formatAmount, 
-    setIsNewCreditModalOpen, 
-    currentRole, 
-    activeCashier, 
-    showToast 
-  } = useApp();
+  const { currency, showToast, activeCashier, currentRole } = useApp();
 
+  // Reference for the article input to auto-refocus
   const itemInputRef = useRef<HTMLInputElement | null>(null);
+  const qtyInputRef = useRef<HTMLInputElement | null>(null);
+  const priceInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Live real-time clock
+  const [currentTime, setCurrentTime] = useState<string>('');
+  const [currentDate, setCurrentDate] = useState<string>('2026-08-23');
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      setCurrentTime(`${h}:${m}:${s}`);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Sales state
   const [sales, setSales] = useState<DailySaleItem[]>(() => {
-    if (typeof window === 'undefined') return [];
+    if (typeof window === 'undefined') return DEFAULT_SAMPLE_SALES;
     try {
-      const saved = localStorage.getItem('ct_daily_sales');
-      return saved ? JSON.parse(saved) : [];
+      const saved = localStorage.getItem('ct_daily_sales_v2');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+      return DEFAULT_SAMPLE_SALES;
     } catch {
-      return [];
+      return DEFAULT_SAMPLE_SALES;
     }
   });
 
-  // Quick inline sale state
+  const saveSales = (newSales: DailySaleItem[]) => {
+    setSales(newSales);
+    try {
+      localStorage.setItem('ct_daily_sales_v2', JSON.stringify(newSales));
+    } catch (e) {
+      console.error("Failed to save sales to storage", e);
+    }
+  };
+
+  // Search filter
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  // Active Line State (Nouvelle vente)
   const [itemName, setItemName] = useState('');
   const [qty, setQty] = useState<number>(1);
   const [unitPrice, setUnitPrice] = useState<number | string>('');
-  const [method, setMethod] = useState('Espèces');
-  const [branch, setBranch] = useState('Boutique Principale (Siège)');
+  const [method, setMethod] = useState<'Espèces' | 'Wave' | 'Mobile Money' | 'Carte' | 'Crédit'>('Espèces');
   const [client, setClient] = useState('');
+  const [isListening, setIsListening] = useState(false);
 
-  const numUnitPrice = typeof unitPrice === 'number' ? unitPrice : parseFloat(unitPrice) || 0;
-  const lineTotal = (qty || 1) * numUnitPrice;
+  // Edit Modal State
+  const [editingSale, setEditingSale] = useState<DailySaleItem | null>(null);
+  // Closing Modal State
+  const [isClosingModalOpen, setIsClosingModalOpen] = useState(false);
+  // Settings Modal State
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // KPIs
-  const totalSales = sales.reduce((acc, s) => acc + s.total, 0);
-  const totalItemsCount = sales.reduce((acc, s) => acc + s.qty, 0);
-  const totalCash = sales.filter(s => s.method === 'Espèces').reduce((acc, s) => acc + s.total, 0);
-  const totalDigital = totalSales - totalCash;
+  // Calculations
+  const parsedPrice = typeof unitPrice === 'number' ? unitPrice : (parseFloat(unitPrice) || 0);
+  const currentLineTotal = Math.max(1, qty) * parsedPrice;
 
+  // KPI Calculations
+  const totalSalesAmount = sales.reduce((sum, s) => sum + s.total, 0);
+  const totalCashAmount = sales.filter(s => s.method === 'Espèces').reduce((sum, s) => sum + s.total, 0);
+  const totalMobileAmount = sales.filter(s => s.method === 'Wave' || s.method === 'Mobile Money').reduce((sum, s) => sum + s.total, 0);
+  const totalItemsCount = sales.reduce((sum, s) => sum + s.qty, 0);
+  const totalSalesCount = sales.length;
+
+  const cashPercent = totalSalesAmount > 0 ? ((totalCashAmount / totalSalesAmount) * 100).toFixed(1) : '0.0';
+  const mobilePercent = totalSalesAmount > 0 ? ((totalMobileAmount / totalSalesAmount) * 100).toFixed(1) : '0.0';
+
+  // Voice dictation handler
+  const handleVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      showToast("La reconnaissance vocale n'est pas prise en charge par ce navigateur.", "info");
+      return;
+    }
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'fr-FR';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        showToast("🎙️ Parlez maintenant (ex: 2 sacs de riz 50kg à 25000)", "info");
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setItemName(transcript);
+          showToast(`Dicté : "${transcript}"`, "success");
+        }
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.warn("Speech recognition error:", err);
+      setIsListening(false);
+    }
+  };
+
+  // Add Sale Handler — Fast Inline
   const handleAddSale = () => {
-    if (!itemName.trim() || numUnitPrice <= 0 || qty <= 0) {
-      showToast("Veuillez renseigner un article et un prix unitaire valide.", "error");
+    if (!itemName.trim()) {
+      showToast("Veuillez saisir la désignation de l'article.", "error");
       itemInputRef.current?.focus();
       return;
     }
 
+    if (parsedPrice <= 0) {
+      showToast("Veuillez indiquer un prix unitaire supérieur à 0.", "error");
+      priceInputRef.current?.focus();
+      return;
+    }
+
     const now = new Date();
-    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
 
     const newSale: DailySaleItem = {
       id: `sale_${Date.now()}`,
       time: timeStr,
       item: itemName.trim(),
-      qty: Number(qty),
-      unitPrice: numUnitPrice,
-      total: lineTotal,
+      qty: Math.max(1, Number(qty) || 1),
+      unitPrice: parsedPrice,
+      total: currentLineTotal,
       method: method,
-      branch: branch,
-      client: client.trim() || 'Client Comptoir',
-      cashier: currentRole === 'cashier' ? (activeCashier?.name || 'Caissier') : 'Gérant (Patron)'
+      client: client.trim() || 'Client comptoir',
+      cashier: activeCashier?.name || (currentRole === 'cashier' ? 'Caissier' : 'Gérant'),
+      branch: 'Boutique Principale'
     };
 
     const updated = [newSale, ...sales];
-    setSales(updated);
-    try {
-      localStorage.setItem('ct_daily_sales', JSON.stringify(updated));
-    } catch (err) {
-      console.warn("Storage write error", err);
-    }
+    saveSales(updated);
 
-    // Reset line
+    // Reset inputs
     setItemName('');
     setQty(1);
     setUnitPrice('');
     setClient('');
-    showToast(`Vente enregistrée : ${newSale.item} (${formatAfricanCurrency(newSale.total, currency)}) !`, 'success');
+    
+    showToast(`✓ Vente ajoutée : ${newSale.item} (${formatAfricanCurrency(newSale.total, currency)})`, 'success');
 
-    // Auto focus back to Item input
+    // Refocus immediately on Item Name input for uninterrupted typing
     setTimeout(() => {
       itemInputRef.current?.focus();
-    }, 40);
+    }, 30);
   };
 
+  // Keyboard shortcut listener
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -121,316 +307,842 @@ export default function VentesPage() {
     }
   };
 
+  // Delete sale
   const handleDeleteSale = (id: string) => {
-    if (!confirm("Voulez-vous annuler et supprimer cette vente du cahier ?")) return;
+    if (!confirm("Voulez-vous supprimer cette ligne de vente ?")) return;
     const updated = sales.filter(s => s.id !== id);
-    setSales(updated);
-    try {
-      localStorage.setItem('ct_daily_sales', JSON.stringify(updated));
-    } catch (err) {
-      console.warn("Storage write error", err);
-    }
-    showToast("Vente supprimée du journal.", "info");
+    saveSales(updated);
+    showToast("Vente retirée du cahier.", "info");
   };
 
-  const handleClosing = () => {
-    alert(`Bilan de clôture 24h :\nTotal Ventes : ${formatAfricanCurrency(totalSales, currency)}\nEspèces en caisse : ${formatAfricanCurrency(totalCash, currency)}\nPaiements mobiles (Wave/MoMo) : ${formatAfricanCurrency(totalDigital, currency)}\n\nLe rapport est prêt à être transmis au patron.`);
+  // Save edited sale
+  const handleUpdateSale = () => {
+    if (!editingSale) return;
+    const updated = sales.map(s => s.id === editingSale.id ? {
+      ...editingSale,
+      total: editingSale.qty * editingSale.unitPrice
+    } : s);
+    saveSales(updated);
+    setEditingSale(null);
+    showToast("Vente mise à jour avec succès.", "success");
   };
+
+  // Export to CSV
+  const handleExportCSV = () => {
+    if (sales.length === 0) {
+      showToast("Aucune vente à exporter.", "info");
+      return;
+    }
+
+    const headers = ["Heure", "Article / Designation", "Quantite", "Prix Unitaire", "Montant Total", "Mode de Paiement", "Client"];
+    const rows = sales.map(s => [
+      `"${s.time}"`,
+      `"${s.item.replace(/"/g, '""')}"`,
+      s.qty,
+      s.unitPrice,
+      s.total,
+      `"${s.method}"`,
+      `"${(s.client || 'Client comptoir').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Cahier_Ventes_${currentDate}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    showToast("Fichier Excel (CSV) téléchargé !", "success");
+  };
+
+  // Print journal
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // Filtered sales
+  const filteredSales = sales.filter(s => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return s.item.toLowerCase().includes(query) || 
+           s.client.toLowerCase().includes(query) || 
+           s.method.toLowerCase().includes(query) ||
+           s.time.includes(query);
+  });
+
+  const displayedSales = isExpanded ? filteredSales : filteredSales.slice(0, 10);
+  const remainingCount = Math.max(0, filteredSales.length - 10);
 
   return (
-    <div className="space-y-5 pb-20 max-w-7xl mx-auto">
+    <div className="w-full max-w-[1400px] mx-auto px-2 sm:px-4 py-4 space-y-5">
       
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 no-print border-b border-slate-200 pb-4">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-wider mb-1">
-            <Sparkles size={14} /> CAHIER DE CAISSE & RECETTES 24H
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <ShoppingCart className="text-blue-600" /> Cahier des Ventes du Jour
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Saisissez directement vos ventes dans le tableau ci-dessous. Validez avec <kbd className="bg-slate-200 px-1.5 py-0.5 rounded font-bold text-slate-800">Entrée</kbd> pour enchaîner sans quitter le clavier.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
-          <button 
-            type="button" 
-            onClick={() => window.print()}
-            className="btn btn-outline border-slate-300 hover:border-slate-400 bg-white text-slate-700 font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 transition shadow-sm"
-          >
-            <Printer size={16} /> Imprimer Journal
-          </button>
-          <button 
-            type="button" 
-            onClick={handleClosing}
-            className="btn bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-4 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-2 shadow-md shadow-emerald-500/20 transition"
-          >
-            <Send size={16} /> Clôturer & Transmettre
-          </button>
-        </div>
-      </div>
-
-      {/* Row 1: 4 Compact KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 no-print">
+      {/* 1. TOP BAR : HEADER TITLE & CONTROLS */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm no-print">
         
-        {/* KPI 1 : Total Ventes */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black">
-            <ShoppingCart size={20} />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Ventes du Jour</div>
-            <div className="text-lg sm:text-xl font-black text-slate-900 mt-0.5">
-              {formatAfricanCurrency(totalSales, currency)}
+        {/* Title + Status + Date Controls */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex items-center gap-2.5">
+              <span className="text-2xl sm:text-3xl text-blue-600 font-extrabold flex items-center">
+                <BookOpen className="w-7 h-7 sm:w-8 sm:h-8 mr-1.5 inline-block text-blue-600 stroke-[2.2]" />
+              </span>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Cahier des Ventes du Jour
+              </h1>
             </div>
-          </div>
-        </div>
-
-        {/* KPI 2 : Articles Vendus */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-black">
-            <Package size={20} />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Articles Vendus</div>
-            <div className="text-lg sm:text-xl font-black text-emerald-600 mt-0.5">
-              {totalItemsCount} article{totalItemsCount > 1 ? 's' : ''}
-            </div>
-          </div>
-        </div>
-
-        {/* KPI 3 : Espèces Cash */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-black">
-            <Banknote size={20} />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Espèces en Caisse</div>
-            <div className="text-lg sm:text-xl font-black text-amber-600 mt-0.5">
-              {formatAfricanCurrency(totalCash, currency)}
-            </div>
-          </div>
-        </div>
-
-        {/* KPI 4 : Mobile Money & Wave */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-black">
-            <Smartphone size={20} />
-          </div>
-          <div>
-            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Mobile Money & Wave</div>
-            <div className="text-lg sm:text-xl font-black text-indigo-600 mt-0.5">
-              {formatAfricanCurrency(totalDigital, currency)}
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-      {/* Row 2: GRAND TABLEAU DU JOURNAL DE VENTE 24H (TABLEUR AVEC LIGNE ACTIVE INTÉGRÉE) */}
-      <div className="bg-white rounded-2xl border-2 border-slate-200 overflow-hidden shadow-sm">
-        
-        <div className="max-h-[600px] overflow-y-auto relative">
-          <table className="w-full border-collapse text-left text-sm">
             
-            {/* Sticky Header with Inline Fast Input Row */}
-            <thead className="sticky top-0 z-20 bg-slate-900 text-white shadow-md">
-              <tr className="border-b border-slate-800 text-[11px] font-bold uppercase tracking-wider">
-                <th className="py-2.5 px-3 w-20 text-center">Heure</th>
-                <th className="py-2.5 px-3 min-w-[220px]">Article / Marchandise <span className="text-blue-400">*</span></th>
-                <th className="py-2.5 px-2 w-20 text-center">Qté <span className="text-blue-400">*</span></th>
-                <th className="py-2.5 px-3 w-32 text-right">P.U <span className="text-blue-400">*</span></th>
-                <th className="py-2.5 px-3 w-36 text-right">Total (Auto)</th>
-                <th className="py-2.5 px-3 w-36">Paiement <span className="text-blue-400">*</span></th>
-                <th className="py-2.5 px-3 w-40">Boutique</th>
-                <th className="py-2.5 px-3 w-36">Client</th>
-                <th className="py-2.5 px-3 w-28 text-center no-print">Action</th>
-              </tr>
+            {/* 24h Actif Badge */}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold rounded-full">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              24h Actif
+            </span>
+          </div>
 
-              {/* LIGNE PERMANENTE DE SAISIE RAPIDE DIRECTE (SPREADSHEET ROW) */}
-              <tr className="bg-slate-100 text-slate-900 border-b-2 border-blue-600">
-                <td className="p-2 text-center">
-                  <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] font-black">
-                    Direct ⚡
-                  </span>
-                </td>
-                <td className="p-2">
-                  <input
-                    ref={itemInputRef}
-                    type="text"
-                    placeholder="Article vendu (ex: Riz, Huile...)"
-                    value={itemName}
-                    onChange={(e) => setItemName(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full h-9 px-3 bg-white border border-slate-400 focus:border-blue-600 rounded-lg text-xs font-bold shadow-sm outline-none transition"
-                  />
-                </td>
-                <td className="p-2 text-center">
-                  <input
-                    type="number"
-                    min="1"
-                    value={qty}
-                    onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
-                    onKeyDown={handleKeyDown}
-                    className="w-full h-9 px-2 bg-white border border-slate-400 focus:border-blue-600 rounded-lg text-xs font-black text-center shadow-sm outline-none transition"
-                  />
-                </td>
-                <td className="p-2">
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder="0"
-                    value={unitPrice}
-                    onChange={(e) => setUnitPrice(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full h-9 px-3 bg-white border border-slate-400 focus:border-blue-600 rounded-lg text-xs font-black text-right shadow-sm outline-none transition"
-                  />
-                </td>
-                <td className="p-2 text-right font-black text-blue-600 text-sm">
-                  {formatAfricanCurrency(lineTotal, currency)}
-                </td>
-                <td className="p-2">
-                  <select
-                    value={method}
-                    onChange={(e) => setMethod(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full h-9 px-2 bg-white border border-slate-400 focus:border-blue-600 rounded-lg text-xs font-bold shadow-sm outline-none transition"
-                  >
-                    <option value="Espèces">💵 Espèces</option>
-                    <option value="Wave Direct">🌊 Wave</option>
-                    <option value="Orange Money">🟠 Orange</option>
-                    <option value="MTN MoMo">🟡 MTN</option>
-                    <option value="Moov Money">🔵 Moov</option>
-                  </select>
-                </td>
-                <td className="p-2">
-                  <select
-                    value={branch}
-                    onChange={(e) => setBranch(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full h-9 px-2 bg-white border border-slate-400 focus:border-blue-600 rounded-lg text-xs shadow-sm outline-none transition"
-                  >
-                    <option value="Boutique Principale (Siège)">📍 Siège</option>
-                    <option value="Succursale 2">📍 Succursale 2</option>
-                    <option value="Point de Vente Marché">📍 Marché</option>
-                  </select>
-                </td>
-                <td className="p-2">
-                  <input
-                    type="text"
-                    placeholder="Client Comptoir"
-                    value={client}
-                    onChange={(e) => setClient(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="w-full h-9 px-3 bg-white border border-slate-400 focus:border-blue-600 rounded-lg text-xs shadow-sm outline-none transition"
-                  />
-                </td>
-                <td className="p-2 text-center no-print">
-                  <button
-                    type="button"
-                    onClick={handleAddSale}
-                    className="w-full h-9 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-lg text-xs flex items-center justify-center gap-1 shadow-md shadow-blue-500/20 transition"
-                    title="Enregistrer cette ligne (Touche Entrée)"
-                  >
-                    <Plus size={14} /> Entrée
-                  </button>
-                </td>
-              </tr>
+          {/* Date Selector + Quick Reset + Live Digital Clock */}
+          <div className="flex items-center gap-2.5 sm:gap-4 flex-wrap text-xs sm:text-sm text-slate-600 pt-0.5">
+            
+            {/* Date Picker */}
+            <div className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 border border-slate-300 rounded-xl px-3 py-1.5 transition">
+              <Calendar className="w-4 h-4 text-slate-500" />
+              <input 
+                type="date"
+                value={currentDate}
+                onChange={(e) => setCurrentDate(e.target.value)}
+                className="bg-transparent text-slate-800 font-bold text-xs sm:text-sm outline-none cursor-pointer"
+              />
+            </div>
 
+            {/* Aujourd'hui Button */}
+            <button 
+              type="button"
+              onClick={() => {
+                const today = new Date().toISOString().split('T')[0];
+                setCurrentDate(today);
+              }}
+              className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition border border-slate-200 shadow-sm"
+            >
+              Aujourd&apos;hui
+            </button>
+
+            {/* Real-time Clock */}
+            <div className="flex items-center gap-1.5 text-slate-500 text-xs sm:text-sm font-medium pl-1">
+              <span>Heure actuelle :</span>
+              <span className="font-mono font-extrabold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
+                {currentTime || '12:35:23'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center gap-2.5 w-full lg:w-auto flex-wrap justify-start lg:justify-end">
+          
+          {/* Print Button */}
+          <button 
+            type="button"
+            onClick={handlePrint}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 font-bold rounded-xl text-xs sm:text-sm shadow-sm transition active:scale-95"
+          >
+            <Printer className="w-4 h-4 text-slate-600" />
+            <span>Imprimer</span>
+          </button>
+
+          {/* Excel CSV Button */}
+          <button 
+            type="button"
+            onClick={handleExportCSV}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-300 hover:border-emerald-300 font-bold rounded-xl text-xs sm:text-sm shadow-sm transition active:scale-95"
+          >
+            <FileSpreadsheet className="w-4 h-4 text-emerald-600" />
+            <span>Excel (CSV)</span>
+          </button>
+
+          {/* Close Register Button */}
+          <button 
+            type="button"
+            onClick={() => setIsClosingModalOpen(true)}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition active:scale-95"
+          >
+            <Send className="w-4 h-4" />
+            <span>Clôturer le Cahier</span>
+          </button>
+
+        </div>
+      </div>
+
+      {/* 2. KPI CARDS (4 LARGE CLEAN CARDS ON 1 ROW) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4 no-print">
+        
+        {/* KPI 1 : RECETTES DU JOUR */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 transition hover:shadow-md">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <ShoppingCart className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Recettes du jour
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-blue-600 tracking-tight truncate mt-0.5">
+              {formatAfricanCurrency(totalSalesAmount, currency)}
+            </div>
+            <div className="text-xs font-semibold text-slate-400 mt-0.5">
+              {totalSalesCount} vente{totalSalesCount > 1 ? 's' : ''}
+            </div>
+          </div>
+        </div>
+
+        {/* KPI 2 : ESPÈCES CAISSE */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 transition hover:shadow-md">
+          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+            <Banknote className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Espèces Caisse
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-amber-600 tracking-tight truncate mt-0.5">
+              {formatAfricanCurrency(totalCashAmount, currency)}
+            </div>
+            <div className="text-xs font-semibold text-slate-400 mt-0.5">
+              {cashPercent}% du total
+            </div>
+          </div>
+        </div>
+
+        {/* KPI 3 : MOBILE MONEY */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 transition hover:shadow-md">
+          <div className="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <Smartphone className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Mobile Money
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-purple-600 tracking-tight truncate mt-0.5">
+              {formatAfricanCurrency(totalMobileAmount, currency)}
+            </div>
+            <div className="text-xs font-semibold text-slate-400 mt-0.5">
+              {mobilePercent}% du total
+            </div>
+          </div>
+        </div>
+
+        {/* KPI 4 : VENTES ENREGISTRÉES */}
+        <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4 transition hover:shadow-md">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <DollarSign className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+              Ventes enregistrées
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-emerald-600 tracking-tight truncate mt-0.5">
+              {totalSalesCount}
+            </div>
+            <div className="text-xs font-semibold text-slate-400 mt-0.5">
+              Articles vendus : {totalItemsCount}
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* 3. MAIN WORKSPACE CARD : LE JOURNAL DES VENTES (TABLEAU GRAND FORMAT) */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-md overflow-hidden flex flex-col">
+        
+        {/* Card Header with Title & Search Bar */}
+        <div className="p-4 sm:p-5 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3.5 bg-slate-50/50 no-print">
+          <div className="flex items-center gap-2.5">
+            <BookOpen className="w-5 h-5 text-blue-600 stroke-[2.2]" />
+            <h2 className="text-base sm:text-lg font-extrabold text-slate-900">
+              Journal des Ventes <span className="text-xs sm:text-sm font-semibold text-slate-500">(Saisie directe sur la ligne bleue)</span>
+            </h2>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-80">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+            <input 
+              type="text"
+              placeholder="Rechercher un article, client..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-8 py-2 bg-white border border-slate-300 focus:border-blue-500 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 outline-none transition shadow-sm"
+            />
+            {searchQuery && (
+              <button 
+                type="button" 
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Scrollable Table Container */}
+        <div className="overflow-x-auto max-h-[550px] overflow-y-auto">
+          <table className="w-full text-left border-collapse min-w-[950px]">
+            
+            {/* Dark Sticky Table Header */}
+            <thead className="sticky top-0 z-10 bg-[#0F172A] text-white shadow-sm">
+              <tr className="text-[11px] sm:text-xs font-bold uppercase tracking-wider">
+                <th className="py-3 px-3.5 w-24 text-center">Heure</th>
+                <th className="py-3 px-4 min-w-[320px] sm:min-w-[400px]">Article / Désignation Vendue</th>
+                <th className="py-3 px-2 w-16 text-center">Qté</th>
+                <th className="py-3 px-3 w-32 text-right">Prix Unit. ({currency})</th>
+                <th className="py-3 px-3 w-36 text-right">Montant Total</th>
+                <th className="py-3 px-3 w-36 text-center">Paiement</th>
+                <th className="py-3 px-3 w-40">Client (Optionnel)</th>
+                <th className="py-3 px-3 w-24 text-center no-print">Actions</th>
+              </tr>
             </thead>
 
-            {/* Historical Entries Body */}
-            <tbody>
-              {sales.length === 0 ? (
+            {/* Table Rows */}
+            <tbody className="divide-y divide-slate-100 text-xs sm:text-sm font-medium text-slate-800">
+              {displayedSales.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-12 text-center text-slate-400">
-                    <Package size={36} className="mx-auto mb-2 text-slate-300" />
-                    <strong className="text-slate-800">Aucune vente enregistrée aujourd'hui</strong>
-                    <p className="text-xs text-slate-500 mt-1">Utilisez la première ligne du tableau ci-dessus pour noter votre premier article vendu.</p>
+                  <td colSpan={8} className="py-12 text-center text-slate-400">
+                    <div className="max-w-sm mx-auto space-y-2">
+                      <BookOpen className="w-10 h-10 mx-auto text-slate-300 stroke-[1.5]" />
+                      <div className="font-extrabold text-slate-700 text-sm">
+                        {searchQuery ? "Aucune vente ne correspond à votre recherche" : "Le cahier des ventes est vide pour le moment"}
+                      </div>
+                      <p className="text-xs text-slate-400">
+                        {searchQuery ? "Essayez un autre mot-clé ou effacez la recherche." : "Utilisez la ligne bleue de saisie ci-dessous pour enregistrer votre première vente."}
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
-                sales.map((s, idx) => {
-                  const isCash = s.method === 'Espèces';
-                  const isWave = s.method.includes('Wave');
+                displayedSales.map((sale, index) => {
+                  const isCash = sale.method === 'Espèces';
+                  const isWave = sale.method === 'Wave';
+                  const isMobile = sale.method === 'Mobile Money';
 
                   return (
                     <tr 
-                      key={s.id}
-                      className={`border-b border-slate-100 ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-blue-50/40 transition`}
+                      key={sale.id}
+                      className={`hover:bg-blue-50/50 transition-colors ${
+                        index % 2 === 0 ? 'bg-white' : 'bg-slate-50/40'
+                      }`}
                     >
-                      <td className="py-2.5 px-3 font-mono text-xs text-slate-500 font-bold text-center">{s.time}</td>
-                      <td className="py-2.5 px-3">
-                        <div className="font-extrabold text-slate-900">{s.item}</div>
-                        {s.client && s.client !== 'Client Comptoir' && (
-                          <div className="text-xs text-blue-600 font-semibold">Client: {s.client}</div>
+                      {/* Heure */}
+                      <td className="py-3 px-3.5 text-center font-mono text-xs font-semibold text-slate-500">
+                        {sale.time}
+                      </td>
+
+                      {/* Article / Désignation Vendue (WIDE & MULTILINE FRIENDLY) */}
+                      <td className="py-3 px-4">
+                        <div className="font-extrabold text-slate-900 leading-snug whitespace-normal break-words max-w-xl">
+                          {sale.item}
+                        </div>
+                      </td>
+
+                      {/* Qté */}
+                      <td className="py-3 px-2 text-center font-bold text-slate-800">
+                        {sale.qty}
+                      </td>
+
+                      {/* Prix Unitaire */}
+                      <td className="py-3 px-3 text-right font-medium text-slate-600 font-mono">
+                        {sale.unitPrice.toLocaleString('fr-FR')}
+                      </td>
+
+                      {/* Montant Total */}
+                      <td className="py-3 px-3 text-right font-black text-slate-900 font-mono">
+                        {sale.total.toLocaleString('fr-FR')}
+                      </td>
+
+                      {/* Paiement Badge */}
+                      <td className="py-3 px-3 text-center">
+                        {isCash && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            💵 Espèces
+                          </span>
+                        )}
+                        {isWave && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                            📱 Wave
+                          </span>
+                        )}
+                        {isMobile && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                            📱 Mobile Money
+                          </span>
+                        )}
+                        {!isCash && !isWave && !isMobile && (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            {sale.method}
+                          </span>
                         )}
                       </td>
-                      <td className="py-2.5 px-2 text-center font-extrabold text-slate-800">{s.qty}</td>
-                      <td className="py-2.5 px-3 text-right font-bold text-slate-600">
-                        {formatAfricanCurrency(s.unitPrice, currency)}
-                      </td>
-                      <td className="py-2.5 px-3 text-right font-black text-blue-600 text-sm">
-                        {formatAfricanCurrency(s.total, currency)}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span className={`px-2.5 py-1 rounded-md text-[11px] font-black ${
-                          isCash 
-                            ? 'bg-emerald-100 text-emerald-800' 
-                            : isWave 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-amber-100 text-amber-800'
-                        }`}>
-                          {s.method}
+
+                      {/* Client */}
+                      <td className="py-3 px-3 text-slate-600">
+                        <span className="truncate block max-w-[180px]" title={sale.client}>
+                          {sale.client || 'Client comptoir'}
                         </span>
                       </td>
-                      <td className="py-2.5 px-3 text-xs text-slate-700">
-                        <div className="font-bold">{s.branch}</div>
-                        <div className="text-[10px] text-slate-400">Par: {s.cashier}</div>
-                      </td>
-                      <td className="py-2.5 px-3 text-xs text-slate-600">
-                        {s.client || 'Client Comptoir'}
-                      </td>
-                      <td className="py-2.5 px-3 text-center no-print">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSale(s.id)}
-                          className="text-slate-400 hover:text-red-600 p-1.5 rounded-lg hover:bg-red-50 transition"
-                          title="Supprimer cette ligne"
-                        >
-                          <Trash2 size={15} />
-                        </button>
+
+                      {/* Actions */}
+                      <td className="py-3 px-3 text-center no-print">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setEditingSale(sale)}
+                            className="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition"
+                            title="Modifier cette vente"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSale(sale.id)}
+                            className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
+                            title="Supprimer cette vente"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
                 })
               )}
-
-              {/* Bottom Consolidated Total Row */}
-              {sales.length > 0 && (
-                <tr className="bg-slate-100 border-t-2 border-slate-300 font-black">
-                  <td colSpan={2} className="py-3 px-3.5 text-slate-900 text-xs sm:text-sm">
-                    TOTAL GÉNÉRAL DU JOUR ({sales.length} ventes)
-                  </td>
-                  <td className="py-3 px-2 text-center text-slate-900 text-sm">{totalItemsCount}</td>
-                  <td></td>
-                  <td className="py-3 px-3 text-right text-blue-600 text-base">
-                    {formatAfricanCurrency(totalSales, currency)}
-                  </td>
-                  <td colSpan={4} className="py-3 px-3 text-xs text-slate-600">
-                    Espèces : <strong className="text-slate-900">{formatAfricanCurrency(totalCash, currency)}</strong> • Électronique : <strong className="text-slate-900">{formatAfricanCurrency(totalDigital, currency)}</strong>
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
         </div>
+
+        {/* View More / Expand Toggle */}
+        {remainingCount > 0 && !isExpanded && (
+          <div className="p-2.5 bg-slate-50 border-t border-slate-200 text-center no-print">
+            <button
+              type="button"
+              onClick={() => setIsExpanded(true)}
+              className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 transition py-1 px-3 rounded-lg hover:bg-blue-50"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Voir plus ({remainingCount} lignes)</span>
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {isExpanded && filteredSales.length > 10 && (
+          <div className="p-2.5 bg-slate-50 border-t border-slate-200 text-center no-print">
+            <button
+              type="button"
+              onClick={() => setIsExpanded(false)}
+              className="inline-flex items-center gap-1 text-xs font-bold text-slate-600 hover:text-slate-800 transition py-1 px-3 rounded-lg hover:bg-slate-200"
+            >
+              <span>Réduire l&apos;affichage</span>
+              <ChevronUp className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
+
+        {/* 4. THE LIVE FAST INLINE ENTRY ROW (BLUE HIGHLIGHTED SECTION) */}
+        <div className="p-3 sm:p-4 bg-blue-50/40 border-t-2 border-blue-500 no-print">
+          
+          {/* Header Banner */}
+          <div className="flex items-center gap-1.5 text-blue-700 text-xs font-extrabold uppercase tracking-wide mb-2.5">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>NOUVELLE VENTE — Saisissez l&apos;article et validez avec Entrée</span>
+          </div>
+
+          {/* Form Row */}
+          <div className="flex flex-col lg:flex-row items-stretch lg:items-center gap-2 sm:gap-2.5">
+            
+            {/* Timestamp Badge */}
+            <div className="hidden lg:flex items-center justify-center px-3 py-2 bg-white border border-slate-300 rounded-xl font-mono text-xs font-extrabold text-slate-700 shrink-0 shadow-sm">
+              {currentTime || '12:35:23'}
+            </div>
+
+            {/* SUPER WIDE ARTICLE INPUT WITH MIC BUTTON */}
+            <div className="relative flex-1 min-w-[280px] sm:min-w-[380px]">
+              <input 
+                ref={itemInputRef}
+                type="text"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Décrivez l'article vendu en détail... (ex: Riz 50kg, Huile 5L, Savon OMO 1kg...)"
+                className="w-full pl-3.5 pr-10 py-2.5 bg-white border border-blue-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100 rounded-xl text-xs sm:text-sm font-bold text-slate-900 placeholder-slate-400 shadow-sm outline-none transition"
+              />
+              <button
+                type="button"
+                onClick={handleVoiceInput}
+                className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition ${
+                  isListening 
+                    ? 'bg-red-500 text-white animate-pulse' 
+                    : 'text-blue-600 hover:bg-blue-50'
+                }`}
+                title="Dicter l'article à la voix"
+              >
+                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+              </button>
+            </div>
+
+            {/* QTY INPUT */}
+            <div className="w-full sm:w-20 shrink-0">
+              <input 
+                ref={qtyInputRef}
+                type="number"
+                min="1"
+                value={qty}
+                onChange={(e) => setQty(Math.max(1, parseInt(e.target.value) || 1))}
+                onKeyDown={handleKeyDown}
+                placeholder="Qté"
+                className="w-full py-2.5 px-2 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-black text-center text-slate-900 shadow-sm outline-none transition"
+              />
+            </div>
+
+            {/* UNIT PRICE INPUT */}
+            <div className="w-full sm:w-28 shrink-0">
+              <input 
+                ref={priceInputRef}
+                type="number"
+                min="0"
+                value={unitPrice}
+                onChange={(e) => setUnitPrice(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Prix Unit."
+                className="w-full py-2.5 px-3 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-black text-right text-slate-900 shadow-sm outline-none transition"
+              />
+            </div>
+
+            {/* TOTAL PREVIEW */}
+            <div className="hidden sm:flex items-center justify-end px-3 py-2.5 bg-slate-100 border border-slate-200 rounded-xl font-mono text-xs sm:text-sm font-black text-slate-700 min-w-[100px] shrink-0">
+              {currentLineTotal > 0 ? currentLineTotal.toLocaleString('fr-FR') : '0'}
+            </div>
+
+            {/* PAYMENT METHOD DROPDOWN */}
+            <div className="w-full sm:w-36 shrink-0">
+              <select
+                value={method}
+                onChange={(e) => setMethod(e.target.value as any)}
+                onKeyDown={handleKeyDown}
+                className="w-full py-2.5 px-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-bold text-slate-800 shadow-sm outline-none transition cursor-pointer"
+              >
+                <option value="Espèces">💵 Espèces</option>
+                <option value="Wave">📱 Wave</option>
+                <option value="Mobile Money">📱 Mobile Money</option>
+                <option value="Carte">💳 Carte</option>
+                <option value="Crédit">🤝 Crédit</option>
+              </select>
+            </div>
+
+            {/* OPTIONAL CLIENT INPUT */}
+            <div className="relative w-full sm:w-44 shrink-0">
+              <input 
+                type="text"
+                value={client}
+                onChange={(e) => setClient(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Client (optionnel)"
+                className="w-full pl-3 pr-8 py-2.5 bg-white border border-slate-300 focus:border-blue-600 rounded-xl text-xs sm:text-sm font-medium text-slate-800 placeholder-slate-400 shadow-sm outline-none transition"
+              />
+              <User className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            </div>
+
+            {/* BLUE SUBMIT BUTTON (CHECKMARK) */}
+            <button
+              type="button"
+              onClick={handleAddSale}
+              className="w-full lg:w-12 h-10 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold rounded-xl flex items-center justify-center shrink-0 shadow-md shadow-blue-600/20 transition"
+              title="Valider et enregistrer (Touche Entrée)"
+            >
+              <Check className="w-5 h-5 stroke-[2.8]" />
+            </button>
+
+          </div>
+        </div>
+
       </div>
+
+      {/* 5. BOTTOM BAR : SYNCHRO & KEYBOARD SHORTCUTS */}
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-3 px-2 text-xs text-slate-500 no-print">
+        
+        {/* Sync status */}
+        <div className="flex items-center gap-2 text-slate-600 font-medium">
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <span>Toutes les ventes sont sauvegardées et synchronisées en direct.</span>
+        </div>
+
+        {/* Shortcuts & Settings */}
+        <div className="flex items-center gap-3 flex-wrap justify-end">
+          <div>
+            Raccourcis : <span className="font-bold text-blue-600">Entrée</span> = Valider • <span className="font-bold text-blue-600">Shift + Entrée</span> = Nouvelle ligne
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-1 text-slate-400 hover:text-slate-600 rounded-md hover:bg-slate-100 transition"
+            title="Options du cahier"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+
+      </div>
+
+      {/* MODAL : EDIT SALE */}
+      {editingSale && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex justify-between items-center border-b pb-3">
+              <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-blue-600" /> Modifier la ligne de vente
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setEditingSale(null)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3.5">
+              <div>
+                <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Article / Désignation</label>
+                <textarea 
+                  value={editingSale.item}
+                  onChange={(e) => setEditingSale({ ...editingSale, item: e.target.value })}
+                  rows={2}
+                  className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-900 outline-none focus:border-blue-600"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Quantité</label>
+                  <input 
+                    type="number"
+                    min="1"
+                    value={editingSale.qty}
+                    onChange={(e) => setEditingSale({ ...editingSale, qty: Math.max(1, parseInt(e.target.value) || 1) })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-black text-slate-900 outline-none focus:border-blue-600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Prix Unitaire ({currency})</label>
+                  <input 
+                    type="number"
+                    min="0"
+                    value={editingSale.unitPrice}
+                    onChange={(e) => setEditingSale({ ...editingSale, unitPrice: parseFloat(e.target.value) || 0 })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-black text-slate-900 outline-none focus:border-blue-600"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Mode de Paiement</label>
+                  <select
+                    value={editingSale.method}
+                    onChange={(e) => setEditingSale({ ...editingSale, method: e.target.value as any })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-bold text-slate-800 outline-none focus:border-blue-600"
+                  >
+                    <option value="Espèces">💵 Espèces</option>
+                    <option value="Wave">📱 Wave</option>
+                    <option value="Mobile Money">📱 Mobile Money</option>
+                    <option value="Carte">💳 Carte</option>
+                    <option value="Crédit">🤝 Crédit</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-600 uppercase mb-1">Client</label>
+                  <input 
+                    type="text"
+                    value={editingSale.client}
+                    onChange={(e) => setEditingSale({ ...editingSale, client: e.target.value })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium text-slate-800 outline-none focus:border-blue-600"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-blue-50 p-3 rounded-xl flex justify-between items-center">
+                <span className="text-xs font-bold text-blue-800">Montant recalculé :</span>
+                <span className="text-base font-black text-blue-900 font-mono">
+                  {formatAfricanCurrency(editingSale.qty * editingSale.unitPrice, currency)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <button 
+                type="button" 
+                onClick={() => setEditingSale(null)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition"
+              >
+                Annuler
+              </button>
+              <button 
+                type="button" 
+                onClick={handleUpdateSale}
+                className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl text-sm transition shadow-md shadow-blue-600/20"
+              >
+                Enregistrer les modifications
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL : CLÔTURE DU CAHIER */}
+      {isClosingModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95">
+            <div className="flex justify-between items-center border-b pb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                  ✓
+                </div>
+                <h3 className="text-lg font-black text-slate-900">
+                  Rapport de Clôture du Cahier
+                </h3>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setIsClosingModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                <div className="flex justify-between text-slate-600 text-xs font-semibold">
+                  <span>Date du journal :</span>
+                  <span className="font-bold text-slate-800">{currentDate}</span>
+                </div>
+                <div className="flex justify-between text-slate-600 text-xs font-semibold">
+                  <span>Nombre de ventes :</span>
+                  <span className="font-bold text-slate-800">{totalSalesCount} ventes ({totalItemsCount} articles)</span>
+                </div>
+                <div className="border-t border-slate-200 pt-2 flex justify-between font-black text-base text-slate-900">
+                  <span>Total Recettes :</span>
+                  <span className="text-blue-600">{formatAfricanCurrency(totalSalesAmount, currency)}</span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
+                  <div className="text-[11px] font-bold text-amber-800 uppercase">Espèces en Caisse</div>
+                  <div className="text-base font-black text-amber-900 mt-1">
+                    {formatAfricanCurrency(totalCashAmount, currency)}
+                  </div>
+                  <div className="text-[10px] text-amber-700 mt-0.5">{cashPercent}% du total</div>
+                </div>
+
+                <div className="p-3 bg-purple-50 rounded-xl border border-purple-200">
+                  <div className="text-[11px] font-bold text-purple-800 uppercase">Mobile Money / Wave</div>
+                  <div className="text-base font-black text-purple-900 mt-1">
+                    {formatAfricanCurrency(totalMobileAmount, currency)}
+                  </div>
+                  <div className="text-[10px] text-purple-700 mt-0.5">{mobilePercent}% du total</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <button 
+                type="button" 
+                onClick={() => {
+                  window.print();
+                  setIsClosingModalOpen(false);
+                }}
+                className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Imprimer le Bilan & Clôturer</span>
+              </button>
+
+              <button 
+                type="button" 
+                onClick={() => setIsClosingModalOpen(false)}
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition"
+              >
+                Fermer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL : SETTINGS & DATA RESET */}
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95">
+            <div className="flex justify-between items-center border-b pb-3">
+              <h3 className="text-lg font-black text-slate-900 flex items-center gap-2">
+                <Settings className="w-5 h-5 text-slate-700" /> Options du Cahier
+              </h3>
+              <button 
+                type="button" 
+                onClick={() => setIsSettingsOpen(false)}
+                className="text-slate-400 hover:text-slate-600 p-1"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm("Réinitialiser le cahier avec les données d'exemple ?")) {
+                    saveSales(DEFAULT_SAMPLE_SALES);
+                    setIsSettingsOpen(false);
+                    showToast("Données de démonstration restaurées.", "success");
+                  }
+                }}
+                className="w-full p-3 text-left border border-slate-200 hover:bg-slate-50 rounded-xl transition flex items-center justify-between"
+              >
+                <div>
+                  <div className="font-bold text-slate-900">Restaurer la maquette exemple</div>
+                  <div className="text-xs text-slate-500">Remet les 8 articles de démonstration</div>
+                </div>
+                <RefreshCw className="w-4 h-4 text-blue-600" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm("Attention : Voulez-vous vider toutes les ventes du cahier d'aujourd'hui ?")) {
+                    saveSales([]);
+                    setIsSettingsOpen(false);
+                    showToast("Le cahier des ventes a été vidé.", "info");
+                  }
+                }}
+                className="w-full p-3 text-left border border-red-200 hover:bg-red-50 rounded-xl transition flex items-center justify-between text-red-600"
+              >
+                <div>
+                  <div className="font-bold">Vider le cahier du jour</div>
+                  <div className="text-xs text-red-400">Supprime toutes les lignes enregistrées</div>
+                </div>
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+
+            <button 
+              type="button" 
+              onClick={() => setIsSettingsOpen(false)}
+              className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-sm transition mt-2"
+            >
+              Fermer
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
-
-
-

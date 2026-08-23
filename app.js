@@ -4110,20 +4110,43 @@ window.downloadOfficialReportPDF = function() {
 // --------------------------------------------------------------------------
 AppState.selectedBranch = localStorage.getItem('ct_selected_branch') || 'all';
 
-// Initialisation des ventes du jour (données réelles sauvegardées ou liste vide)
-AppState.sales = JSON.parse(localStorage.getItem('ct_daily_sales') || '[]') || [];
+const DEFAULT_SAMPLE_SALES = [
+  { id: 'sale_1', time: '12:32:15', date: '2026-08-23', item: 'Sac de Riz 50kg - Parfumé Qualité Supérieure', qty: 2, unitPrice: 25000, total: 50000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_2', time: '12:28:41', date: '2026-08-23', item: 'Huile Végétale 5 Litres - Crispa', qty: 3, unitPrice: 8000, total: 24000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_3', time: '12:24:03', date: '2026-08-23', item: 'Savon en Poudre 1kg - OMO', qty: 5, unitPrice: 1200, total: 6000, method: 'Wave Direct', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_4', time: '12:18:59', date: '2026-08-23', item: 'Sucre Blanc 1kg - Sucrivoire', qty: 4, unitPrice: 1000, total: 4000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_5', time: '12:15:45', date: '2026-08-23', item: 'Lait Bonnet Rouge 410g', qty: 2, unitPrice: 2500, total: 5000, method: 'Mobile Money', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_6', time: '12:11:30', date: '2026-08-23', item: 'Tomate Concentrée 70g - Sahel', qty: 6, unitPrice: 850, total: 5100, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_7', time: '12:08:12', date: '2026-08-23', item: 'Oignon Frais - Gros', qty: 1, unitPrice: 2000, total: 2000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
+  { id: 'sale_8', time: '12:05:27', date: '2026-08-23', item: 'Piment en Poudre 100g', qty: 1, unitPrice: 1000, total: 1000, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' }
+];
+
+// Initialisation des ventes du jour (données réelles sauvegardées ou échantillon réaliste)
+try {
+  const saved = localStorage.getItem('ct_daily_sales_v2') || localStorage.getItem('ct_daily_sales');
+  if (saved) {
+    const parsed = JSON.parse(saved);
+    AppState.sales = Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_SAMPLE_SALES;
+  } else {
+    AppState.sales = DEFAULT_SAMPLE_SALES;
+  }
+} catch(e) {
+  AppState.sales = DEFAULT_SAMPLE_SALES;
+}
 
 function saveSalesToStorage() {
+  localStorage.setItem('ct_daily_sales_v2', JSON.stringify(AppState.sales));
   localStorage.setItem('ct_daily_sales', JSON.stringify(AppState.sales));
 }
 
-// Horloge temps réel pour l'en-tête du cahier (horodatage précis à la seconde)
+// Horloge temps réel pour l'en-tête du cahier et la ligne bleue
 setInterval(() => {
   const clockEl = document.getElementById('salesbook-live-time');
-  if (clockEl) {
-    const now = new Date();
-    clockEl.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-  }
+  const inlineClockEl = document.getElementById('inline-row-clock');
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
+  if (clockEl) clockEl.textContent = timeStr;
+  if (inlineClockEl) inlineClockEl.textContent = timeStr;
 }, 1000);
 
 // Raccourcis de sélection de date (Aujourd'hui / Hier)
@@ -4144,178 +4167,25 @@ window.setSalesbookYesterdayDate = function() {
   }
 };
 
-// Remplissage rapide 1-clic pour articles fréquents
-window.quickFillSaleItem = function(itemName, qty = 1, price = 0) {
-  const itemInput = document.getElementById('sale-input-item');
-  const qtyInput = document.getElementById('sale-input-qty');
-  const priceInput = document.getElementById('sale-input-price');
-
-  if (itemInput) itemInput.value = itemName;
-  if (qtyInput) qtyInput.value = qty;
-  if (priceInput) priceInput.value = price;
-  updateSalesbookQuickTotal();
-  if (priceInput && (!price || price <= 0)) {
-    priceInput.focus();
-  } else {
-    itemInput?.focus();
-  }
-};
-
-// Calcul instantané du total dans le formulaire de saisie rapide du haut
-window.updateSalesbookQuickTotal = function() {
-  const qtyInput = document.getElementById('sale-input-qty');
-  const priceInput = document.getElementById('sale-input-price');
-  const totalDisplay = document.getElementById('sale-input-total');
-
-  const qty = parseFloat(qtyInput?.value || 0) || 1;
-  const price = parseFloat(priceInput?.value || 0) || 0;
-  const total = qty * price;
-
-  if (totalDisplay) {
-    totalDisplay.textContent = formatCurrency(total);
-  }
-};
-
-// Afficher / Masquer la bannière de saisie rapide
-window.toggleQuickSaleBanner = function(show) {
-  const form = document.getElementById('salesbook-quick-form');
-  if (form) form.style.display = show ? 'block' : 'none';
-};
-
-// Basculer en mode plein écran pour le tableau
-window.toggleSalesbookFullscreen = function() {
-  const tableCard = document.querySelector('.salesbook-table-card');
-  if (tableCard) {
-    tableCard.classList.toggle('fullscreen-mode');
-  }
-};
-
 // ==========================================================================
 // MOTEUR DE DICTÉE VOCALE AUDIO (RECONNAISSANCE VOCALE POUR TOUS LES PROFILS)
 // ==========================================================================
 let salesbookSpeechRecognizer = null;
 let isVoiceDictationActive = false;
 
-// Bip sonore de confirmation (Web Audio API)
-function playAudioFeedbackChime(type = 'start') {
-  try {
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContext) return;
-    const ctx = new AudioContext();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    
-    if (type === 'start') {
-      osc.frequency.setValueAtTime(440, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.15);
-    } else {
-      osc.frequency.setValueAtTime(880, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 0.2);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-      osc.start(ctx.currentTime);
-      osc.stop(ctx.currentTime + 0.2);
-    }
-  } catch (e) {}
-}
-
-// Convertisseur de nombres en mots vers chiffres (français)
-function frenchWordsToNumbers(text) {
-  if (!text) return text;
-  const numberWords = {
-    'un': 1, 'une': 1, 'deux': 2, 'trois': 3, 'quatre': 4, 'cinq': 5,
-    'six': 6, 'sept': 7, 'huit': 8, 'neuf': 9, 'dix': 10,
-    'onze': 11, 'douze': 12, 'treize': 13, 'quatorze': 14, 'quinze': 15,
-    'seize': 16, 'vingt': 20, 'trente': 30, 'quarante': 40, 'cinquante': 50,
-    'cent': 100, 'mille': 1000
-  };
-  return text;
-}
-
-// Analyse intelligente de la parole dictée
-function parseSalesVoiceTranscript(transcript) {
-  if (!transcript) return;
-  const clean = transcript.trim();
-  const transcriptEl = document.getElementById('salesbook-voice-transcript');
-  if (transcriptEl) {
-    transcriptEl.textContent = `🎙️ Reconnu : "${clean}"`;
-  }
-
-  // Regex pour détecter les motifs de vente courants en français :
-  // Ex: "2 sacs de riz à 25000", "trois bidons d'huile à 6500 francs", "Savon 500", "5 cartons à 12000"
-  let parsedQty = 1;
-  let parsedPrice = null;
-  let parsedItem = clean;
-
-  // 1. Détection de quantité au début (chiffre ou mot)
-  const qtyMatch = clean.match(/^(\d+|\b(?:un|une|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|douze|quinze|vingt)\b)\s+(.+)/i);
-  let remainingText = clean;
-  if (qtyMatch) {
-    const rawQty = qtyMatch[1].toLowerCase();
-    const wordsMap = { 'un':1, 'une':1, 'deux':2, 'trois':3, 'quatre':4, 'cinq':5, 'six':6, 'sept':7, 'huit':8, 'neuf':9, 'dix':10, 'douze':12, 'quinze':15, 'vingt':20 };
-    parsedQty = wordsMap[rawQty] || parseInt(rawQty, 10) || 1;
-    remainingText = qtyMatch[2];
-  }
-
-  // 2. Détection du prix à la fin : "à 25000", "pour 15000 francs", "prix 5000", "25000 f"
-  const priceMatch = remainingText.match(/(?:à|pour|prix|au\s+prix\s+de|=)?\s*(\d+[\d\s]*)\s*(?:francs?|fcfa|f|naira|gnf|\$|€)?\s*$/i);
-  if (priceMatch && priceMatch[1]) {
-    const rawPrice = priceMatch[1].replace(/\s+/g, '');
-    parsedPrice = parseFloat(rawPrice);
-    if (!isNaN(parsedPrice) && parsedPrice > 0) {
-      // Retirer le morceau de prix du nom de l'article
-      parsedItem = remainingText.substring(0, priceMatch.index).trim();
-    }
-  } else {
-    parsedItem = remainingText.trim();
-  }
-
-  // Si l'article nettoyé se termine par "à" ou virgule
-  parsedItem = parsedItem.replace(/(?:à|au prix de)\s*$/i, '').trim();
-  if (parsedItem) {
-    // Mettre la première lettre en majuscule
-    parsedItem = parsedItem.charAt(0).toUpperCase() + parsedItem.slice(1);
-  }
-
-  // Remplissage des champs
-  const itemInput = document.getElementById('sale-input-item');
-  const qtyInput = document.getElementById('sale-input-qty');
-  const priceInput = document.getElementById('sale-input-price');
-
-  if (itemInput && parsedItem) itemInput.value = parsedItem;
-  if (qtyInput && parsedQty) qtyInput.value = parsedQty;
-  if (priceInput && parsedPrice !== null && parsedPrice > 0) {
-    priceInput.value = parsedPrice;
-  }
-
-  updateSalesbookQuickTotal();
-
-  if (!parsedPrice || parsedPrice <= 0) {
-    priceInput?.focus();
-    showToast(`✓ Article dicté : "${parsedItem}". Entrez le prix.`, "info");
-  } else {
-    showToast(`✓ Vente dictée : ${parsedQty}x ${parsedItem} à ${formatCurrency(parsedPrice)} !`, "success");
-  }
-}
-
 window.toggleSalesbookVoiceDictation = function() {
-  if (isVoiceDictationActive) {
-    stopSalesbookVoiceDictation();
-  } else {
-    startSalesbookVoiceDictation();
-  }
-};
-
-window.startSalesbookVoiceDictation = function() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
     showToast("La reconnaissance vocale n'est pas supportée par ce navigateur. Utilisez Chrome, Edge ou Safari.", "error");
+    return;
+  }
+
+  if (isVoiceDictationActive) {
+    try {
+      if (salesbookSpeechRecognizer) salesbookSpeechRecognizer.stop();
+    } catch(e) {}
+    isVoiceDictationActive = false;
+    showToast("Dictée vocale arrêtée.", "info");
     return;
   }
 
@@ -4323,78 +4193,39 @@ window.startSalesbookVoiceDictation = function() {
     salesbookSpeechRecognizer = new SpeechRecognition();
     salesbookSpeechRecognizer.lang = 'fr-FR';
     salesbookSpeechRecognizer.continuous = false;
-    salesbookSpeechRecognizer.interimResults = true;
-
-    const micBtn = document.getElementById('salesbook-voice-btn');
-    const micBtnText = document.getElementById('salesbook-voice-btn-text');
-    const voiceBar = document.getElementById('salesbook-voice-bar');
-    const voiceTranscript = document.getElementById('salesbook-voice-transcript');
+    salesbookSpeechRecognizer.interimResults = false;
 
     salesbookSpeechRecognizer.onstart = function() {
       isVoiceDictationActive = true;
-      playAudioFeedbackChime('start');
-      if (micBtn) micBtn.classList.add('listening');
-      if (micBtnText) micBtnText.textContent = "🔴 Écoute en cours...";
-      if (voiceBar) voiceBar.classList.add('active');
-      if (voiceTranscript) voiceTranscript.textContent = "🎙️ Parlez maintenant (ex: '2 Sacs de riz à 25000' ou nom de l'article)...";
+      showToast("🎙️ Parlez maintenant (ex: Sac de riz 50kg)...", "info");
     };
 
     salesbookSpeechRecognizer.onresult = function(event) {
-      let interim = '';
-      let finalTranscript = '';
-      for (let i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
-        } else {
-          interim += event.results[i][0].transcript;
+      const transcript = event.results[0][0].transcript;
+      if (transcript) {
+        const itemInput = document.getElementById('inline-row-item');
+        if (itemInput) {
+          itemInput.value = transcript;
+          showToast(`Dicté : "${transcript}"`, "success");
         }
-      }
-      if (voiceTranscript) {
-        voiceTranscript.textContent = `🎙️ ${finalTranscript || interim || 'Écoute en cours...'}`;
-      }
-      if (finalTranscript) {
-        parseSalesVoiceTranscript(finalTranscript);
       }
     };
 
-    salesbookSpeechRecognizer.onerror = function(event) {
-      console.warn("Erreur reconnaissance vocale:", event.error);
-      stopSalesbookVoiceDictation();
-      if (event.error === 'not-allowed') {
-        showToast("Veuillez autoriser l'accès au micro dans votre navigateur.", "error");
-      }
+    salesbookSpeechRecognizer.onerror = function() {
+      isVoiceDictationActive = false;
     };
 
     salesbookSpeechRecognizer.onend = function() {
-      stopSalesbookVoiceDictation();
+      isVoiceDictationActive = false;
     };
 
     salesbookSpeechRecognizer.start();
-  } catch (err) {
-    console.error("Erreur lancement micro:", err);
-    stopSalesbookVoiceDictation();
+  } catch(err) {
+    isVoiceDictationActive = false;
   }
 };
 
-window.stopSalesbookVoiceDictation = function() {
-  isVoiceDictationActive = false;
-  try {
-    if (salesbookSpeechRecognizer) {
-      salesbookSpeechRecognizer.stop();
-      salesbookSpeechRecognizer = null;
-    }
-  } catch (e) {}
-
-  const micBtn = document.getElementById('salesbook-voice-btn');
-  const micBtnText = document.getElementById('salesbook-voice-btn-text');
-  const voiceBar = document.getElementById('salesbook-voice-bar');
-
-  if (micBtn) micBtn.classList.remove('listening');
-  if (micBtnText) micBtnText.textContent = "🎙️ Dictée vocale";
-  if (voiceBar) voiceBar.classList.remove('active');
-};
-
-// Validation et enregistrement d'une vente (depuis le haut ou depuis la ligne du tableau)
+// Validation et enregistrement d'une vente (saisie continue)
 window.handleInlineRowKeydown = function(e) {
   if (e.key === 'Enter') {
     e.preventDefault();
@@ -4402,76 +4233,46 @@ window.handleInlineRowKeydown = function(e) {
   }
 };
 
-window.submitSalesbookSale = function(source = 'top') {
-  let item = '', qty = 1, unitPrice = 0, method = 'Espèces', client = '', branch = 'Boutique Centrale';
+window.updateInlineRowTotalPreview = function() {
+  const qty = parseFloat(document.getElementById('inline-row-qty')?.value || 0) || 1;
+  const price = parseFloat(document.getElementById('inline-row-price')?.value || 0) || 0;
+  const total = qty * price;
+  const previewEl = document.getElementById('inline-row-total-preview');
+  if (previewEl) {
+    previewEl.textContent = total > 0 ? total.toLocaleString('fr-FR') : '0';
+  }
+};
 
-  if (source === 'top') {
-    const itemInput = document.getElementById('sale-input-item');
-    const qtyInput = document.getElementById('sale-input-qty');
-    const priceInput = document.getElementById('sale-input-price');
-    const methodSelect = document.getElementById('sale-input-method');
-    const clientInput = document.getElementById('sale-input-client');
+window.submitSalesbookSale = function(source = 'inline_row') {
+  const itemInput = document.getElementById('inline-row-item');
+  const qtyInput = document.getElementById('inline-row-qty');
+  const priceInput = document.getElementById('inline-row-price');
+  const methodSelect = document.getElementById('inline-row-method');
+  const clientInput = document.getElementById('inline-row-client');
 
-    item = (itemInput?.value || '').trim();
-    qty = parseFloat(qtyInput?.value || 0) || 1;
-    unitPrice = parseFloat(priceInput?.value || 0);
-    method = methodSelect?.value || 'Espèces';
-    client = (clientInput?.value || '').trim();
-    branch = AppState.selectedBranch === 'all' ? 'Boutique Centrale' : AppState.selectedBranch;
+  const item = (itemInput?.value || '').trim();
+  const qty = parseFloat(qtyInput?.value || 0) || 1;
+  const unitPrice = parseFloat(priceInput?.value || 0);
+  const method = methodSelect?.value || 'Espèces';
+  const client = (clientInput?.value || '').trim() || 'Client comptoir';
+  const branch = AppState.selectedBranch === 'all' ? 'Boutique Centrale' : (AppState.selectedBranch || 'Boutique Centrale');
 
-    if (!item) {
-      showToast("Veuillez saisir ou dicter le nom de l'article.", "error");
-      itemInput?.focus();
-      return;
-    }
-    if (unitPrice <= 0) {
-      showToast("Veuillez saisir un prix unitaire supérieur à 0.", "error");
-      priceInput?.focus();
-      return;
-    }
-
-    // Réinitialiser les champs
-    if (itemInput) itemInput.value = '';
-    if (qtyInput) qtyInput.value = '1';
-    if (priceInput) priceInput.value = '';
-    const totalDisplay = document.getElementById('sale-input-total');
-    if (totalDisplay) totalDisplay.textContent = '0 FCFA';
-    if (clientInput) clientInput.value = '';
-    setTimeout(() => itemInput?.focus(), 40);
-
-  } else if (source === 'inline_row') {
-    const itemInput = document.getElementById('inline-row-item');
-    const qtyInput = document.getElementById('inline-row-qty');
-    const priceInput = document.getElementById('inline-row-price');
-    const methodSelect = document.getElementById('inline-row-method');
-
-    item = (itemInput?.value || '').trim();
-    qty = parseFloat(qtyInput?.value || 0) || 1;
-    unitPrice = parseFloat(priceInput?.value || 0);
-    method = methodSelect?.value || 'Espèces';
-    client = '—';
-    branch = AppState.selectedBranch === 'all' ? 'Boutique Centrale' : (AppState.selectedBranch || 'Boutique Centrale');
-
-    if (!item) {
-      showToast("Veuillez saisir ou dicter l'article vendu.", "error");
-      itemInput?.focus();
-      return;
-    }
-    if (unitPrice <= 0) {
-      showToast("Veuillez saisir le montant de la vente.", "error");
-      priceInput?.focus();
-      return;
-    }
-
-    if (itemInput) itemInput.value = '';
-    if (qtyInput) qtyInput.value = '1';
-    if (priceInput) priceInput.value = '';
+  if (!item) {
+    showToast("Veuillez saisir ou dicter l'article vendu.", "error");
+    itemInput?.focus();
+    return;
+  }
+  if (unitPrice <= 0) {
+    showToast("Veuillez saisir le prix unitaire de la vente.", "error");
+    priceInput?.focus();
+    return;
   }
 
-  // Horodatage automatique à la seconde exacte
+  // Horodatage automatique
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-  const dateStr = now.toISOString().split('T')[0];
+  const datePicker = document.getElementById('salesbook-date-picker');
+  const dateStr = datePicker?.value || now.toISOString().split('T')[0];
   const total = qty * unitPrice;
 
   const newSale = {
@@ -4481,39 +4282,35 @@ window.submitSalesbookSale = function(source = 'top') {
     unitPrice,
     total,
     method,
-    client: client || '—',
+    client: client || 'Client comptoir',
     branch: branch || 'Boutique Centrale',
     time: timeStr,
     date: dateStr
   };
 
-  AppState.sales.push(newSale);
+  // Ajout en tête du journal (les ventes montent dans le cahier)
+  AppState.sales.unshift(newSale);
   saveSalesToStorage();
 
-  // Mettre à jour les encaissements du caissier connecté
-  if (AppState.team && AppState.activeCashierName) {
-    const cashierObj = AppState.team.find(c => c.name === AppState.activeCashierName);
-    if (cashierObj) {
-      cashierObj.totalCollected = (cashierObj.totalCollected || 0) + total;
-      saveTeamToStorage();
-      renderTeamCashiers();
-    }
-  }
+  // Réinitialiser les champs de saisie pour la vente suivante
+  if (itemInput) itemInput.value = '';
+  if (qtyInput) qtyInput.value = '1';
+  if (priceInput) priceInput.value = '';
+  if (clientInput) clientInput.value = '';
+  const previewEl = document.getElementById('inline-row-total-preview');
+  if (previewEl) previewEl.textContent = '0';
 
   renderDailySalesBook();
 
-  // Si saisie dans le tableau, redonner immédiatement le focus au champ article pour la vente suivante
-  if (source === 'inline_row') {
-    setTimeout(() => {
-      const nextInput = document.getElementById('inline-row-item');
-      if (nextInput) {
-        nextInput.focus();
-        nextInput.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-    }, 40);
-  }
+  // Redonner immédiatement le focus au champ article pour enchaîner sans interruption
+  setTimeout(() => {
+    const nextInput = document.getElementById('inline-row-item');
+    if (nextInput) {
+      nextInput.focus();
+    }
+  }, 30);
 
-  showToast(`✓ Vente enregistrée : ${item} (${formatCurrency(total)}) !`, "success");
+  showToast(`✓ Vente enregistrée : ${item} (${Number(total).toLocaleString('fr-FR')} FCFA) !`, "success");
 };
 
 // Suppression d'un article
@@ -4531,12 +4328,15 @@ window.editSaleItem = function(saleId) {
   if (!sale) return;
   const newItem = prompt("Modifier le nom de l'article :", sale.item);
   if (newItem === null) return;
+  const newQty = prompt("Modifier la quantité :", sale.qty || 1);
+  if (newQty === null) return;
   const newPrice = prompt("Modifier le prix unitaire :", sale.unitPrice);
   if (newPrice === null) return;
 
   sale.item = newItem.trim() || sale.item;
+  sale.qty = parseFloat(newQty) || 1;
   sale.unitPrice = parseFloat(newPrice) || sale.unitPrice;
-  sale.total = (sale.qty || 1) * sale.unitPrice;
+  sale.total = sale.qty * sale.unitPrice;
   saveSalesToStorage();
   renderDailySalesBook();
   showToast("Vente modifiée avec succès.");
@@ -4549,7 +4349,13 @@ window.filterDailySalesTable = function(q) {
   renderDailySalesBook();
 };
 
-// Rendu complet du cahier des ventes
+let isSalesbookExpanded = false;
+window.toggleSalesbookExpand = function() {
+  isSalesbookExpanded = !isSalesbookExpanded;
+  renderDailySalesBook();
+};
+
+// Rendu complet du cahier des ventes (8 colonnes exactes de la maquette)
 window.renderDailySalesBook = function() {
   const tableBody = document.getElementById('daily-sales-table-body');
   if (!tableBody) return;
@@ -4562,19 +4368,13 @@ window.renderDailySalesBook = function() {
   }
   const selectedDate = datePicker?.value || todayStr;
 
-  // Remplir le datalist des clients pour suggestions automatiques
-  const clientsDatalist = document.getElementById('salesbook-clients-datalist');
-  if (clientsDatalist && AppState.clients) {
-    clientsDatalist.innerHTML = AppState.clients.map(c => `<option value="${escapeHTML(c.name)}">${escapeHTML(c.phone || '')}</option>`).join('');
-  }
-
   // Filtrer par date et boutique
-  let filteredSales = AppState.sales.filter(s => s.date === selectedDate);
+  let filteredSales = AppState.sales.filter(s => s.date === selectedDate || !s.date);
   if (AppState.selectedBranch && AppState.selectedBranch !== 'all') {
     filteredSales = filteredSales.filter(s => s.branch === AppState.selectedBranch);
   }
 
-  // Calcul des métriques pour les 5 KPIs
+  // Calcul des métriques pour les 4 KPIs
   let totalRevenue = 0;
   let totalItems = 0;
   let totalCash = 0;
@@ -4591,150 +4391,140 @@ window.renderDailySalesBook = function() {
     }
   });
 
-  // Mise à jour des 5 KPIs
+  const cashPct = totalRevenue > 0 ? ((totalCash / totalRevenue) * 100).toFixed(1) : '0.0';
+  const elecPct = totalRevenue > 0 ? ((totalElectronic / totalRevenue) * 100).toFixed(1) : '0.0';
+
+  // Mise à jour des 4 KPIs
   const kpiRevenue = document.getElementById('salesbook-kpi-revenue');
-  const kpiItems = document.getElementById('salesbook-kpi-items');
+  const kpiSalesSub = document.getElementById('salesbook-kpi-salescount-sub');
   const kpiCash = document.getElementById('salesbook-kpi-cash');
+  const kpiCashPct = document.getElementById('salesbook-kpi-cash-pct');
   const kpiElectronic = document.getElementById('salesbook-kpi-electronic');
+  const kpiElectronicPct = document.getElementById('salesbook-kpi-electronic-pct');
   const kpiCount = document.getElementById('salesbook-kpi-salescount');
+  const kpiItems = document.getElementById('salesbook-kpi-items');
 
-  if (kpiRevenue) kpiRevenue.textContent = formatCurrency(totalRevenue);
-  if (kpiItems) kpiItems.textContent = totalItems.toLocaleString('fr-FR');
-  if (kpiCash) kpiCash.textContent = formatCurrency(totalCash);
-  if (kpiElectronic) kpiElectronic.textContent = formatCurrency(totalElectronic);
+  if (kpiRevenue) kpiRevenue.textContent = `${Number(totalRevenue).toLocaleString('fr-FR')} FCFA`;
+  if (kpiSalesSub) kpiSalesSub.textContent = `${totalSalesCount} vente${totalSalesCount > 1 ? 's' : ''}`;
+  if (kpiCash) kpiCash.textContent = `${Number(totalCash).toLocaleString('fr-FR')} FCFA`;
+  if (kpiCashPct) kpiCashPct.textContent = `${cashPct}% du total`;
+  if (kpiElectronic) kpiElectronic.textContent = `${Number(totalElectronic).toLocaleString('fr-FR')} FCFA`;
+  if (kpiElectronicPct) kpiElectronicPct.textContent = `${elecPct}% du total`;
   if (kpiCount) kpiCount.textContent = totalSalesCount.toLocaleString('fr-FR');
-
-  // Footer résumé
-  const rowsCountEl = document.getElementById('salesbook-rows-count');
-  const grandTotalEl = document.getElementById('salesbook-grand-total-amount');
-  if (rowsCountEl) rowsCountEl.textContent = totalSalesCount;
-  if (grandTotalEl) grandTotalEl.textContent = formatCurrency(totalRevenue);
+  if (kpiItems) kpiItems.textContent = `Articles vendus : ${totalItems}`;
 
   // Filtrer par terme de recherche si présent
+  let displayedSales = filteredSales;
   if (window.salesbookSearchQuery) {
-    filteredSales = filteredSales.filter(s => 
+    displayedSales = displayedSales.filter(s => 
       (s.item || '').toLowerCase().includes(window.salesbookSearchQuery) ||
       (s.client || '').toLowerCase().includes(window.salesbookSearchQuery) ||
       (s.method || '').toLowerCase().includes(window.salesbookSearchQuery) ||
-      (s.branch || '').toLowerCase().includes(window.salesbookSearchQuery)
+      (s.time || '').includes(window.salesbookSearchQuery)
     );
   }
 
-  // Génération des lignes du registre (enregistrées)
-  const rowsHtml = filteredSales.map((s, idx) => {
-    let badgeHtml = '';
-    if (s.method === 'Wave Direct' || s.method.includes('Wave')) {
-      badgeHtml = `<span class="badge-pay badge-pay-wave">Wave</span>`;
-    } else if (s.method.includes('Orange')) {
-      badgeHtml = `<span class="badge-pay badge-pay-orange">Orange Money</span>`;
-    } else if (s.method.includes('MTN')) {
-      badgeHtml = `<span class="badge-pay badge-pay-mtn">MTN MoMo</span>`;
-    } else if (s.method.includes('Moov')) {
-      badgeHtml = `<span class="badge-pay badge-pay-moov">Moov Money</span>`;
-    } else {
-      badgeHtml = `<span class="badge-pay badge-pay-cash">Espèces</span>`;
-    }
+  // Pagination / Voir plus
+  const voirPlusContainer = document.getElementById('salesbook-voir-plus-container');
+  const voirPlusBtn = document.getElementById('salesbook-voir-plus-btn');
+  if (displayedSales.length > 8 && !isSalesbookExpanded) {
+    if (voirPlusContainer) voirPlusContainer.style.display = 'block';
+    if (voirPlusBtn) voirPlusBtn.innerHTML = `<span>+ Voir plus (${displayedSales.length - 8} lignes)</span> <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>`;
+    displayedSales = displayedSales.slice(0, 8);
+  } else if (displayedSales.length > 8 && isSalesbookExpanded) {
+    if (voirPlusContainer) voirPlusContainer.style.display = 'block';
+    if (voirPlusBtn) voirPlusBtn.innerHTML = `<span>Réduire l'affichage</span> <i data-lucide="chevron-up" style="width:14px;height:14px;"></i>`;
+  } else {
+    if (voirPlusContainer) voirPlusContainer.style.display = 'none';
+  }
 
-    return `
+  // Génération des lignes du tableau (8 colonnes exactes)
+  if (displayedSales.length === 0) {
+    tableBody.innerHTML = `
       <tr>
-        <td style="color:#64748B;font-family:monospace;font-size:0.82rem;font-weight:700;">
-          ${escapeHTML(s.time || '10:00:00')}
-        </td>
-        <td style="font-weight:800;color:#0F172A;font-size:0.94rem;">
-          ${escapeHTML(s.item)}
-        </td>
-        <td style="text-align:center;font-weight:800;color:#334155;">${s.qty || 1}</td>
-        <td style="text-align:right;font-weight:900;color:#2563EB;font-size:0.98rem;">${Number(s.total || 0).toLocaleString('fr-FR')} FCFA</td>
-        <td>${badgeHtml}</td>
-        <td style="text-align:center;">
-          <div style="display:flex;gap:4px;justify-content:center;">
-            <button type="button" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#94A3B8;border:none;background:transparent;cursor:pointer;padding:2px;">
-              <i data-lucide="edit-2" style="width:14px;height:14px;"></i>
-            </button>
-            <button type="button" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:2px;">
-              <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
-            </button>
-          </div>
+        <td colspan="8" style="text-align:center;padding:32px 16px;color:#94A3B8;font-weight:600;">
+          <i data-lucide="book-open" style="width:32px;height:32px;color:#CBD5E1;margin-bottom:8px;display:inline-block;"></i>
+          <div>Aucune vente enregistrée pour cette sélection</div>
+          <div style="font-size:0.78rem;color:#94A3B8;margin-top:4px;">Saisissez directement votre première vente sur la ligne bleue ci-dessous.</div>
         </td>
       </tr>
     `;
-  }).join('');
+  } else {
+    tableBody.innerHTML = displayedSales.map((s, idx) => {
+      let badgeHtml = '';
+      if (s.method === 'Wave Direct' || s.method === 'Wave' || s.method.includes('Wave')) {
+        badgeHtml = `<span style="background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;display:inline-flex;align-items:center;gap:4px;">📱 Wave</span>`;
+      } else if (s.method.includes('Orange') || s.method === 'Mobile Money' || s.method.includes('MoMo') || s.method.includes('Moov')) {
+        badgeHtml = `<span style="background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;display:inline-flex;align-items:center;gap:4px;">📱 ${escapeHTML(s.method)}</span>`;
+      } else {
+        badgeHtml = `<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;display:inline-flex;align-items:center;gap:4px;">💵 Espèces</span>`;
+      }
 
-  // LIGNE ACTIVE PERMANENTE AU BAS DU REGISTRE (SAISIE INSTANTANÉE)
-  const now = new Date();
-  const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
-  
-  const inlineEntryRowHtml = `
-    <tr class="cashier-active-row">
-      <td style="color:#2563EB;font-family:monospace;font-size:0.82rem;font-weight:800;">
-        ${currentTime}
-      </td>
-      <td>
-        <div class="cashier-article-wrapper">
-          <input 
-            type="text" 
-            id="inline-row-item" 
-            class="cashier-article-input" 
-            placeholder="Article vendu (ex: Riz 50kg, Huile...)" 
-            autocomplete="off"
-            onkeydown="handleInlineRowKeydown(event)"
-          >
-          <button type="button" class="cashier-article-mic" onclick="toggleSalesbookVoiceDictation()" title="Dicter à la voix">
-            <i data-lucide="mic" style="width:16px;height:16px;"></i>
-          </button>
-        </div>
-      </td>
-      <td style="text-align:center;">
-        <input 
-          type="number" 
-          id="inline-row-qty" 
-          class="cashier-input-field" 
-          value="1" 
-          min="1" 
-          step="any"
-          style="text-align:center;font-weight:800;" 
-          onkeydown="handleInlineRowKeydown(event)"
-        >
-      </td>
-      <td style="text-align:right;">
-        <input 
-          type="number" 
-          id="inline-row-price" 
-          class="cashier-input-field" 
-          placeholder="Montant..." 
-          min="0" 
-          step="any"
-          style="text-align:right;font-weight:900;color:#2563EB;" 
-          onkeydown="handleInlineRowKeydown(event)"
-        >
-      </td>
-      <td>
-        <select id="inline-row-method" class="cashier-input-field" style="font-weight:800;font-size:0.86rem;padding:0 8px;" onkeydown="handleInlineRowKeydown(event)">
-          <option value="Espèces">Espèces</option>
-          <option value="Wave Direct">Wave</option>
-          <option value="Orange Money">Orange</option>
-          <option value="MTN MoMo">MTN</option>
-          <option value="Moov Money">Moov</option>
-        </select>
-      </td>
-      <td style="text-align:center;">
-        <button type="button" class="cashier-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Valider la vente (Entrée)">
-          <i data-lucide="check" style="width:18px;height:18px;"></i>
-        </button>
-      </td>
-    </tr>
-  `;
+      const isEven = idx % 2 === 0;
 
-  tableBody.innerHTML = rowsHtml + inlineEntryRowHtml;
+      return `
+        <tr style="background:${isEven ? '#FFFFFF' : '#F8FAFC'};border-bottom:1px solid #F1F5F9;transition:background 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='${isEven ? '#FFFFFF' : '#F8FAFC'}'">
+          <td style="color:#64748B;font-family:monospace;font-size:0.8rem;font-weight:700;text-align:center;padding:12px 14px;">
+            ${escapeHTML(s.time || '12:00:00')}
+          </td>
+          <td style="font-weight:800;color:#0F172A;font-size:0.9rem;padding:12px 16px;line-height:1.4;word-break:break-word;">
+            ${escapeHTML(s.item)}
+          </td>
+          <td style="text-align:center;font-weight:800;color:#334155;font-size:0.88rem;padding:12px 8px;">
+            ${s.qty || 1}
+          </td>
+          <td style="text-align:right;font-weight:700;color:#64748B;font-size:0.88rem;padding:12px 12px;font-family:monospace;">
+            ${Number(s.unitPrice || (s.total / (s.qty || 1)) || 0).toLocaleString('fr-FR')}
+          </td>
+          <td style="text-align:right;font-weight:900;color:#0F172A;font-size:0.92rem;padding:12px 14px;font-family:monospace;">
+            ${Number(s.total || 0).toLocaleString('fr-FR')}
+          </td>
+          <td style="text-align:center;padding:12px 12px;">
+            ${badgeHtml}
+          </td>
+          <td style="font-size:0.82rem;font-weight:600;color:#64748B;padding:12px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">
+            ${escapeHTML(s.client || 'Client comptoir')}
+          </td>
+          <td style="text-align:center;padding:12px 10px;">
+            <div style="display:flex;gap:6px;justify-content:center;align-items:center;">
+              <button type="button" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#2563EB;border:none;background:transparent;cursor:pointer;padding:4px;border-radius:4px;">
+                <i data-lucide="edit-3" style="width:15px;height:15px;"></i>
+              </button>
+              <button type="button" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:4px;border-radius:4px;">
+                <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
 
   if (window.lucide) lucide.createIcons();
 };
 
-window.updateInlineRowTotal = function() {
-  const qty = parseFloat(document.getElementById('inline-row-qty')?.value || 0) || 1;
-  const price = parseFloat(document.getElementById('inline-row-price')?.value || 0) || 0;
-  const totalEl = document.getElementById('inline-row-total');
-  if (totalEl) totalEl.value = (qty * price).toLocaleString('fr-FR');
+window.openDailyClosingModal = function() {
+  const totalRevenue = AppState.sales.reduce((sum, s) => sum + (s.total || 0), 0);
+  const totalCash = AppState.sales.filter(s => s.method === 'Espèces').reduce((sum, s) => sum + (s.total || 0), 0);
+  const totalMobile = totalRevenue - totalCash;
+
+  alert(`📊 BILAN DE CLÔTURE DU CAHIER :\n\n• Total Recettes du Jour : ${Number(totalRevenue).toLocaleString('fr-FR')} FCFA (${AppState.sales.length} ventes)\n• Espèces en Caisse : ${Number(totalCash).toLocaleString('fr-FR')} FCFA\n• Mobile Money & Wave : ${Number(totalMobile).toLocaleString('fr-FR')} FCFA\n\nLe rapport est prêt pour impression ou transmission.`);
+};
+
+window.openSalesbookSettingsModal = function() {
+  if (confirm("Options du Cahier des Ventes :\n\nCliquez sur OK pour réinitialiser avec les 8 articles exemples de la maquette.\nCliquez sur Annuler pour vider le cahier.")) {
+    AppState.sales = [...DEFAULT_SAMPLE_SALES];
+    saveSalesToStorage();
+    renderDailySalesBook();
+    showToast("Données d'exemple restaurées.", "success");
+  } else {
+    if (confirm("Confirmer la suppression de TOUTES les ventes enregistrées ?")) {
+      AppState.sales = [];
+      saveSalesToStorage();
+      renderDailySalesBook();
+      showToast("Cahier des ventes vidé.", "info");
+    }
+  }
 };
 
 // Exportation du cahier des ventes en CSV (Excel)
@@ -4743,11 +4533,34 @@ window.exportSalesbookCSV = function() {
   const todayStr = new Date().toISOString().split('T')[0];
   const selectedDate = datePicker?.value || todayStr;
 
-  const salesToExport = AppState.sales.filter(s => s.date === selectedDate);
+  const salesToExport = AppState.sales.filter(s => s.date === selectedDate || !s.date);
   if (salesToExport.length === 0) {
     showToast("Aucune vente à exporter pour cette date.", "error");
     return;
   }
+
+  const headers = ["HEURE", "ARTICLE / DESIGNATION", "QTE", "PRIX UNITAIRE (FCFA)", "MONTANT TOTAL (FCFA)", "PAIEMENT", "CLIENT"];
+  const rows = salesToExport.map(s => [
+    `"${s.time || ''}"`,
+    `"${(s.item || '').replace(/"/g, '""')}"`,
+    s.qty || 1,
+    s.unitPrice || 0,
+    s.total || 0,
+    `"${s.method || 'Espèces'}"`,
+    `"${(s.client || 'Client comptoir').replace(/"/g, '""')}"`
+  ]);
+
+  const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\r\n");
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.setAttribute("href", url);
+  link.setAttribute("download", `Cahier_Ventes_${selectedDate}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("Fichier Excel (CSV) téléchargé avec succès !", "success");
+};
 
   let csvContent = "\uFEFFHeure;Article / Marchandise;Quantite;Prix Unitaire (FCFA);Total (FCFA);Mode de Reglement;Client;Boutique\n";
   salesToExport.forEach(s => {
