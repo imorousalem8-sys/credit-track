@@ -48,7 +48,7 @@ window.getCountryConfig = getCountryConfig;
 
 // Système de détection automatique des nouvelles versions en ligne pour tous les utilisateurs
 (function initAutoUpdateWatcher() {
-  const APP_VERSION = "20260823_v3.0.0";
+  const APP_VERSION = "20260823_v3.1.0";
   async function checkRemoteVersion() {
     try {
       const res = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
@@ -4674,28 +4674,28 @@ window.renderDailySalesBook = function() {
   
   const inlineEntryRowHtml = `
     <tr class="salesbook-inline-entry-row">
-      <td style="color:#64748B;font-family:monospace;font-size:0.84rem;font-weight:800;white-space:nowrap;">
-        <span style="display:inline-flex;align-items:center;gap:4px;">
-          <i data-lucide="clock" style="width:13px;height:13px;color:#2563EB;"></i>
+      <td style="color:#64748B;font-family:monospace;font-size:0.86rem;font-weight:800;white-space:nowrap;width:110px;">
+        <span style="display:inline-flex;align-items:center;gap:5px;">
+          <i data-lucide="clock" style="width:14px;height:14px;color:#2563EB;"></i>
           ${currentTime}
         </span>
       </td>
-      <td style="min-width:260px;">
+      <td style="min-width:320px;width:34%;">
         <div class="salesbook-inline-item-container">
           <input 
             type="text" 
             id="inline-row-item" 
             class="salesbook-inline-article-input" 
-            placeholder="Nom de l'article ou référence..." 
+            placeholder="Nom de l'article ou référence vendue..." 
             autocomplete="off"
             onkeydown="handleInlineRowKeydown(event)"
           >
-          <button type="button" class="salesbook-inline-mic-btn" onclick="toggleSalesbookVoiceDictation()" title="Dicter à la voix">
-            <i data-lucide="mic" style="width:16px;height:16px;"></i>
+          <button type="button" class="salesbook-inline-mic-btn" onclick="toggleSalesbookVoiceDictation()" title="Dicter la vente à la voix">
+            <i data-lucide="mic" style="width:18px;height:18px;"></i>
           </button>
         </div>
       </td>
-      <td style="text-align:center;width:75px;">
+      <td style="text-align:center;width:90px;">
         <input 
           type="number" 
           id="inline-row-qty" 
@@ -4703,12 +4703,12 @@ window.renderDailySalesBook = function() {
           value="1" 
           min="1" 
           step="any"
-          style="text-align:center;font-weight:800;" 
+          style="text-align:center;font-weight:800;font-size:1rem;" 
           oninput="updateInlineRowTotal()" 
           onkeydown="handleInlineRowKeydown(event)"
         >
       </td>
-      <td style="text-align:right;width:120px;">
+      <td style="text-align:right;width:135px;">
         <input 
           type="number" 
           id="inline-row-price" 
@@ -4716,23 +4716,23 @@ window.renderDailySalesBook = function() {
           placeholder="0" 
           min="0" 
           step="any"
-          style="text-align:right;font-weight:800;" 
+          style="text-align:right;font-weight:800;font-size:1rem;" 
           oninput="updateInlineRowTotal()" 
           onkeydown="handleInlineRowKeydown(event)"
         >
       </td>
-      <td style="text-align:right;width:130px;">
+      <td style="text-align:right;width:145px;">
         <input 
           type="text" 
           id="inline-row-total" 
           class="salesbook-inline-table-input" 
           placeholder="0" 
           readonly 
-          style="text-align:right;background:#EFF6FF;font-weight:900;color:#2563EB;border-color:#BFDBFE;"
+          style="text-align:right;background:#EFF6FF;font-weight:900;color:#2563EB;border-color:#BFDBFE;font-size:1.1rem;"
         >
       </td>
-      <td style="width:140px;">
-        <select id="inline-row-method" class="salesbook-inline-table-input" style="font-weight:700;" onkeydown="handleInlineRowKeydown(event)">
+      <td style="width:150px;">
+        <select id="inline-row-method" class="salesbook-inline-table-input" style="font-weight:800;font-size:0.92rem;" onkeydown="handleInlineRowKeydown(event)">
           <option value="Espèces">Espèces</option>
           <option value="Wave Direct">Wave</option>
           <option value="Orange Money">Orange Money</option>
@@ -4741,7 +4741,7 @@ window.renderDailySalesBook = function() {
           <option value="Virement / Carte">Carte / Autre</option>
         </select>
       </td>
-      <td style="width:150px;">
+      <td style="width:160px;">
         <input 
           type="text" 
           id="inline-row-client" 
@@ -4751,16 +4751,16 @@ window.renderDailySalesBook = function() {
           onkeydown="handleInlineRowKeydown(event)"
         >
       </td>
-      <td style="width:140px;">
-        <select id="inline-row-branch" class="salesbook-inline-table-input" style="font-weight:600;">
+      <td style="width:150px;">
+        <select id="inline-row-branch" class="salesbook-inline-table-input" style="font-weight:700;font-size:0.9rem;">
           <option value="Boutique Centrale">Boutique Centrale</option>
           <option value="Boutique Annexe">Boutique Annexe</option>
           <option value="Boutique Siège">Boutique Siège</option>
         </select>
       </td>
-      <td style="text-align:center;width:70px;">
+      <td style="text-align:center;width:75px;">
         <button type="button" class="salesbook-inline-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Enregistrer la vente (Entrée)">
-          <i data-lucide="check" style="width:18px;height:18px;"></i>
+          <i data-lucide="check" style="width:20px;height:20px;"></i>
         </button>
       </td>
     </tr>
