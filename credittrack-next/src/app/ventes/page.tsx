@@ -767,11 +767,11 @@ export default function VentesPage() {
               {currentTime || '13:14:24'}
             </div>
 
-            {/* GIGANTIC VERTICAL ARTICLE TEXTAREA */}
-            <div className="relative flex-1 w-full">
+            {/* GIGANTIC VERTICAL ARTICLE TEXTAREA WITH BALANCED WIDTH */}
+            <div className="relative flex-1 max-w-[680px] w-full">
               <textarea 
                 ref={itemInputRef as any}
-                rows={2}
+                rows={3}
                 value={itemName}
                 onChange={(e) => setItemName(e.target.value)}
                 onKeyDown={(e) => {
@@ -780,8 +780,8 @@ export default function VentesPage() {
                     handleAddSale();
                   }
                 }}
-                placeholder="Écrivez ici l'article ou la marchandise vendue en détail...&#10;(ex: Sac de riz parfumé 50 kg — Qualité supérieure — Marque Mémé / Huile Dinor 5L...)"
-                className="w-full pl-4 pr-12 py-2.5 bg-white border-2 border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-xl text-sm font-black text-slate-900 placeholder-slate-400 shadow-md shadow-blue-500/10 outline-none resize-none transition"
+                placeholder="Écrivez ici l'article ou la marchandise vendue en détail...&#10;(ex: Sac de riz 50 kg / Bidon d'huile 5L / Savon en poudre OMO 1kg...)"
+                className="w-full pl-4 pr-12 py-3 bg-white border-2 border-blue-600 focus:ring-4 focus:ring-blue-100 rounded-xl text-sm font-black text-slate-900 placeholder-slate-400 shadow-md shadow-blue-500/10 outline-none resize-none h-[105px] min-h-[105px] leading-relaxed transition"
               />
               <button
                 type="button"

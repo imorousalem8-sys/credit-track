@@ -4189,11 +4189,11 @@ setInterval(() => {
   if (inlineClockEl) inlineClockEl.textContent = timeStr;
 }, 1000);
 
-// Raccourcis de sélection de date (Aujourd'hui / Hier)
+// Raccourcis de sélection de date (Aujourd'hui / Hier) en mode réel
 window.setSalesbookTodayDate = function() {
   const datePicker = document.getElementById('salesbook-date-picker');
   if (datePicker) {
-    datePicker.value = '2026-08-23';
+    datePicker.value = new Date().toISOString().split('T')[0];
     renderDailySalesBook();
   }
 };
@@ -4201,7 +4201,8 @@ window.setSalesbookTodayDate = function() {
 window.setSalesbookYesterdayDate = function() {
   const datePicker = document.getElementById('salesbook-date-picker');
   if (datePicker) {
-    datePicker.value = '2026-08-22';
+    const yest = new Date(Date.now() - 86400000);
+    datePicker.value = yest.toISOString().split('T')[0];
     renderDailySalesBook();
   }
 };
