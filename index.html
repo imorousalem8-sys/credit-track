@@ -26,7 +26,7 @@
   <script>
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260823_v3.1.0";
+      const CURRENT_BUILD = "20260823_v3.2.0";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('serviceWorker' in navigator) {
@@ -81,9 +81,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260823_v3.1.0" defer></script>
-  <script src="app.js?v=20260823_v3.1.0" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260823_v3.1.0">
+  <script src="dataStore.js?v=20260823_v3.2.0" defer></script>
+  <script src="app.js?v=20260823_v3.2.0" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260823_v3.2.0">
 </head>
 <body class="is-landing-mode">
 
@@ -1985,117 +1985,98 @@
 
         <!-- ============================================================
              VUE : CAHIER DES VENTES DU JOUR (#menu-salesbook)
-             REGISTRE DE CAISSE NUMÉRIQUE UNIFIÉ — STYLE A PREMIUM
+             LE VÉRITABLE CAHIER / REGISTRE DE VENTES LIGNÉ DE BOUTIQUE
         ============================================================ -->
         <style id="salesbook-master-styles">
-          /* Master Styles - Cahier des Ventes SaaS Pro */
+          /* Styles Authentiques du Cahier de Caisse Ligné */
           .salesbook-kpis-container {
             display: grid !important;
             grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
-            gap: 16px !important;
-            margin-bottom: 24px !important;
+            gap: 14px !important;
+            margin-bottom: 20px !important;
           }
-          @media (max-width: 1200px) {
+          @media (max-width: 1024px) {
             .salesbook-kpis-container { grid-template-columns: repeat(3, 1fr) !important; }
           }
-          @media (max-width: 768px) {
+          @media (max-width: 640px) {
             .salesbook-kpis-container { grid-template-columns: 1fr 1fr !important; }
-          }
-          @media (max-width: 480px) {
-            .salesbook-kpis-container { grid-template-columns: 1fr !important; }
           }
 
           .salesbook-kpi-card {
             background: #FFFFFF !important;
             border: 1.5px solid #E2E8F0 !important;
-            border-radius: 18px !important;
-            padding: 20px 22px !important;
+            border-radius: 14px !important;
+            padding: 14px 16px !important;
             display: flex !important;
             align-items: center !important;
-            gap: 16px !important;
-            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.03) !important;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            gap: 12px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03) !important;
           }
-          .salesbook-kpi-card:hover {
-            transform: translateY(-3px) !important;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.07) !important;
-            border-color: #CBD5E1 !important;
-          }
-
           .salesbook-kpi-icon {
-            width: 52px !important;
-            height: 52px !important;
-            border-radius: 14px !important;
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 10px !important;
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
             flex-shrink: 0 !important;
           }
-          .salesbook-kpi-icon.blue   { background: #EFF6FF !important; color: #2563EB !important; border: 1px solid #DBEAFE !important; }
-          .salesbook-kpi-icon.green  { background: #ECFDF5 !important; color: #10B981 !important; border: 1px solid #D1FAE5 !important; }
-          .salesbook-kpi-icon.orange { background: #FFFBEB !important; color: #D97706 !important; border: 1px solid #FEF3C7 !important; }
-          .salesbook-kpi-icon.purple { background: #F5F3FF !important; color: #7C3AED !important; border: 1px solid #EDE9FE !important; }
-          .salesbook-kpi-icon.cyan   { background: #F0F9FF !important; color: #0284C7 !important; border: 1px solid #E0F2FE !important; }
+          .salesbook-kpi-icon.blue   { background: #EFF6FF !important; color: #2563EB !important; }
+          .salesbook-kpi-icon.green  { background: #ECFDF5 !important; color: #10B981 !important; }
+          .salesbook-kpi-icon.orange { background: #FFFBEB !important; color: #D97706 !important; }
+          .salesbook-kpi-icon.purple { background: #F5F3FF !important; color: #7C3AED !important; }
+          .salesbook-kpi-icon.cyan   { background: #F0F9FF !important; color: #0284C7 !important; }
 
           .salesbook-kpi-label {
-            font-size: 0.74rem !important;
+            font-size: 0.72rem !important;
             font-weight: 800 !important;
             color: #64748B !important;
             text-transform: uppercase !important;
-            letter-spacing: 0.6px !important;
-            margin-bottom: 4px !important;
+            letter-spacing: 0.5px !important;
+            margin-bottom: 2px !important;
           }
           .salesbook-kpi-val {
-            font-size: 1.45rem !important;
+            font-size: 1.25rem !important;
             font-weight: 900 !important;
             color: #0F172A !important;
             line-height: 1.2 !important;
           }
 
-          /* Carte du Tableau de Registre */
-          .salesbook-table-card {
+          /* Le Grand Cahier de Registre Ligné */
+          .salesbook-notebook-card {
             background: #FFFFFF !important;
-            border: 1.5px solid #E2E8F0 !important;
-            border-radius: 20px !important;
+            border: 1.5px solid #CBD5E1 !important;
+            border-left: 6px solid #2563EB !important;
+            border-radius: 16px !important;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05) !important;
             overflow: hidden !important;
-            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04) !important;
           }
-          .salesbook-table-header-bar {
-            padding: 18px 24px !important;
+
+          .salesbook-notebook-header {
+            padding: 16px 22px !important;
+            background: #F8FAFC !important;
+            border-bottom: 2px solid #E2E8F0 !important;
             display: flex !important;
-            align-items: center !important;
             justify-content: space-between !important;
+            align-items: center !important;
             flex-wrap: wrap !important;
-            gap: 16px !important;
-            background: #FFFFFF !important;
-            border-bottom: 1.5px solid #F1F5F9 !important;
+            gap: 14px !important;
           }
 
-          .salesbook-scroll-wrapper {
-            max-height: 580px !important;
-            overflow-y: auto !important;
-            overflow-x: auto !important;
-            position: relative !important;
-          }
-
-          .salesbook-main-table {
+          .salesbook-notebook-table {
             width: 100% !important;
-            min-width: 1100px !important;
             border-collapse: collapse !important;
-            text-align: left !important;
+            table-layout: auto !important;
           }
-          .salesbook-main-table thead {
-            position: sticky !important;
-            top: 0 !important;
-            z-index: 20 !important;
-          }
-          .salesbook-main-table thead tr {
+
+          .salesbook-notebook-table thead tr {
             background: #0F172A !important;
             color: #FFFFFF !important;
           }
-          .salesbook-main-table th {
-            padding: 16px 16px !important;
-            font-size: 0.76rem !important;
+
+          .salesbook-notebook-table th {
+            padding: 14px 14px !important;
+            font-size: 0.78rem !important;
             font-weight: 800 !important;
             letter-spacing: 0.6px !important;
             text-transform: uppercase !important;
@@ -2103,51 +2084,66 @@
             border: none !important;
             white-space: nowrap !important;
           }
-          .salesbook-main-table td {
-            padding: 14px 16px !important;
-            font-size: 0.92rem !important;
+
+          .salesbook-notebook-table td {
+            padding: 12px 14px !important;
+            font-size: 0.94rem !important;
             color: #1E293B !important;
-            border-bottom: 1px solid #F1F5F9 !important;
+            border-bottom: 1px solid #E2E8F0 !important;
             vertical-align: middle !important;
           }
-          .salesbook-main-table tbody tr:hover:not(.salesbook-inline-entry-row) {
-            background: #F8FAFC !important;
+
+          .salesbook-notebook-table tbody tr:nth-child(even):not(.salesbook-inline-entry-row) {
+            background: #FAFAFA !important;
+          }
+
+          .salesbook-notebook-table tbody tr:hover:not(.salesbook-inline-entry-row) {
+            background: #F0F7FF !important;
+          }
+
+          /* Marge de Ligne de Cahier */
+          .salesbook-line-margin {
+            font-family: monospace !important;
+            font-weight: 800 !important;
+            font-size: 0.85rem !important;
+            color: #2563EB !important;
+            white-space: nowrap !important;
           }
 
           /* Ligne Active de Saisie Permanente au Bas */
           .salesbook-inline-entry-row {
             background: #F8FAFC !important;
-            border-top: 2.5px solid #2563EB !important;
-            box-shadow: inset 0 3px 8px rgba(37, 99, 235, 0.08) !important;
+            border-top: 3px solid #2563EB !important;
           }
+
           .salesbook-inline-item-container {
             display: flex !important;
             align-items: center !important;
             position: relative !important;
             width: 100% !important;
           }
-          .salesbook-inline-article-input {
+
+          .salesbook-notebook-input-article {
             width: 100% !important;
-            height: 48px !important;
-            padding: 0 46px 0 16px !important;
-            font-size: 0.98rem !important;
+            height: 46px !important;
+            padding: 0 46px 0 14px !important;
+            font-size: 1.02rem !important;
             font-weight: 700 !important;
             color: #0F172A !important;
             background: #FFFFFF !important;
             border: 2px solid #2563EB !important;
             border-radius: 10px !important;
             outline: none !important;
-            transition: all 0.2s ease !important;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15) !important;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.12) !important;
           }
-          .salesbook-inline-article-input:focus {
+          .salesbook-notebook-input-article:focus {
             border-color: #1D4ED8 !important;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25) !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
           }
 
-          .salesbook-inline-mic-btn {
+          .salesbook-notebook-mic-btn {
             position: absolute !important;
-            right: 8px !important;
+            right: 6px !important;
             top: 50% !important;
             transform: translateY(-50%) !important;
             background: #EFF6FF !important;
@@ -2159,34 +2155,27 @@
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            transition: all 0.15s ease !important;
-          }
-          .salesbook-inline-mic-btn:hover {
-            background: #DBEAFE !important;
-            color: #1D4ED8 !important;
           }
 
-          .salesbook-inline-table-input {
+          .salesbook-notebook-input {
             width: 100% !important;
-            height: 48px !important;
-            padding: 0 12px !important;
-            font-size: 0.94rem !important;
-            font-weight: 700 !important;
-            border: 2px solid #CBD5E1 !important;
+            height: 46px !important;
+            padding: 0 10px !important;
+            font-size: 0.95rem !important;
+            font-weight: 800 !important;
+            border: 1.5px solid #CBD5E1 !important;
             border-radius: 10px !important;
             outline: none !important;
             background: #FFFFFF !important;
-            transition: all 0.2s ease !important;
           }
-          .salesbook-inline-table-input:focus {
+          .salesbook-notebook-input:focus {
             border-color: #2563EB !important;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
           }
 
-          .salesbook-inline-btn-submit {
-            width: 48px !important;
-            height: 48px !important;
-            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%) !important;
+          .salesbook-notebook-btn-submit {
+            width: 46px !important;
+            height: 46px !important;
+            background: #2563EB !important;
             color: #FFFFFF !important;
             border: none !important;
             border-radius: 10px !important;
@@ -2194,20 +2183,20 @@
             align-items: center !important;
             justify-content: center !important;
             cursor: pointer !important;
-            transition: all 0.2s ease !important;
-            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+            font-weight: 900 !important;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35) !important;
           }
-          .salesbook-inline-btn-submit:hover {
-            transform: scale(1.06) !important;
-            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5) !important;
+          .salesbook-notebook-btn-submit:hover {
+            background: #1D4ED8 !important;
+            transform: scale(1.05) !important;
           }
 
           /* Badges de Paiement */
           .sales-badge-payment {
             display: inline-flex !important;
             align-items: center !important;
-            gap: 6px !important;
-            padding: 6px 12px !important;
+            gap: 5px !important;
+            padding: 5px 10px !important;
             border-radius: 8px !important;
             font-size: 0.8rem !important;
             font-weight: 800 !important;
@@ -2218,172 +2207,124 @@
           .sales-badge-orange { background: #FFF7ED !important; color: #C2410C !important; border: 1px solid #FFEDD5 !important; }
           .sales-badge-mtn    { background: #FEFCE8 !important; color: #854D0E !important; border: 1px solid #FEF08A !important; }
           .sales-badge-moov   { background: #EFF6FF !important; color: #1E40AF !important; border: 1px solid #BFDBFE !important; }
-
-          /* Live Pill */
-          .salesbook-live-pill {
-            display: inline-flex !important;
-            align-items: center !important;
-            gap: 8px !important;
-            background: #ECFDF5 !important;
-            color: #065F46 !important;
-            border: 1px solid #A7F3D0 !important;
-            padding: 6px 14px !important;
-            border-radius: 9999px !important;
-            font-size: 0.82rem !important;
-            font-weight: 800 !important;
-          }
         </style>
 
         <section id="menu-salesbook" class="view-container">
           
-          <!-- En-tête Supérieur : Titre, Horodatage Temps Réel & Actions Clôture -->
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:24px;">
+          <!-- En-tête Supérieur : Titre, Date & Clôture -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-bottom:20px;">
             <div>
-              <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
-                <h2 style="font-size:1.65rem;font-weight:900;margin:0;color:#0F172A;letter-spacing:-0.5px;">Cahier des Ventes – Journal du Jour</h2>
-                <span class="salesbook-live-pill">
-                  <span class="pulse-green-dot"></span>
-                  <span>En temps réel</span>
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
+                <h2 style="font-size:1.6rem;font-weight:900;margin:0;color:#0F172A;letter-spacing:-0.5px;">Cahier des Ventes du Jour</h2>
+                <span class="sales-badge-payment sales-badge-cash" style="font-size:0.75rem;padding:4px 10px;">
+                  En direct 24h
                 </span>
               </div>
-              <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-                <!-- Sélecteur de date avec raccourcis rapides -->
-                <div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;padding:6px 12px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
-                  <i data-lucide="calendar" style="width:16px;height:16px;color:#2563EB;"></i>
-                  <input type="date" id="salesbook-date-picker" onchange="renderDailySalesBook()" style="border:none;outline:none;font-weight:800;font-size:0.88rem;color:#1E293B;background:transparent;cursor:pointer;">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:6px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:8px;padding:5px 10px;">
+                  <i data-lucide="calendar" style="width:15px;height:15px;color:#2563EB;"></i>
+                  <input type="date" id="salesbook-date-picker" onchange="renderDailySalesBook()" style="border:none;outline:none;font-weight:800;font-size:0.85rem;color:#1E293B;background:transparent;cursor:pointer;">
                 </div>
-                <div style="display:flex;align-items:center;gap:6px;">
-                  <button type="button" class="salesbook-chip-btn" onclick="setSalesbookTodayDate()" style="font-weight:800;padding:6px 14px;font-size:0.82rem;">Aujourd'hui</button>
-                  <button type="button" class="salesbook-chip-btn" onclick="setSalesbookYesterdayDate()" style="font-weight:700;padding:6px 14px;font-size:0.82rem;">Hier</button>
-                </div>
-                <div style="display:flex;align-items:center;gap:6px;font-size:0.84rem;color:#64748B;font-weight:700;">
-                  <i data-lucide="clock" style="width:15px;height:15px;color:#2563EB;"></i>
-                  <span>Dernière mise à jour : <strong id="salesbook-live-time" style="color:#0F172A;font-family:monospace;font-size:0.92rem;">--:--:--</strong></span>
+                <button type="button" class="salesbook-chip-btn" onclick="setSalesbookTodayDate()" style="font-weight:800;padding:5px 12px;font-size:0.8rem;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:8px;cursor:pointer;">Aujourd'hui</button>
+                <button type="button" class="salesbook-chip-btn" onclick="setSalesbookYesterdayDate()" style="font-weight:700;padding:5px 12px;font-size:0.8rem;background:#FFFFFF;border:1px solid #CBD5E1;border-radius:8px;cursor:pointer;">Hier</button>
+                <div style="font-size:0.82rem;color:#64748B;font-weight:700;">
+                  Dernière saisie : <strong id="salesbook-live-time" style="color:#0F172A;font-family:monospace;">--:--:--</strong>
                 </div>
               </div>
             </div>
 
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-              <button type="button" class="btn btn-outline" onclick="window.print()" style="display:flex;align-items:center;gap:8px;font-size:0.88rem;padding:10px 18px;border-radius:10px;font-weight:800;">
-                <i data-lucide="printer" style="width:16px;height:16px;"></i>
+              <button type="button" class="btn btn-outline" onclick="window.print()" style="display:flex;align-items:center;gap:6px;font-size:0.86rem;padding:9px 16px;border-radius:8px;font-weight:800;">
+                <i data-lucide="printer" style="width:15px;height:15px;"></i>
                 <span>Imprimer</span>
               </button>
-              <button type="button" class="btn btn-outline" onclick="exportSalesbookCSV()" style="display:flex;align-items:center;gap:8px;font-size:0.88rem;padding:10px 18px;border-radius:10px;font-weight:800;">
-                <i data-lucide="file-spreadsheet" style="width:16px;height:16px;color:#10B981;"></i>
-                <span>Exporter Excel</span>
+              <button type="button" class="btn btn-outline" onclick="exportSalesbookCSV()" style="display:flex;align-items:center;gap:6px;font-size:0.86rem;padding:9px 16px;border-radius:8px;font-weight:800;">
+                <i data-lucide="file-spreadsheet" style="width:15px;height:15px;color:#10B981;"></i>
+                <span>Excel (CSV)</span>
               </button>
-              <button type="button" class="btn btn-primary" onclick="openDailyClosingModal()" style="background:linear-gradient(135deg, #10B981 0%, #059669 100%);border:none;color:#FFFFFF;padding:11px 22px;border-radius:10px;font-weight:800;font-size:0.9rem;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(16,185,129,0.35);">
+              <button type="button" class="btn btn-primary" onclick="openDailyClosingModal()" style="background:linear-gradient(135deg, #10B981 0%, #059669 100%);border:none;color:#FFFFFF;padding:10px 20px;border-radius:8px;font-weight:800;font-size:0.88rem;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(16,185,129,0.3);">
                 <i data-lucide="send" style="width:16px;height:16px;"></i>
-                <span>Clôturer &amp; Transmettre au Patron</span>
+                <span>Clôturer le Cahier</span>
               </button>
             </div>
           </div>
 
-          <!-- 5 Cartes KPI Horizontales (Style A Standard) -->
+          <!-- 5 KPIs Résumé en Haut -->
           <div class="salesbook-kpis-container">
-            
-            <!-- KPI 1 : Chiffre d'Affaires -->
             <div class="salesbook-kpi-card">
-              <div class="salesbook-kpi-icon blue">
-                <i data-lucide="shopping-cart" style="width:26px;height:26px;"></i>
-              </div>
-              <div style="min-width:0;">
-                <div class="salesbook-kpi-label">Chiffre d'Affaires</div>
+              <div class="salesbook-kpi-icon blue"><i data-lucide="shopping-cart" style="width:22px;height:22px;"></i></div>
+              <div>
+                <div class="salesbook-kpi-label">Total Recettes</div>
                 <div id="salesbook-kpi-revenue" class="salesbook-kpi-val" style="color:#2563EB;">0 FCFA</div>
               </div>
             </div>
-
-            <!-- KPI 2 : Articles Vendus -->
             <div class="salesbook-kpi-card">
-              <div class="salesbook-kpi-icon green">
-                <i data-lucide="package" style="width:26px;height:26px;"></i>
-              </div>
-              <div style="min-width:0;">
+              <div class="salesbook-kpi-icon green"><i data-lucide="package" style="width:22px;height:22px;"></i></div>
+              <div>
                 <div class="salesbook-kpi-label">Articles Vendus</div>
                 <div id="salesbook-kpi-items" class="salesbook-kpi-val" style="color:#10B981;">0</div>
               </div>
             </div>
-
-            <!-- KPI 3 : Espèces en Caisse -->
             <div class="salesbook-kpi-card">
-              <div class="salesbook-kpi-icon orange">
-                <i data-lucide="banknote" style="width:26px;height:26px;"></i>
-              </div>
-              <div style="min-width:0;">
-                <div class="salesbook-kpi-label">Espèces en Caisse</div>
+              <div class="salesbook-kpi-icon orange"><i data-lucide="banknote" style="width:22px;height:22px;"></i></div>
+              <div>
+                <div class="salesbook-kpi-label">Espèces Caisse</div>
                 <div id="salesbook-kpi-cash" class="salesbook-kpi-val" style="color:#D97706;">0 FCFA</div>
               </div>
             </div>
-
-            <!-- KPI 4 : Paiements Électroniques -->
             <div class="salesbook-kpi-card">
-              <div class="salesbook-kpi-icon purple">
-                <i data-lucide="smartphone" style="width:26px;height:26px;"></i>
-              </div>
-              <div style="min-width:0;">
-                <div class="salesbook-kpi-label">Paiements Électroniques</div>
+              <div class="salesbook-kpi-icon purple"><i data-lucide="smartphone" style="width:22px;height:22px;"></i></div>
+              <div>
+                <div class="salesbook-kpi-label">Mobile Money</div>
                 <div id="salesbook-kpi-electronic" class="salesbook-kpi-val" style="color:#7C3AED;">0 FCFA</div>
               </div>
             </div>
-
-            <!-- KPI 5 : Nombre de Ventes -->
             <div class="salesbook-kpi-card">
-              <div class="salesbook-kpi-icon cyan">
-                <i data-lucide="receipt" style="width:26px;height:26px;"></i>
-              </div>
-              <div style="min-width:0;">
-                <div class="salesbook-kpi-label">Nombre de Ventes</div>
+              <div class="salesbook-kpi-icon cyan"><i data-lucide="receipt" style="width:22px;height:22px;"></i></div>
+              <div>
+                <div class="salesbook-kpi-label">Lignes du Jour</div>
                 <div id="salesbook-kpi-salescount" class="salesbook-kpi-val" style="color:#0284C7;">0</div>
               </div>
             </div>
-
           </div>
 
-          <!-- SECTION 2 : REGISTRE DES VENTES D'AUJOURD'HUI (TABLEAU COMPLET) -->
-          <div class="salesbook-table-card">
+          <!-- LE GRAND REGISTRE / CAHIER DE VENTES LIGNÉ -->
+          <div class="salesbook-notebook-card">
             
-            <div class="salesbook-table-header-bar">
-              <div style="display:flex;align-items:center;gap:12px;">
-                <div style="width:36px;height:36px;border-radius:10px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;">
-                  <i data-lucide="clipboard-list" style="width:20px;height:20px;"></i>
-                </div>
+            <div class="salesbook-notebook-header">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <i data-lucide="book-open" style="width:22px;height:22px;color:#2563EB;"></i>
                 <div>
-                  <h3 style="font-size:1.1rem;font-weight:900;color:#0F172A;margin:0;">Registre des ventes d'aujourd'hui</h3>
-                  <div style="font-size:0.8rem;color:#64748B;font-weight:600;">Saisie directe et continue dans le grand tableau ci-dessous</div>
+                  <h3 style="font-size:1.05rem;font-weight:900;color:#0F172A;margin:0;">Registre des Ventes de la Journée</h3>
+                  <div style="font-size:0.78rem;color:#64748B;font-weight:600;">Saisissez directement sur la ligne de bas de page et tapez Entrée pour enregistrer</div>
                 </div>
               </div>
 
-              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:10px;">
                 <div style="position:relative;">
                   <input 
                     type="text" 
                     id="salesbook-table-search" 
-                    placeholder="Rechercher..." 
+                    placeholder="Rechercher dans le cahier..." 
                     oninput="filterDailySalesTable(this.value)"
-                    style="height:42px;padding:0 14px 0 38px;border:1.5px solid #CBD5E1;border-radius:10px;font-size:0.88rem;outline:none;width:230px;font-weight:600;"
+                    style="height:38px;padding:0 12px 0 34px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:0.85rem;outline:none;width:220px;font-weight:600;"
                   >
-                  <i data-lucide="search" style="width:16px;height:16px;position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94A3B8;"></i>
+                  <i data-lucide="search" style="width:15px;height:15px;position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#94A3B8;"></i>
                 </div>
-                <button type="button" class="btn btn-outline" style="padding:8px 14px;height:42px;border-radius:10px;font-weight:700;font-size:0.84rem;display:flex;align-items:center;gap:6px;" title="Plein Écran" onclick="toggleSalesbookFullscreen()">
-                  <i data-lucide="maximize-2" style="width:16px;height:16px;"></i>
-                  <span>Plein écran</span>
-                </button>
               </div>
             </div>
 
-            <div class="salesbook-scroll-wrapper">
-              <table class="salesbook-main-table">
+            <div style="overflow-x:auto;">
+              <table class="salesbook-notebook-table">
                 <thead>
                   <tr>
-                    <th style="width:110px;">HEURE</th>
-                    <th style="width:34%;min-width:320px;">ARTICLE / MARCHANDISE</th>
-                    <th style="text-align:center;width:90px;">QTÉ</th>
-                    <th style="text-align:right;width:135px;">PRIX UNIT.</th>
-                    <th style="text-align:right;width:145px;">TOTAL</th>
-                    <th style="width:150px;">PAIEMENT</th>
-                    <th style="width:160px;">CLIENT</th>
-                    <th style="width:150px;">BOUTIQUE</th>
-                    <th style="text-align:center;width:75px;">ACTIONS</th>
+                    <th style="width:130px;">N° &amp; HEURE</th>
+                    <th style="width:52%;">ARTICLE / MARCHANDISE VENDUE</th>
+                    <th style="text-align:center;width:80px;">QTÉ</th>
+                    <th style="text-align:right;width:140px;">PRIX UNIT.</th>
+                    <th style="text-align:right;width:150px;">TOTAL</th>
+                    <th style="width:140px;">PAIEMENT</th>
+                    <th style="text-align:center;width:65px;">ACTION</th>
                   </tr>
                 </thead>
                 <tbody id="daily-sales-table-body">
@@ -2392,17 +2333,31 @@
               </table>
             </div>
 
-            <!-- Footer Résumé du Tableau -->
-            <div style="padding:18px 24px;background:#F8FAFC;border-top:1.5px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
-              <div style="font-size:0.95rem;font-weight:700;color:#64748B;display:flex;align-items:center;gap:8px;">
-                <span>Total des lignes : <strong id="salesbook-rows-count" style="color:#0F172A;font-size:1.15rem;">0</strong></span>
+            <!-- Total de Clôture du Cahier -->
+            <div style="padding:16px 22px;background:#F8FAFC;border-top:2px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+              <div style="font-size:0.95rem;font-weight:800;color:#64748B;">
+                Total des ventes enregistrées : <strong id="salesbook-rows-count" style="color:#0F172A;font-size:1.15rem;">0</strong> lignes
               </div>
-              <div style="display:flex;align-items:center;gap:12px;">
-                <span id="salesbook-grand-total-amount" style="font-size:1.5rem;font-weight:900;color:#2563EB;">0 FCFA</span>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:0.9rem;font-weight:800;color:#64748B;text-transform:uppercase;">TOTAL GÉNÉRAL DU CAHIER :</span>
+                <span id="salesbook-grand-total-amount" style="font-size:1.6rem;font-weight:900;color:#2563EB;">0 FCFA</span>
               </div>
             </div>
 
           </div>
+
+          <!-- Bas de page -->
+          <div style="margin-top:14px;font-size:0.8rem;color:#64748B;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <i data-lucide="shield-check" style="width:15px;height:15px;color:#10B981;"></i>
+              <span>Chaque ligne de ce cahier est enregistrée et sauvegardée automatiquement en direct.</span>
+            </div>
+            <div style="font-weight:700;color:#2563EB;">
+              Appuyez sur <kbd style="background:#FFFFFF;border:1px solid #CBD5E1;border-radius:4px;padding:2px 6px;font-weight:900;">Entrée</kbd> pour valider et passer à la ligne suivante
+            </div>
+          </div>
+
+        </section>
 
           <!-- Bas de page : Notification & Export -->
           <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">

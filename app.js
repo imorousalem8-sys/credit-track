@@ -48,7 +48,7 @@ window.getCountryConfig = getCountryConfig;
 
 // Système de détection automatique des nouvelles versions en ligne pour tous les utilisateurs
 (function initAutoUpdateWatcher() {
-  const APP_VERSION = "20260823_v3.1.0";
+  const APP_VERSION = "20260823_v3.2.0";
   async function checkRemoteVersion() {
     try {
       const res = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
@@ -4624,8 +4624,8 @@ window.renderDailySalesBook = function() {
     );
   }
 
-  // Génération des lignes du tableau (enregistrées)
-  const rowsHtml = filteredSales.map(s => {
+  // Génération des lignes du cahier (enregistrées)
+  const rowsHtml = filteredSales.map((s, idx) => {
     let badgeHtml = '';
     if (s.method === 'Wave Direct' || s.method.includes('Wave')) {
       badgeHtml = `<span class="sales-badge-payment sales-badge-wave">Wave</span>`;
@@ -4641,26 +4641,24 @@ window.renderDailySalesBook = function() {
 
     return `
       <tr>
-        <td style="color:#64748B;font-family:monospace;font-size:0.84rem;font-weight:800;">
+        <td class="salesbook-line-margin">
           <span style="display:inline-flex;align-items:center;gap:4px;">
             <i data-lucide="clock" style="width:13px;height:13px;color:#94A3B8;"></i>
-            ${escapeHTML(s.time || '10:00:00')}
+            <strong>L.${idx + 1}</strong> • ${escapeHTML(s.time || '10:00:00')}
           </span>
         </td>
-        <td style="font-weight:800;color:#0F172A;font-size:0.92rem;">${escapeHTML(s.item)}</td>
-        <td style="text-align:center;font-weight:800;color:#334155;font-size:0.9rem;">${s.qty || 1}</td>
+        <td style="font-weight:800;color:#0F172A;font-size:0.96rem;">${escapeHTML(s.item)}</td>
+        <td style="text-align:center;font-weight:800;color:#334155;font-size:0.92rem;">${s.qty || 1}</td>
         <td style="text-align:right;color:#64748B;font-weight:700;">${Number(s.unitPrice || 0).toLocaleString('fr-FR')}</td>
-        <td style="text-align:right;font-weight:900;color:#2563EB;font-size:0.96rem;">${Number(s.total || 0).toLocaleString('fr-FR')}</td>
+        <td style="text-align:right;font-weight:900;color:#2563EB;font-size:1.02rem;">${Number(s.total || 0).toLocaleString('fr-FR')}</td>
         <td>${badgeHtml}</td>
-        <td style="color:#64748B;font-size:0.86rem;font-weight:600;">${escapeHTML(s.client || '—')}</td>
-        <td style="color:#475569;font-size:0.82rem;font-weight:600;">${escapeHTML(s.branch || 'Boutique Centrale')}</td>
         <td style="text-align:center;">
-          <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
-            <button type="button" class="btn-icon-tiny" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#64748B;border:none;background:transparent;cursor:pointer;padding:5px;border-radius:6px;">
-              <i data-lucide="edit-3" style="width:16px;height:16px;"></i>
+          <div style="display:flex;align-items:center;justify-content:center;gap:4px;">
+            <button type="button" class="btn-icon-tiny" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#64748B;border:none;background:transparent;cursor:pointer;padding:4px;border-radius:6px;">
+              <i data-lucide="edit-3" style="width:15px;height:15px;"></i>
             </button>
-            <button type="button" class="btn-icon-tiny" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:5px;border-radius:6px;">
-              <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+            <button type="button" class="btn-icon-tiny" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:4px;border-radius:6px;">
+              <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
             </button>
           </div>
         </td>
@@ -4668,71 +4666,71 @@ window.renderDailySalesBook = function() {
     `;
   }).join('');
 
-  // LIGNE PERMANENTE DE NOUVELLE SAISIE DIRECTE EN BAS DE TABLEAU (CENTRE DE TRAVAIL)
+  // LIGNE ACTIVE PERMANENTE AU BAS DU CAHIER (SAISIE CONTINUE)
   const now = new Date();
   const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   
   const inlineEntryRowHtml = `
     <tr class="salesbook-inline-entry-row">
-      <td style="color:#64748B;font-family:monospace;font-size:0.86rem;font-weight:800;white-space:nowrap;width:110px;">
-        <span style="display:inline-flex;align-items:center;gap:5px;">
-          <i data-lucide="clock" style="width:14px;height:14px;color:#2563EB;"></i>
-          ${currentTime}
+      <td class="salesbook-line-margin" style="color:#2563EB;width:130px;">
+        <span style="display:inline-flex;align-items:center;gap:4px;">
+          <i data-lucide="edit-2" style="width:13px;height:13px;color:#2563EB;"></i>
+          <strong>L.${filteredSales.length + 1}</strong> • ${currentTime}
         </span>
       </td>
-      <td style="min-width:320px;width:34%;">
+      <td style="width:52%;">
         <div class="salesbook-inline-item-container">
           <input 
             type="text" 
             id="inline-row-item" 
-            class="salesbook-inline-article-input" 
-            placeholder="Nom de l'article ou référence vendue..." 
+            class="salesbook-notebook-input-article" 
+            placeholder="Écrivez ou dictez l'article vendu (ex: 2 Sacs de riz 50kg Royal, Huile 5L...)" 
             autocomplete="off"
             onkeydown="handleInlineRowKeydown(event)"
           >
-          <button type="button" class="salesbook-inline-mic-btn" onclick="toggleSalesbookVoiceDictation()" title="Dicter la vente à la voix">
+          <button type="button" class="salesbook-notebook-mic-btn" onclick="toggleSalesbookVoiceDictation()" title="Dicter la vente à la voix">
             <i data-lucide="mic" style="width:18px;height:18px;"></i>
           </button>
         </div>
       </td>
-      <td style="text-align:center;width:90px;">
+      <td style="text-align:center;width:80px;">
         <input 
           type="number" 
           id="inline-row-qty" 
-          class="salesbook-inline-table-input" 
+          class="salesbook-notebook-input" 
           value="1" 
           min="1" 
           step="any"
-          style="text-align:center;font-weight:800;font-size:1rem;" 
+          style="text-align:center;font-weight:900;" 
           oninput="updateInlineRowTotal()" 
           onkeydown="handleInlineRowKeydown(event)"
         >
       </td>
-      <td style="text-align:right;width:135px;">
+      <td style="text-align:right;width:140px;">
         <input 
           type="number" 
           id="inline-row-price" 
-          class="salesbook-inline-table-input" 
+          class="salesbook-notebook-input" 
           placeholder="0" 
           min="0" 
           step="any"
-          style="text-align:right;font-weight:800;font-size:1rem;" 
+          style="text-align:right;font-weight:900;" 
           oninput="updateInlineRowTotal()" 
           onkeydown="handleInlineRowKeydown(event)"
         >
       </td>
-      <td style="text-align:right;width:145px;">
+      <td style="text-align:right;width:150px;">
         <input 
           type="text" 
           id="inline-row-total" 
-          class="salesbook-inline-table-input" 
+          class="salesbook-notebook-input" 
           placeholder="0" 
           readonly 
-          style="text-align:right;background:#EFF6FF;font-weight:900;color:#2563EB;border-color:#BFDBFE;font-size:1.1rem;"
+          style="text-align:right;background:#EFF6FF;font-weight:900;color:#2563EB;border-color:#BFDBFE;font-size:1.05rem;"
         >
       </td>
-      <td style="width:150px;">
-        <select id="inline-row-method" class="salesbook-inline-table-input" style="font-weight:800;font-size:0.92rem;" onkeydown="handleInlineRowKeydown(event)">
+      <td style="width:140px;">
+        <select id="inline-row-method" class="salesbook-notebook-input" style="font-weight:800;font-size:0.9rem;" onkeydown="handleInlineRowKeydown(event)">
           <option value="Espèces">Espèces</option>
           <option value="Wave Direct">Wave</option>
           <option value="Orange Money">Orange Money</option>
@@ -4741,25 +4739,8 @@ window.renderDailySalesBook = function() {
           <option value="Virement / Carte">Carte / Autre</option>
         </select>
       </td>
-      <td style="width:160px;">
-        <input 
-          type="text" 
-          id="inline-row-client" 
-          class="salesbook-inline-table-input" 
-          placeholder="Client (optionnel)..." 
-          list="salesbook-clients-datalist"
-          onkeydown="handleInlineRowKeydown(event)"
-        >
-      </td>
-      <td style="width:150px;">
-        <select id="inline-row-branch" class="salesbook-inline-table-input" style="font-weight:700;font-size:0.9rem;">
-          <option value="Boutique Centrale">Boutique Centrale</option>
-          <option value="Boutique Annexe">Boutique Annexe</option>
-          <option value="Boutique Siège">Boutique Siège</option>
-        </select>
-      </td>
-      <td style="text-align:center;width:75px;">
-        <button type="button" class="salesbook-inline-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Enregistrer la vente (Entrée)">
+      <td style="text-align:center;width:65px;">
+        <button type="button" class="salesbook-notebook-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Valider la ligne (Entrée)">
           <i data-lucide="check" style="width:20px;height:20px;"></i>
         </button>
       </td>
