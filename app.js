@@ -48,7 +48,7 @@ window.getCountryConfig = getCountryConfig;
 
 // Système de détection automatique des nouvelles versions en ligne pour tous les utilisateurs
 (function initAutoUpdateWatcher() {
-  const APP_VERSION = "20260823_v3.2.0";
+  const APP_VERSION = "20260823_v3.3.0";
   async function checkRemoteVersion() {
     try {
       const res = await fetch('index.html?nocache=' + Date.now(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
@@ -4444,23 +4444,21 @@ window.submitSalesbookSale = function(source = 'top') {
     const qtyInput = document.getElementById('inline-row-qty');
     const priceInput = document.getElementById('inline-row-price');
     const methodSelect = document.getElementById('inline-row-method');
-    const clientInput = document.getElementById('inline-row-client');
-    const branchSelect = document.getElementById('inline-row-branch');
 
     item = (itemInput?.value || '').trim();
     qty = parseFloat(qtyInput?.value || 0) || 1;
     unitPrice = parseFloat(priceInput?.value || 0);
     method = methodSelect?.value || 'Espèces';
-    client = (clientInput?.value || '').trim();
-    branch = branchSelect?.value || 'Boutique Centrale';
+    client = '—';
+    branch = AppState.selectedBranch === 'all' ? 'Boutique Centrale' : (AppState.selectedBranch || 'Boutique Centrale');
 
     if (!item) {
-      showToast("Veuillez saisir le nom de l'article dans le tableau.", "error");
+      showToast("Veuillez saisir ou dicter l'article vendu.", "error");
       itemInput?.focus();
       return;
     }
     if (unitPrice <= 0) {
-      showToast("Veuillez saisir un prix unitaire supérieur à 0.", "error");
+      showToast("Veuillez saisir le montant de la vente.", "error");
       priceInput?.focus();
       return;
     }
@@ -4468,8 +4466,6 @@ window.submitSalesbookSale = function(source = 'top') {
     if (itemInput) itemInput.value = '';
     if (qtyInput) qtyInput.value = '1';
     if (priceInput) priceInput.value = '';
-    if (document.getElementById('inline-row-total')) document.getElementById('inline-row-total').value = '0';
-    if (clientInput) clientInput.value = '';
   }
 
   // Horodatage automatique à la seconde exacte
@@ -4624,125 +4620,107 @@ window.renderDailySalesBook = function() {
     );
   }
 
-  // Génération des lignes du cahier (enregistrées)
+  // Génération des lignes du registre (enregistrées)
   const rowsHtml = filteredSales.map((s, idx) => {
     let badgeHtml = '';
     if (s.method === 'Wave Direct' || s.method.includes('Wave')) {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-wave">Wave</span>`;
+      badgeHtml = `<span class="badge-pay badge-pay-wave">Wave</span>`;
     } else if (s.method.includes('Orange')) {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-orange">Orange Money</span>`;
+      badgeHtml = `<span class="badge-pay badge-pay-orange">Orange</span>`;
     } else if (s.method.includes('MTN')) {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-mtn">MTN MoMo</span>`;
+      badgeHtml = `<span class="badge-pay badge-pay-mtn">MTN</span>`;
     } else if (s.method.includes('Moov')) {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-moov">Moov Money</span>`;
+      badgeHtml = `<span class="badge-pay badge-pay-moov">Moov</span>`;
     } else {
-      badgeHtml = `<span class="sales-badge-payment sales-badge-cash">Espèces</span>`;
+      badgeHtml = `<span class="badge-pay badge-pay-cash">Espèces</span>`;
     }
 
     return `
       <tr>
-        <td class="salesbook-line-margin">
-          <span style="display:inline-flex;align-items:center;gap:4px;">
-            <i data-lucide="clock" style="width:13px;height:13px;color:#94A3B8;"></i>
-            <strong>L.${idx + 1}</strong> • ${escapeHTML(s.time || '10:00:00')}
-          </span>
+        <td style="color:#64748B;font-family:monospace;font-size:0.82rem;font-weight:700;">
+          ${escapeHTML(s.time || '10:00:00')}
         </td>
-        <td style="font-weight:800;color:#0F172A;font-size:0.96rem;">${escapeHTML(s.item)}</td>
-        <td style="text-align:center;font-weight:800;color:#334155;font-size:0.92rem;">${s.qty || 1}</td>
-        <td style="text-align:right;color:#64748B;font-weight:700;">${Number(s.unitPrice || 0).toLocaleString('fr-FR')}</td>
-        <td style="text-align:right;font-weight:900;color:#2563EB;font-size:1.02rem;">${Number(s.total || 0).toLocaleString('fr-FR')}</td>
-        <td>${badgeHtml}</td>
-        <td style="text-align:center;">
-          <div style="display:flex;align-items:center;justify-content:center;gap:4px;">
-            <button type="button" class="btn-icon-tiny" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#64748B;border:none;background:transparent;cursor:pointer;padding:4px;border-radius:6px;">
-              <i data-lucide="edit-3" style="width:15px;height:15px;"></i>
-            </button>
-            <button type="button" class="btn-icon-tiny" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:4px;border-radius:6px;">
-              <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
-            </button>
+        <td style="font-weight:800;color:#0F172A;font-size:0.94rem;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span>${escapeHTML(s.item)}</span>
+            <div style="display:flex;gap:4px;">
+              <button type="button" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#94A3B8;border:none;background:transparent;cursor:pointer;padding:2px;">
+                <i data-lucide="edit-2" style="width:13px;height:13px;"></i>
+              </button>
+              <button type="button" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:2px;">
+                <i data-lucide="trash-2" style="width:13px;height:13px;"></i>
+              </button>
+            </div>
           </div>
         </td>
+        <td style="text-align:center;font-weight:800;color:#334155;">${s.qty || 1}</td>
+        <td style="text-align:right;font-weight:900;color:#2563EB;font-size:0.98rem;">${Number(s.total || 0).toLocaleString('fr-FR')} FCFA</td>
+        <td>${badgeHtml}</td>
       </tr>
     `;
   }).join('');
 
-  // LIGNE ACTIVE PERMANENTE AU BAS DU CAHIER (SAISIE CONTINUE)
+  // LIGNE ACTIVE PERMANENTE AU BAS DU REGISTRE (SAISIE INSTANTANÉE)
   const now = new Date();
   const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   
   const inlineEntryRowHtml = `
-    <tr class="salesbook-inline-entry-row">
-      <td class="salesbook-line-margin" style="color:#2563EB;width:130px;">
-        <span style="display:inline-flex;align-items:center;gap:4px;">
-          <i data-lucide="edit-2" style="width:13px;height:13px;color:#2563EB;"></i>
-          <strong>L.${filteredSales.length + 1}</strong> • ${currentTime}
-        </span>
+    <tr class="cashier-active-row">
+      <td style="color:#2563EB;font-family:monospace;font-size:0.82rem;font-weight:800;">
+        ${currentTime}
       </td>
-      <td style="width:52%;">
-        <div class="salesbook-inline-item-container">
+      <td>
+        <div class="cashier-article-wrapper">
           <input 
             type="text" 
             id="inline-row-item" 
-            class="salesbook-notebook-input-article" 
-            placeholder="Écrivez ou dictez l'article vendu (ex: 2 Sacs de riz 50kg Royal, Huile 5L...)" 
+            class="cashier-article-input" 
+            placeholder="Article vendu (ex: Sac de riz 50kg, Huile...)" 
             autocomplete="off"
             onkeydown="handleInlineRowKeydown(event)"
           >
-          <button type="button" class="salesbook-notebook-mic-btn" onclick="toggleSalesbookVoiceDictation()" title="Dicter la vente à la voix">
-            <i data-lucide="mic" style="width:18px;height:18px;"></i>
+          <button type="button" class="cashier-article-mic" onclick="toggleSalesbookVoiceDictation()" title="Dicter à la voix">
+            <i data-lucide="mic" style="width:16px;height:16px;"></i>
           </button>
         </div>
       </td>
-      <td style="text-align:center;width:80px;">
+      <td style="text-align:center;">
         <input 
           type="number" 
           id="inline-row-qty" 
-          class="salesbook-notebook-input" 
+          class="cashier-input-field" 
           value="1" 
           min="1" 
           step="any"
-          style="text-align:center;font-weight:900;" 
-          oninput="updateInlineRowTotal()" 
+          style="text-align:center;font-weight:800;" 
           onkeydown="handleInlineRowKeydown(event)"
         >
       </td>
-      <td style="text-align:right;width:140px;">
+      <td style="text-align:right;">
         <input 
           type="number" 
           id="inline-row-price" 
-          class="salesbook-notebook-input" 
-          placeholder="0" 
+          class="cashier-input-field" 
+          placeholder="Montant FCFA..." 
           min="0" 
           step="any"
-          style="text-align:right;font-weight:900;" 
-          oninput="updateInlineRowTotal()" 
+          style="text-align:right;font-weight:900;color:#2563EB;" 
           onkeydown="handleInlineRowKeydown(event)"
         >
       </td>
-      <td style="text-align:right;width:150px;">
-        <input 
-          type="text" 
-          id="inline-row-total" 
-          class="salesbook-notebook-input" 
-          placeholder="0" 
-          readonly 
-          style="text-align:right;background:#EFF6FF;font-weight:900;color:#2563EB;border-color:#BFDBFE;font-size:1.05rem;"
-        >
-      </td>
-      <td style="width:140px;">
-        <select id="inline-row-method" class="salesbook-notebook-input" style="font-weight:800;font-size:0.9rem;" onkeydown="handleInlineRowKeydown(event)">
-          <option value="Espèces">Espèces</option>
-          <option value="Wave Direct">Wave</option>
-          <option value="Orange Money">Orange Money</option>
-          <option value="MTN MoMo">MTN MoMo</option>
-          <option value="Moov Money">Moov Money</option>
-          <option value="Virement / Carte">Carte / Autre</option>
-        </select>
-      </td>
-      <td style="text-align:center;width:65px;">
-        <button type="button" class="salesbook-notebook-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Valider la ligne (Entrée)">
-          <i data-lucide="check" style="width:20px;height:20px;"></i>
-        </button>
+      <td>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <select id="inline-row-method" class="cashier-input-field" style="font-weight:800;font-size:0.82rem;padding:0 6px;" onkeydown="handleInlineRowKeydown(event)">
+            <option value="Espèces">Espèces</option>
+            <option value="Wave Direct">Wave</option>
+            <option value="Orange Money">Orange</option>
+            <option value="MTN MoMo">MTN</option>
+            <option value="Moov Money">Moov</option>
+          </select>
+          <button type="button" class="cashier-btn-submit" onclick="submitSalesbookSale('inline_row')" title="Valider la vente (Entrée)" style="width:38px;flex-shrink:0;">
+            <i data-lucide="check" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
       </td>
     </tr>
   `;
