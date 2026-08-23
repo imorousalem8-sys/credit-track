@@ -2936,55 +2936,45 @@ window.handleForgotPasswordSubmit = async function(e) {
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Envoi du code...</span>`;
+    submitBtn.innerHTML = `<span>Envoi du lien en cours...</span>`;
   }
 
   try {
     pendingAuthData.resetEmail = email;
+    const redirectUrl = window.location.origin + '/auth/callback?type=recovery';
+    
     if (window.supabaseClient) {
       const { error: resetErr } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + window.location.pathname
+        redirectTo: redirectUrl
       });
-      if (resetErr) {
-        await window.supabaseClient.auth.signInWithOtp({
-          email: email,
-          options: { shouldCreateUser: false }
-        });
-      }
+      if (resetErr) throw resetErr;
     }
 
-    showToast(`Code de vérification envoyé à ${maskEmail(email)} !`, "success");
-    switchAuthTab('reset-password');
-    const otpInput = document.getElementById('auth-reset-otp-code');
-    if (otpInput) setTimeout(() => otpInput.focus(), 150);
+    showToast(`✓ Lien de réinitialisation envoyé à ${maskEmail(email)} ! Vérifiez votre boîte de réception.`, "success");
+    
+    // Fermer ou basculer en mode attente
+    setTimeout(() => {
+      closeModal('modal-auth');
+    }, 2000);
   } catch (err) {
     console.error("Erreur Reset Password:", err);
-    showToast(err.message || "Impossible d'envoyer le code de vérification. Vérifiez l'adresse.", "error");
+    showToast(err.message || "Impossible d'envoyer le lien. Vérifiez votre adresse e-mail.", "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>Recevoir le Code de Vérification</span>`;
+      submitBtn.innerHTML = `<span>Envoyer le Lien de Réinitialisation</span>`;
     }
   }
 };
 
 window.handleResetPasswordSubmit = async function(e) {
   e.preventDefault();
-  const otpInput = document.getElementById('auth-reset-otp-code');
   const newPassInput = document.getElementById('auth-reset-new-password');
   const confPassInput = document.getElementById('auth-reset-confirm-password');
   const submitBtn = document.getElementById('auth-reset-submit-btn');
 
-  const otpCode = (otpInput?.value || '').trim().replace(/[^0-9]/g, '');
   const newPassword = newPassInput?.value || '';
   const confirmPassword = confPassInput?.value || '';
-  const email = pendingAuthData.resetEmail || (document.getElementById('auth-forgot-email')?.value || '').trim().toLowerCase();
-
-  if (!otpCode || otpCode.length < 4) {
-    showToast("Veuillez entrer le code de vérification à 6 chiffres reçu par e-mail.", "error");
-    if (otpInput) otpInput.focus();
-    return;
-  }
 
   if (!newPassword || newPassword.length < 8) {
     showToast("Le mot de passe doit comporter au moins 8 caractères.", "error");
@@ -3000,51 +2990,32 @@ window.handleResetPasswordSubmit = async function(e) {
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Validation en cours...</span>`;
+    submitBtn.innerHTML = `<span>Enregistrement...</span>`;
   }
 
   try {
     if (window.supabaseClient) {
-      let verifySuccess = false;
-      
-      const { data: vData1, error: vErr1 } = await window.supabaseClient.auth.verifyOtp({
-        email: email,
-        token: otpCode,
-        type: 'recovery'
-      });
-
-      if (!vErr1 && vData1?.session) {
-        verifySuccess = true;
-      } else {
-        const { data: vData2, error: vErr2 } = await window.supabaseClient.auth.verifyOtp({
-          email: email,
-          token: otpCode,
-          type: 'email'
-        });
-        if (!vErr2 && vData2?.session) verifySuccess = true;
-      }
-
       const { error: updErr } = await window.supabaseClient.auth.updateUser({
         password: newPassword
       });
 
-      if (updErr && !verifySuccess) throw updErr;
+      if (updErr) throw updErr;
+
+      showToast("✓ Votre nouveau mot de passe a été enregistré avec succès !", "success");
+      closeModal('modal-auth');
+      
+      // Ouvrir l'espace de travail
+      if (typeof openAppWorkspace === 'function') {
+        openAppWorkspace('menu-salesbook');
+      }
     }
-
-    AppState.user.email = email;
-    localStorage.setItem('userEmail', email);
-    localStorage.setItem('user_id', 'user_' + Date.now());
-
-    showToast("Mot de passe réinitialisé avec succès ! Vous êtes connecté.", "success");
-    closeModal('modal-auth');
-    openAppWorkspace('menu-2');
   } catch (err) {
-    console.error("Erreur Update Password:", err);
-    showToast(err.message || "Code de vérification incorrect ou expiré. Veuillez vérifier.", "error");
+    console.error("Erreur Mise à jour mot de passe:", err);
+    showToast(err.message || "Impossible d'enregistrer le mot de passe. Le lien a peut-être expiré.", "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>Enregistrer &amp; Se Connecter</span>`;
+      submitBtn.innerHTML = `<span>✓ Enregistrer mon Nouveau Mot de Passe</span>`;
     }
   }
 };

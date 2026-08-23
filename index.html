@@ -201,7 +201,7 @@
           </div>
           <h4 style="font-size:1.15rem;font-weight:900;color:#0F172A;margin-bottom:4px;">Mot de passe oublié ?</h4>
           <p style="font-size:0.84rem;color:#64748B;line-height:1.45;">
-            Saisissez votre adresse e-mail. Vous recevrez dans les secondes suivantes un <strong style="color:#0F172A;">code de vérification à 6 chiffres</strong> pour créer un nouveau mot de passe.
+            Saisissez votre adresse e-mail. Vous recevrez instantanément un <strong style="color:#0F172A;">lien sécurisé de réinitialisation</strong> dans votre boîte de réception pour créer votre nouveau mot de passe.
           </p>
         </div>
 
@@ -213,7 +213,7 @@
 
           <button type="submit" id="auth-forgot-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:8px;">
             <i data-lucide="send" style="width:17px;height:17px;"></i>
-            <span>Recevoir mon Code de Vérification</span>
+            <span>Envoyer le Lien de Réinitialisation</span>
           </button>
         </form>
 
@@ -222,7 +222,7 @@
         </div>
       </div>
 
-      <!-- VUE : RÉINITIALISATION (ÉTAPE 2 : CODE OTP 6 CHIFFRES + NOUVEAU MOT DE PASSE) -->
+      <!-- VUE : RÉINITIALISATION (NOUVEAU MOT DE PASSE SÉCURISÉ) -->
       <div id="auth-view-reset-password" style="display:none;padding:6px 0;">
         <div style="text-align:center;margin-bottom:16px;">
           <div style="width:52px;height:52px;border-radius:50%;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
@@ -230,16 +230,11 @@
           </div>
           <h4 style="font-size:1.15rem;font-weight:900;color:#0F172A;margin-bottom:4px;">Nouveau Mot de Passe</h4>
           <p style="font-size:0.84rem;color:#64748B;line-height:1.45;">
-            Saisissez le <strong style="color:#0F172A;">code à 6 chiffres</strong> reçu par e-mail, puis créez votre nouveau mot de passe.
+            Définissez votre nouveau mot de passe pour sécuriser l'accès à votre espace.
           </p>
         </div>
 
         <form id="form-auth-reset-password" onsubmit="handleResetPasswordSubmit(event)">
-          <div class="form-group" style="margin-bottom:12px;">
-            <label class="form-label">Code de Vérification reçu par e-mail (6 chiffres) *</label>
-            <input type="text" id="auth-reset-otp-code" class="form-control" placeholder="1 2 3 4 5 6" maxlength="8" required style="letter-spacing:4px;font-weight:800;font-size:1.15rem;text-align:center;">
-          </div>
-
           <div class="form-group" style="margin-bottom:12px;">
             <label class="form-label">Nouveau Mot de Passe * (min. 8 caractères)</label>
             <input type="password" id="auth-reset-new-password" class="form-control" placeholder="••••••••" required minlength="8" autocomplete="new-password">
@@ -251,12 +246,12 @@
           </div>
 
           <button type="submit" id="auth-reset-submit-btn" class="btn btn-primary" style="width:100%;padding:13px;font-weight:700;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:8px;background:linear-gradient(135deg,#10B981,#059669);">
-            <span>✓ Valider &amp; Se Connecter</span>
+            <span>✓ Enregistrer mon Nouveau Mot de Passe</span>
           </button>
         </form>
 
         <div style="text-align:center;margin-top:14px;">
-          <a href="javascript:void(0)" onclick="switchAuthTab('forgot-password')" style="color:#64748B;font-size:0.8rem;text-decoration:none;font-weight:600;">Renvoyer un nouveau code</a>
+          <a href="javascript:void(0)" onclick="switchAuthTab('forgot-password')" style="color:#64748B;font-size:0.8rem;text-decoration:none;font-weight:600;">Renvoyer un nouveau lien</a>
         </div>
       </div>
 
