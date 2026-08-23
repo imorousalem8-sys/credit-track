@@ -26,7 +26,7 @@
   <script>
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260823_v4.0.0";
+      const CURRENT_BUILD = "20260823_v4.2.0";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('serviceWorker' in navigator) {
@@ -58,6 +58,20 @@
           }
         }
 
+        // Nettoyage immédiat des anciennes ventes démo dans localStorage
+        ['ct_daily_sales_v2', 'ct_daily_sales'].forEach(k => {
+          const val = localStorage.getItem(k);
+          if (val) {
+            try {
+              const parsed = JSON.parse(val);
+              if (Array.isArray(parsed)) {
+                const realOnly = parsed.filter(s => s && s.id && !String(s.id).startsWith('sale_1') && !String(s.id).startsWith('sale_2') && !String(s.id).startsWith('sale_3') && !String(s.id).startsWith('sale_4') && !String(s.id).startsWith('sale_5') && !String(s.id).startsWith('sale_6') && !String(s.id).startsWith('sale_7') && !String(s.id).startsWith('sale_8') && !String(s.id).startsWith('sale_9') && !String(s.id).startsWith('sale_10'));
+                localStorage.setItem(k, JSON.stringify(realOnly));
+              }
+            } catch(e) {}
+          }
+        });
+
         // Nettoyage immédiat dans IndexedDB
         try {
           const req = indexedDB.open("CreditTrackDB", 2);
@@ -81,9 +95,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260823_v4.0.0" defer></script>
-  <script src="app.js?v=20260823_v4.0.0" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260823_v4.0.0">
+  <script src="dataStore.js?v=20260823_v4.2.0" defer></script>
+  <script src="app.js?v=20260823_v4.2.0" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260823_v4.2.0">
 </head>
 <body class="is-landing-mode">
 

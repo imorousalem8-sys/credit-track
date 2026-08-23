@@ -4132,25 +4132,11 @@ window.downloadOfficialReportPDF = function() {
 };
 
 // --------------------------------------------------------------------------
-// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — DÉMONSTRATION DU DIMANCHE & AJOUT RAPIDE "TAC"
+// 18. MOTEUR DU CAHIER DES VENTES DU JOUR (24H) — 100% DONNÉES RÉELLES EN DIRECT
 // --------------------------------------------------------------------------
 AppState.selectedBranch = localStorage.getItem('ct_selected_branch') || 'all';
 
-// Échantillon réaliste et complet du Dimanche 23 Août 2026
-const DEFAULT_SAMPLE_SALES = [
-  { id: 'sale_1', time: '13:28:15', date: '2026-08-23', item: 'Sac de Riz 50kg — Parfumé Qualité Supérieure (Marque Mémé)', qty: 2, unitPrice: 24500, total: 49000, method: 'Espèces', client: 'Mme Koné (Restaurant)', branch: 'Boutique Centrale' },
-  { id: 'sale_2', time: '13:15:40', date: '2026-08-23', item: 'Huile Végétale Dinor 5 Litres (Bidon renforcé)', qty: 3, unitPrice: 6500, total: 19500, method: 'Wave Direct', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_3', time: '12:54:12', date: '2026-08-23', item: 'Carton Spaghetti Maman 500g (20 paquets)', qty: 2, unitPrice: 7000, total: 14000, method: 'Mobile Money', client: 'Kouamé Épicerie', branch: 'Boutique Centrale' },
-  { id: 'sale_4', time: '12:40:05', date: '2026-08-23', item: 'Savon en Poudre OMO 1kg (Lavage Express)', qty: 6, unitPrice: 1200, total: 7200, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_5', time: '12:22:30', date: '2026-08-23', item: 'Sucre Blanc en Morceaux St Louis 1kg', qty: 5, unitPrice: 900, total: 4500, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_6', time: '11:58:19', date: '2026-08-23', item: 'Lait Concentré Sucré Bonnet Rouge 410g', qty: 12, unitPrice: 600, total: 7200, method: 'Wave Direct', client: 'Cafétéria du Marché', branch: 'Boutique Centrale' },
-  { id: 'sale_7', time: '11:35:00', date: '2026-08-23', item: 'Pack Eau Minérale AWA 1.5L (Pack de 6 bouteilles)', qty: 4, unitPrice: 2200, total: 8800, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_8', time: '11:10:44', date: '2026-08-23', item: 'Boîte de Tomate Concentrée Gino 400g', qty: 8, unitPrice: 650, total: 5200, method: 'Espèces', client: 'Client comptoir', branch: 'Boutique Centrale' },
-  { id: 'sale_9', time: '10:45:10', date: '2026-08-23', item: 'Sac d\'Oignons Violets de Galmi 25kg', qty: 1, unitPrice: 18500, total: 18500, method: 'Mobile Money', client: 'Traoré Grossiste', branch: 'Boutique Centrale' },
-  { id: 'sale_10', time: '10:12:05', date: '2026-08-23', item: 'Bidon d\'Huile de Palme Raffinée 25 Litres', qty: 1, unitPrice: 26000, total: 26000, method: 'Espèces', client: 'Mme Bamba', branch: 'Boutique Centrale' }
-];
-
-// Catalogue d'articles fréquents pour ajout instantané en 1 clic ("TAC !")
+// Catalogue d'articles fréquents pour pré-remplissage rapide en 1 clic ("TAC !")
 window.QUICK_ARTICLES_CATALOG = [
   { item: 'Sac de Riz 50kg — Parfumé Supérieur', price: 24500, icon: '🌾' },
   { item: 'Huile Végétale Dinor 5L', price: 6500, icon: '🛢️' },
@@ -4162,17 +4148,19 @@ window.QUICK_ARTICLES_CATALOG = [
   { item: 'Bidon Huile 25L', price: 26000, icon: '🛢️' }
 ];
 
-// Initialisation des ventes du jour (données réelles sauvegardées ou échantillon réaliste du dimanche)
+// Initialisation STRICTEMENT RÉELLE : Uniquement les vraies ventes enregistrées par l'utilisateur
+AppState.sales = [];
 try {
   const saved = localStorage.getItem('ct_daily_sales_v2');
   if (saved) {
     const parsed = JSON.parse(saved);
-    AppState.sales = Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_SAMPLE_SALES;
-  } else {
-    AppState.sales = DEFAULT_SAMPLE_SALES;
+    if (Array.isArray(parsed)) {
+      // Filtrage strict : éliminer tout reste de données démo
+      AppState.sales = parsed.filter(s => s && s.id && !String(s.id).startsWith('sale_1') && !String(s.id).startsWith('sale_2') && !String(s.id).startsWith('sale_3') && !String(s.id).startsWith('sale_4') && !String(s.id).startsWith('sale_5') && !String(s.id).startsWith('sale_6') && !String(s.id).startsWith('sale_7') && !String(s.id).startsWith('sale_8') && !String(s.id).startsWith('sale_9') && !String(s.id).startsWith('sale_10'));
+    }
   }
 } catch(e) {
-  AppState.sales = DEFAULT_SAMPLE_SALES;
+  AppState.sales = [];
 }
 
 function saveSalesToStorage() {

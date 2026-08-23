@@ -44,89 +44,6 @@ interface DailySaleItem {
   branch?: string;
 }
 
-const DEFAULT_SAMPLE_SALES: DailySaleItem[] = [
-  {
-    id: 'sale_1',
-    time: '12:32:15',
-    item: 'Sac de Riz 50kg - Parfumé Qualité Supérieure',
-    qty: 2,
-    unitPrice: 25000,
-    total: 50000,
-    method: 'Espèces',
-    client: 'Client comptoir'
-  },
-  {
-    id: 'sale_2',
-    time: '12:28:41',
-    item: 'Huile Végétale 5 Litres - Crispa',
-    qty: 3,
-    unitPrice: 8000,
-    total: 24000,
-    method: 'Espèces',
-    client: 'Client comptoir'
-  },
-  {
-    id: 'sale_3',
-    time: '12:24:03',
-    item: 'Savon en Poudre 1kg - OMO',
-    qty: 5,
-    unitPrice: 1200,
-    total: 6000,
-    method: 'Wave',
-    client: 'Client comptoir'
-  },
-  {
-    id: 'sale_4',
-    time: '12:18:59',
-    item: 'Sucre Blanc 1kg - Sucrivoire',
-    qty: 4,
-    unitPrice: 1000,
-    total: 4000,
-    method: 'Espèces',
-    client: 'Client comptoir'
-  },
-  {
-    id: 'sale_5',
-    time: '12:15:45',
-    item: 'Lait Bonnet Rouge 410g',
-    qty: 2,
-    unitPrice: 2500,
-    total: 5000,
-    method: 'Mobile Money',
-    client: 'Client comptoir'
-  },
-  {
-    id: 'sale_6',
-    time: '12:11:30',
-    item: 'Tomate Concentrée 70g - Sahel',
-    qty: 6,
-    unitPrice: 850,
-    total: 5100,
-    method: 'Espèces',
-    client: 'Client comptoir'
-  },
-  {
-    id: 'sale_7',
-    time: '12:08:12',
-    item: 'Oignon Frais - Gros',
-    qty: 1,
-    unitPrice: 2000,
-    total: 2000,
-    method: 'Espèces',
-    client: 'Client comptoir'
-  },
-  {
-    id: 'sale_8',
-    time: '12:05:27',
-    item: 'Piment en Poudre 100g',
-    qty: 1,
-    unitPrice: 1000,
-    total: 1000,
-    method: 'Espèces',
-    client: 'Client comptoir'
-  }
-];
-
 export default function VentesPage() {
   const { currency, showToast, activeCashier, currentRole } = useApp();
 
@@ -135,9 +52,11 @@ export default function VentesPage() {
   const qtyInputRef = useRef<HTMLInputElement | null>(null);
   const priceInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Live real-time clock
+  // Live real-time clock and dynamic real date
   const [currentTime, setCurrentTime] = useState<string>('');
-  const [currentDate, setCurrentDate] = useState<string>('2026-08-23');
+  const [currentDate, setCurrentDate] = useState<string>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
 
   useEffect(() => {
     const updateTime = () => {
@@ -152,18 +71,20 @@ export default function VentesPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // Sales state
+  // Pure Real Data Sales state (Uniquement les ventes réelles enregistrées)
   const [sales, setSales] = useState<DailySaleItem[]>(() => {
-    if (typeof window === 'undefined') return DEFAULT_SAMPLE_SALES;
+    if (typeof window === 'undefined') return [];
     try {
       const saved = localStorage.getItem('ct_daily_sales_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter(s => s && s.id && !String(s.id).startsWith('sale_1') && !String(s.id).startsWith('sale_2') && !String(s.id).startsWith('sale_3') && !String(s.id).startsWith('sale_4') && !String(s.id).startsWith('sale_5') && !String(s.id).startsWith('sale_6') && !String(s.id).startsWith('sale_7') && !String(s.id).startsWith('sale_8') && !String(s.id).startsWith('sale_9') && !String(s.id).startsWith('sale_10'));
+        }
       }
-      return DEFAULT_SAMPLE_SALES;
+      return [];
     } catch {
-      return DEFAULT_SAMPLE_SALES;
+      return [];
     }
   });
 
@@ -1151,35 +1072,17 @@ export default function VentesPage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (confirm("Réinitialiser le cahier avec les données d'exemple ?")) {
-                    saveSales(DEFAULT_SAMPLE_SALES);
-                    setIsSettingsOpen(false);
-                    showToast("Données de démonstration restaurées.", "success");
-                  }
-                }}
-                className="w-full p-3 text-left border border-slate-200 hover:bg-slate-50 rounded-xl transition flex items-center justify-between"
-              >
-                <div>
-                  <div className="font-bold text-slate-900">Restaurer la maquette exemple</div>
-                  <div className="text-xs text-slate-500">Remet les 8 articles de démonstration</div>
-                </div>
-                <RefreshCw className="w-4 h-4 text-blue-600" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
                   if (confirm("Attention : Voulez-vous vider toutes les ventes du cahier d'aujourd'hui ?")) {
                     saveSales([]);
                     setIsSettingsOpen(false);
-                    showToast("Le cahier des ventes a été vidé.", "info");
+                    showToast("Le cahier des ventes a été réinitialisé à zéro.", "info");
                   }
                 }}
                 className="w-full p-3 text-left border border-red-200 hover:bg-red-50 rounded-xl transition flex items-center justify-between text-red-600"
               >
                 <div>
-                  <div className="font-bold">Vider le cahier du jour</div>
-                  <div className="text-xs text-red-400">Supprime toutes les lignes enregistrées</div>
+                  <div className="font-bold">Vider le cahier d&apos;aujourd&apos;hui</div>
+                  <div className="text-xs text-red-400">Efface toutes les lignes enregistrées</div>
                 </div>
                 <Trash2 className="w-4 h-4" />
               </button>
