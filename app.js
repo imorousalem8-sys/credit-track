@@ -3150,11 +3150,13 @@ window.handleForgotPasswordSubmit = async function(e) {
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi du lien...`;
+    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi du code / lien...`;
   }
 
   try {
+    pendingAuthData.email = email;
     pendingAuthData.resetEmail = email;
+    pendingAuthData.isRecovery = true;
     const redirectUrl = `${getAppBaseUrl()}/auth/callback?type=recovery`;
     
     if (window.supabaseClient) {
@@ -3168,18 +3170,15 @@ window.handleForgotPasswordSubmit = async function(e) {
       if (resetErr) throw resetErr;
     }
 
-    showToast(`✓ Lien de réinitialisation sécurisé envoyé à ${maskEmail(email)} ! Vérifiez votre boîte de réception.`, "success");
-    
-    setTimeout(() => {
-      closeModal('modal-auth');
-    }, 2500);
+    showToast(`✓ Lien et code de sécurité envoyés à ${maskEmail(email)} !`, "success");
+    showOtpVerificationView(email);
   } catch (err) {
     console.error("Erreur Reset Password:", err);
     showToast(err.message || "Impossible d'envoyer le lien. Vérifiez votre adresse e-mail.", "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<i data-lucide="send" style="width:17px;height:17px;"></i> <span>Envoyer le Lien de Réinitialisation</span>`;
+      submitBtn.innerHTML = `<i data-lucide="send" style="width:17px;height:17px;"></i> <span>Envoyer le Code / Lien de Réinitialisation</span>`;
       if (window.lucide) lucide.createIcons();
     }
   }
@@ -3432,11 +3431,12 @@ window.handleVerifyOtpSubmit = async function(e) {
     const isMasterExamCode = (otpCode === '202688' || otpCode === '999888');
 
     if (window.supabaseClient && !isMasterExamCode) {
+      const primaryType = pendingAuthData.isRecovery ? 'recovery' : 'signup';
       let verifyRes = await withAuthTimeout(
         window.supabaseClient.auth.verifyOtp({
           email: pendingAuthData.email,
           token: otpCode,
-          type: 'signup'
+          type: primaryType
         }),
         12000,
         "Délai d'attente dépassé lors de la vérification du code."
@@ -3460,6 +3460,13 @@ window.handleVerifyOtpSubmit = async function(e) {
         userId = verifyRes.data.user.id;
         userEmail = verifyRes.data.user.email || userEmail;
       }
+    }
+
+    if (pendingAuthData.isRecovery) {
+      pendingAuthData.isRecovery = false;
+      showToast("✓ Code vérifié avec succès ! Veuillez saisir votre nouveau mot de passe.", "success");
+      switchAuthTab('reset-password');
+      return;
     }
 
     AppState.user.id = userId;
