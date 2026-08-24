@@ -1430,8 +1430,8 @@ window.switchMenu = function(menuId) {
   closeMobileSidebarIfOpen();
 
   // Mapping de compatibilité des menus
-  if (menuId === 'menu-salesbook' || menuId === 'menu-products') {
-    menuId = 'menu-5';
+  if (menuId === 'menu-products') {
+    menuId = 'menu-salesbook';
   }
 
   localStorage.setItem('activeMenu', menuId);
@@ -1464,6 +1464,7 @@ window.switchMenu = function(menuId) {
 
   const pageTitles = {
     'menu-2': AppState.lang === 'en' ? 'Dashboard' : 'Tableau de Bord',
+    'menu-salesbook': AppState.lang === 'en' ? 'Daily Salesbook (24h)' : 'Cahier des Ventes (24h)',
     'menu-accounting': AppState.lang === 'en' ? 'Cash & Expenses' : 'Caisse & Dépenses',
     'menu-4-directory': AppState.lang === 'en' ? 'Clients & Debts' : 'Clients & Dettes',
     'menu-6': AppState.lang === 'en' ? 'Payments & Receipts' : 'Encaisser & Reçus',
@@ -1474,6 +1475,7 @@ window.switchMenu = function(menuId) {
 
   const pageIcons = {
     'menu-2': 'layout-grid',
+    'menu-salesbook': 'book-open',
     'menu-accounting': 'trending-up',
     'menu-4-directory': 'users',
     'menu-6': 'wallet',
@@ -1488,6 +1490,10 @@ window.switchMenu = function(menuId) {
   const iconEl = document.getElementById('header-page-icon');
   if (iconEl && pageIcons[menuId]) {
     iconEl.setAttribute('data-lucide', pageIcons[menuId]);
+  }
+
+  if (menuId === 'menu-salesbook' && typeof renderDailySalesBook === 'function') {
+    try { renderDailySalesBook(); } catch(e) {}
   }
 
   const headerBtn = document.getElementById('top-header-btn');
@@ -3666,6 +3672,48 @@ window.handleLoginSubmit = async function(e) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = `<span>Se Connecter</span>`;
     }
+  }
+};
+
+window.handleLoginWithOtpDirect = async function() {
+  const emailInput = document.getElementById('auth-login-email');
+  const email = (emailInput?.value || '').trim().toLowerCase();
+  
+  if (!email || !isValidEmailStrict(email)) {
+    showToast("Veuillez saisir votre adresse e-mail dans le formulaire.", "warning");
+    if (emailInput) {
+      emailInput.style.borderColor = '#EF4444';
+      emailInput.focus();
+      setTimeout(() => { emailInput.style.borderColor = ''; }, 3000);
+    }
+    return;
+  }
+
+  showToast("Envoi de votre code de connexion sécurisé...", "info");
+  pendingAuthData.email = email;
+  pendingAuthData.isOtpLogin = true;
+
+  try {
+    if (window.supabaseClient) {
+      const redirectUrl = `${getAppBaseUrl()}/auth/callback?type=signup`;
+      await withAuthTimeout(
+        window.supabaseClient.auth.signInWithOtp({
+          email,
+          options: {
+            shouldCreateUser: true,
+            emailRedirectTo: redirectUrl
+          }
+        }),
+        12000,
+        "Le serveur met du temps à répondre. Vérifiez votre connexion."
+      );
+    }
+    showToast(`✓ Code de connexion envoyé à ${maskEmail(email)} !`, "success");
+    showOtpVerificationView(email);
+  } catch (err) {
+    console.warn("Erreur signInWithOtp direct:", err);
+    showToast(`Code envoyé à ${maskEmail(email)}. Saisissez-le ci-dessous.`, "info");
+    showOtpVerificationView(email);
   }
 };
 
