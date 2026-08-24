@@ -40,15 +40,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Adresse e-mail invalide.' }, { status: 400 });
     }
 
+    const hostHeader = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const protoHeader = request.headers.get('x-forwarded-proto') || 'https';
+    const computedOrigin = hostHeader ? `${protoHeader}://${hostHeader}` : null;
+    const siteUrl = computedOrigin || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://credit-track00.vercel.app';
+    const redirectUrl = `${siteUrl}/auth/callback?type=signup`;
+
     const { error } = await supabase.auth.resend({
       type: 'signup',
-      email: cleanEmail
+      email: cleanEmail,
+      options: { emailRedirectTo: redirectUrl }
     });
 
     if (error) {
       await supabase.auth.signInWithOtp({
         email: cleanEmail,
-        options: { shouldCreateUser: false }
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: redirectUrl
+        }
       });
     }
 

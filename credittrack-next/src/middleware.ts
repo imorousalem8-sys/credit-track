@@ -3,8 +3,10 @@ import type { NextRequest } from 'next/server';
 
 // Whitelist des origines CORS autorisées
 const ALLOWED_ORIGINS = [
+  'https://credit-track00.vercel.app',
   'https://credittrack.pro',
   'https://www.credittrack.pro',
+  'https://credit-track.vercel.app',
   'http://localhost:3000',
   'http://localhost:8085'
 ];

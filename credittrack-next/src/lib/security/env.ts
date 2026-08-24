@@ -15,7 +15,7 @@ export const ServerEnv = {
   PAYMENT_WEBHOOK_SECRET: process.env.PAYMENT_WEBHOOK_SECRET || '',
   
   // Whitelist CORS
-  CORS_ALLOWED_ORIGINS: (process.env.CORS_ALLOWED_ORIGINS || 'https://credittrack.pro,http://localhost:3000')
+  CORS_ALLOWED_ORIGINS: (process.env.CORS_ALLOWED_ORIGINS || 'https://credit-track00.vercel.app,https://credittrack.pro,https://www.credittrack.pro,https://credit-track.vercel.app,http://localhost:3000,http://localhost:8085')
     .split(',')
     .map(o => o.trim()),
 

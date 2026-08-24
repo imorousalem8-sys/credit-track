@@ -22,13 +22,13 @@ function initSupabase() {
         auth: {
           persistSession: true,
           autoRefreshToken: true,
-          detectSessionInUrl: false
+          detectSessionInUrl: true
         }
       });
       window.supabaseClient = supabaseClient;
       setupRealtimeSubscriptions();
-    } catch {
-      // Échec silencieux pour éviter la fuite d'informations
+    } catch (e) {
+      console.warn('[dataStore] Erreur initialisation Supabase Client:', e);
     }
   }
   return supabaseClient;

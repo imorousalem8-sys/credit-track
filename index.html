@@ -8,12 +8,30 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://bnkwplwlfnhukevwdcen.supabase.co https://api.qrserver.com; frame-src 'self' https://wa.me; object-src 'none';">
-  <title>CréditTrack PRO - Gestion Facile de Crédits & Paiements</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://bnkwplwlfnhukevwdcen.supabase.co wss://bnkwplwlfnhukevwdcen.supabase.co https://*.supabase.co https://api.qrserver.com https://credit-track00.vercel.app; frame-src 'self' https://wa.me; object-src 'none';">
+  <title>CréditTrack PRO - Gestion Facile de Crédits, Caisses &amp; Paiements</title>
   <meta name="description" content="Application simple et puissante pour suivre vos crédits clients, encaisser par Wave / Mobile Money et envoyer des rappels WhatsApp automatiques.">
+  <meta name="application-name" content="CréditTrack PRO">
+  <meta name="apple-mobile-web-app-title" content="CréditTrack PRO">
   <meta name="theme-color" content="#1B3BBB">
+  
+  <!-- Open Graph / WhatsApp / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://credit-track00.vercel.app/">
+  <meta property="og:title" content="CréditTrack PRO - Recouvrement &amp; Gestion de Crédits Commerçants">
+  <meta property="og:description" content="Gérez vos créances, encaissez par Mobile Money et suivez vos caisses en temps réel sans jamais dévoiler vos marges.">
+  <meta property="og:image" content="https://credit-track00.vercel.app/logo_3d.png">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://credit-track00.vercel.app/">
+  <meta name="twitter:title" content="CréditTrack PRO - Recouvrement &amp; Caisse Panafricaine">
+  <meta name="twitter:description" content="Gérez vos créances, encaissez par Mobile Money et pilotez vos points de vente en temps réel.">
+  <meta name="twitter:image" content="https://credit-track00.vercel.app/logo_3d.png">
+
   <link rel="icon" type="image/png" href="logo_3d.png">
   <link rel="apple-touch-icon" href="logo_3d.png">
+  <link rel="shortcut icon" href="logo_3d.png">
   <link rel="manifest" href="manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -39,7 +57,7 @@
 
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260823_v4.2.8_vector_logos_and_auto_lang";
+      const CURRENT_BUILD = "20260824_v4.3.0_auth_and_routing_fix";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('caches' in window) {
@@ -65,9 +83,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260823_v4.2.8_vector_logos_and_auto_lang" defer></script>
-  <script src="app.js?v=20260823_v4.2.8_vector_logos_and_auto_lang" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260823_v4.2.8_vector_logos_and_auto_lang">
+  <script src="dataStore.js?v=20260824_v4.3.0_auth_and_routing_fix" defer></script>
+  <script src="app.js?v=20260824_v4.3.0_auth_and_routing_fix" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260824_v4.3.0_auth_and_routing_fix">
 </head>
 <body class="is-landing-mode">
 

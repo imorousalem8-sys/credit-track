@@ -16,8 +16,17 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "CréditTrack PRO - Solution de Recouvrement Panafricain",
-  description: "Plateforme professionnelle de comptabilité et de recouvrement panafricain",
+  metadataBase: new URL('https://credit-track00.vercel.app'),
+  title: {
+    default: "CréditTrack PRO - Solution de Recouvrement & Caisse Panafricaine",
+    template: "%s | CréditTrack PRO"
+  },
+  description: "Plateforme tout-en-un pour commerçants africains : gestion des crédits clients, encaissement Mobile Money, relances WhatsApp et sous-comptes caissiers sécurisés.",
+  applicationName: "CréditTrack PRO",
+  keywords: ["CréditTrack", "gestion crédit", "comptabilité africaine", "recouvrement", "Mobile Money", "Wave", "caisse commerçant"],
+  authors: [{ name: "CréditTrack PRO" }],
+  creator: "CréditTrack PRO",
+  publisher: "CréditTrack PRO",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -27,6 +36,32 @@ export const metadata: Metadata = {
     apple: "/logo_3d.png",
     shortcut: "/logo_3d.png"
   },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: "https://credit-track00.vercel.app/",
+    title: "CréditTrack PRO - Recouvrement & Gestion Commerciale",
+    description: "Gérez vos créances, encaissez par Mobile Money et suivez vos caisses en temps réel sans dévoiler vos marges.",
+    siteName: "CréditTrack PRO",
+    images: [
+      {
+        url: "/logo_3d.png",
+        width: 512,
+        height: 512,
+        alt: "CréditTrack PRO Logo"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CréditTrack PRO - Recouvrement & Caisse Panafricaine",
+    description: "Gérez vos créances, encaissez par Mobile Money et pilotez vos points de vente en temps réel.",
+    images: ["/logo_3d.png"]
+  },
+  robots: {
+    index: true,
+    follow: true
+  }
 };
 
 export default function RootLayout({

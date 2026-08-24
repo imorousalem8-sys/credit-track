@@ -1055,23 +1055,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   populateCountrySelect();
   restoreSavedState();
 
-  // Gestion automatique du lien d'activation reçu par e-mail (Supabase Magic Link / Token Callback)
+  // Gestion automatique du lien d'activation reçu par e-mail (Supabase Magic Link / Token Callback / Password Recovery)
   if (window.supabaseClient) {
     try {
-      // 1. Écouteur global des événements d'authentification (redirection lien e-mail)
+      // 1. Écouteur global des événements d'authentification
       window.supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'PASSWORD_RECOVERY') {
+          openAuthModal('reset-password');
+          showToast("Veuillez saisir votre nouveau mot de passe sécurisé.", "info");
+          return;
+        }
         if (session && session.user && (event === 'SIGNED_IN' || event === 'USER_UPDATED')) {
           await activateUserSession(session.user, true);
         }
       });
 
-      // 2. Traitement des paramètres URL de confirmation (code ou token_hash)
+      // 2. Traitement des paramètres URL de confirmation ou récupération
+      const hash = window.location.hash || '';
       const params = new URLSearchParams(window.location.search);
       const code = params.get('code');
       const tokenHash = params.get('token_hash');
-      const type = params.get('type') || 'signup';
+      const type = params.get('type') || (hash.includes('type=recovery') ? 'recovery' : 'signup');
 
-      if (code) {
+      if (type === 'recovery' || hash.includes('type=recovery')) {
+        openAuthModal('reset-password');
+      } else if (code) {
         const { data, error } = await window.supabaseClient.auth.exchangeCodeForSession(code);
         if (!error && data && data.session && data.session.user) {
           await activateUserSession(data.session.user);
@@ -1086,9 +1094,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
 
-      // 3. Restauration de session active existante
+      // 3. Restauration de session active existante (hors réinitialisation de mot de passe)
       const { data: { session } } = await window.supabaseClient.auth.getSession();
-      if (session && session.user) {
+      if (session && session.user && type !== 'recovery' && !hash.includes('type=recovery')) {
         await activateUserSession(session.user, false);
       }
     } catch(e) {
@@ -1399,95 +1407,7 @@ window.openAuthModal = function(tab = 'register') {
   window.openModal('modal-auth');
 };
 
-window.switchAuthTab = function(tab) {
-  const regView = document.getElementById('auth-view-register');
-  const loginView = document.getElementById('auth-view-login');
-  const forgotView = document.getElementById('auth-view-forgot-password');
-  const resetView = document.getElementById('auth-view-reset-password');
-  const tabsContainer = document.getElementById('auth-tabs-container');
-  const tabReg = document.getElementById('tab-auth-register');
-  const tabLogin = document.getElementById('tab-auth-login');
-  const modalTitle = document.getElementById('auth-modal-title');
 
-  if (regView) regView.style.display = 'none';
-  if (loginView) loginView.style.display = 'none';
-  if (forgotView) forgotView.style.display = 'none';
-  if (resetView) resetView.style.display = 'none';
-  if (tabsContainer) tabsContainer.style.display = 'flex';
-
-  if (tab === 'register') {
-    if (regView) regView.style.display = 'block';
-    if (tabReg) { tabReg.classList.add('active'); tabReg.style.background = '#fff'; tabReg.style.color = '#0F172A'; }
-    if (tabLogin) { tabLogin.classList.remove('active'); tabLogin.style.background = 'transparent'; tabLogin.style.color = '#64748B'; }
-    if (modalTitle) modalTitle.innerHTML = `<i data-lucide="user-plus" style="width:18px;height:18px;color:#2563EB;"></i><span>Créer votre Compte Commerçant</span>`;
-  } else if (tab === 'login') {
-    if (loginView) loginView.style.display = 'block';
-    if (tabLogin) { tabLogin.classList.add('active'); tabLogin.style.background = '#fff'; tabLogin.style.color = '#0F172A'; }
-    if (tabReg) { tabReg.classList.remove('active'); tabReg.style.background = 'transparent'; tabReg.style.color = '#64748B'; }
-    if (modalTitle) modalTitle.innerHTML = `<i data-lucide="lock" style="width:18px;height:18px;color:#2563EB;"></i><span>Connexion à votre Espace</span>`;
-  } else if (tab === 'forgot-password') {
-    if (forgotView) forgotView.style.display = 'block';
-    if (tabsContainer) tabsContainer.style.display = 'none';
-  } else if (tab === 'reset-password') {
-    if (resetView) resetView.style.display = 'block';
-    if (tabsContainer) tabsContainer.style.display = 'none';
-  }
-
-  if (window.lucide) lucide.createIcons();
-};
-
-window.handleRegisterSubmit = function(e) {
-  e.preventDefault();
-  const bizName = document.getElementById('auth-reg-biz-name')?.value || 'Mon Commerce';
-  const phone = document.getElementById('auth-reg-phone')?.value || '';
-  const email = document.getElementById('auth-reg-email')?.value || 'commercant@credittrack.com';
-
-  AppState.businessName = bizName;
-  AppState.businessPhone = phone;
-  AppState.user.id = 'user_' + Date.now();
-  AppState.user.email = email;
-  AppState.user.businessName = bizName;
-
-  localStorage.setItem('bizName', bizName);
-  localStorage.setItem('bizPhone', phone);
-  localStorage.setItem('user_id', AppState.user.id);
-  localStorage.setItem('userEmail', email);
-
-  closeModal('modal-auth');
-  showToast(`Compte créé avec succès ! Bienvenue ${bizName}.`, 'success');
-  window.openAppWorkspace('menu-salesbook');
-};
-
-window.handleLoginSubmit = function(e) {
-  e.preventDefault();
-  const email = document.getElementById('auth-login-email')?.value || 'commercant@credittrack.com';
-
-  AppState.user.id = 'user_' + Date.now();
-  AppState.user.email = email;
-  localStorage.setItem('user_id', AppState.user.id);
-  localStorage.setItem('userEmail', email);
-
-  closeModal('modal-auth');
-  showToast("Connexion réussie.", 'success');
-  window.openAppWorkspace('menu-salesbook');
-};
-
-window.handleForgotPasswordSubmit = function(e) {
-  e.preventDefault();
-  showToast("Code de vérification envoyé à votre adresse e-mail.", 'info');
-  window.switchAuthTab('reset-password');
-};
-
-window.handleSignOut = function() {
-  if (confirm("Voulez-vous vous déconnecter de votre espace ?")) {
-    AppState.user.id = '';
-    AppState.user.email = '';
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('userEmail');
-    window.openPublicLanding();
-    showToast("Vous avez été déconnecté.", "info");
-  }
-};
 
 window.openAppWorkspace = function(menuId = 'menu-salesbook') {
   closeMobileSidebarIfOpen();
@@ -3004,61 +2924,31 @@ function startResendCooldown(seconds = 60) {
   }, 1000);
 }
 
+function getAppBaseUrl() {
+  if (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null') {
+    return window.location.origin;
+  }
+  return 'https://credit-track00.vercel.app';
+}
+
+function withAuthTimeout(promise, timeoutMs = 12000, errorMsg = "Le serveur met trop de temps à répondre. Veuillez vérifier votre connexion et réessayer.") {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(errorMsg)), timeoutMs))
+  ]);
+}
+
 window.openAuthModal = function(tab = 'register') {
-  switchAuthTab(tab);
+  if (typeof window.switchAuthTab === 'function') {
+    window.switchAuthTab(tab);
+  }
   openModal('modal-auth');
 };
 
-window.switchAuthTab = function(tab) {
-  const isRegister = tab === 'register';
-  const tabLogin = document.getElementById('tab-auth-login');
-  const tabReg = document.getElementById('tab-auth-register');
-  const viewReg = document.getElementById('auth-view-register');
-  const viewLogin = document.getElementById('auth-view-login');
-  const viewOtp = document.getElementById('auth-view-otp');
-  const tabsContainer = document.getElementById('auth-tabs-container');
-  const modalTitle = document.getElementById('auth-modal-title');
-
-  if (tabsContainer) tabsContainer.style.display = 'flex';
-  if (viewOtp) viewOtp.style.display = 'none';
-
-  if (isRegister) {
-    if (viewReg) viewReg.style.display = 'block';
-    if (viewLogin) viewLogin.style.display = 'none';
-    if (modalTitle) modalTitle.textContent = 'Créer un Compte (Essai 3 Mois Offert)';
-    if (tabReg) {
-      tabReg.classList.add('active');
-      tabReg.style.background = '#fff';
-      tabReg.style.color = '#0F172A';
-      tabReg.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-    }
-    if (tabLogin) {
-      tabLogin.classList.remove('active');
-      tabLogin.style.background = 'transparent';
-      tabLogin.style.color = '#64748B';
-      tabLogin.style.boxShadow = 'none';
-    }
-  } else {
-    if (viewReg) viewReg.style.display = 'none';
-    if (viewLogin) viewLogin.style.display = 'block';
-    if (modalTitle) modalTitle.textContent = 'Connexion à votre Espace';
-    if (tabLogin) {
-      tabLogin.classList.add('active');
-      tabLogin.style.background = '#fff';
-      tabLogin.style.color = '#0F172A';
-      tabLogin.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-    }
-    if (tabReg) {
-      tabReg.classList.remove('active');
-      tabReg.style.background = 'transparent';
-      tabReg.style.color = '#64748B';
-      tabReg.style.boxShadow = 'none';
-    }
-  }
-};
-
 window.backToAuthRegister = function() {
-  switchAuthTab('register');
+  if (typeof window.switchAuthTab === 'function') {
+    window.switchAuthTab('register');
+  }
 };
 
 // --------------------------------------------------------------------------
@@ -3249,40 +3139,48 @@ window.handleForgotPasswordSubmit = async function(e) {
   const submitBtn = document.getElementById('auth-forgot-submit-btn');
 
   if (!email || !isValidEmailStrict(email)) {
-    showToast("Veuillez entrer une adresse e-mail valide.", "error");
-    if (emailInput) emailInput.focus();
+    showToast("Veuillez entrer une adresse e-mail valide.", "warning");
+    if (emailInput) {
+      emailInput.style.borderColor = '#EF4444';
+      emailInput.focus();
+      setTimeout(() => { emailInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Envoi du lien en cours...</span>`;
+    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Envoi du lien...`;
   }
 
   try {
     pendingAuthData.resetEmail = email;
-    const redirectUrl = window.location.origin + '/auth/callback?type=recovery';
+    const redirectUrl = `${getAppBaseUrl()}/auth/callback?type=recovery`;
     
     if (window.supabaseClient) {
-      const { error: resetErr } = await window.supabaseClient.auth.resetPasswordForEmail(email, {
-        redirectTo: redirectUrl
-      });
+      const { error: resetErr } = await withAuthTimeout(
+        window.supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: redirectUrl
+        }),
+        12000,
+        "Le serveur met trop de temps à répondre. Vérifiez votre connexion Internet."
+      );
       if (resetErr) throw resetErr;
     }
 
-    showToast(`✓ Lien de réinitialisation envoyé à ${maskEmail(email)} ! Vérifiez votre boîte de réception.`, "success");
+    showToast(`✓ Lien de réinitialisation sécurisé envoyé à ${maskEmail(email)} ! Vérifiez votre boîte de réception.`, "success");
     
-    // Fermer ou basculer en mode attente
     setTimeout(() => {
       closeModal('modal-auth');
-    }, 2000);
+    }, 2500);
   } catch (err) {
     console.error("Erreur Reset Password:", err);
     showToast(err.message || "Impossible d'envoyer le lien. Vérifiez votre adresse e-mail.", "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
-      submitBtn.innerHTML = `<span>Envoyer le Lien de Réinitialisation</span>`;
+      submitBtn.innerHTML = `<i data-lucide="send" style="width:17px;height:17px;"></i> <span>Envoyer le Lien de Réinitialisation</span>`;
+      if (window.lucide) lucide.createIcons();
     }
   }
 };
@@ -3297,34 +3195,45 @@ window.handleResetPasswordSubmit = async function(e) {
   const confirmPassword = confPassInput?.value || '';
 
   if (!newPassword || newPassword.length < 8) {
-    showToast("Le mot de passe doit comporter au moins 8 caractères.", "error");
-    if (newPassInput) newPassInput.focus();
+    showToast("Le mot de passe doit comporter au moins 8 caractères.", "warning");
+    if (newPassInput) {
+      newPassInput.style.borderColor = '#EF4444';
+      newPassInput.focus();
+      setTimeout(() => { newPassInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
   if (newPassword !== confirmPassword) {
-    showToast("Les deux mots de passe ne correspondent pas.", "error");
-    if (confPassInput) confPassInput.focus();
+    showToast("Les deux mots de passe ne correspondent pas.", "warning");
+    if (confPassInput) {
+      confPassInput.style.borderColor = '#EF4444';
+      confPassInput.focus();
+      setTimeout(() => { confPassInput.style.borderColor = ''; }, 3000);
+    }
     return;
   }
 
   if (submitBtn) {
     submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span>Enregistrement...</span>`;
+    submitBtn.innerHTML = `<div class="spinner" style="width:16px;height:16px;border-width:2px;display:inline-block;margin-right:6px;"></div> Enregistrement...`;
   }
 
   try {
     if (window.supabaseClient) {
-      const { error: updErr } = await window.supabaseClient.auth.updateUser({
-        password: newPassword
-      });
+      const { error: updErr } = await withAuthTimeout(
+        window.supabaseClient.auth.updateUser({
+          password: newPassword
+        }),
+        12000,
+        "Délai d'attente dépassé lors de l'enregistrement du mot de passe."
+      );
 
       if (updErr) throw updErr;
 
       showToast("✓ Votre nouveau mot de passe a été enregistré avec succès !", "success");
       closeModal('modal-auth');
       
-      // Ouvrir l'espace de travail
       if (typeof openAppWorkspace === 'function') {
         openAppWorkspace('menu-salesbook');
       }
@@ -3339,7 +3248,6 @@ window.handleResetPasswordSubmit = async function(e) {
     }
   }
 };
-
 
 window.handleRegisterSubmit = async function(e) {
   e.preventDefault();
@@ -3357,7 +3265,7 @@ window.handleRegisterSubmit = async function(e) {
 
   // 1. Validation de champ vide
   if (!email) {
-    showToast("Veuillez entrer votre adresse e-mail.");
+    showToast("Veuillez entrer votre adresse e-mail.", "warning");
     if (emailInput) {
       emailInput.style.borderColor = '#EF4444';
       emailInput.focus();
@@ -3368,7 +3276,7 @@ window.handleRegisterSubmit = async function(e) {
 
   // 2. Validation réelle et stricte du format e-mail
   if (!isValidEmailStrict(email)) {
-    showToast("Veuillez entrer une adresse e-mail valide.");
+    showToast("Veuillez entrer une adresse e-mail valide.", "warning");
     if (emailInput) {
       emailInput.style.borderColor = '#EF4444';
       emailInput.focus();
@@ -3379,7 +3287,7 @@ window.handleRegisterSubmit = async function(e) {
 
   // 3. Validation de mot de passe (Minimum 8 caractères)
   if (!password || password.length < 8) {
-    showToast("Le mot de passe doit comporter au moins 8 caractères.");
+    showToast("Le mot de passe doit comporter au moins 8 caractères.", "warning");
     if (passInput) {
       passInput.style.borderColor = '#EF4444';
       passInput.focus();
@@ -3390,7 +3298,7 @@ window.handleRegisterSubmit = async function(e) {
 
   // 4. Validation de correspondance des mots de passe
   if (password !== passwordConfirm) {
-    showToast("Les mots de passe ne correspondent pas.");
+    showToast("Les mots de passe ne correspondent pas.", "warning");
     if (passConfInput) {
       passConfInput.style.borderColor = '#EF4444';
       passConfInput.focus();
@@ -3412,20 +3320,28 @@ window.handleRegisterSubmit = async function(e) {
   try {
     let userId = 'usr_' + Date.now();
     let userEmail = email;
+    const redirectUrl = `${getAppBaseUrl()}/auth/callback?type=signup`;
 
     if (window.supabaseClient) {
       try {
-        const { data, error } = await window.supabaseClient.auth.signUp({
-          email,
-          password,
-          options: {
-            data: {
-              business_name: bizName,
-              phone: phone,
-              plan_tier: 'trial_3_months'
+        const { data, error } = await withAuthTimeout(
+          window.supabaseClient.auth.signUp({
+            email,
+            password,
+            options: {
+              emailRedirectTo: redirectUrl,
+              data: {
+                business_name: bizName,
+                phone: phone,
+                plan_tier: 'trial_3_months'
+              }
             }
-          }
-        });
+          }),
+          12000,
+          "Délai d'attente dépassé lors de l'inscription."
+        );
+
+        if (error) throw error;
 
         if (data && data.user) {
           userId = data.user.id;
@@ -3433,6 +3349,11 @@ window.handleRegisterSubmit = async function(e) {
         }
       } catch (sbErr) {
         console.warn("Supabase Auth notice:", sbErr);
+        if (sbErr.message && (sbErr.message.includes('already registered') || sbErr.message.includes('already exists'))) {
+          showToast("Un compte existe déjà avec cette adresse e-mail. Veuillez vous connecter.", "info");
+          switchAuthTab('login');
+          return;
+        }
       }
     }
 
@@ -3451,27 +3372,29 @@ window.handleRegisterSubmit = async function(e) {
     localStorage.setItem('userPlan', 'trial_3_months');
     localStorage.setItem('userName', AppState.userName);
 
-    if (window.dataStore) {
-      try {
+    try {
+      if (window.dataStore) {
         await window.dataStore.syncFromSupabase();
-      } catch(e) {}
+      }
+    } catch(e) {}
+
+    try {
+      if (typeof renderClientDirectory === 'function') renderClientDirectory();
+      if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
+      if (typeof renderAccountingKPIs === 'function') renderAccountingKPIs();
+      if (typeof renderCreditKPIs === 'function') renderCreditKPIs();
+      if (typeof updateUserPlanBadgeUI === 'function') updateUserPlanBadgeUI();
+    } catch (renderErr) {
+      console.warn("UI render non-bloquant:", renderErr);
     }
 
-    renderClientDirectory();
-    renderPaymentsTable();
-    renderAccountingKPIs();
-    renderCreditKPIs();
-
-    updateUserPlanBadgeUI();
     closeModal('modal-auth');
-
-    // Basculer directement vers le Tableau de Bord
     openAppWorkspace('menu-2');
 
-    showToast(`Bienvenue ${bizName} ! Votre compte est créé & 3 Mois d'Essai Offerts sont activés.`);
+    showToast(`Bienvenue ${bizName} ! Votre compte est créé & 3 Mois d'Essai Offerts sont activés.`, "success");
   } catch (err) {
     console.error("Erreur Inscription:", err);
-    showToast(`Erreur : ${err.message || "Impossible de créer le compte"}`);
+    showToast(`Erreur : ${err.message || "Impossible de créer le compte"}`, "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -3485,7 +3408,7 @@ window.handleVerifyOtpSubmit = async function(e) {
   const otpCode = getOtpCodeFromInputs();
 
   if (!otpCode || otpCode.length < 6) {
-    showToast("Veuillez saisir les 6 chiffres du code de vérification reçu.");
+    showToast("Veuillez saisir les 6 chiffres du code de vérification reçu.", "warning");
     const container = document.getElementById('otp-inputs-container');
     if (container) {
       const inputs = container.querySelectorAll('.otp-digit-input');
@@ -3509,20 +3432,26 @@ window.handleVerifyOtpSubmit = async function(e) {
     const isMasterExamCode = (otpCode === '202688' || otpCode === '999888');
 
     if (window.supabaseClient && !isMasterExamCode) {
-      // 1. Vérification standard côté serveur par Supabase Auth (type: 'signup')
-      let verifyRes = await window.supabaseClient.auth.verifyOtp({
-        email: pendingAuthData.email,
-        token: otpCode,
-        type: 'signup'
-      });
-
-      // 2. Fallback si le type de confirmation configuré sur le serveur est 'email'
-      if (verifyRes.error) {
-        verifyRes = await window.supabaseClient.auth.verifyOtp({
+      let verifyRes = await withAuthTimeout(
+        window.supabaseClient.auth.verifyOtp({
           email: pendingAuthData.email,
           token: otpCode,
-          type: 'email'
-        });
+          type: 'signup'
+        }),
+        12000,
+        "Délai d'attente dépassé lors de la vérification du code."
+      );
+
+      if (verifyRes.error) {
+        verifyRes = await withAuthTimeout(
+          window.supabaseClient.auth.verifyOtp({
+            email: pendingAuthData.email,
+            token: otpCode,
+            type: 'email'
+          }),
+          12000,
+          "Délai d'attente dépassé lors de la vérification du code."
+        );
       }
 
       if (verifyRes.error) throw verifyRes.error;
@@ -3533,7 +3462,6 @@ window.handleVerifyOtpSubmit = async function(e) {
       }
     }
 
-    // Initialisation session utilisateur avec 3 mois d'essai offerts
     AppState.user.id = userId;
     AppState.user.email = userEmail;
     AppState.user.businessName = pendingAuthData.bizName || AppState.businessName;
@@ -3548,32 +3476,33 @@ window.handleVerifyOtpSubmit = async function(e) {
     localStorage.setItem('userPlan', 'trial_3_months');
     localStorage.setItem('userName', AppState.userName);
 
-    // Charger immédiatement le jeu de données propre à cet utilisateur
     AppState.clients = getCachedArray('credittrack_clients');
     AppState.payments = getCachedArray('credittrack_payments');
     AppState.accountingEntries = getCachedArray('credittrack_accounting');
 
-    if (window.dataStore) {
-      try {
+    try {
+      if (window.dataStore) {
         await window.dataStore.syncFromSupabase();
-      } catch(e) {}
+      }
+    } catch(e) {}
+
+    try {
+      if (typeof renderClientDirectory === 'function') renderClientDirectory();
+      if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
+      if (typeof renderAccountingKPIs === 'function') renderAccountingKPIs();
+      if (typeof renderCreditKPIs === 'function') renderCreditKPIs();
+      if (typeof updateUserPlanBadgeUI === 'function') updateUserPlanBadgeUI();
+    } catch(renderErr) {
+      console.warn("UI render non-bloquant:", renderErr);
     }
 
-    renderClientDirectory();
-    renderPaymentsTable();
-    renderAccountingKPIs();
-    renderCreditKPIs();
-
-    updateUserPlanBadgeUI();
     closeModal('modal-auth');
-
-    // Ouvrir directement le Tableau de Bord (Dashboard)
     openAppWorkspace('menu-2');
 
-    showToast(`Bienvenue ${AppState.user.businessName} ! Compte vérifié avec succès & 3 Mois d'Essai activés !`);
+    showToast(`Bienvenue ${AppState.user.businessName} ! Compte vérifié avec succès & 3 Mois d'Essai activés !`, "success");
   } catch (err) {
     console.error("Erreur validation OTP:", err);
-    showToast("Code incorrect ou expiré. Veuillez vérifier votre boîte mail et réessayer.");
+    showToast("Code incorrect ou expiré. Veuillez vérifier votre boîte mail et réessayer.", "error");
     const container = document.getElementById('otp-inputs-container');
     if (container) {
       const inputs = container.querySelectorAll('.otp-digit-input');
@@ -3603,7 +3532,7 @@ window.handleLoginSubmit = async function(e) {
 
   // 1. Validation de champ vide
   if (!email) {
-    showToast("Veuillez entrer votre adresse e-mail.");
+    showToast("Veuillez entrer votre adresse e-mail.", "warning");
     if (emailInput) {
       emailInput.style.borderColor = '#EF4444';
       emailInput.focus();
@@ -3614,7 +3543,7 @@ window.handleLoginSubmit = async function(e) {
 
   // 2. Validation réelle du format e-mail
   if (!isValidEmailStrict(email)) {
-    showToast("Veuillez entrer une adresse e-mail valide.");
+    showToast("Veuillez entrer une adresse e-mail valide.", "warning");
     if (emailInput) {
       emailInput.style.borderColor = '#EF4444';
       emailInput.focus();
@@ -3625,7 +3554,7 @@ window.handleLoginSubmit = async function(e) {
 
   // 3. Validation mot de passe
   if (!password) {
-    showToast("Veuillez saisir votre mot de passe.");
+    showToast("Veuillez saisir votre mot de passe.", "warning");
     if (passInput) {
       passInput.style.borderColor = '#EF4444';
       passInput.focus();
@@ -3646,24 +3575,37 @@ window.handleLoginSubmit = async function(e) {
     let bizName = 'Mon Commerce';
 
     if (window.supabaseClient) {
-      const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-        email,
-        password
-      });
+      const { data, error } = await withAuthTimeout(
+        window.supabaseClient.auth.signInWithPassword({
+          email,
+          password
+        }),
+        12000,
+        "Délai d'attente dépassé lors de la connexion. Veuillez vérifier votre connexion Internet."
+      );
 
       if (error) {
         // Détecter si l'email n'est pas encore vérifié
         if (error.message && (error.message.includes('Email not confirmed') || error.message.includes('not confirmed'))) {
-          showToast("Votre adresse e-mail n'a pas encore été vérifiée. Un code vous a été envoyé.");
+          showToast("Votre adresse e-mail n'a pas encore été confirmée. Un code de sécurité vous a été envoyé.", "info");
           pendingAuthData.email = email;
           try {
-            await window.supabaseClient.auth.resend({ type: 'signup', email });
+            const redirectUrl = `${getAppBaseUrl()}/auth/callback?type=signup`;
+            await window.supabaseClient.auth.resend({
+              type: 'signup',
+              email,
+              options: { emailRedirectTo: redirectUrl }
+            });
           } catch(re) {}
           showOtpVerificationView(email);
           return;
         }
-        // Message d'erreur sécurisé anti-énumération
-        throw new Error("Adresse e-mail ou mot de passe incorrect.");
+
+        if (error.message && (error.message.includes('Invalid login credentials') || error.message.includes('invalid_grant') || error.message.includes('user_not_found'))) {
+          throw new Error("Identifiants non reconnus par le serveur. Cliquez sur 'Mot de passe oublié ?' ou créez votre compte.");
+        }
+
+        throw new Error(error.message || "Identifiants incorrects. Veuillez vérifier votre adresse e-mail et mot de passe.");
       }
 
       if (data && data.user) {
@@ -3686,30 +3628,32 @@ window.handleLoginSubmit = async function(e) {
     localStorage.setItem('bizName', bizName);
     localStorage.setItem('userName', AppState.userName);
 
-    // Charger les données isolées propres à ce commerçant
     AppState.clients = getCachedArray('credittrack_clients');
     AppState.payments = getCachedArray('credittrack_payments');
     AppState.accountingEntries = getCachedArray('credittrack_accounting');
 
-    if (window.dataStore) {
-      try {
+    try {
+      if (window.dataStore) {
         await window.dataStore.syncFromSupabase();
-      } catch(e) {}
+      }
+    } catch(e) {}
+
+    try {
+      if (typeof renderClientDirectory === 'function') renderClientDirectory();
+      if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
+      if (typeof renderAccountingKPIs === 'function') renderAccountingKPIs();
+      if (typeof renderCreditKPIs === 'function') renderCreditKPIs();
+      if (typeof updateUserPlanBadgeUI === 'function') updateUserPlanBadgeUI();
+    } catch(renderErr) {
+      console.warn("UI render non-bloquant:", renderErr);
     }
 
-    renderClientDirectory();
-    renderPaymentsTable();
-    renderAccountingKPIs();
-    renderCreditKPIs();
-
-    updateUserPlanBadgeUI();
     closeModal('modal-auth');
-
     openAppWorkspace('menu-2');
-    showToast(`Heureux de vous revoir ${AppState.businessName} !`);
+    showToast(`Heureux de vous revoir ${AppState.businessName} !`, "success");
   } catch (err) {
     console.error("Erreur Connexion:", err);
-    showToast((err.message || "Adresse e-mail ou mot de passe incorrect."));
+    showToast((err.message || "Adresse e-mail ou mot de passe incorrect."), "error");
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;
@@ -3720,34 +3664,43 @@ window.handleLoginSubmit = async function(e) {
 
 window.handleResendOtp = async function() {
   if (!pendingAuthData.email) {
-    showToast("Aucune adresse e-mail en attente de vérification.");
+    showToast("Aucune adresse e-mail en attente de vérification.", "warning");
     return;
   }
 
   if (resendSecondsLeft > 0) {
-    showToast(`Veuillez patienter encore ${resendSecondsLeft} secondes avant de renvoyer un code.`);
+    showToast(`Veuillez patienter encore ${resendSecondsLeft} secondes avant de renvoyer un code.`, "warning");
     return;
   }
 
-  showToast("Envoi d'un nouveau code par le serveur...");
+  showToast("Envoi d'un nouveau code par le serveur...", "info");
   try {
     if (window.supabaseClient) {
-      const { error } = await window.supabaseClient.auth.resend({
-        type: 'signup',
-        email: pendingAuthData.email
-      });
+      const redirectUrl = `${getAppBaseUrl()}/auth/callback?type=signup`;
+      const { error } = await withAuthTimeout(
+        window.supabaseClient.auth.resend({
+          type: 'signup',
+          email: pendingAuthData.email,
+          options: { emailRedirectTo: redirectUrl }
+        }),
+        12000,
+        "Délai d'attente dépassé lors du renvoi du code."
+      );
       if (error) {
         await window.supabaseClient.auth.signInWithOtp({
           email: pendingAuthData.email,
-          options: { shouldCreateUser: false }
+          options: {
+            shouldCreateUser: false,
+            emailRedirectTo: redirectUrl
+          }
         });
       }
     }
     startResendCooldown(60);
-    showToast(`Nouveau code renvoyé avec succès à ${maskEmail(pendingAuthData.email)} !`);
+    showToast(`Nouveau code renvoyé avec succès à ${maskEmail(pendingAuthData.email)} !`, "success");
   } catch (e) {
     console.warn("Erreur renvoi OTP:", e);
-    showToast("Impossible de renvoyer le code pour le moment. Veuillez patienter.");
+    showToast("Impossible de renvoyer le code pour le moment. Veuillez patienter.", "error");
   }
 };
 

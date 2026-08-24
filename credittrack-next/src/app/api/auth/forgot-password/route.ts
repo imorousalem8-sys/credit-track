@@ -13,7 +13,11 @@ export async function POST(request: Request) {
     }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey);
-    const siteUrl = origin || 'https://credit-track.vercel.app';
+    const hostHeader = request.headers.get('x-forwarded-host') || request.headers.get('host');
+    const protoHeader = request.headers.get('x-forwarded-proto') || 'https';
+    const computedOrigin = hostHeader ? `${protoHeader}://${hostHeader}` : null;
+
+    const siteUrl = origin || computedOrigin || process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://credit-track00.vercel.app';
     const redirectUrl = `${siteUrl}/auth/callback?type=recovery`;
 
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
