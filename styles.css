@@ -79,19 +79,12 @@ html, body {
 /* ==========================================================================
    DÉCOUPLAGE LANDING PAGE VS WORKSPACE APPLICATIF
    ========================================================================== */
-#app-workspace-layout {
-  display: none !important;
-}
-
-#public-landing-container {
-  display: block !important;
-}
-
 body.is-landing-mode,
 body.is-landing-mode #public-landing-container {
   background-color: #060A14 !important;
   background: #060A14 !important;
   color: #FFFFFF !important;
+  display: block !important;
 }
 
 body.is-landing-mode #app-workspace-layout {
