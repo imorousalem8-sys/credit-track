@@ -1,104 +1,175 @@
-# 🧠 Matrice d'Exécution & Conditions de Prompt Engineering — Agence IA
+# 🧠 Grand Référentiel des 25 Conditions d'Ingénierie Agentique & Prompt Engineering
 
-Ce référentiel formalise l'ensemble des principes, techniques et conditions d'ingénierie de prompts et d'exécution agentique. Pour chaque tâche demandée par l'utilisateur, l'agent identifie et applique **la condition exacte la plus adaptée**.
+Ce document constitue la **matrice d'exécution de référence de l'agence**. À chaque requête utilisateur, l'agent identifie, active et combine les conditions correspondantes pour garantir une exécution d'un niveau d'expertise maximal.
 
 ---
 
-## 🎯 Classification & Sélection Automatique des Conditions
+## 🧭 Sommaire des 25 Conditions d'Exécution
 
 ```mermaid
-graph TD
-    A[Demande Utilisateur] --> B{Nature de la Tâche}
-    B -->|Bug, Erreur, Panne| C1[Condition C1 : Diagnostic & Bug Hunting]
-    B -->|Nouvelle Feature, UI, Page| C2[Condition C2 : Architecture & Conception]
-    B -->|Nettoyage, Doublons, Perf| C3[Condition C3 : Refactoring & Optimisation]
-    B -->|Auth, Supabase, Tokens, RLS| C4[Condition C4 : Sécurité & Intégrité]
-    B -->|Vercel, Build, DNS, Cache PWA| C5[Condition C5 : Déploiement & DevOps]
-    B -->|SEO, Textes, Copywriting| C6[Condition C6 : Contenu & SEO]
-    B -->|Micro-retouche, Alignement| C7[Condition C7 : Micro-Ajustement Précis]
+graph LR
+    subgraph "Diagnostic & Résilience"
+        C1[C1: Root Cause Hunting]
+        C2[C2: Abductive Hypotheses]
+        C3[C3: Asynchronous Guardrails]
+        C4[C4: Error Boundary & UI Isolation]
+    end
+    subgraph "Architecture & Design"
+        C5[C5: STYLE A Strict Layout]
+        C6[C6: Zero Orphan Component]
+        C7[C7: Rich Visual Aesthetics]
+        C8[C8: Micro-Animations & Interactivity]
+    end
+    subgraph "Mobile & Engineering"
+        C9[C9: GPU Layering & Compositing]
+        C10[C10: Touch Events & Propagation]
+        C11[C11: Offline-First & Service Worker]
+        C12[C12: PWA Installability]
+    end
+    subgraph "Sécurité & Données"
+        C13[C13: Dynamic Origin Resolution]
+        C14[C14: Defensive Sanitization XSS/SQLi]
+        C15[C15: RLS & Secret Isolation]
+        C16[C16: Multi-Factor / OTP Resilient Auth]
+    end
+    subgraph "Code Quality & Refactoring"
+        C17[C17: DRY Strict De-duplication]
+        C18[C18: Single Source of Truth]
+        C19[C19: Strict Typing & Linting]
+        C20[C20: Non-Regression & Scope Control]
+    end
+    subgraph "DevOps & Localisation"
+        C21[C21: Build Integrity (0 Error)]
+        C22[C22: Cache-Busting & Versioning]
+        C23[C23: Canonical URL & SPA Routing]
+        C24[C24: Panafrican Multi-Currency & Local MoMo]
+        C25[C25: Premium SEO & OpenGraph]
+    end
 ```
 
 ---
 
-## 📋 Table des Conditions par Catégorie de Tâche
+## 🔍 SECTION I : Diagnostic, Traque de Bugs & Résilience
 
-### 🔍 Condition C1 : Diagnostic & Traque Systématique des Bugs (Root Cause Analysis)
-* **Quand l'appliquer** : Erreur console, rejet de connexion, blocage asynchrone, 4xx/5xx, redirection indésirable.
-* **Protocole d'exécution** :
-  1. **Isoler la cause racine réelle** : Ne jamais masquer le symptôme par du CSS ou un timeout artificiel sans comprendre la source.
-  2. **ReAct & Tracing** : Inspecter le flux réseau (requête REST, headers, statut HTTP, payload retourné).
-  3. **Vérifier les verrous et promesses** : S'assurer que chaque promesse possède un garde-fou (`timeout`, `try/catch/finally` garanti).
-  4. **Tester directement** : Valider la correction avec des tests ou des scripts de diagnostic avant de conclure.
+### Condition C1 : Diagnostic à la Source & Traque de Cause Racine (Root Cause Analysis)
+* **Principe** : Ne jamais appliquer de correctif cosmétique qui masque un symptôme sans comprendre l'origine.
+* **Protocole** : Poser les 5 "Pourquoi", analyser la pile d'appels (`stack trace`), et inspecter les requêtes réseau (statut HTTP, code d'erreur Supabase / API).
 
----
+### Condition C2 : Génération d'Hypothèses Abductives Classées
+* **Principe** : Établir une liste ordonnée des hypothèses de panne (de la plus probable à la moins probable) :
+  1. Changement récent de code / régression de merge.
+  2. Problème d'état asynchrone / verrouillage (`navigator.locks`).
+  3. Données mal formées / rejet de validation serveur.
+  4. Configuration réseau / CSP / CORS / Domaine de redirection.
 
-### 🎨 Condition C2 : Architecture & Conception de Nouvelles Fonctionnalités
-* **Quand l'appliquer** : Création d'une page, d'une modale, d'un composant, d'un nouveau flux métier.
-* **Protocole d'exécution** :
-  1. **Conformité stricte "STYLE A"** : Respecter la charte visuelle (Sidebar 20% + Workspace large + KPIs horizontaux + Grille 2 colonnes).
-  2. **Zéro composant orphelin** : Toujours relier le nouveau composant à la navigation principale et à l'état global (`AppState`).
-  3. **Esthétique Rich & Moderne** : Palette soignée, typographie moderne (Plus Jakarta Sans / Inter), micro-animations et aucun placeholder.
-  4. **Cohérence Mobile & Desktop** : S'assurer que le rendu est 100% responsive et fluide sur smartphone.
+### Condition C3 : Garde-Fous Asynchrones & Timeouts Systématiques
+* **Principe** : Aucune promesse réseau ne doit pouvoir geler l'interface indéfiniment.
+* **Protocole** : Toute requête critique (`signIn`, `signUp`, `fetch`, `sync`) doit être encapsulée dans un wrapper avec timeout (ex: `withAuthTimeout(promise, 12000)`), et réinitialiser son état dans un bloc `finally` garanti.
 
----
-
-### ⚡ Condition C3 : Refactoring, Nettoyage & Élimination des Doublons
-* **Quand l'appliquer** : Code dupliqué, fonctions écrasées par ordre de chargement, dette technique, ralentissement.
-* **Protocole d'exécution** :
-  1. **Principe DRY (Don't Repeat Yourself)** : Supprimer impitoyablement toute fonction factice ou redondante.
-  2. **Scope Unifié** : Centraliser les variables d'état et exposer uniquement ce qui est nécessaire sur l'objet global `window`.
-  3. **Non-Régression** : Vérifier que la suppression d'un bloc ne casse aucun gestionnaire d'événement existant.
+### Condition C4 : Isolation des Erreurs de Rendu UI (Error Boundaries)
+* **Principe** : L'échec d'un composant secondaire ou d'un calcul de KPI ne doit jamais bloquer l'accès au tableau de bord ou à l'espace de travail principal.
 
 ---
 
-### 🛡️ Condition C4 : Sécurité, Authentification & Données Supabase
-* **Quand l'appliquer** : Inscription, Connexion, Mots de passe, RLS, Webhooks, API keys.
-* **Protocole d'exécution** :
-  1. **Sécurité Défensive** : Assainir toutes les entrées utilisateur (XSS, injections SQL).
-  2. **Résolution Dynamique des Origines** : Toujours utiliser `getAppBaseUrl()` pour `redirectTo` / `emailRedirectTo`.
-  3. **Fallbacks Résilients** : Prévoir une authentification de secours (OTP in-app, codes maîtres, messages explicites).
-  4. **Isolation Client/Serveur** : Ne jamais exposer de `SERVICE_ROLE_KEY` côté client.
+## 🎨 SECTION II : Architecture, Structure & "STYLE A"
+
+### Condition C5 : Respect Strict de la Grille "STYLE A" (Standard SaaS Dashboard)
+* **Principe** :
+  - **Sidebar Gauche** : 20% de la largeur, fixe sur 100vh, fond sombre épuré (`#1B3BBB` ou `#0F172A`), logo de marque en haut, navigation avec états actifs en bloc plein, pied de page utilisateur.
+  - **Workspace Droite** : 80% de la largeur, fond pro (`#F8FAFC`), en-tête horizontal complet, KPIs en 1 ligne horizontale, grilles de données en 2 colonnes (65% / 35%).
+
+### Condition C6 : Zéro Composant Orphelin & Navigation Intégrée
+* **Principe** : Chaque vue ou modale créée doit être enregistrée dans le routeur / sélecteur (`switchMenu`), disposer de son bouton dans la barre de navigation et synchroniser son titre dans le header supérieur.
+
+### Condition C7 : Esthétique Visuelle "Rich & Modern" (Anti-Generic Design)
+* **Principe** : Bannir les couleurs primaires basiques et les bordures épaisses d'ancienne génération.
+* **Protocole** : Utiliser des palettes harmonieuses, des dégradés subtils, des ombres douces (`box-shadow: 0 4px 20px rgba(0,0,0,0.05)`), des coins arrondis (`border-radius: 12px` à `18px`) et la police Google *Plus Jakarta Sans* ou *Inter*.
+
+### Condition C8 : Micro-Animations, Transitions & États Interactifs
+* **Principe** : L'interface doit paraître vivante et réactive au toucher comme à la souris (`transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1)`, effets de survol `:hover`, états d'activation `:active`, et spinners discrets).
 
 ---
 
-### 🚀 Condition C5 : Déploiement, Vercel, DNS, Cache-Busting & PWA
-* **Quand l'appliquer** : Déploiement Git, règles de routage SPA, Service Worker, configuration Vercel.
-* **Protocole d'exécution** :
-  1. **Domaine Canonique Strict** : Rediriger vers l'URL officielle (`credit-track00.vercel.app`).
-  2. **Cache-Busting Systématique** : Incrémenter le numéro de build (`v4.x.x`) sur les bundles JS/CSS et `CURRENT_BUILD`.
-  3. **Stratégie Service Worker** : `updateViaCache: 'none'`, Network-First sur le HTML, purge du cache obsolète.
-  4. **Validation de Build** : Tester `npm run build` et vérifier le code de sortie 0 avant chaque publication.
+## 📱 SECTION III : Ingénierie Mobile, PWA & Tactile
+
+### Condition C9 : Accélération Matérielle & Composition GPU Layering
+* **Principe** : Les éléments coulissants mobiles (off-canvas sidebar, modales) doivent utiliser `transform: translate3d(0, 0, 0)` et `will-change: transform` pour un défilement à 60 FPS sans à-coups.
+
+### Condition C10 : Déverrouillage Tactile & Zéro Piège de Composition
+* **Principe** :
+  - **Interdiction formelle de `backdrop-filter: blur()` sur l'overlay mobile** (provoque la disparition de la sidebar sur iOS Safari / Chrome Android).
+  - Synchroniser les 3 déclencheurs tactiles (`.open`, `.active`, `body.mobile-sidebar-open`).
+  - Aucun `pointer-events: none` non réinitialisé sur la navigation.
+
+### Condition C11 : Résilience Hors-Ligne & Stratégie Service Worker
+* **Principe** : Service Worker moderne avec `updateViaCache: 'none'`, stratégie `Network-First` pour le HTML d'authentification et purge immédiate des anciens caches avec `clients.claim()`.
+
+### Condition C12 : Expérience PWA & Installation Mobile
+* **Principe** : Manifeste PWA complet (`manifest.json`), icônes vectorielles / 3D haute résolution (512x512, 192x192), `theme-color: #1B3BBB`, et orientation adaptative.
 
 ---
 
-### ✍️ Condition C6 : Contenu Métier, SEO & Localisation Panafricaine
-* **Quand l'appliquer** : Textes, métadonnées OpenGraph/Twitter, devises, moyens de paiement locaux.
-* **Protocole d'exécution** :
-  1. **Pertinence Culturelle & Locale** : Adapter les devises (FCFA, GHS, NGN...) et les méthodes de paiement (Wave, MTN MoMo, Orange Money...).
-  2. **SEO Premium** : Balises `title`, `description`, `og:image`, `canonical`, `manifest` complètes et sans template par défaut.
-  3. **Ton Professionnel** : Vocabulaire commercial clair, adapté aux commerçants et gérants de boutiques.
+## 🛡️ SECTION IV : Sécurité, Authentification & Données Supabase
+
+### Condition C13 : Résolution Dynamique de l'URL d'Origine (`getAppBaseUrl`)
+* **Principe** : Ne jamais hardcoder `http://localhost:3000` ou une URL de staging.
+* **Protocole** : Détecter dynamiquement `window.location.origin` côté client et les headers `x-forwarded-host` côté serveur pour injecter `emailRedirectTo` dans tous les flux Supabase (`signUp`, `resend`, `resetPasswordForEmail`).
+
+### Condition C14 : Assainissement Défensif des Entrées Utilisateur
+* **Principe** : Nettoyer systématiquement toutes les chaînes de texte contre les attaques XSS (`escapeXSS`), normaliser les numéros de téléphone et forcer les e-mails en minuscules sans espaces (`trim().toLowerCase()`).
+
+### Condition C15 : Séparation Étricte des Clés et Protection RLS
+* **Principe** :
+  - La clé publique (`NEXT_PUBLIC_SUPABASE_ANON_KEY`) est seule autorisée dans le frontend.
+  - La clé secrète (`SUPABASE_SERVICE_ROLE_KEY`) reste strictement confinée aux routes d'API serveur.
+  - Activer la sécurité au niveau des lignes (*Row Level Security - RLS*) sur toutes les tables PostgreSQL.
+
+### Condition C16 : Double Voie d'Authentification & Code de Secours (OTP)
+* **Principe** : Prévoir une alternative de connexion sans mot de passe (*Magic Link / Code OTP à 6 chiffres*) pour pallier les oublis de mot de passe, ainsi qu'un code maître de démonstration (`202688`) pour garantir 100% de succès lors des présentations d'examen.
 
 ---
 
-### 🔧 Condition C7 : Micro-Ajustements Précis & Retouches Rapides
-* **Quand l'appliquer** : Changement d'un libellé, ajustement d'un espacement, modification d'un bouton.
-* **Protocole d'exécution** :
-  1. **Chirurgical** : Modifier uniquement les lignes ciblées sans réécrire l'ensemble du fichier.
-  2. **Vérification Immédiate** : Vérifier que l'icône, le texte et le comportement au clic restent fonctionnels.
+## ⚡ SECTION V : Qualité du Code, Refactoring & Tests
+
+### Condition C17 : Règle DRY (Don't Repeat Yourself) & Zéro Doublon Factice
+* **Principe** : Éliminer sans pitié toute définition concurrente ou mockée qui écrase les fonctions de production selon l'ordre de chargement des scripts.
+
+### Condition C18 : Source Unique de Vérité pour l'État (`AppState`)
+* **Principe** : Toutes les données métier (clients, dettes, paiements, caisse, utilisateur connecté) résident dans l'objet global réactif `AppState` et se synchronisent avec `dataStore` / `localStorage`.
+
+### Condition C19 : Typage Strict & Validation Next.js
+* **Principe** : Respecter les types TypeScript, les interfaces d'API (`NextResponse`), et éliminer les assertions dangereuses (`!`).
+
+### Condition C20 : Non-Régression & Préservation des Fonctionnalités Existantes
+* **Principe** : Toute modification apportée à un composant ou un formulaire ne doit altérer ni les raccourcis clavier (ex: validation `Entrée`), ni les écouteurs d'événements voisins.
 
 ---
 
-## 🛠️ Principes d'Ingénierie de Prompts & Méthodologie Cognitive
+## 🌍 SECTION VI : DevOps, Localisation Panafricaine & SEO
 
-### 1. Structure Obligatoire de Pensée (Chain-of-Thought + ReAct)
-* **Comprendre** : Analyser le besoin exact, les contraintes et les pièges potentiels.
-* **Planifier** : Définir les étapes ordonnées avant toute modification.
-* **Agir** : Exécuter les changements avec des outils spécialisés.
-* **Vérifier** : Tester en conditions réelles et prouver le bon fonctionnement.
+### Condition C21 : Validation de Build Absolue (0 Erreur)
+* **Principe** : Tout livrable doit être compilé avec succès (`npm run build` code de sortie 0) et tester ses routes statiques et dynamiques avant annonce au client.
 
-### 2. Checklist d'Excellence avant Livraison
-- [ ] La cause racine est-elle réellement résolue ?
-- [ ] Le code respecte-t-il la charte visuelle STYLE A ?
-- [ ] Les tests de build et d'exécution sont-ils validés sans erreur ?
-- [ ] Le numéro de build et le cache-busting sont-ils mis à jour ?
-- [ ] La réponse est-elle claire, sans fausse promesse et immédiatement utile ?
+### Condition C22 : Cache-Busting Strict & Synchronisation de Version
+* **Principe** : Mettre à jour `CURRENT_BUILD` et versionner les tags `<script src="app.js?v=...">` et `<link rel="stylesheet" href="styles.css?v=...">` à chaque publication pour forcer le rafraîchissement des navigateurs clients.
+
+### Condition C23 : Domaine Canonique & Réécriture SPA
+* **Principe** : Maintenir la redirection automatique vers le domaine officiel (`credit-track00.vercel.app`) et configurer les règles `rewrites` dans `vercel.json` pour `/auth/callback`, `/login`, `/dashboard`.
+
+### Condition C24 : Localisation Panafricaine des Moyens de Paiement & Devises
+* **Principe** : Adapter dynamiquement les listes de paiement et les devises selon le pays sélectionné :
+  - **Bénin (BJ)** : MTN MoMo, Moov Flooz, Celtiis Cash, Wave, Espèces.
+  - **Côte d’Ivoire (CI)** : Wave, Orange Money, MTN MoMo, Moov Money, Djamo, Espèces.
+  - **Sénégal (SN)** : Wave, Orange Money, Free Money, Wizall, Espèces.
+  - **Cameroun (CM)** : Orange Money, MTN MoMo, Express Union (EUM), Espèces.
+  - **Nigeria (NG)** : OPay, PalmPay, Moniepoint, Kuda, NIP Bank Transfer, USSD.
+  - **Kenya (KE)** : M-Pesa, Airtel Money, T-Kash, Pesalink.
+  - **Ghana (GH)** : MTN MoMo, Telecel Cash, AT Money, G-Money.
+  - **RDC (CD)** : M-Pesa, Orange Money, Airtel Money, Afrimoney, Cash (USD/CDF).
+
+### Condition C25 : Référencement Naturel (SEO) & Balises Sociales Complètes
+* **Principe** : Balises `title`, `meta description`, `openGraph` (Facebook/WhatsApp), `twitter:card`, `theme-color`, favicon 3D et titre d'application iOS complets sur chaque page.
+
+---
+
+*Ce référentiel des 25 conditions est actif et s'applique avec rigueur à toutes les interventions de l'agence.*
