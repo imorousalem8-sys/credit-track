@@ -2136,8 +2136,298 @@ async function handleNewCreditSubmit(e) {
 }
 
 // --------------------------------------------------------------------------
-// 9. ENCAISSEMENT CLIENT (payClientDebt) & REÇUS
+// 9. ENCAISSEMENT CLIENT, REÇUS & SIGNATURE DIGITALE (STYLE A)
+// --------------------------------------------------------------------------
 
+let signatureCanvas = null;
+let signatureCtx = null;
+let isDrawing = false;
+let hasSignature = false;
+
+function initSignaturePad() {
+  signatureCanvas = document.getElementById('signature-pad');
+  if (!signatureCanvas) return;
+
+  signatureCtx = signatureCanvas.getContext('2d');
+  
+  const rect = signatureCanvas.getBoundingClientRect();
+  if (rect.width > 0 && rect.height > 0) {
+    signatureCanvas.width = rect.width * 2;
+    signatureCanvas.height = rect.height * 2;
+    signatureCtx.scale(2, 2);
+  }
+
+  signatureCtx.strokeStyle = '#1E3A8A';
+  signatureCtx.lineWidth = 2.5;
+  signatureCtx.lineCap = 'round';
+  signatureCtx.lineJoin = 'round';
+
+  function getCanvasCoords(e) {
+    const r = signatureCanvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - r.left,
+      y: clientY - r.top
+    };
+  }
+
+  function startDrawing(e) {
+    e.preventDefault();
+    isDrawing = true;
+    hasSignature = true;
+    const coords = getCanvasCoords(e);
+    signatureCtx.beginPath();
+    signatureCtx.moveTo(coords.x, coords.y);
+  }
+
+  function draw(e) {
+    if (!isDrawing) return;
+    e.preventDefault();
+    const coords = getCanvasCoords(e);
+    signatureCtx.lineTo(coords.x, coords.y);
+    signatureCtx.stroke();
+  }
+
+  function stopDrawing() {
+    isDrawing = false;
+  }
+
+  signatureCanvas.addEventListener('mousedown', startDrawing);
+  signatureCanvas.addEventListener('mousemove', draw);
+  window.addEventListener('mouseup', stopDrawing);
+
+  signatureCanvas.addEventListener('touchstart', startDrawing, { passive: false });
+  signatureCanvas.addEventListener('touchmove', draw, { passive: false });
+  signatureCanvas.addEventListener('touchend', stopDrawing);
+}
+
+window.clearSignature = function() {
+  if (signatureCtx && signatureCanvas) {
+    signatureCtx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height);
+    hasSignature = false;
+    showToast("Zone de signature effacée.", "info");
+  }
+};
+
+window.handleSignatureReceiptClick = function() {
+  const select = document.getElementById('signature-client-select');
+  const clientId = select ? select.value : '';
+  const client = (AppState.clients || []).find(c => c.id.toString() === clientId);
+
+  if (!client) {
+    showToast("Veuillez sélectionner un client dans la liste avant d'émettre le reçu.", "warning");
+    if (select) select.focus();
+    return;
+  }
+
+  const clientName = client.name;
+  const clientPhone = client.phone;
+  const signatureDataUrl = (hasSignature && signatureCanvas) ? signatureCanvas.toDataURL() : null;
+
+  openReceiptPreviewModalWithData(clientName, clientPhone, "Règlement & Reçu Signé", client.totalDue || 0, signatureDataUrl);
+};
+
+window.renderPaymentsTable = function() {
+  const tbody = document.getElementById('payments-table-body');
+  const payments = AppState.payments || [];
+
+  const sigSelect = document.getElementById('signature-client-select');
+  if (sigSelect) {
+    const clientsList = (AppState.clients || []);
+    sigSelect.innerHTML = `<option value="">-- Choisir un client débiteur --</option>` +
+      clientsList.map(c => `<option value="${c.id}">${escapeHTML(c.name)} (${formatCurrency(c.totalDue || 0)})</option>`).join('');
+  }
+
+  const qrImg = document.getElementById('merchant-qr-code-img');
+  const qrBiz = document.getElementById('merchant-qr-biz-name');
+  const qrPhone = document.getElementById('merchant-qr-phone');
+  const bizName = AppState.businessName || 'Mon Commerce';
+  const bizPhone = AppState.businessPhone || '';
+
+  if (qrBiz) qrBiz.textContent = bizName;
+  if (qrPhone) qrPhone.textContent = bizPhone ? `Paiement au : ${bizPhone}` : 'Paiement Wave, MTN, Orange & Flooz';
+  if (qrImg) {
+    const qrData = encodeURIComponent(`https://credit-track00.vercel.app/pay?m=${encodeURIComponent(bizName)}&p=${encodeURIComponent(bizPhone)}`);
+    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${qrData}`;
+  }
+
+  const totalAmount = payments.reduce((acc, p) => acc + (parseFloat(p.amount) || 0), 0);
+  const totalCount = payments.length;
+
+  const totalKpi = document.getElementById('pay-kpi-total');
+  const countKpi = document.getElementById('pay-kpi-count');
+  const methodKpi = document.getElementById('pay-kpi-method');
+  const ratioKpi = document.getElementById('pay-kpi-ratio');
+
+  if (totalKpi) totalKpi.textContent = formatCurrency(totalAmount);
+  if (countKpi) countKpi.textContent = `${totalCount} ${totalCount > 1 ? 'Paiements' : 'Paiement'}`;
+
+  const methodCounts = {};
+  let mobileCount = 0;
+  let cashCount = 0;
+
+  payments.forEach(p => {
+    const m = p.method || 'Espèces';
+    methodCounts[m] = (methodCounts[m] || 0) + 1;
+    if (m.toLowerCase().includes('espèces') || m.toLowerCase().includes('cash')) {
+      cashCount++;
+    } else {
+      mobileCount++;
+    }
+  });
+
+  let topMethod = 'Espèces';
+  let topCount = 0;
+  for (const [m, c] of Object.entries(methodCounts)) {
+    if (c > topCount) {
+      topCount = c;
+      topMethod = m;
+    }
+  }
+
+  if (methodKpi) methodKpi.textContent = payments.length > 0 ? topMethod.split(' ')[0] : 'Espèces';
+  if (ratioKpi) {
+    if (totalCount === 0) {
+      ratioKpi.textContent = '100% Caisse';
+    } else {
+      const mobRatio = Math.round((mobileCount / totalCount) * 100);
+      ratioKpi.textContent = `${mobRatio}% Mobile / ${100 - mobRatio}% Caisse`;
+    }
+  }
+
+  if (!tbody) return;
+
+  if (payments.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;padding:36px 16px;">
+          <div style="width:52px;height:52px;border-radius:14px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <i data-lucide="wallet" style="width:26px;height:26px;"></i>
+          </div>
+          <h4 style="font-size:1rem;font-weight:800;color:#0F172A;margin-bottom:4px;">Aucun encaissement enregistré pour l'instant</h4>
+          <p style="font-size:0.84rem;color:#64748B;max-width:440px;margin:0 auto 16px;line-height:1.45;">
+            Les versements de vos clients et les reçus délivrés apparaîtront ici automatiquement avec leur date et moyen de paiement.
+          </p>
+          <button type="button" class="btn btn-primary" onclick="openQuickPaymentModal()" style="padding:9px 18px;font-weight:700;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(37,99,235,0.25);">
+            <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
+            <span>Encaisser un premier règlement</span>
+          </button>
+        </td>
+      </tr>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  tbody.innerHTML = payments.map(p => {
+    const methodBadgeColor = p.method?.toLowerCase().includes('wave') ? '#1E40AF' :
+      (p.method?.toLowerCase().includes('mtn') ? '#B45309' :
+      (p.method?.toLowerCase().includes('orange') ? '#EA580C' :
+      (p.method?.toLowerCase().includes('moov') || p.method?.toLowerCase().includes('flooz') ? '#047857' : '#475569')));
+
+    return `
+      <tr>
+        <td><span style="font-family:monospace;font-weight:800;color:#2563EB;background:#EFF6FF;padding:3px 7px;border-radius:6px;font-size:0.8rem;">${escapeHTML(p.ref || `PAY-${p.id.toString().slice(-6)}`)}</span></td>
+        <td><strong style="color:#0F172A;font-size:0.9rem;">${escapeHTML(p.clientName || 'Client Comptoir')}</strong></td>
+        <td><strong style="color:#10B981;font-size:0.92rem;font-weight:900;">${formatCurrency(p.amount || 0)}</strong></td>
+        <td>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:${methodBadgeColor}15;color:${methodBadgeColor};padding:4px 10px;border-radius:8px;font-size:0.78rem;font-weight:800;">
+            <i data-lucide="credit-card" style="width:13px;height:13px;"></i>
+            ${escapeHTML(p.method || 'Espèces')}
+          </span>
+        </td>
+        <td style="color:#64748B;font-size:0.82rem;">${escapeHTML(p.date || 'Aujourd\'hui')}</td>
+        <td style="text-align:right;">
+          <div style="display:flex;gap:6px;justify-content:flex-end;">
+            <button type="button" class="btn btn-outline" style="padding:5px 9px;font-size:0.76rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName || 'Client')}', '', '${escapeHTML(p.method || 'Règlement')}', ${parseFloat(p.amount) || 0})" title="Imprimer ou voir le reçu">
+              <i data-lucide="printer" style="width:13px;height:13px;"></i> Reçu PDF
+            </button>
+            <button type="button" class="btn btn-outline" style="padding:5px 9px;font-size:0.76rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;border-color:#25D366;color:#15803D;" onclick="sendWhatsAppPaymentReceipt('${escapeHTML(p.clientName || 'Client')}', ${parseFloat(p.amount) || 0}, '${escapeHTML(p.ref || '')}')" title="Envoyer par WhatsApp">
+              <i data-lucide="message-circle" style="width:13px;height:13px;"></i> WhatsApp
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) lucide.createIcons();
+};
+
+window.filterPaymentsTable = function(query) {
+  const tbody = document.getElementById('payments-table-body');
+  if (!tbody) return;
+  const q = (query || '').toLowerCase().trim();
+  const rows = tbody.querySelectorAll('tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(q) ? '' : 'none';
+  });
+};
+
+window.openQuickPaymentModal = function() {
+  const debtors = (AppState.clients || []).filter(c => c.totalDue > 0);
+  if (debtors.length > 0) {
+    viewClientDetails(debtors[0].id);
+  } else if ((AppState.clients || []).length > 0) {
+    viewClientDetails(AppState.clients[0].id);
+  } else {
+    showToast("Veuillez d'abord créer un client dans le Répertoire ou noter une vente à crédit.", "info");
+    switchMenu('menu-5');
+  }
+};
+
+window.downloadMerchantQRCode = function() {
+  const qrImg = document.getElementById('merchant-qr-code-img');
+  if (!qrImg || !qrImg.src) {
+    showToast("QR Code en cours de génération...", "info");
+    return;
+  }
+  const link = document.createElement('a');
+  link.href = qrImg.src;
+  link.download = `QR-Paiement-${(AppState.businessName || 'Commerce').replace(/\s+/g, '_')}.png`;
+  link.target = '_blank';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("✓ Affiche QR Code de Paiement téléchargée pour votre comptoir !", "success");
+};
+
+window.sharePaymentLinkWhatsApp = function() {
+  const bizName = AppState.businessName || 'notre boutique';
+  const bizPhone = AppState.businessPhone || '';
+  const payUrl = `https://credit-track00.vercel.app/pay?m=${encodeURIComponent(bizName)}`;
+  
+  let msg = `Bonjour ! Voici le lien sécurisé pour régler vos achats chez *${bizName}* par Wave ou Mobile Money :\n👉 ${payUrl}`;
+  if (bizPhone) {
+    msg += `\nNuméro direct Wave / MoMo : *${bizPhone}*`;
+  }
+  msg += `\nMerci pour votre confiance !`;
+
+  const waUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, '_blank');
+  showToast("Lien de paiement ouvert sur WhatsApp.");
+};
+
+window.sendWhatsAppPaymentReceipt = function(clientName, amount, ref) {
+  const client = (AppState.clients || []).find(c => c.name === clientName);
+  const phone = client ? client.phone : '';
+  const cleanPhone = sanitizePhoneNumber(phone);
+  const bizName = AppState.businessName || 'Notre boutique';
+
+  let msg = `Bonjour ${clientName},\n\nNous vous confirmons la bonne réception de votre paiement de *${formatCurrency(amount)}* (Réf: ${ref || 'PAY-CONFIRMED'}) chez *${bizName}*.\n\nVotre solde a été mis à jour avec succès.\nMerci pour votre confiance !`;
+
+  const waUrl = cleanPhone 
+    ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`
+    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+  window.open(waUrl, '_blank');
+  showToast(`Reçu de paiement ouvert pour transmission WhatsApp.`);
+};
+
+// --------------------------------------------------------------------------
+// 9.b ENCAISSEMENT CLIENT (payClientDebt)
 // --------------------------------------------------------------------------
 window.payClientDebt = async function() {
   const client = AppState.activeClientInModal;
@@ -3407,6 +3697,15 @@ window.handleRegisterSubmit = async function(e) {
           "Délai d'attente dépassé lors de l'inscription."
         );
 
+        if (data && data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+          showToast("ℹ️ Cette adresse e-mail possède déjà un compte. Redirection vers la connexion...", "info");
+          const loginEmailInput = document.getElementById('auth-login-email');
+          if (loginEmailInput) loginEmailInput.value = email;
+          switchAuthTab('login');
+          setTimeout(() => document.getElementById('auth-login-password')?.focus(), 150);
+          return;
+        }
+
         if (error) throw error;
 
         if (data && data.user) {
@@ -3415,11 +3714,15 @@ window.handleRegisterSubmit = async function(e) {
         }
       } catch (sbErr) {
         console.warn("Supabase Auth notice:", sbErr);
-        if (sbErr.message && (sbErr.message.includes('already registered') || sbErr.message.includes('already exists'))) {
-          showToast("Un compte existe déjà avec cette adresse e-mail. Veuillez vous connecter.", "info");
+        if (sbErr.message && (sbErr.message.includes('already') || sbErr.message.includes('registered') || sbErr.message.includes('exists') || sbErr.status === 422)) {
+          showToast("ℹ️ Cette adresse e-mail possède déjà un compte. Redirection vers la connexion...", "info");
+          const loginEmailInput = document.getElementById('auth-login-email');
+          if (loginEmailInput) loginEmailInput.value = email;
           switchAuthTab('login');
+          setTimeout(() => document.getElementById('auth-login-password')?.focus(), 150);
           return;
         }
+        throw sbErr;
       }
     }
 

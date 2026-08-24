@@ -83,9 +83,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260824_v4.4.0_interactive_payment_panel" defer></script>
-  <script src="app.js?v=20260824_v4.4.0_interactive_payment_panel" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260824_v4.4.0_interactive_payment_panel">
+  <script src="dataStore.js?v=20260824_v4.5.0_payments_and_auth" defer></script>
+  <script src="app.js?v=20260824_v4.5.0_payments_and_auth" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260824_v4.5.0_payments_and_auth">
 </head>
 <body class="is-landing-mode">
 
@@ -488,8 +488,17 @@
           <label style="font-size:0.82rem;font-weight:700;color:#0F172A;margin-bottom:8px;display:block;">
             Moyen de règlement utilisé pour cet encaissement :
           </label>
-          <div id="modal-pay-method-grid" class="payment-methods-pill-grid"></div>
-          <select id="modal-pay-method-select" class="form-control" style="font-size:0.86rem;font-weight:700;display:none;">
+          <button type="button" id="modal-pay-method-btn" onclick="openPaymentMethodSelectorModal('modal-pay-method-select', 'modal-pay-method-btn-text', 'modal-pay-method-btn-logo')" style="width:100%;height:44px;background:#FFFFFF;border:1.5px solid #CBD5E1;border-radius:10px;padding:0 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:all 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+            <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+              <div id="modal-pay-method-btn-logo" style="width:24px;height:24px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"></div>
+              <span id="modal-pay-method-btn-text" style="font-weight:800;font-size:0.88rem;color:#0F172A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Espèces (Cash)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:4px;color:#2563EB;font-size:0.78rem;font-weight:800;flex-shrink:0;">
+              <span>Choisir</span>
+              <i data-lucide="chevron-down" style="width:16px;height:16px;"></i>
+            </div>
+          </button>
+          <select id="modal-pay-method-select" class="form-control" style="display:none;">
             <option value="Espèces (Cash)">Espèces (Cash)</option>
           </select>
         </div>
@@ -1439,16 +1448,36 @@
         </section>
 
         <!-- ============================================================
-             VUE 4 : ENCAISSEMENTS & REÇUS (#menu-6)
+             VUE 4 : ENCAISSEMENTS, REÇUS & RÈGLEMENTS CLIENTS (#menu-6)
         ============================================================ -->
         <section id="menu-6" class="view-container">
 
-          <div class="metrics-grid-3">
+          <!-- En-tête & Action Rapide d'Encaissement -->
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;background:#FFFFFF;border:1.5px solid #E2E8F0;border-radius:14px;padding:16px 20px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,0.02);">
+            <div>
+              <div style="font-size:1.15rem;font-weight:900;color:#0F172A;display:flex;align-items:center;gap:10px;">
+                <i data-lucide="wallet" style="width:24px;height:24px;color:#2563EB;"></i>
+                <span data-i18n="menuPayments">Encaissements, Reçus &amp; Règlements</span>
+              </div>
+              <p style="font-size:0.82rem;color:#64748B;margin:2px 0 0 0;">
+                Enregistrez les versements de vos clients, délivrez des reçus officiels avec signature et encaissez par Wave &amp; Mobile Money.
+              </p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <button type="button" class="btn btn-primary" onclick="openQuickPaymentModal()" style="padding:10px 20px;font-weight:800;font-size:0.88rem;display:flex;align-items:center;gap:8px;box-shadow:0 3px 12px rgba(37,99,235,0.3);cursor:pointer;">
+                <i data-lucide="plus-circle" style="width:18px;height:18px;"></i>
+                <span>+ Encaisser un Règlement</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 1. KPIs ENCAISSEMENTS (GRILLE HORIZONTALE PLEINE LARGEUR) -->
+          <div class="metrics-grid" style="grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px;margin-bottom:20px;">
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="collectedThisMonth">Total Encaissé ce Mois</div>
                 <div id="pay-kpi-total" class="metric-value" style="color:#10B981;">0 FCFA</div>
-                <div class="metric-trend"><i data-lucide="trending-up"></i> <span data-i18n="collectedThisMonthSub">Règlements validés</span></div>
+                <div class="metric-trend" style="color:#10B981;"><i data-lucide="trending-up"></i> <span data-i18n="collectedThisMonthSub">Règlements validés</span></div>
               </div>
               <div class="metric-icon-box green"><i data-lucide="wallet"></i></div>
             </div>
@@ -1457,44 +1486,112 @@
               <div class="metric-info">
                 <div class="metric-label" data-i18n="paymentsCount">Nombre d'Encaissements</div>
                 <div id="pay-kpi-count" class="metric-value" style="color:#2563EB;">0 Paiement</div>
-                <div class="metric-trend"><i data-lucide="check-circle"></i> <span data-i18n="receiptsDelivered">Reçus délivrés</span></div>
+                <div class="metric-trend" style="color:#2563EB;"><i data-lucide="check-circle"></i> <span data-i18n="receiptsDelivered">Reçus délivrés</span></div>
               </div>
-              <div class="metric-icon-box blue"><i data-lucide="trending-up"></i></div>
+              <div class="metric-icon-box blue"><i data-lucide="receipt"></i></div>
             </div>
 
             <div class="metric-card">
               <div class="metric-info">
                 <div class="metric-label" data-i18n="favoritePaymentMethod">Moyen Préféré</div>
-                <div id="pay-kpi-method" class="metric-value">--</div>
-                <div class="metric-trend"><i data-lucide="smartphone"></i> <span data-i18n="mobileMoneyWave">Paiement Mobile &amp; Espèces</span></div>
+                <div id="pay-kpi-method" class="metric-value" style="font-size:1.1rem;">Espèces</div>
+                <div class="metric-trend"><i data-lucide="smartphone"></i> <span data-i18n="mobileMoneyWave">Mobile Money &amp; Wave</span></div>
               </div>
               <div class="metric-icon-box blue"><i data-lucide="smartphone"></i></div>
             </div>
+
+            <div class="metric-card">
+              <div class="metric-info">
+                <div class="metric-label">Part Mobile vs Cash</div>
+                <div id="pay-kpi-ratio" class="metric-value" style="color:#8B5CF6;">100% Caisse</div>
+                <div class="metric-trend" style="color:#8B5CF6;"><i data-lucide="pie-chart"></i> Répartition des flux</div>
+              </div>
+              <div class="metric-icon-box" style="background:#EDE9FE;color:#8B5CF6;"><i data-lucide="pie-chart"></i></div>
+            </div>
           </div>
 
-          <div class="grid-2-equal">
-            <div class="card" style="text-align:center;">
-              <div class="card-header"><span class="card-title" data-i18n="qrCodeTitle">QR Code pour Payer Directement</span></div>
-              <img id="merchant-qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://credittrack.app/pay" alt="QR Code Paiement" style="width:130px;height:130px;margin:8px auto;display:block;">
-              <p style="font-size:0.8rem;color:#64748B;" data-i18n="qrCodeSub">Vos clients peuvent scanner pour vous payer par Wave, MTN ou Orange Money.</p>
-            </div>
-
-            <div class="card">
-              <div class="card-header"><span class="card-title" data-i18n="signatureTitle">Faire Signer le Client au Doigt</span></div>
-              <p style="font-size:0.8rem;color:#64748B;margin-bottom:8px;" data-i18n="signatureSub">Signez directement sur l'écran du téléphone ou de la tablette :</p>
-              <canvas id="signature-pad" style="border:2px dashed #CBD5E1;border-radius:8px;width:100%;height:100px;background:#fff;touch-action:none;"></canvas>
-              <div style="display:flex;gap:10px;margin-top:10px;">
-                <button class="btn btn-outline" style="flex:1;" onclick="clearSignature()" data-i18n="clear">Effacer</button>
-                <button class="btn btn-primary" style="flex:2;" onclick="handleSignatureReceiptClick()" data-i18n="previewReceipt">Générer le Reçu</button>
+          <!-- 2. SECTION OUTILS D'ENCAISSEMENT AU COMPTOIR (2 COLONNES) -->
+          <div class="grid-2-equal" style="margin-bottom:20px;gap:18px;">
+            
+            <!-- Carte Gauche : QR Code Comptoir Personnalisé -->
+            <div class="card" style="padding:20px;">
+              <div class="card-header" style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #F1F5F9;">
+                <span class="card-title" style="display:flex;align-items:center;gap:8px;font-size:0.95rem;">
+                  <i data-lucide="qr-code" style="width:18px;height:18px;color:#2563EB;"></i>
+                  <span data-i18n="qrCodeTitle">QR Code pour Payer Directement</span>
+                </span>
+              </div>
+              <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:16px;text-align:center;margin-bottom:14px;">
+                <img id="merchant-qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=https://credit-track00.vercel.app" alt="QR Code Paiement" style="width:140px;height:140px;margin:0 auto 10px auto;display:block;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.06);background:#fff;padding:6px;">
+                <strong id="merchant-qr-biz-name" style="display:block;font-size:0.92rem;color:#0F172A;">CréditTrack PRO</strong>
+                <span id="merchant-qr-phone" style="font-size:0.8rem;color:#64748B;">Paiement Wave &amp; Mobile Money</span>
+              </div>
+              <p style="font-size:0.78rem;color:#64748B;margin-bottom:14px;line-height:1.4;" data-i18n="qrCodeSub">
+                Vos clients scannent ce QR code avec l'appareil photo ou l'application Wave/MoMo pour vous payer au comptoir.
+              </p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button type="button" class="btn btn-outline" style="flex:1;padding:8px 12px;font-size:0.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="downloadMerchantQRCode()">
+                  <i data-lucide="download" style="width:15px;height:15px;"></i>
+                  <span>Télécharger (A4)</span>
+                </button>
+                <button type="button" class="btn btn-outline" style="flex:1;padding:8px 12px;font-size:0.82rem;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;border-color:#25D366;color:#15803D;" onclick="sharePaymentLinkWhatsApp()">
+                  <i data-lucide="message-circle" style="width:15px;height:15px;"></i>
+                  <span>Lien WhatsApp</span>
+                </button>
               </div>
             </div>
+
+            <!-- Carte Droite : Signature Digitale & Émission de Reçu Express -->
+            <div class="card" style="padding:20px;">
+              <div class="card-header" style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #F1F5F9;">
+                <span class="card-title" style="display:flex;align-items:center;gap:8px;font-size:0.95rem;">
+                  <i data-lucide="pen-tool" style="width:18px;height:18px;color:#2563EB;"></i>
+                  <span data-i18n="signatureTitle">Faire Signer le Client au Doigt</span>
+                </span>
+              </div>
+
+              <div style="margin-bottom:10px;">
+                <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:4px;">Sélectionner le Client pour le Reçu Signé :</label>
+                <select id="signature-client-select" class="form-control" style="height:38px;font-size:0.85rem;border-radius:8px;background:#F8FAFC;">
+                  <option value="">-- Choisir un client débiteur --</option>
+                </select>
+              </div>
+
+              <p style="font-size:0.78rem;color:#64748B;margin-bottom:8px;" data-i18n="signatureSub">
+                Faites signer le client directement sur l'écran tactile du smartphone ou de la tablette :
+              </p>
+              <canvas id="signature-pad" style="border:2px dashed #CBD5E1;border-radius:10px;width:100%;height:105px;background:#FFFFFF;touch-action:none;cursor:crosshair;"></canvas>
+              
+              <div style="display:flex;gap:10px;margin-top:12px;">
+                <button type="button" class="btn btn-outline" style="flex:1;padding:8px 12px;font-size:0.82rem;font-weight:700;" onclick="clearSignature()" data-i18n="clear">
+                  Effacer
+                </button>
+                <button type="button" class="btn btn-primary" style="flex:2;padding:8px 14px;font-size:0.84rem;font-weight:800;display:flex;align-items:center;justify-content:center;gap:6px;" onclick="handleSignatureReceiptClick()">
+                  <i data-lucide="file-check" style="width:16px;height:16px;"></i>
+                  <span data-i18n="previewReceipt">Émettre le Reçu Signé</span>
+                </button>
+              </div>
+            </div>
+
           </div>
 
+          <!-- 3. GRAND REGISTRE & HISTORIQUE DES ENCAISSEMENTS -->
+          <div class="card" style="padding:20px;">
+            <div class="card-header" style="flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+              <div>
+                <span class="card-title" data-i18n="paymentsHistoryTitle" style="display:flex;align-items:center;gap:8px;font-size:1.05rem;">
+                  <i data-lucide="history" style="width:20px;height:20px;color:#2563EB;"></i>
+                  Historique de Tous les Encaissements
+                </span>
+                <span style="font-size:0.78rem;color:#64748B;">Reçus archivés, montants soldés et traçabilité</span>
+              </div>
 
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title" data-i18n="paymentsHistoryTitle">Historique de Tous les Encaissements</span>
+              <!-- Filtres de Recherche -->
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;min-width:280px;">
+                <input type="text" id="payments-search-input" class="form-control" placeholder="Rechercher un règlement, client..." onkeyup="filterPaymentsTable(this.value)" style="height:38px;font-size:0.84rem;border-radius:8px;min-width:200px;">
+              </div>
             </div>
+
             <div class="table-responsive">
               <table class="custom-table">
                 <thead>
@@ -1503,12 +1600,12 @@
                     <th data-i18n="client">Client</th>
                     <th data-i18n="amountPaid">Montant Encaissé</th>
                     <th data-i18n="paymentMethod">Moyen de Paiement</th>
-                    <th data-i18n="dateTime">Date</th>
-                    <th data-i18n="receipt">Reçu PDF</th>
+                    <th data-i18n="dateTime">Date &amp; Heure</th>
+                    <th style="text-align:right;" data-i18n="receipt">Reçu &amp; Actions</th>
                   </tr>
                 </thead>
                 <tbody id="payments-table-body">
-                  <!-- Populated by JS -->
+                  <!-- Populated dynamically by renderPaymentsTable() -->
                 </tbody>
               </table>
             </div>
