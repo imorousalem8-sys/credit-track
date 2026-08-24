@@ -1,11 +1,13 @@
 {
-  "name": "CréditTrack PRO - Solution de Recouvrement Panafricain",
+  "name": "CréditTrack PRO",
   "short_name": "CréditTrack",
+  "description": "Application panafricaine de gestion des créances clients, de caisse et de recouvrement.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#060A14",
+  "orientation": "portrait",
+  "background_color": "#0F172A",
   "theme_color": "#1B3BBB",
-  "orientation": "portrait-primary",
   "icons": [
     {
       "src": "/logo_3d.png",
@@ -18,6 +20,12 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }

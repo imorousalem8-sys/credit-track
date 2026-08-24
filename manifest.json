@@ -1,22 +1,31 @@
 {
-  "name": "CréditTrack - Gestion de Crédit Client Panafricain",
+  "name": "CréditTrack PRO",
   "short_name": "CréditTrack",
-  "description": "Application mobile-first de gestion de crédit client et encaissement Mobile Money / Wave pour petits commerces.",
-  "start_url": "./index.html",
+  "description": "Application panafricaine de gestion des créances clients, de caisse et de recouvrement.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#0F172A",
-  "theme_color": "#1E40AF",
+  "theme_color": "#1B3BBB",
   "icons": [
     {
-      "src": "logo_3d.png",
+      "src": "/logo_3d.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "logo_3d.png",
+      "src": "/logo_3d.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
