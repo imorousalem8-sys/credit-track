@@ -1988,6 +1988,77 @@ body.is-app-mode #app-workspace-layout {
 }
 
 /* ==========================================================================
+   PANEL & SÉLECTEUR DE MOYENS DE PAIEMENT PANAFRICAIN (STYLE A)
+   ========================================================================== */
+.payment-method-panel-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: #FFFFFF;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+.payment-method-panel-card:hover {
+  border-color: #2563EB;
+  background: #F8FAFC;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.08);
+}
+.payment-method-panel-card.active {
+  border-color: #2563EB;
+  background: #EFF6FF;
+  box-shadow: 0 0 0 2px rgba(37,99,235,0.25);
+}
+.payment-method-panel-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.payment-method-panel-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #F1F5F9;
+  flex-shrink: 0;
+}
+.payment-method-panel-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #0F172A;
+}
+.payment-method-panel-desc {
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: #64748B;
+  margin-top: 1px;
+}
+.payment-method-panel-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #CBD5E1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.payment-method-panel-card.active .payment-method-panel-check {
+  border-color: #2563EB;
+  background: #2563EB;
+  color: #FFFFFF;
+}
+
+/* ==========================================================================
    5. RESPONSIVE DESIGN COMPLET (MOBILES & TABLETTES)
    ========================================================================== */
 

@@ -260,23 +260,78 @@ function selectPaymentMethodChip(targetSelectId, label, containerId) {
   }
 }
 
-function renderPaymentChipsGrid(containerId, targetSelectId, methods, selectedVal) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
+// Gestionnaire du panneau / modale de sélection de moyen de paiement
+window._activePaymentTarget = {
+  selectId: 'credit-payment-method-pref',
+  textId: 'credit-pay-method-btn-text',
+  logoId: 'credit-pay-method-btn-logo'
+};
 
-  const currentVal = selectedVal || methods[0]?.label || '';
-  const html = methods.map(m => {
-    const isActive = m.label === currentVal;
+function openPaymentMethodSelectorModal(targetSelectId, targetBtnTextId, targetBtnLogoId) {
+  window._activePaymentTarget = {
+    selectId: targetSelectId || 'credit-payment-method-pref',
+    textId: targetBtnTextId || 'credit-pay-method-btn-text',
+    logoId: targetBtnLogoId || 'credit-pay-method-btn-logo'
+  };
+  renderPaymentMethodPanel();
+  if (typeof window.openModal === 'function') {
+    window.openModal('modal-select-payment-method');
+  }
+}
+
+function renderPaymentMethodPanel() {
+  const panelList = document.getElementById('payment-method-panel-list');
+  if (!panelList) return;
+
+  const countryCode = AppState.country || 'CI';
+  const methods = COUNTRY_PAYMENT_METHODS[countryCode] || COUNTRY_PAYMENT_METHODS['CI'];
+  const targetSelect = document.getElementById(window._activePaymentTarget.selectId);
+  const currentVal = targetSelect ? targetSelect.value : (methods[0]?.label || '');
+
+  panelList.innerHTML = methods.map(m => {
+    const isSelected = m.label === currentVal;
     const logoSvg = getPaymentMethodLogo(m.label);
+    const escapedLabel = m.label.replace(/'/g, "\\'");
     return `
-      <div class="payment-method-chip ${isActive ? 'active' : ''}" data-value="${m.label}" onclick="selectPaymentMethodChip('${targetSelectId}', '${m.label.replace(/'/g, "\\'")}', '${containerId}')">
-        <div class="payment-method-chip-logo">${logoSvg}</div>
-        <span class="payment-method-chip-text" title="${m.label}">${m.label}</span>
+      <div class="payment-method-panel-card ${isSelected ? 'active' : ''}" onclick="selectPaymentMethodFromPanel('${escapedLabel}')">
+        <div class="payment-method-panel-card-left">
+          <div class="payment-method-panel-logo">${logoSvg}</div>
+          <div>
+            <div class="payment-method-panel-title">${m.label}</div>
+            <div class="payment-method-panel-desc">${m.type === 'mobile_money' ? 'Paiement Mobile Money instantané' : (m.type === 'cash' ? 'Règlement en espèces physique' : 'Virement bancaire / Carte')}</div>
+          </div>
+        </div>
+        <div class="payment-method-panel-check">✓</div>
       </div>
     `;
   }).join('');
+}
 
-  container.innerHTML = html;
+function selectPaymentMethodFromPanel(label) {
+  const target = window._activePaymentTarget;
+  if (!target) return;
+
+  const select = document.getElementById(target.selectId);
+  if (select) {
+    select.value = label;
+    select.dispatchEvent(new Event('change'));
+  }
+
+  const textEl = document.getElementById(target.textId);
+  if (textEl) textEl.textContent = label;
+
+  const logoEl = document.getElementById(target.logoId);
+  if (logoEl) logoEl.innerHTML = getPaymentMethodLogo(label);
+
+  const accountInput = document.getElementById('credit-transfer-account');
+  if (accountInput) {
+    const brand = label.split(' ')[0] || 'MoMo';
+    accountInput.placeholder = label.toLowerCase().includes('espèces') ? 'Aucun numéro requis (Paiement physique)' : `Numéro ${brand} ou compte client`;
+  }
+
+  if (typeof window.closeModal === 'function') {
+    window.closeModal('modal-select-payment-method');
+  }
 }
 
 function updateCountryPaymentMethods(countryCode) {
@@ -285,19 +340,23 @@ function updateCountryPaymentMethods(countryCode) {
 
   const optionsHTML = methods.map(m => `<option value="${m.label}">${m.label}</option>`).join('');
 
-  const modalSelect = document.getElementById('modal-pay-method-select');
-  if (modalSelect) modalSelect.innerHTML = optionsHTML;
-
   const prefSelect = document.getElementById('credit-payment-method-pref');
-  if (prefSelect) prefSelect.innerHTML = optionsHTML;
+  if (prefSelect) {
+    prefSelect.innerHTML = optionsHTML;
+    prefSelect.value = methods[0]?.label || '';
+  }
 
-  // Render visual chip grids with genuine brand logos
-  renderPaymentChipsGrid('credit-payment-methods-grid', 'credit-payment-method-pref', methods, methods[0]?.label);
-  renderPaymentChipsGrid('modal-pay-method-grid', 'modal-pay-method-select', methods, methods[0]?.label);
+  // Synchroniser le bouton sélecteur avec le premier moyen du pays
+  const firstMethod = methods[0]?.label || 'Espèces';
+  const btnText = document.getElementById('credit-pay-method-btn-text');
+  if (btnText) btnText.textContent = firstMethod;
 
-  const firstBrand = methods[0]?.label ? methods[0].label.split(' ')[0] : 'Wave';
+  const btnLogo = document.getElementById('credit-pay-method-btn-logo');
+  if (btnLogo) btnLogo.innerHTML = getPaymentMethodLogo(firstMethod);
+
   const accountInput = document.getElementById('credit-transfer-account');
   if (accountInput) {
+    const firstBrand = firstMethod.split(' ')[0] || 'Wave';
     accountInput.placeholder = `Numéro ${firstBrand} ou compte de paiement`;
   }
 }
@@ -307,7 +366,9 @@ window.COUNTRY_PAYMENT_METHODS = COUNTRY_PAYMENT_METHODS;
 window.PAYMENT_LOGOS = PAYMENT_LOGOS;
 window.getCountryConfig = getCountryConfig;
 window.getPaymentMethodLogo = getPaymentMethodLogo;
-window.selectPaymentMethodChip = selectPaymentMethodChip;
+window.openPaymentMethodSelectorModal = openPaymentMethodSelectorModal;
+window.renderPaymentMethodPanel = renderPaymentMethodPanel;
+window.selectPaymentMethodFromPanel = selectPaymentMethodFromPanel;
 window.updateCountryPaymentMethods = updateCountryPaymentMethods;
 
 // Système de détection automatique des nouvelles versions (sécurisé, sans rechargement en boucle)
