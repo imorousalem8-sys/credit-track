@@ -62,4 +62,17 @@ Le contenu des cartes, des menus, des graphiques et des badges **ADAPTE UNIQUEME
 
 ---
 
+## 🧠 Matrice d'Exécution & Sélection des Conditions (Prompt Engineering)
+Pour toute tâche demandée par l'utilisateur, l'agent sélectionne et applique systématiquement la condition idoine définie dans [ai_prompt_engineer.md](file:///c:/Users/Utilisateur/Desktop/2e_projet/.agents/rules/ai_prompt_engineer.md) :
+- **Condition C1 (Diagnostic & Bug Hunting)** : Traque à la source, analyse de requêtes, promesses avec timeout.
+- **Condition C2 (Architecture & Features)** : Respect strict du STYLE A, zéro composant orphelin, responsive.
+- **Condition C3 (Refactoring & Clean Code)** : Élimination DRY des doublons, scope clair, non-régression.
+- **Condition C4 (Sécurité & Auth Supabase)** : Assainissement des entrées, URLs dynamiques, fallbacks résilients.
+- **Condition C5 (Déploiement & DevOps)** : Cache-busting, versions strictes, validation de build.
+- **Condition C6 (Contenu & SEO)** : Localisation panafricaine, devises, métadonnées OpenGraph.
+- **Condition C7 (Micro-Ajustements)** : Interventions chirurgicales rapides et précises.
+
+---
+
 *Cette règle prend effet immédiatement et s'applique à l'ensemble des créations web de l'agence.*
+
