@@ -1028,6 +1028,14 @@
             <span>Paramètres</span>
           </div>
         </button>
+
+        <!-- 8. Page d'Accueil (Site Public) -->
+        <button class="nav-link" id="nav-menu-landing" onclick="openPublicLanding()" style="margin-top:4px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
+          <div class="nav-link-left">
+            <i data-lucide="external-link" style="color:#60A5FA;"></i>
+            <span style="color:#93C5FD;">Page d'Accueil</span>
+          </div>
+        </button>
       </nav>
 
       <!-- Widget Boutique Active en bas de Sidebar (Fidèle au Mockup) -->
@@ -2897,60 +2905,182 @@
   <!-- ============================================================
        MODALE AJOUT D'UN CAISSIER / VENDEUR EMPLOYÉ
   ============================================================ -->
+  <!-- ============================================================
+       MODALE ASSISTANT GUIDÉ CRÉATION CAISSIER (4 ÉTAPES STEP-BY-STEP)
+  ============================================================ -->
   <div class="modal-overlay" id="modal-add-cashier">
-    <div class="modal-card" style="max-width:480px;">
-      <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:12px;">
-        <span class="card-title" style="display:flex;align-items:center;gap:8px;">
-          <i data-lucide="user-plus" style="width:20px;height:20px;color:#2563EB;"></i>
-          Ajouter un Employé / Caissier
-        </span>
-        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-add-cashier')">✕</button>
+    <div class="modal-card" style="max-width:540px;padding:0;overflow:hidden;border-radius:20px;">
+      
+      <!-- En-tête avec Stepper Visuel -->
+      <div style="background:#0F172A;color:#FFFFFF;padding:20px 24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:34px;height:34px;border-radius:10px;background:#2563EB;display:flex;align-items:center;justify-content:center;">
+              <i data-lucide="user-plus" style="width:18px;height:18px;color:#FFFFFF;"></i>
+            </div>
+            <div>
+              <h3 style="margin:0;font-size:1rem;font-weight:900;color:#FFFFFF;">Créer un Caissier / Vendeur</h3>
+              <p style="margin:2px 0 0 0;font-size:0.75rem;color:#94A3B8;">Assistant de configuration sécurisée en 4 étapes</p>
+            </div>
+          </div>
+          <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-add-cashier')" style="color:#94A3B8;border-color:#334155;background:transparent;">✕</button>
+        </div>
+
+        <!-- Stepper Visuel 4 Étapes -->
+        <div style="display:grid;grid-template-columns:repeat(4, 1fr);gap:6px;align-items:center;">
+          <div id="step-indicator-1" style="height:6px;border-radius:99px;background:#3B82F6;transition:all 0.3s;"></div>
+          <div id="step-indicator-2" style="height:6px;border-radius:99px;background:#334155;transition:all 0.3s;"></div>
+          <div id="step-indicator-3" style="height:6px;border-radius:99px;background:#334155;transition:all 0.3s;"></div>
+          <div id="step-indicator-4" style="height:6px;border-radius:99px;background:#334155;transition:all 0.3s;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:0.72rem;font-weight:800;color:#94A3B8;">
+          <span id="step-label-indicator">Étape 1 / 4 : Identité</span>
+          <span style="color:#60A5FA;">Session Sécurisée</span>
+        </div>
       </div>
 
-      <form id="form-add-cashier" onsubmit="saveNewCashier(event)" style="padding-top:16px;">
-        <div class="form-group" style="margin-bottom:14px;">
-          <label class="form-label">Prénom &amp; Nom de l'employé *</label>
-          <input type="text" id="cashier-name-input" class="form-control" placeholder="Nom complet du caissier / vendeur" required>
+      <div style="padding:22px 24px;">
 
-        </div>
-
-        <div class="form-group" style="margin-bottom:14px;">
-          <label class="form-label">Rôle assigné *</label>
-          <select id="cashier-role-select" class="form-control">
-            <option value="Caissier Principal">Caissier Principal (Encaissements &amp; Ventes)</option>
-            <option value="Vendeur Boutique">Vendeur Boutique (Prise de commandes &amp; Reçus)</option>
-            <option value="Responsable de Caisse">Responsable de Caisse</option>
-            <option value="Gérant Adjoint">Gérant Adjoint</option>
-          </select>
-        </div>
-
-        <div class="form-group" style="margin-bottom:14px;">
-          <label class="form-label">Boutique / Point de Vente assigné *</label>
-          <select id="cashier-branch-select" class="form-control">
-            <option value="Boutique Principale (Siège)">Boutique Principale (Siège)</option>
-            <option value="Boutique 2 (Succursale)">Boutique 2 (Succursale)</option>
-            <option value="Point de Vente Marché">Point de Vente Marché</option>
-            <option value="Toutes les boutiques">Toutes les boutiques (Polyvalent)</option>
-          </select>
-        </div>
-
-        <div class="form-group" style="margin-bottom:14px;">
-          <label class="form-label">Code PIN Secret Personnalisé (4 à 8 chiffres) *</label>
-          <div style="position:relative;">
-            <input type="text" id="cashier-pin-input" class="form-control" placeholder="ex: 7492" minlength="4" maxlength="8" pattern="[0-9]{4,8}" required style="font-weight:700;letter-spacing:2px;">
+        <!-- ÉTAPE 1 : IDENTITÉ & RÔLE DE L'EMPLOYÉ -->
+        <div id="cashier-step-1" class="cashier-wizard-step">
+          <div style="margin-bottom:16px;">
+            <span style="background:#EFF6FF;color:#2563EB;padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;text-transform:uppercase;">Étape 1 sur 4</span>
+            <h4 style="font-size:1.05rem;font-weight:900;color:#0F172A;margin:6px 0 2px 0;">Qui est votre nouvel employé ?</h4>
+            <p style="font-size:0.8rem;color:#64748B;margin:0;">Renseignez ses coordonnées pour lui générer ses accès caisse.</p>
           </div>
-          <span style="font-size:0.75rem;color:#64748B;">Définissez le code PIN secret que cet employé utilisera pour sa session de caisse.</span>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Prénom &amp; Nom du Caissier / Vendeur *</label>
+            <input type="text" id="wizard-cashier-name" class="form-control" placeholder="ex: Moussa Traoré" required style="font-size:0.92rem;font-weight:700;">
+          </div>
+
+          <div class="form-group" style="margin-bottom:14px;">
+            <label class="form-label">Numéro Téléphone / WhatsApp de l'employé *</label>
+            <input type="tel" id="wizard-cashier-phone" class="form-control" placeholder="ex: +229 97 00 11 22 (pour recevoir ses accès)" required style="font-size:0.92rem;font-weight:700;">
+          </div>
+
+          <div class="form-group" style="margin-bottom:18px;">
+            <label class="form-label">Fonction / Rôle dans votre commerce *</label>
+            <select id="wizard-cashier-role" class="form-control" style="font-size:0.9rem;font-weight:700;">
+              <option value="Caissier Boutique">🛒 Caissier Boutique (Encaissements, Ventes &amp; Reçus)</option>
+              <option value="Vendeur de Rayon">📦 Vendeur de Rayon (Saisie des commandes &amp; Crédits)</option>
+              <option value="Responsable de Caisse">💼 Responsable de Caisse (Clôture journalière)</option>
+            </select>
+          </div>
+
+          <div style="display:flex;justify-content:flex-end;">
+            <button type="button" class="btn btn-primary" onclick="goToCashierStep(2)" style="padding:10px 20px;font-weight:800;display:flex;align-items:center;gap:6px;">
+              <span>Continuer vers le Point de Vente</span> ➔
+            </button>
+          </div>
         </div>
 
-        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:12px;margin-bottom:18px;font-size:0.78rem;color:#475569;">
-          <strong>Sécurité garantie :</strong> Cet employé ne pourra ni exporter la base de données, ni voir les bénéfices globaux, ni supprimer l'historique de la boutique.
+        <!-- ÉTAPE 2 : AFFECTATION & POINT DE VENTE -->
+        <div id="cashier-step-2" class="cashier-wizard-step" style="display:none;">
+          <div style="margin-bottom:16px;">
+            <span style="background:#EFF6FF;color:#2563EB;padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;text-transform:uppercase;">Étape 2 sur 4</span>
+            <h4 style="font-size:1.05rem;font-weight:900;color:#0F172A;margin:6px 0 2px 0;">Où travaille cet employé ?</h4>
+            <p style="font-size:0.8rem;color:#64748B;margin:0;">Associez le caissier à votre magasin ou à un rayon précis.</p>
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Nom de la Boutique / Emplacement de Caisse *</label>
+            <input type="text" id="wizard-cashier-branch" class="form-control" placeholder="ex: Boutique Principale / Caisse 1" value="Boutique Principale (Siège)" required style="font-size:0.92rem;font-weight:700;">
+          </div>
+
+          <div style="background:#F8FAFC;border:1.5px dashed #CBD5E1;border-radius:12px;padding:14px;margin-bottom:18px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <i data-lucide="store" style="width:20px;height:20px;color:#2563EB;"></i>
+              <div>
+                <strong style="font-size:0.85rem;color:#0F172A;display:block;">Isolation des ventes par employé</strong>
+                <span style="font-size:0.75rem;color:#64748B;">Chaque encaissement effectué portera la signature et le nom de ce caissier.</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <button type="button" class="btn btn-outline" onclick="goToCashierStep(1)">⬅ Retour</button>
+            <button type="button" class="btn btn-primary" onclick="goToCashierStep(3)" style="padding:10px 20px;font-weight:800;display:flex;align-items:center;gap:6px;">
+              <span>Définir le Code PIN Secret</span> ➔
+            </button>
+          </div>
         </div>
 
-        <div style="display:flex;gap:10px;justify-content:flex-end;">
-          <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-cashier')">Annuler</button>
-          <button type="submit" class="btn btn-primary">Enregistrer le Caissier</button>
+        <!-- ÉTAPE 3 : CODE PIN SECRET & PERMISSIONS -->
+        <div id="cashier-step-3" class="cashier-wizard-step" style="display:none;">
+          <div style="margin-bottom:16px;">
+            <span style="background:#EFF6FF;color:#2563EB;padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;text-transform:uppercase;">Étape 3 sur 4</span>
+            <h4 style="font-size:1.05rem;font-weight:900;color:#0F172A;margin:6px 0 2px 0;">Code PIN &amp; Protection des Bénéfices</h4>
+            <p style="font-size:0.8rem;color:#64748B;margin:0;">L'employé se connecte avec ce code à 4 chiffres sans jamais voir vos marges.</p>
+          </div>
+
+          <div class="form-group" style="margin-bottom:16px;">
+            <label class="form-label">Code PIN Secret de l'Employé (4 chiffres) *</label>
+            <input type="password" id="wizard-cashier-pin" class="form-control" placeholder="••••" maxlength="6" pattern="[0-9]{4,6}" required style="font-size:1.4rem;letter-spacing:6px;text-align:center;font-weight:900;color:#2563EB;">
+            <span style="font-size:0.75rem;color:#64748B;display:block;margin-top:4px;">Exemple : 1234 ou 8820 (donnez-lui ce code pour sa session).</span>
+          </div>
+
+          <!-- Tableau des Droits & Protections Patron -->
+          <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:12px 14px;margin-bottom:18px;">
+            <div style="font-size:0.78rem;font-weight:900;color:#15803D;margin-bottom:6px;">PROTECTIONS AUTOMATIQUES ACTIVÉES :</div>
+            <ul style="margin:0;padding-left:18px;font-size:0.75rem;color:#166534;line-height:1.6;">
+              <li>✓ <strong>Autorisé :</strong> Enregistrer les ventes, encaisser par Wave/MoMo et émettre des reçus.</li>
+              <li>🔒 <strong>Verrouillé :</strong> Le caissier ne peut <strong>PAS</strong> voir le bénéfice global du patron.</li>
+              <li>🔒 <strong>Verrouillé :</strong> Le caissier ne peut <strong>PAS</strong> supprimer de clients ni effacer l'historique.</li>
+            </ul>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <button type="button" class="btn btn-outline" onclick="goToCashierStep(2)">⬅ Retour</button>
+            <button type="button" class="btn btn-primary" onclick="submitNewCashierWizard()" style="padding:10px 20px;font-weight:900;background:#10B981;border-color:#10B981;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(16,185,129,0.3);">
+              <span>✓ Valider &amp; Activer le Caissier</span> ➔
+            </button>
+          </div>
         </div>
-      </form>
+
+        <!-- ÉTAPE 4 : FICHE RÉCAPITULATIVE & TRANSMISSION WHATSAPP -->
+        <div id="cashier-step-4" class="cashier-wizard-step" style="display:none;text-align:center;">
+          <div style="width:52px;height:52px;border-radius:50%;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
+            <i data-lucide="check-circle" style="width:28px;height:28px;"></i>
+          </div>
+          
+          <h4 style="font-size:1.15rem;font-weight:900;color:#0F172A;margin-bottom:4px;">Caissier Enregistré avec Succès !</h4>
+          <p style="font-size:0.82rem;color:#64748B;margin-bottom:16px;">Transmettez dès maintenant ses identifiants à votre employé :</p>
+
+          <!-- Carte d'Accès Pro -->
+          <div style="background:#0F172A;color:#FFFFFF;border-radius:16px;padding:18px 20px;text-align:left;margin-bottom:20px;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:10px;margin-bottom:12px;">
+              <span style="font-size:0.75rem;color:#94A3B8;font-weight:800;text-transform:uppercase;">FICHE D'ACCÈS CAISSE</span>
+              <span style="background:#10B981;color:#FFFFFF;font-size:0.68rem;padding:2px 6px;border-radius:4px;font-weight:800;">ACTIF</span>
+            </div>
+            <div style="margin-bottom:8px;">
+              <div style="font-size:0.72rem;color:#94A3B8;">Nom de l'Employé</div>
+              <div id="wizard-summary-name" style="font-size:1rem;font-weight:900;color:#FFFFFF;">Moussa Traoré</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <div style="font-size:0.72rem;color:#94A3B8;">Point de Vente</div>
+                <div id="wizard-summary-branch" style="font-size:0.85rem;font-weight:800;color:#93C5FD;">Boutique Principale</div>
+              </div>
+              <div>
+                <div style="font-size:0.72rem;color:#94A3B8;">Code PIN Caissier</div>
+                <div id="wizard-summary-pin" style="font-size:1.1rem;font-weight:900;color:#FBBF24;font-family:monospace;letter-spacing:2px;">1234</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button type="button" class="btn btn-primary" onclick="sendCashierCredentialsWhatsApp()" style="padding:12px;background:#25D366;border-color:#25D366;color:#FFFFFF;font-weight:900;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 3px 12px rgba(37,211,102,0.3);">
+              <i data-lucide="message-circle" style="width:18px;height:18px;"></i>
+              <span>Envoyer les Identifiants par WhatsApp</span>
+            </button>
+            <button type="button" class="btn btn-outline" onclick="closeModal('modal-add-cashier'); renderCashiersList();" style="padding:10px;font-weight:700;">
+              Terminer et Fermer
+            </button>
+          </div>
+        </div>
+
+      </div>
 
     </div>
   </div>

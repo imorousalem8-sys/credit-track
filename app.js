@@ -843,6 +843,9 @@ const AppState = {
   clients: getCachedArray('credittrack_clients'),
   payments: (getCachedArray('credittrack_payments') || []).filter(p => p && !String(p.clientName || '').includes('Abonnement') && p.type !== 'subscription'),
   accountingEntries: getCachedArray('credittrack_accounting'),
+  cashiers: getCachedArray('credittrack_cashiers'),
+  activeSessionMode: localStorage.getItem('activeSessionMode') || 'patron',
+  activeCashierUser: null,
 
   user: {
     id: localStorage.getItem('user_id') || '',
@@ -1614,6 +1617,285 @@ window.switchMenu = function(menuId) {
   }, 25);
 };
 
+
+// --------------------------------------------------------------------------
+// 7.b GESTION DES PARAMÈTRES, ÉQUIPE & ASSISTANT CAISSIER (4 ÉTAPES STEP-BY-STEP)
+// --------------------------------------------------------------------------
+
+window.switchSettingsTab = function(tab) {
+  const tabs = ['company', 'users', 'currency', 'backup', 'privacy', 'team'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`tab-btn-${t}`);
+    const panel = document.getElementById(`settings-panel-${t}`);
+    if (btn) {
+      if (t === tab) {
+        btn.classList.add('btn-primary', 'active');
+        btn.classList.remove('btn-outline');
+      } else {
+        btn.classList.remove('btn-primary', 'active');
+        btn.classList.add('btn-outline');
+      }
+    }
+    if (panel) {
+      panel.style.display = (t === tab) ? 'block' : 'none';
+    }
+  });
+
+  if (tab === 'team') {
+    renderCashiersList();
+  }
+};
+
+window.saveCompanySettings = function() {
+  const name = document.getElementById('setting-company-input')?.value.trim();
+  const address = document.getElementById('setting-address-input')?.value.trim();
+  const phone = document.getElementById('setting-phone-input')?.value.trim();
+
+  AppState.businessName = name || AppState.businessName;
+  AppState.businessAddress = address || AppState.businessAddress;
+  AppState.businessPhone = phone || AppState.businessPhone;
+
+  localStorage.setItem('bizName', AppState.businessName);
+  localStorage.setItem('bizAddress', AppState.businessAddress);
+  localStorage.setItem('bizPhone', AppState.businessPhone);
+
+  showToast("✓ Informations de votre commerce enregistrées avec succès !", "success");
+};
+
+window.saveUserSettings = function() {
+  const name = document.getElementById('setting-username-input')?.value.trim();
+  const role = document.getElementById('setting-role-input')?.value.trim();
+
+  AppState.userName = name || AppState.userName;
+  AppState.userRole = role || AppState.userRole;
+
+  localStorage.setItem('userName', AppState.userName);
+  localStorage.setItem('userRole', AppState.userRole);
+
+  showToast("✓ Profil utilisateur mis à jour !", "success");
+};
+
+window.currentCashierWizardStep = 1;
+window._lastCreatedCashier = null;
+
+window.goToCashierStep = function(targetStep) {
+  if (targetStep === 2) {
+    const name = document.getElementById('wizard-cashier-name')?.value.trim();
+    const phone = document.getElementById('wizard-cashier-phone')?.value.trim();
+    if (!name) {
+      showToast("Veuillez saisir le nom complet de l'employé.", "warning");
+      document.getElementById('wizard-cashier-name')?.focus();
+      return;
+    }
+    if (!phone || phone.length < 6) {
+      showToast("Veuillez saisir un numéro de téléphone/WhatsApp valide.", "warning");
+      document.getElementById('wizard-cashier-phone')?.focus();
+      return;
+    }
+  }
+
+  if (targetStep === 3) {
+    const branch = document.getElementById('wizard-cashier-branch')?.value.trim();
+    if (!branch) {
+      showToast("Veuillez indiquer la boutique ou l'emplacement de caisse.", "warning");
+      document.getElementById('wizard-cashier-branch')?.focus();
+      return;
+    }
+  }
+
+  for (let s = 1; s <= 4; s++) {
+    const el = document.getElementById(`cashier-step-${s}`);
+    const ind = document.getElementById(`step-indicator-${s}`);
+    if (el) el.style.display = (s === targetStep) ? 'block' : 'none';
+    if (ind) ind.style.background = (s <= targetStep) ? '#3B82F6' : '#334155';
+  }
+
+  const lbl = document.getElementById('step-label-indicator');
+  if (lbl) {
+    const stepNames = ["1 / 4 : Identité", "2 / 4 : Point de Vente", "3 / 4 : Code PIN & Sécurité", "4 / 4 : Fiche d'Accès"];
+    lbl.textContent = `Étape ${stepNames[targetStep - 1]}`;
+  }
+
+  window.currentCashierWizardStep = targetStep;
+  if (window.lucide) lucide.createIcons();
+};
+
+window.submitNewCashierWizard = function() {
+  const pin = document.getElementById('wizard-cashier-pin')?.value.trim();
+  if (!pin || pin.length < 4) {
+    showToast("Le code PIN doit comporter au moins 4 chiffres.", "warning");
+    document.getElementById('wizard-cashier-pin')?.focus();
+    return;
+  }
+
+  const name = document.getElementById('wizard-cashier-name')?.value.trim();
+  const phone = document.getElementById('wizard-cashier-phone')?.value.trim();
+  const role = document.getElementById('wizard-cashier-role')?.value || 'Caissier Boutique';
+  const branch = document.getElementById('wizard-cashier-branch')?.value.trim() || 'Boutique Principale (Siège)';
+
+  const cashier = {
+    id: Date.now(),
+    name,
+    phone,
+    role,
+    branch,
+    pin,
+    status: 'active',
+    createdDate: new Date().toISOString().split('T')[0]
+  };
+
+  AppState.cashiers = AppState.cashiers || [];
+  AppState.cashiers.push(cashier);
+  saveLocalCache('credittrack_cashiers', AppState.cashiers);
+
+  window._lastCreatedCashier = cashier;
+
+  const sumName = document.getElementById('wizard-summary-name');
+  const sumBranch = document.getElementById('wizard-summary-branch');
+  const sumPin = document.getElementById('wizard-summary-pin');
+
+  if (sumName) sumName.textContent = cashier.name;
+  if (sumBranch) sumBranch.textContent = cashier.branch;
+  if (sumPin) sumPin.textContent = cashier.pin;
+
+  window.goToCashierStep(4);
+  showToast(`✓ Caissier ${cashier.name} activé avec succès !`, "success");
+};
+
+window.sendCashierCredentialsWhatsApp = function() {
+  const c = window._lastCreatedCashier;
+  if (!c) {
+    showToast("Aucun caissier récent trouvé.", "warning");
+    return;
+  }
+
+  const cleanPhone = sanitizePhoneNumber(c.phone);
+  const bizName = AppState.businessName || 'notre boutique';
+
+  let msg = `Bonjour ${c.name},\n\nVoici vos accès sécurisés pour utiliser la caisse de *${bizName}* sur CréditTrack PRO :\n\n📍 Point de vente : *${c.branch}*\n👤 Rôle : *${c.role}*\n🔑 Votre Code PIN Caissier : *${c.pin}*\n\n👉 Accédez directement à l'application ici :\nhttps://credit-track00.vercel.app\n\n_Conservez ce code PIN secret et ne le divulguez à personne._`;
+
+  const waUrl = cleanPhone
+    ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`
+    : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+
+  window.open(waUrl, '_blank');
+  showToast("Fiche d'accès ouverte pour envoi WhatsApp.");
+};
+
+window.renderCashiersList = function() {
+  const container = document.getElementById('team-cashiers-container');
+  if (!container) return;
+
+  const cashiers = AppState.cashiers || [];
+
+  if (cashiers.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:36px 16px;background:#F8FAFC;border:1.5px dashed #CBD5E1;border-radius:16px;">
+        <div style="width:48px;height:48px;border-radius:14px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;">
+          <i data-lucide="users" style="width:24px;height:24px;"></i>
+        </div>
+        <h4 style="font-size:0.95rem;font-weight:900;color:#0F172A;margin-bottom:4px;">Aucun caissier enregistré pour le moment</h4>
+        <p style="font-size:0.82rem;color:#64748B;max-width:440px;margin:0 auto 16px;line-height:1.45;">
+          Créez un profil pour vos employés afin qu'ils puissent encaisser des règlements sans jamais voir vos bénéfices ni vos marges.
+        </p>
+        <button type="button" class="btn btn-primary" onclick="openModal('modal-add-cashier'); goToCashierStep(1);" style="padding:9px 18px;font-weight:800;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px;">
+          <i data-lucide="user-plus" style="width:16px;height:16px;"></i>
+          <span>+ Créer mon Premier Caissier</span>
+        </button>
+      </div>
+    `;
+    if (window.lucide) lucide.createIcons();
+    return;
+  }
+
+  container.innerHTML = cashiers.map(c => `
+    <div style="background:#FFFFFF;border:1.5px solid #E2E8F0;border-radius:14px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,0.02);display:flex;flex-direction:column;justify-content:space-between;gap:12px;">
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div>
+            <strong style="font-size:0.95rem;color:#0F172A;display:block;">${escapeHTML(c.name)}</strong>
+            <span style="font-size:0.75rem;color:#2563EB;font-weight:700;">${escapeHTML(c.role || 'Caissier')}</span>
+          </div>
+          <span style="background:#ECFDF5;color:#10B981;padding:2px 7px;border-radius:6px;font-size:0.72rem;font-weight:800;">Actif</span>
+        </div>
+        <div style="font-size:0.78rem;color:#64748B;line-height:1.5;">
+          <div>📍 ${escapeHTML(c.branch || 'Boutique Principale')}</div>
+          <div>📞 ${escapeHTML(c.phone || 'Non renseigné')}</div>
+          <div style="margin-top:6px;font-weight:800;color:#0F172A;">
+            PIN Secret : <span style="font-family:monospace;background:#F1F5F9;padding:2px 6px;border-radius:4px;color:#2563EB;">••••</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:8px;border-top:1px solid #F1F5F9;padding-top:10px;">
+        <button type="button" class="btn btn-outline" style="flex:1;font-size:0.78rem;padding:6px;font-weight:800;" onclick="startCashierSession(${c.id})">
+          🔑 Démarrer Session
+        </button>
+        <button type="button" class="btn btn-outline" style="color:#EF4444;border-color:#FCA5A5;font-size:0.78rem;padding:6px 10px;" onclick="deleteCashier(${c.id})" title="Supprimer">
+          <i data-lucide="trash-2" style="width:14px;height:14px;"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  if (window.lucide) lucide.createIcons();
+};
+
+window.startCashierSession = function(cashierId) {
+  const cashier = (AppState.cashiers || []).find(c => c.id === cashierId);
+  if (!cashier) return;
+
+  AppState.activeSessionMode = 'cashier';
+  AppState.activeCashierUser = cashier;
+  localStorage.setItem('activeSessionMode', 'cashier');
+
+  const roleTag = document.getElementById('current-user-role-tag');
+  if (roleTag) {
+    roleTag.textContent = `SESSION CAISSIER : ${cashier.name.toUpperCase()}`;
+    roleTag.style.background = '#2563EB';
+  }
+
+  const sessionLabel = document.getElementById('team-active-session-label');
+  if (sessionLabel) sessionLabel.textContent = `Caissier : ${cashier.name} (${cashier.branch})`;
+
+  showToast(`Session Caissier activée pour ${cashier.name}. Bénéfices masqués pour la sécurité.`, "info");
+  switchMenu('menu-salesbook');
+};
+
+window.toggleCashierMode = function() {
+  if (AppState.activeSessionMode === 'cashier') {
+    AppState.activeSessionMode = 'patron';
+    AppState.activeCashierUser = null;
+    localStorage.setItem('activeSessionMode', 'patron');
+
+    const roleTag = document.getElementById('current-user-role-tag');
+    if (roleTag) {
+      roleTag.textContent = 'SESSION : GÉRANT';
+      roleTag.style.background = 'rgba(255,255,255,0.2)';
+    }
+
+    const sessionLabel = document.getElementById('team-active-session-label');
+    if (sessionLabel) sessionLabel.textContent = 'Gérant (Patron)';
+
+    showToast("Session Propriétaire / Gérant restaurée avec succès.", "success");
+  } else {
+    const cashiers = AppState.cashiers || [];
+    if (cashiers.length > 0) {
+      startCashierSession(cashiers[0].id);
+    } else {
+      openModal('modal-add-cashier');
+      goToCashierStep(1);
+    }
+  }
+};
+
+window.deleteCashier = function(id) {
+  if (!confirm("Voulez-vous vraiment supprimer ce profil caissier ?")) return;
+  AppState.cashiers = (AppState.cashiers || []).filter(c => c.id !== id);
+  saveLocalCache('credittrack_cashiers', AppState.cashiers);
+  renderCashiersList();
+  showToast("Profil caissier supprimé.", "info");
+};
 
 // --------------------------------------------------------------------------
 // 8. GESTION DES CLIENTS, CRÉDITS & ENCAISSEMENTS
