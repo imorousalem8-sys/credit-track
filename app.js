@@ -2107,6 +2107,10 @@ function renderCreditKPIs() {
   if (dueEl) dueEl.textContent = formatCurrency(totalDue);
   if (clientEl) clientEl.textContent = activeClients;
   if (overdueEl) overdueEl.textContent = overdueCount;
+
+  if (typeof window.updateHeaderAlertsNotification === 'function') {
+    window.updateHeaderAlertsNotification();
+  }
 }
 
 function populateCreditClientSelect() {
@@ -3153,33 +3157,215 @@ window.saveUserSettings = function() {
   showToast(AppState.lang === 'en' ? 'User profile saved!' : 'Profil utilisateur mis à jour !');
 };
 
+// --------------------------------------------------------------------------
+// 11. SAUVEGARDE & EXPORTS COMPLETS (JSON & CSV EXCEL)
+// --------------------------------------------------------------------------
 window.exportJSON = function() {
-  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState, null, 2));
+  const exportPayload = {
+    system: "CreditTrack PRO",
+    version: "2.5.1",
+    exportDate: new Date().toISOString(),
+    country: AppState.country || 'CI',
+    currency: AppState.currency || 'FCFA',
+    businessName: AppState.businessName || 'Mon Commerce',
+    user: AppState.user || {},
+    clients: AppState.clients || [],
+    payments: AppState.payments || [],
+    accountingEntries: AppState.accountingEntries || [],
+    sales: AppState.sales || [],
+    cashiers: AppState.cashiers || []
+  };
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
   const dl = document.createElement('a');
   dl.setAttribute("href", dataStr);
-  dl.setAttribute("download", `CreditTrack_Backup_${AppState.country}_${Date.now()}.json`);
+  dl.setAttribute("download", `CreditTrack_Backup_${(AppState.businessName || 'Commerce').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.json`);
   document.body.appendChild(dl);
   dl.click();
   dl.remove();
-  showToast(AppState.lang === 'en' ? 'JSON backup downloaded!' : 'Sauvegarde JSON exportée !');
+  showToast("✓ Sauvegarde complète JSON exportée avec succès !", "success");
 };
 
-window.exportAccountingCSV = function() {
-  let csv = "Date;NumeroPiece;Categorie;Description;MontantHT;TVA;TotalTTC;Statut\n";
-  AppState.accountingEntries.forEach(e => {
-    const total = e.amountHT + (e.vatAmount || 0);
-    csv += `"${e.date}";"${e.ref}";"${e.code}";"${e.label}";"${e.amountHT}";"${e.vatAmount}";"${total}";"${e.status}"\n`;
+window.exportClientsCSV = function() {
+  if (!AppState.clients || AppState.clients.length === 0) {
+    showToast("Aucun client à exporter pour le moment.", "info");
+    return;
+  }
+
+  // Ajout du BOM UTF-8 (\uFEFF) pour compatibilité parfaite avec Microsoft Excel
+  let csv = "\uFEFFNom Client;Telephone;Piece CNI;Dette Restante;Devise;Score Confiance;Moyen Paiement;Statut\n";
+  AppState.clients.forEach(c => {
+    const statusLabel = c.totalDue > 0 ? (c.status === 'overdue' ? 'En retard' : 'Dette en cours') : 'À jour';
+    csv += `"${(c.name || '').replace(/"/g, '""')}";"${c.phone || ''}";"${c.cni || ''}";"${c.totalDue || 0}";"${AppState.currency || 'FCFA'}";"${c.reliabilityScore || 85}%";"${c.preferredPaymentMethod || 'Espèces'}";"${statusLabel}"\n`;
   });
 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.setAttribute('href', url);
-  link.setAttribute('download', `Livre_Caisse_${AppState.country}_${Date.now()}.csv`);
+  link.setAttribute('download', `CreditTrack_Clients_Dettes_${new Date().toISOString().split('T')[0]}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  showToast(AppState.lang === 'en' ? 'Excel (CSV) file exported!' : 'Export Excel (CSV) généré !');
+  showToast("✓ Fichier Clients & Dettes (CSV/Excel) exporté !", "success");
+};
+
+window.exportAccountingCSV = function() {
+  let csv = "\uFEFFDate;NumeroPiece;Categorie;Description;MontantHT;TVA;TotalTTC;Statut\n";
+  (AppState.accountingEntries || []).forEach(e => {
+    const total = (e.amountHT || 0) + (e.vatAmount || 0);
+    csv += `"${e.date || ''}";"${e.ref || ''}";"${e.code || ''}";"${(e.label || '').replace(/"/g, '""')}";"${e.amountHT || 0}";"${e.vatAmount || 0}";"${total}";"${e.status || 'Validé'}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Livre_Caisse_${AppState.country}_${new Date().toISOString().split('T')[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast("✓ Journal de Caisse (CSV/Excel) exporté !", "success");
+};
+
+window.importBackupJSON = function(event) {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data || typeof data !== 'object') throw new Error("Format JSON invalide");
+
+      if (Array.isArray(data.clients)) {
+        AppState.clients = data.clients;
+        saveLocalCache('credittrack_clients', AppState.clients);
+        if (window.dataStore) {
+          for (const c of AppState.clients) {
+            try { await window.dataStore.add('clients', c); } catch(err) {}
+          }
+        }
+      }
+
+      if (Array.isArray(data.payments)) {
+        AppState.payments = data.payments;
+        saveLocalCache('credittrack_payments', AppState.payments);
+      }
+
+      if (Array.isArray(data.accountingEntries)) {
+        AppState.accountingEntries = data.accountingEntries;
+        saveLocalCache('credittrack_accounting', AppState.accountingEntries);
+      }
+
+      if (data.businessName) {
+        AppState.businessName = data.businessName;
+        localStorage.setItem('bizName', data.businessName);
+      }
+
+      if (data.currency) {
+        AppState.currency = data.currency;
+        localStorage.setItem('appCurrency', data.currency);
+      }
+
+      // Rafraîchir toutes les vues applicatives
+      if (typeof renderClientDirectory === 'function') renderClientDirectory();
+      if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
+      if (typeof renderCreditKPIs === 'function') renderCreditKPIs();
+      if (typeof renderAccountingKPIs === 'function') renderAccountingKPIs();
+      if (typeof updateHeaderAlertsNotification === 'function') updateHeaderAlertsNotification();
+
+      showToast("✓ Sauvegarde restaurée avec succès ! Données synchronisées.", "success");
+    } catch(err) {
+      console.error("Erreur Restauration JSON:", err);
+      showToast("Erreur lors de la lecture du fichier de sauvegarde JSON.", "error");
+    } finally {
+      // Réinitialiser le champ file pour permettre de re-sélectionner le même fichier
+      if (event.target) event.target.value = '';
+    }
+  };
+  reader.readAsText(file);
+};
+
+// --------------------------------------------------------------------------
+// 11.b CENTRE D'ALERTES & CRÉANCES EN RETARD
+// --------------------------------------------------------------------------
+window.updateHeaderAlertsNotification = function() {
+  const clients = AppState.clients || [];
+  const overdueClients = clients.filter(c => Number(c.totalDue) > 0 && (c.status === 'overdue' || Number(c.reliabilityScore) < 70));
+  const count = overdueClients.length;
+
+  const dot = document.getElementById('header-notif-dot');
+  const countBadge = document.getElementById('header-notif-count');
+
+  if (dot) {
+    dot.style.display = count > 0 ? 'block' : 'none';
+  }
+  if (countBadge) {
+    if (count > 0) {
+      countBadge.style.display = 'inline-block';
+      countBadge.textContent = count > 99 ? '99+' : count;
+    } else {
+      countBadge.style.display = 'none';
+    }
+  }
+};
+
+window.openOverdueAlertsModal = function() {
+  const clients = AppState.clients || [];
+  const overdueClients = clients.filter(c => Number(c.totalDue) > 0);
+  
+  // Trier par montant dû décroissant
+  overdueClients.sort((a, b) => (Number(b.totalDue) || 0) - (Number(a.totalDue) || 0));
+
+  const totalOverdue = overdueClients.reduce((sum, c) => sum + (Number(c.totalDue) || 0), 0);
+  const totalOverdueEl = document.getElementById('alerts-modal-total-overdue');
+  const countEl = document.getElementById('alerts-modal-client-count');
+  const tbody = document.getElementById('alerts-modal-table-body');
+
+  if (totalOverdueEl) totalOverdueEl.textContent = formatCurrency(totalOverdue);
+  if (countEl) countEl.textContent = `${overdueClients.length} client(s) avec solde dû`;
+
+  if (tbody) {
+    if (overdueClients.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align:center;padding:24px;color:#64748B;">
+            <div style="font-size:1.1rem;font-weight:700;color:#10B981;margin-bottom:4px;">✓ Aucune créance en retard !</div>
+            <div style="font-size:0.8rem;">Tous vos clients sont à jour de leurs paiements.</div>
+          </td>
+        </tr>`;
+    } else {
+      tbody.innerHTML = overdueClients.map(c => {
+        const isCritical = c.status === 'overdue' || Number(c.reliabilityScore) < 60;
+        const statusBadge = isCritical 
+          ? `<span style="background:#FEE2E2;color:#DC2626;padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;">Retard critique</span>`
+          : `<span style="background:#FEF3C7;color:#D97706;padding:3px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;">Solde à relancer</span>`;
+
+        return `
+          <tr>
+            <td>
+              <div style="font-weight:800;color:#0F172A;">${escapeHTML(c.name || 'Client')}</div>
+              <div style="font-size:0.72rem;color:#64748B;">Score: ${c.reliabilityScore || 85}%</div>
+            </td>
+            <td style="font-size:0.84rem;color:#334155;">${escapeHTML(c.phone || '--')}</td>
+            <td style="font-weight:900;color:#EF4444;font-size:0.95rem;">${formatCurrency(c.totalDue || 0)}</td>
+            <td>${statusBadge}</td>
+            <td style="text-align:right;white-space:nowrap;">
+              <button class="btn btn-outline" style="padding:4px 8px;font-size:0.75rem;margin-right:4px;border-color:#25D366;color:#128C7E;" onclick="closeModal('modal-overdue-alerts'); sendWhatsAppReminder('${escapeHTML(c.name)}', '${escapeHTML(c.phone)}', ${c.totalDue});" title="Envoyer rappel WhatsApp">
+                <i data-lucide="message-circle" style="width:13px;height:13px;"></i> WhatsApp
+              </button>
+              <button class="btn btn-primary" style="padding:4px 8px;font-size:0.75rem;" onclick="closeModal('modal-overdue-alerts'); openClientDetails('${c.id}');" title="Encaisser un paiement">
+                Encaisser
+              </button>
+            </td>
+          </tr>`;
+      }).join('');
+    }
+  }
+
+  if (window.lucide) lucide.createIcons();
+  openModal('modal-overdue-alerts');
 };
 
 function filterClientTable(query) {
@@ -4474,10 +4660,51 @@ window.redeemAdminLicenseKey = function() {
   }
 };
 
+window.PAYSTACK_PUBLIC_KEY = 'pk_test_ae33c8c1fafa3eb054c031cc4a1268733db70518';
+
 window.triggerSaaSPayment = function(planTier, amount) {
   const planLabel = planTier === 'pro_yearly' ? 'PRO Annuel' : 'PRO Mensuel';
+  const userEmail = (AppState.user && AppState.user.email) ? AppState.user.email : 'commercant@credittrack.pro';
   
-  // 1. If FedaPay Checkout SDK is available
+  // 1. Paystack Inline Checkout (Priorité N°1)
+  if (typeof PaystackPop !== 'undefined' && PaystackPop.setup) {
+    try {
+      const handler = PaystackPop.setup({
+        key: window.PAYSTACK_PUBLIC_KEY,
+        email: userEmail,
+        amount: Math.round(amount * 100), // Montant en sous-unité (centimes/kobos pour XOF)
+        currency: 'XOF',
+        ref: 'CT_' + Math.floor((Math.random() * 1000000000) + 1),
+        metadata: {
+          custom_fields: [
+            {
+              display_name: "Plan",
+              variable_name: "plan_tier",
+              value: planLabel
+            },
+            {
+              display_name: "Utilisateur",
+              variable_name: "business_name",
+              value: (AppState.user && AppState.user.businessName) || 'Commerçant'
+            }
+          ]
+        },
+        callback: function(response) {
+          console.log('[Paystack] Paiement réussi:', response);
+          activateProPlan(planTier, amount, 'Paystack (' + (response.reference || 'Succès') + ')');
+        },
+        onClose: function() {
+          showToast("Paiement Paystack interrompu.");
+        }
+      });
+      handler.openIframe();
+      return;
+    } catch (e) {
+      console.warn("[Paystack] Erreur lancement widget, tentative fallback:", e);
+    }
+  }
+
+  // 2. If FedaPay Checkout SDK is available
   if (typeof FedaPay !== 'undefined' && FedaPay.init) {
     try {
       const widget = FedaPay.init({
@@ -4485,11 +4712,11 @@ window.triggerSaaSPayment = function(planTier, amount) {
         transaction: {
           amount: amount,
           description: `Abonnement CreditTrack ${planLabel}`,
-          custom_metadata: { plan_tier: planTier, user_email: AppState.user.email || 'client@credittrack.pro' }
+          custom_metadata: { plan_tier: planTier, user_email: userEmail }
         },
         customer: {
-          email: AppState.user.email || 'commercant@credittrack.pro',
-          firstname: AppState.user.businessName || 'Commerçant'
+          email: userEmail,
+          firstname: (AppState.user && AppState.user.businessName) || 'Commerçant'
         },
         onComplete: function(response) {
           if (response && (response.status === 'approved' || response.status === 'completed')) {
@@ -4504,7 +4731,7 @@ window.triggerSaaSPayment = function(planTier, amount) {
     }
   }
 
-  // 2. Direct Activation Fallback
+  // 3. Direct Activation Fallback
   activateProPlan(planTier, amount, 'Wave / Mobile Money');
 };
 

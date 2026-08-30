@@ -8,7 +8,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://bnkwplwlfnhukevwdcen.supabase.co wss://bnkwplwlfnhukevwdcen.supabase.co https://*.supabase.co https://api.qrserver.com https://credit-track00.vercel.app; frame-src 'self' https://wa.me; object-src 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.fedapay.com https://js.paystack.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://bnkwplwlfnhukevwdcen.supabase.co wss://bnkwplwlfnhukevwdcen.supabase.co https://*.supabase.co https://api.qrserver.com https://credit-track00.vercel.app https://api.paystack.co https://*.paystack.co; frame-src 'self' https://wa.me https://checkout.paystack.com; object-src 'none';">
   <meta name="google-site-verification" content="google8cd72fa0966109f1">
   <title>CréditTrack PRO - Gestion Facile de Crédits, Caisses &amp; Paiements</title>
   <meta name="description" content="Application simple et puissante pour suivre vos crédits clients, encaisser par Wave / Mobile Money et envoyer des rappels WhatsApp automatiques.">
@@ -50,6 +50,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
   <script>
     // REDIRECTION AUTOMATIQUE DE SECOURS VERS LE DOMAINE DE PRODUCTION OFFICIEL
@@ -67,7 +68,7 @@
 
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260824_v4.3.2_salesbook_and_otp_login";
+      const CURRENT_BUILD = "20260830_v4.7.0_backup_alerts";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('caches' in window) {
@@ -93,9 +94,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260824_v4.5.0_payments_and_auth" defer></script>
-  <script src="app.js?v=20260824_v4.5.0_payments_and_auth" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260824_v4.5.0_payments_and_auth">
+  <script src="dataStore.js?v=20260830_v4.7.0_backup_alerts" defer></script>
+  <script src="app.js?v=20260830_v4.7.0_backup_alerts" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260830_v4.7.0_backup_alerts">
 </head>
 <body class="is-landing-mode">
 
@@ -1106,9 +1107,10 @@
             <span data-i18n="btnNewCredit">+ Noter un Crédit</span>
           </button>
 
-          <div class="header-icon-btn" title="Alertes Retards" onclick="showToast('Vous avez 2 clients en retard de paiement.')">
+          <div class="header-icon-btn" id="header-bell-btn" title="Centre d'Alertes & Échéances" onclick="openOverdueAlertsModal()">
             <i data-lucide="bell" style="width:18px;height:18px;"></i>
-            <div class="notif-dot"></div>
+            <div class="notif-dot" id="header-notif-dot"></div>
+            <span id="header-notif-count" class="header-notif-count" style="display:none;">0</span>
           </div>
 
           <div class="header-user-avatar" onclick="switchMenu('menu-settings')">AK</div>
@@ -1804,13 +1806,49 @@
                 </button>
               </div>
 
-              <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                <button class="btn btn-primary" onclick="exportJSON()">
-                  <i data-lucide="download"></i> <span data-i18n="exportBackupJSON">Télécharger Sauvegarde Complète (JSON)</span>
-                </button>
-                <button class="btn btn-outline" onclick="exportAccountingCSV()">
-                  <i data-lucide="file-spreadsheet"></i> <span data-i18n="exportExcel">Exporter en Excel (CSV)</span>
-                </button>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:16px;">
+                <!-- Bloc 1 : Sauvegarde & Restauration Système -->
+                <div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                      <i data-lucide="database" style="width:18px;height:18px;color:#2563EB;"></i>
+                      <strong style="font-size:0.92rem;color:#0F172A;">Sauvegarde Complète (JSON)</strong>
+                    </div>
+                    <p style="font-size:0.8rem;color:#64748B;line-height:1.45;margin-bottom:14px;">
+                      Sauvegarde l'intégralité de vos clients, dettes, historique de paiements, journal de caisse et paramètres.
+                    </p>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <button type="button" class="btn btn-primary" onclick="exportJSON()" style="width:100%;justify-content:center;gap:8px;">
+                      <i data-lucide="download"></i> <span>Télécharger la Sauvegarde (.json)</span>
+                    </button>
+                    <input type="file" id="restore-backup-file-input" accept=".json" style="display:none;" onchange="importBackupJSON(event)">
+                    <button type="button" class="btn btn-outline" onclick="document.getElementById('restore-backup-file-input').click()" style="width:100%;justify-content:center;gap:8px;background:#fff;">
+                      <i data-lucide="upload"></i> <span>Restaurer une Sauvegarde</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Bloc 2 : Exports Tableur Excel -->
+                <div style="background:#F8FAFC;border:1.5px solid #E2E8F0;border-radius:12px;padding:16px;display:flex;flex-direction:column;justify-content:space-between;">
+                  <div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                      <i data-lucide="file-spreadsheet" style="width:18px;height:18px;color:#10B981;"></i>
+                      <strong style="font-size:0.92rem;color:#0F172A;">Exports Tableur Excel (CSV)</strong>
+                    </div>
+                    <p style="font-size:0.8rem;color:#64748B;line-height:1.45;margin-bottom:14px;">
+                      Générez des fichiers tableurs compatibles Microsoft Excel, Google Sheets et LibreOffice.
+                    </p>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px;">
+                    <button type="button" class="btn btn-outline" onclick="exportClientsCSV()" style="width:100%;justify-content:center;gap:8px;background:#fff;">
+                      <i data-lucide="users"></i> <span>Exporter Clients &amp; Dettes (CSV)</span>
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="exportAccountingCSV()" style="width:100%;justify-content:center;gap:8px;background:#fff;">
+                      <i data-lucide="book-open"></i> <span>Exporter Journal de Caisse (CSV)</span>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1903,7 +1941,7 @@
               
               <!-- KPI 1 : Montant Total (0 FCFA Réel par défaut) -->
               <div style="display:flex;align-items:center;gap:12px;">
-                <div style="width:38px;height:38px;border-radius:10px;background:#F5F3FF;color:#7C3AED;display:flex;align-items:center;justify-content:center;shrink:0;">
+                <div style="width:38px;height:38px;border-radius:10px;background:#F5F3FF;color:#7C3AED;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                   <i data-lucide="wallet" style="width:18px;height:18px;"></i>
                 </div>
                 <div>
@@ -1914,7 +1952,7 @@
 
               <!-- KPI 2 : Articles (0 Réel par défaut) -->
               <div style="display:flex;align-items:center;gap:12px;border-left:1px solid #E2E8F0;padding-left:14px;">
-                <div style="width:38px;height:38px;border-radius:10px;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;shrink:0;">
+                <div style="width:38px;height:38px;border-radius:10px;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                   <i data-lucide="package" style="width:18px;height:18px;"></i>
                 </div>
                 <div>
@@ -1925,7 +1963,7 @@
 
               <!-- KPI 3 : Date Limite -->
               <div style="display:flex;align-items:center;gap:12px;border-left:1px solid #E2E8F0;padding-left:14px;">
-                <div style="width:38px;height:38px;border-radius:10px;background:#FFFBEB;color:#D97706;display:flex;align-items:center;justify-content:center;shrink:0;">
+                <div style="width:38px;height:38px;border-radius:10px;background:#FFFBEB;color:#D97706;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                   <i data-lucide="calendar" style="width:18px;height:18px;"></i>
                 </div>
                 <div>
@@ -1936,7 +1974,7 @@
 
               <!-- KPI 4 : Mode de Paiement -->
               <div style="display:flex;align-items:center;gap:12px;border-left:1px solid #E2E8F0;padding-left:14px;">
-                <div style="width:38px;height:38px;border-radius:10px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;shrink:0;">
+                <div style="width:38px;height:38px;border-radius:10px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                   <i data-lucide="badge-dollar-sign" style="width:18px;height:18px;"></i>
                 </div>
                 <div>
@@ -3273,6 +3311,66 @@
           </button>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       MODALE : CENTRE D'ALERTES & ÉCHÉANCES EN RETARD (RELANCES GROUPÉES)
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-overdue-alerts">
+    <div class="modal-card modal-card-large" style="max-width:720px;">
+      <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:14px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:40px;height:40px;border-radius:10px;background:#FEE2E2;color:#EF4444;display:flex;align-items:center;justify-content:center;">
+            <i data-lucide="bell-ring" style="width:22px;height:22px;"></i>
+          </div>
+          <div>
+            <h3 class="card-title" style="margin:0;font-size:1.15rem;font-weight:800;color:#0F172A;">Centre d'Alertes &amp; Créances en Retard</h3>
+            <p style="margin:2px 0 0 0;font-size:0.78rem;color:#64748B;">Détecte automatiquement les clients devant être relancés immédiatement.</p>
+          </div>
+        </div>
+        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-overdue-alerts')">✕</button>
+      </div>
+
+      <div style="padding:18px 22px;">
+        <!-- Résumé synthétique des alertes -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:16px;">
+          <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 14px;">
+            <div style="font-size:0.75rem;font-weight:700;color:#991B1B;text-transform:uppercase;">Créances en Retard</div>
+            <div id="alerts-modal-total-overdue" style="font-size:1.35rem;font-weight:900;color:#DC2626;margin-top:2px;">0 FCFA</div>
+          </div>
+          <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;">
+            <div style="font-size:0.75rem;font-weight:700;color:#1E40AF;text-transform:uppercase;">Clients à Relancer</div>
+            <div id="alerts-modal-client-count" style="font-size:1.35rem;font-weight:900;color:#2563EB;margin-top:2px;">0 client(s)</div>
+          </div>
+        </div>
+
+        <!-- Liste interactive des clients en retard -->
+        <div style="max-height:300px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:16px;">
+          <table class="custom-table" style="margin:0;">
+            <thead style="position:sticky;top:0;background:#F8FAFC;z-index:2;">
+              <tr>
+                <th>Client</th>
+                <th>Téléphone</th>
+                <th>Montant Dû</th>
+                <th>Statut</th>
+                <th style="text-align:right;">Actions Immédiates</th>
+              </tr>
+            </thead>
+            <tbody id="alerts-modal-table-body">
+              <!-- Dynamiquement peuplé par app.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modal-overdue-alerts')">Fermer</button>
+          <button type="button" class="btn btn-primary" onclick="closeModal('modal-overdue-alerts'); switchMenu('menu-8');" style="display:flex;align-items:center;gap:6px;">
+            <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
+            <span>Accéder au Centre de Rappels WhatsApp</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>

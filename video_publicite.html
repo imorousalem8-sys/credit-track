@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Présentation Vidéo Officielle — CréditTrack PRO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    
+    body {
+      background: #060912;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .header-box {
+      text-align: center;
+      margin-bottom: 12px;
+      width: 100%;
+      max-width: 960px;
+    }
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      background: rgba(37, 99, 235, 0.18);
+      border: 1px solid rgba(37, 99, 235, 0.45);
+      border-radius: 20px;
+      font-size: 0.76rem;
+      font-weight: 800;
+      color: #60A5FA;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .pulse-dot {
+      width: 7px;
+      height: 7px;
+      background: #10B981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px #10B981;
+    }
+    h1 {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #F8FAFC;
+    }
+
+    .toolbar-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .btn-play-hero {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+      color: #FFFFFF;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 4px 22px rgba(37,99,235,0.5);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .btn-play-hero:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(37,99,235,0.7);
+    }
+    .btn-nav-step {
+      background: rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* CONTENEUR CINÉMATIQUE 16:9 PC */
+    .cinema-viewport {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      aspect-ratio: 16 / 9;
+      background: #000000;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(37, 99, 235, 0.3);
+      border: 2px solid rgba(255, 255, 255, 0.12);
+    }
+
+    /* SCÈNES DE FOND */
+    .scene-background {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transform: scale(1);
+      transition: opacity 0.8s ease-in-out;
+      pointer-events: none;
+    }
+    .scene-background.active {
+      opacity: 1;
+    }
+
+    .vignette-overlay {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.75) 100%),
+                  linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 20%, transparent 60%, rgba(0,0,0,0.92) 100%);
+      pointer-events: none;
+    }
+
+    /* BRAND BADGE */
+    .brand-top-badge {
+      position: absolute;
+      top: 16px;
+      left: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(10px);
+      padding: 6px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      z-index: 20;
+    }
+    .brand-top-badge img {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+    }
+    .brand-top-badge span {
+      font-weight: 900;
+      font-size: 0.92rem;
+      color: #60A5FA;
+    }
+
+    /* CARTES FLOTTANTES */
+    .floating-card-salesbook {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      width: 340px;
+      max-width: calc(100% - 40px);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(14px);
+      border: 1.5px solid #3B82F6;
+      border-radius: 14px;
+      padding: 14px 18px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+      z-index: 30;
+      display: none;
+    }
+    .floating-card-salesbook.show {
+      display: block;
+    }
+
+    .floating-card-wa {
+      position: absolute;
+      top: 60px;
+      right: 20px;
+      width: 330px;
+      max-width: calc(100% - 40px);
+      background: #FFFFFF;
+      color: #0F172A;
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.75);
+      z-index: 30;
+      display: none;
+    }
+    .floating-card-wa.show {
+      display: block;
+    }
+
+    .floating-card-boss {
+      position: absolute;
+      top: 60px;
+      left: 20px;
+      width: 350px;
+      max-width: calc(100% - 40px);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(14px);
+      border: 1.5px solid #10B981;
+      border-radius: 14px;
+      padding: 14px 18px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+      z-index: 30;
+      display: none;
+    }
+    .floating-card-boss.show {
+      display: block;
+    }
+
+    /* SOUS-TITRES DYNAMIQUES */
+    .subtitles-layer {
+      position: absolute;
+      bottom: 24px;
+      left: 3%;
+      right: 3%;
+      text-align: center;
+      z-index: 40;
+      pointer-events: none;
+    }
+    .sub-badge {
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.92);
+      border: 2px solid #FACC15;
+      color: #FFFFFF;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.4;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      max-width: 95%;
+    }
+    .sub-badge .gold {
+      color: #FACC15;
+    }
+
+    .timeline-bar {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: rgba(255,255,255,0.2);
+    }
+    .timeline-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #2563EB, #60A5FA);
+      transition: width 0.4s ease;
+    }
+
+    .cta-container {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      max-width: 960px;
+    }
+    .btn-download-official {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #FFFFFF;
+      border: none;
+      padding: 14px 34px;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.45);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    @media (max-width: 768px) {
+      body { padding: 12px 10px; }
+      h1 { font-size: 1.15rem; }
+      .floating-card-salesbook, .floating-card-wa, .floating-card-boss {
+        top: 45px;
+        left: 10px;
+        right: 10px;
+        width: auto;
+        padding: 8px 12px;
+      }
+      .sub-badge {
+        font-size: 0.82rem;
+        padding: 6px 12px;
+      }
+      .subtitles-layer {
+        bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-box">
+    <div class="badge-status">
+      <span class="pulse-dot"></span>
+      Démonstration Vidéo avec Synthèse Vocale &amp; Bruitages
+    </div>
+    <h1>CréditTrack PRO • Présentation Officielle</h1>
+  </div>
+
+  <div class="toolbar-top">
+    <button class="btn-nav-step" onclick="prevStep()">⬅ Précédent</button>
+    <button class="btn-play-hero" id="btnPlay" onclick="togglePlay()">
+      ▶ Lancer la Présentation
+    </button>
+    <button class="btn-nav-step" onclick="nextStep()">Suivant ➔</button>
+  </div>
+
+  <!-- LECTEUR CINÉMATIQUE -->
+  <div class="cinema-viewport" id="viewport">
+    
+    <!-- Scène 1 : La Caissière en boutique (img_caissier_officiel.jpg) -->
+    <div class="scene-background active" id="sceneCashier" style="background-image: url('img_caissier_officiel.jpg');"></div>
+
+    <!-- Scène 2 : Le Patron dans son bureau (img_patron_officiel.jpg) -->
+    <div class="scene-background" id="sceneBoss" style="background-image: url('img_patron_officiel.jpg');"></div>
+
+    <div class="vignette-overlay"></div>
+
+    <div class="brand-top-badge">
+      <img src="logo_3d.png" alt="Logo">
+      <span>CréditTrack PRO</span>
+    </div>
+
+    <!-- 1. CARTE FLOTTANTE : CAHIER DU JOUR -->
+    <div class="floating-card-salesbook" id="cardSalesbook">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:0.75rem;font-weight:800;color:#38BDF8;text-transform:uppercase;">📖 Cahier du Jour des Ventes</span>
+        <span style="background:#2563EB;color:#FFF;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:6px;">En direct</span>
+      </div>
+      <div style="background:rgba(255,255,255,0.08);padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:0.8rem;">
+        <span style="color:#94A3B8;">Client :</span> <strong style="color:#FFF;">Koffi Mensah (Sac de Riz 25kg)</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;background:#FEF3C7;color:#92400E;padding:6px 10px;border-radius:8px;font-size:0.75rem;font-weight:800;">
+        <span>Mode : À Crédit (Vendredi)</span>
+        <span>25 000 FCFA</span>
+      </div>
+      <div style="margin-top:6px;font-size:0.7rem;color:#10B981;font-weight:700;text-align:center;">
+        ✓ Reçu digital QR Code généré en 5 secondes
+      </div>
+    </div>
+
+    <!-- 2. BULLE WHATSAPP FLOTTANTE -->
+    <div class="floating-card-wa" id="cardWhatsApp">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+        <span style="background:#25D366;color:#FFF;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:6px;">WhatsApp Business</span>
+        <span style="font-size:0.78rem;font-weight:800;">CréditTrack • Relance</span>
+      </div>
+      <div style="font-size:0.78rem;color:#334155;line-height:1.35;margin-bottom:8px;">
+        Bonjour M. Koffi, votre facture N°204 de <strong>25 000 FCFA</strong> arrive à échéance aujourd'hui.
+      </div>
+      <div style="background:#EFF6FF;color:#2563EB;font-size:0.72rem;font-weight:800;padding:6px 8px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+        <span>Payer par Wave / MoMo</span>
+        <span style="background:#10B981;color:#FFF;padding:2px 6px;border-radius:4px;font-size:0.65rem;" id="badgeSoldéWa">SOLDÉ ✓</span>
+      </div>
+    </div>
+
+    <!-- 3. CARTE FLOTTANTE : DASHBOARD PATRON -->
+    <div class="floating-card-boss" id="cardBoss">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:0.75rem;font-weight:800;color:#34D399;text-transform:uppercase;">👑 Clôture de Caisse du Jour</span>
+        <span style="color:#60A5FA;font-size:0.7rem;font-weight:700;">Reçu à 19h00</span>
+      </div>
+      <div style="font-size:0.7rem;color:#94A3B8;">Chiffre d'Affaires Encaissé :</div>
+      <div style="font-size:1.4rem;font-weight:900;color:#38BDF8;margin-bottom:6px;">2 276 977 FCFA</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:rgba(255,255,255,0.08);padding:6px;border-radius:6px;font-size:0.7rem;">
+        <div>Taux: <strong style="color:#10B981;">95.4%</strong></div>
+        <div>Dehors: <strong style="color:#F59E0B;">145 000 F</strong></div>
+      </div>
+      <div style="margin-top:6px;font-size:0.7rem;color:#38BDF8;font-weight:700;text-align:center;">
+        ● Synchronisé en direct depuis toutes vos boutiques
+      </div>
+    </div>
+
+    <!-- SOUS-TITRES DYNAMIQUES -->
+    <div class="subtitles-layer">
+      <div class="sub-badge" id="subtitlesBox">
+        Cliquez sur <span class="gold">Lancer la Présentation</span> pour démarrer
+      </div>
+    </div>
+
+    <!-- TIMELINE -->
+    <div class="timeline-bar">
+      <div class="timeline-fill" id="timelineProgress"></div>
+    </div>
+  </div>
+
+  <!-- BOUTON OFFICIEL -->
+  <div class="cta-container">
+    <a href="https://credit-track00.vercel.app/" target="_blank" class="btn-download-official">
+      🚀 Ouvrir &amp; Installer CréditTrack PRO Maintenant
+    </a>
+  </div>
+
+  <script>
+    const videoTimeline = [
+      {
+        scene: 'cashier',
+        sub: "🚀 <span class='gold'>CréditTrack PRO</span> s'installe en 1 clic directement depuis votre navigateur !",
+        voice: "Bienvenue sur CréditTrack PRO. Plus besoin de téléchargement compliqué : l'application s'installe en un clic sur votre téléphone ou votre ordinateur, directement depuis votre navigateur web.",
+        salesbook: false,
+        wa: false,
+        boss: false
+      },
+      {
+        scene: 'cashier',
+        sub: "🏪 En boutique : La caissière saisit les ventes et crédits sur le <span class='gold'>Cahier du Jour</span> en 5s !",
+        voice: "Au comptoir de la boutique, la caissière enregistre chaque vente et chaque crédit client sur le Cahier du Jour digital en cinq secondes chrono. Fini les vieux cahiers papier raturés ou perdus.",
+        salesbook: true,
+        wa: false,
+        boss: false
+      },
+      {
+        scene: 'cashier',
+        sub: "📲 Un rappel <span class='gold'>WhatsApp automatique</span> part avec le reçu et le lien Wave / MoMo !",
+        voice: "À l'échéance convenue, un rappel WhatsApp poli et personnalisé part automatiquement au client avec son reçu officiel et le lien de paiement direct par Wave ou Mobile Money.",
+        salesbook: false,
+        wa: true,
+        boss: false
+      },
+      {
+        scene: 'boss',
+        sub: "👑 En fin de journée : Le patron reçoit la <span class='gold'>Clôture de Caisse</span> et suit ses <span class='gold'>2 276 977 FCFA</span> !",
+        voice: "En fin de journée, l'application compile la clôture de caisse et l'envoie automatiquement au patron. Même depuis chez vous, à l'hôtel ou en voyage, vous recevez le journal complet et contrôlez vos deux millions deux cent soixante-seize mille francs CFA en direct.",
+        salesbook: false,
+        wa: false,
+        boss: true
+      },
+      {
+        scene: 'boss',
+        sub: "👉 Cliquez sur le bouton vert ci-dessous pour <span class='gold'>ouvrir &amp; tester CréditTrack PRO</span> !",
+        voice: "Ne laissez plus vos bénéfices dehors. Cliquez sur le bouton vert juste en dessous de la vidéo pour ouvrir et installer CréditTrack PRO gratuitement dès aujourd'hui.",
+        salesbook: false,
+        wa: false,
+        boss: true
+      }
+    ];
+
+    let currentIdx = 0;
+    let isPlaying = false;
+    let autoTimer = null;
+    const SECONDS_PER_SCENE = 9;
+
+    // AUDIO CONTEXT & SYNTHÈSE VOCALE FIABLE
+    let audioCtx = null;
+    function initAudio() {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+      } catch (e) {}
+    }
+
+    function playTone(freq = 600, duration = 0.2) {
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playVoiceRobust(text) {
+      playTone(520, 0.15); // Bip sonore confirmant la lecture audio
+      try {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.resume();
+          const u = new SpeechSynthesisUtterance(text);
+          u.lang = 'fr-FR';
+          u.rate = 0.95;
+          u.volume = 1.0;
+
+          // Détection voix FR
+          const voices = window.speechSynthesis.getVoices();
+          const fr = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
+          if (fr) u.voice = fr;
+
+          window.speechSynthesis.speak(u);
+        }
+      } catch (e) {}
+    }
+
+    function togglePlay() {
+      initAudio();
+      if (isPlaying) {
+        pauseDemo();
+      } else {
+        startDemo();
+      }
+    }
+
+    function startDemo() {
+      isPlaying = true;
+      document.getElementById('btnPlay').textContent = '❚❚ Pause';
+      renderStep(currentIdx);
+      startTimer();
+    }
+
+    function pauseDemo() {
+      isPlaying = false;
+      document.getElementById('btnPlay').textContent = '▶ Reprendre la Présentation';
+      clearInterval(autoTimer);
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
+    function startTimer() {
+      clearInterval(autoTimer);
+      autoTimer = setInterval(() => {
+        if (currentIdx < videoTimeline.length - 1) {
+          currentIdx++;
+          renderStep(currentIdx);
+        } else {
+          pauseDemo();
+          document.getElementById('btnPlay').textContent = '🔄 Revoir la Présentation';
+          currentIdx = 0;
+        }
+      }, SECONDS_PER_SCENE * 1000);
+    }
+
+    function nextStep() {
+      if (currentIdx < videoTimeline.length - 1) {
+        currentIdx++;
+        renderStep(currentIdx);
+        if (isPlaying) startTimer();
+      }
+    }
+
+    function prevStep() {
+      if (currentIdx > 0) {
+        currentIdx--;
+        renderStep(currentIdx);
+        if (isPlaying) startTimer();
+      }
+    }
+
+    function renderStep(idx) {
+      currentIdx = idx;
+      const item = videoTimeline[idx];
+
+      const pct = ((idx + 1) / videoTimeline.length) * 100;
+      document.getElementById('timelineProgress').style.width = pct + '%';
+
+      document.getElementById('sceneCashier').classList.toggle('active', item.scene === 'cashier');
+      document.getElementById('sceneBoss').classList.toggle('active', item.scene === 'boss');
+
+      document.getElementById('cardSalesbook').classList.toggle('show', item.salesbook);
+      document.getElementById('cardWhatsApp').classList.toggle('show', item.wa);
+      document.getElementById('cardBoss').classList.toggle('show', item.boss);
+
+      document.getElementById('subtitlesBox').innerHTML = item.sub;
+
+      playVoiceRobust(item.voice);
+    }
+  </script>
+</body>
+</html>
