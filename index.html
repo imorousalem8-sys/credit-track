@@ -68,7 +68,7 @@
 
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260830_v4.7.0_backup_alerts";
+      const CURRENT_BUILD = "20260830_v4.7.1_logo_alerts_fix";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('caches' in window) {
@@ -94,9 +94,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260830_v4.7.0_backup_alerts" defer></script>
-  <script src="app.js?v=20260830_v4.7.0_backup_alerts" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260830_v4.7.0_backup_alerts">
+  <script src="dataStore.js?v=20260830_v4.7.1_logo_alerts_fix" defer></script>
+  <script src="app.js?v=20260830_v4.7.1_logo_alerts_fix" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260830_v4.7.1_logo_alerts_fix">
 </head>
 <body class="is-landing-mode">
 
@@ -1049,8 +1049,8 @@
       </div>
 
       <div class="sidebar-user-footer">
-        <div style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;" onclick="openAuthModal('register')">
-          <div class="user-avatar-circle" id="sidebar-avatar-initials">AK</div>
+        <div style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;" onclick="switchMenu('menu-settings')">
+          <div class="user-avatar-circle" id="sidebar-avatar-initials">IS</div>
           <div class="user-info-text">
             <div class="user-name-title" id="sidebar-user-name">Mon Compte</div>
             <div class="user-role-sub" id="sidebar-user-plan-badge" style="color:#10B981;font-weight:700;">Essai 3 Mois Actif</div>
@@ -1113,7 +1113,7 @@
             <span id="header-notif-count" class="header-notif-count" style="display:none;">0</span>
           </div>
 
-          <div class="header-user-avatar" onclick="switchMenu('menu-settings')">AK</div>
+          <div class="header-user-avatar" id="header-user-avatar" onclick="switchMenu('menu-settings')">IS</div>
         </div>
       </header>
 
@@ -1727,6 +1727,27 @@
             <!-- Panel 1: Mon Commerce -->
             <div class="card settings-panel" id="settings-panel-company">
               <div class="card-header"><span class="card-title" data-i18n="settingsCompanyTitle">Informations de Mon Commerce</span></div>
+
+              <!-- Section Logo de l'Entreprise / Boutique -->
+              <div style="background:#F8FAFC;border:1.5px dashed #CBD5E1;border-radius:12px;padding:16px;margin-bottom:16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <div id="setting-logo-preview" style="width:60px;height:60px;border-radius:50%;background:#EFF6FF;border:2px solid #2563EB;display:flex;align-items:center;justify-content:center;color:#2563EB;font-weight:900;font-size:1.2rem;overflow:hidden;flex-shrink:0;">
+                  IS
+                </div>
+                <div style="flex:1;min-width:200px;">
+                  <strong style="font-size:0.88rem;color:#0F172A;display:block;margin-bottom:2px;">Logo de votre Boutique / Entreprise</strong>
+                  <p style="font-size:0.75rem;color:#64748B;margin:0 0 8px 0;">Affiché sur la barre latérale, l'en-tête et les reçus de caisse.</p>
+                  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <input type="file" id="setting-logo-file-input" accept="image/*" style="display:none;" onchange="handleBusinessLogoUpload(event)">
+                    <button type="button" class="btn btn-outline" style="padding:6px 12px;font-size:0.78rem;background:#fff;display:flex;align-items:center;gap:6px;" onclick="document.getElementById('setting-logo-file-input').click()">
+                      <i data-lucide="image" style="width:14px;height:14px;color:#2563EB;"></i> <span>Changer le Logo</span>
+                    </button>
+                    <button type="button" id="btn-remove-logo" class="btn btn-outline" style="padding:6px 10px;font-size:0.78rem;color:#EF4444;border-color:#FCA5A5;display:none;align-items:center;gap:4px;" onclick="removeBusinessLogo()">
+                      <i data-lucide="trash-2" style="width:13px;height:13px;"></i> <span>Retirer</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
               <div class="form-group">
                 <label class="form-label" data-i18n="companyName">Nom du Magasin / Entreprise</label>
                 <input type="text" class="form-control" placeholder="Ex: Mon Entreprise / Magasin" id="setting-company-input">
@@ -3319,43 +3340,43 @@
        MODALE : CENTRE D'ALERTES & ÉCHÉANCES EN RETARD (RELANCES GROUPÉES)
   ============================================================ -->
   <div class="modal-overlay" id="modal-overdue-alerts">
-    <div class="modal-card modal-card-large" style="max-width:720px;">
-      <div class="card-header" style="border-bottom:1px solid #E2E8F0;padding-bottom:14px;">
+    <div class="modal-card" style="max-width:640px;width:100%;padding:0;overflow:hidden;border-radius:16px;box-shadow:0 25px 50px -12px rgba(0,0,0,0.35);margin:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #E2E8F0;background:#FFFFFF;">
         <div style="display:flex;align-items:center;gap:10px;">
-          <div style="width:40px;height:40px;border-radius:10px;background:#FEE2E2;color:#EF4444;display:flex;align-items:center;justify-content:center;">
-            <i data-lucide="bell-ring" style="width:22px;height:22px;"></i>
+          <div style="width:38px;height:38px;border-radius:10px;background:#FEE2E2;color:#EF4444;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i data-lucide="bell-ring" style="width:20px;height:20px;"></i>
           </div>
           <div>
-            <h3 class="card-title" style="margin:0;font-size:1.15rem;font-weight:800;color:#0F172A;">Centre d'Alertes &amp; Créances en Retard</h3>
-            <p style="margin:2px 0 0 0;font-size:0.78rem;color:#64748B;">Détecte automatiquement les clients devant être relancés immédiatement.</p>
+            <h3 style="margin:0;font-size:1.05rem;font-weight:800;color:#0F172A;">Centre d'Alertes &amp; Créances en Retard</h3>
+            <p style="margin:2px 0 0 0;font-size:0.75rem;color:#64748B;">Détecte automatiquement les clients à relancer immédiatement.</p>
           </div>
         </div>
         <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-overdue-alerts')">✕</button>
       </div>
 
-      <div style="padding:18px 22px;">
+      <div style="padding:18px 20px;max-height:calc(85vh - 80px);overflow-y:auto;">
         <!-- Résumé synthétique des alertes -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:12px;margin-bottom:16px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
           <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:10px;padding:12px 14px;">
-            <div style="font-size:0.75rem;font-weight:700;color:#991B1B;text-transform:uppercase;">Créances en Retard</div>
-            <div id="alerts-modal-total-overdue" style="font-size:1.35rem;font-weight:900;color:#DC2626;margin-top:2px;">0 FCFA</div>
+            <div style="font-size:0.72rem;font-weight:700;color:#991B1B;text-transform:uppercase;">Créances en Retard</div>
+            <div id="alerts-modal-total-overdue" style="font-size:1.25rem;font-weight:900;color:#DC2626;margin-top:2px;">0 FCFA</div>
           </div>
           <div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;">
-            <div style="font-size:0.75rem;font-weight:700;color:#1E40AF;text-transform:uppercase;">Clients à Relancer</div>
-            <div id="alerts-modal-client-count" style="font-size:1.35rem;font-weight:900;color:#2563EB;margin-top:2px;">0 client(s)</div>
+            <div style="font-size:0.72rem;font-weight:700;color:#1E40AF;text-transform:uppercase;">Clients à Relancer</div>
+            <div id="alerts-modal-client-count" style="font-size:1.25rem;font-weight:900;color:#2563EB;margin-top:2px;">0 client(s)</div>
           </div>
         </div>
 
         <!-- Liste interactive des clients en retard -->
-        <div style="max-height:300px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:16px;">
-          <table class="custom-table" style="margin:0;">
+        <div class="table-responsive" style="max-height:260px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:10px;margin-bottom:16px;">
+          <table class="custom-table" style="margin:0;width:100%;">
             <thead style="position:sticky;top:0;background:#F8FAFC;z-index:2;">
               <tr>
                 <th>Client</th>
                 <th>Téléphone</th>
                 <th>Montant Dû</th>
                 <th>Statut</th>
-                <th style="text-align:right;">Actions Immédiates</th>
+                <th style="text-align:right;">Actions</th>
               </tr>
             </thead>
             <tbody id="alerts-modal-table-body">
@@ -3366,9 +3387,9 @@
 
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
           <button type="button" class="btn btn-outline" onclick="closeModal('modal-overdue-alerts')">Fermer</button>
-          <button type="button" class="btn btn-primary" onclick="closeModal('modal-overdue-alerts'); switchMenu('menu-8');" style="display:flex;align-items:center;gap:6px;">
-            <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
-            <span>Accéder au Centre de Rappels WhatsApp</span>
+          <button type="button" class="btn btn-primary" onclick="closeModal('modal-overdue-alerts'); switchMenu('menu-8');" style="display:flex;align-items:center;gap:6px;font-size:0.84rem;">
+            <i data-lucide="message-circle" style="width:15px;height:15px;"></i>
+            <span>Centre de Rappels WhatsApp</span>
           </button>
         </div>
       </div>

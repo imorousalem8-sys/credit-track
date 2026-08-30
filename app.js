@@ -835,6 +835,7 @@ const AppState = {
   businessName: localStorage.getItem('bizName') || localStorage.getItem('businessName') || '',
   businessAddress: localStorage.getItem('bizAddress') || localStorage.getItem('businessAddress') || '',
   businessPhone: localStorage.getItem('bizPhone') || localStorage.getItem('businessPhone') || '',
+  businessLogo: localStorage.getItem('businessLogo') || '',
   userName: localStorage.getItem('userName') || '',
   userRole: localStorage.getItem('userRole') || 'Gérant',
   activeClientInModal: null,
@@ -1266,15 +1267,23 @@ function restoreSavedState() {
 
   const savedUserId = localStorage.getItem('user_id');
   const savedEmail = localStorage.getItem('userEmail');
+  const savedName = localStorage.getItem('userName');
   const activeView = localStorage.getItem('activeView');
   const activeMenu = localStorage.getItem('activeMenu') || 'menu-2';
+
+  if (savedName) {
+    AppState.userName = savedName;
+  } else if (savedEmail) {
+    AppState.userName = savedEmail.split('@')[0];
+  }
+
+  updateUserProfileUI();
 
   if (savedUserId && savedEmail && activeView === 'workspace') {
     AppState.user.id = savedUserId;
     AppState.user.email = savedEmail;
     AppState.user.businessName = AppState.businessName || '';
     AppState.user.planTier = localStorage.getItem('userPlan') || 'trial_3_months';
-    AppState.userName = savedEmail.split('@')[0];
     updateUserPlanBadgeUI();
     openAppWorkspace(activeMenu);
   } else {
@@ -1646,6 +1655,156 @@ window.switchSettingsTab = function(tab) {
   }
 };
 
+// --------------------------------------------------------------------------
+// GESTION DYNAMIQUE DU PROFIL UTILISATEUR & DU LOGO D'ENTREPRISE
+// --------------------------------------------------------------------------
+window.getUserInitials = function(name, email) {
+  const str = (name || '').trim();
+  if (str) {
+    // Cas spécial ou prénom + nom (ex: "Imorou Salem" => "IS", "Salem" => "SL")
+    const words = str.split(/[\s_-]+/).filter(Boolean);
+    if (words.length >= 2) {
+      return (words[0][0] + words[1][0]).toUpperCase();
+    } else if (words.length === 1 && words[0].length >= 2) {
+      return (words[0][0] + words[0][1]).toUpperCase();
+    } else if (words.length === 1) {
+      return words[0][0].toUpperCase();
+    }
+  }
+  if (email) {
+    const prefix = email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ');
+    const eWords = prefix.split(' ').filter(Boolean);
+    if (eWords.length >= 2) return (eWords[0][0] + eWords[1][0]).toUpperCase();
+    if (eWords.length === 1 && eWords[0].length >= 2) return (eWords[0][0] + eWords[0][1]).toUpperCase();
+  }
+  return "IS";
+};
+
+window.updateUserProfileUI = function() {
+  const currentName = AppState.userName || AppState.businessName || 'Imorou Salem';
+  const initials = getUserInitials(AppState.userName || AppState.businessName, AppState.user?.email || '');
+  const logo = AppState.businessLogo || localStorage.getItem('businessLogo') || '';
+
+  // 1. Mise à jour du nom utilisateur en bas de sidebar
+  const sbName = document.getElementById('sidebar-user-name');
+  if (sbName) sbName.textContent = currentName;
+
+  // 2. Avatar de la barre latérale (Logo ou Initiales)
+  const sbAvatar = document.getElementById('sidebar-avatar-initials');
+  if (sbAvatar) {
+    if (logo) {
+      sbAvatar.innerHTML = `<img src="${logo}" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      sbAvatar.style.padding = '0';
+      sbAvatar.style.overflow = 'hidden';
+    } else {
+      sbAvatar.textContent = initials;
+      sbAvatar.style.padding = '';
+      sbAvatar.style.overflow = '';
+    }
+  }
+
+  // 3. Avatar de l'en-tête supérieur droit
+  const headerAvatar = document.getElementById('header-user-avatar');
+  if (headerAvatar) {
+    if (logo) {
+      headerAvatar.innerHTML = `<img src="${logo}" alt="Logo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      headerAvatar.style.padding = '0';
+      headerAvatar.style.overflow = 'hidden';
+    } else {
+      headerAvatar.textContent = initials;
+      headerAvatar.style.padding = '';
+      headerAvatar.style.overflow = '';
+    }
+  }
+
+  // 4. Prévisualisation du logo dans les paramètres
+  const preview = document.getElementById('setting-logo-preview');
+  const btnRemove = document.getElementById('btn-remove-logo');
+  if (preview) {
+    if (logo) {
+      preview.innerHTML = `<img src="${logo}" alt="Logo Boutique" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      preview.style.border = '2px solid #10B981';
+      if (btnRemove) btnRemove.style.display = 'inline-flex';
+    } else {
+      preview.textContent = initials;
+      preview.style.border = '2px solid #2563EB';
+      if (btnRemove) btnRemove.style.display = 'none';
+    }
+  }
+
+  // 5. Remplir les champs de saisie s'ils existent
+  const compInp = document.getElementById('setting-company-input');
+  const userInp = document.getElementById('setting-username-input');
+  const addrInp = document.getElementById('setting-address-input');
+  const phoneInp = document.getElementById('setting-phone-input');
+
+  if (compInp && !compInp.value) compInp.value = AppState.businessName || '';
+  if (userInp && !userInp.value) userInp.value = AppState.userName || '';
+  if (addrInp && !addrInp.value) addrInp.value = AppState.businessAddress || '';
+  if (phoneInp && !phoneInp.value) phoneInp.value = AppState.businessPhone || '';
+};
+
+window.handleBusinessLogoUpload = function(event) {
+  const file = event.target?.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) {
+    showToast("Veuillez sélectionner un fichier image valide (PNG, JPG, SVG, WebP).", "warning");
+    return;
+  }
+
+  // Limite de taille : 5 Mo max
+  if (file.size > 5 * 1024 * 1024) {
+    showToast("L'image sélectionnée est trop lourde (max 5 Mo).", "warning");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = new Image();
+    img.onload = function() {
+      // Redimensionnement automatique pour optimiser le stockage local (max 256x256)
+      const canvas = document.createElement('canvas');
+      const MAX_SIZE = 256;
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > MAX_SIZE) {
+          height *= MAX_SIZE / width;
+          width = MAX_SIZE;
+        }
+      } else {
+        if (height > MAX_SIZE) {
+          width *= MAX_SIZE / height;
+          height = MAX_SIZE;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const optimizedBase64 = canvas.toDataURL('image/png', 0.9);
+      AppState.businessLogo = optimizedBase64;
+      localStorage.setItem('businessLogo', optimizedBase64);
+
+      updateUserProfileUI();
+      showToast("✓ Logo de votre boutique enregistré avec succès !", "success");
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsText ? reader.readAsDataURL(file) : null;
+};
+
+window.removeBusinessLogo = function() {
+  AppState.businessLogo = '';
+  localStorage.removeItem('businessLogo');
+  updateUserProfileUI();
+  showToast("Logo retiré. Affichage des initiales rétabli.", "info");
+};
+
 window.saveCompanySettings = function() {
   const name = document.getElementById('setting-company-input')?.value.trim();
   const address = document.getElementById('setting-address-input')?.value.trim();
@@ -1659,6 +1818,7 @@ window.saveCompanySettings = function() {
   localStorage.setItem('bizAddress', AppState.businessAddress);
   localStorage.setItem('bizPhone', AppState.businessPhone);
 
+  updateUserProfileUI();
   showToast("✓ Informations de votre commerce enregistrées avec succès !", "success");
 };
 
@@ -1672,6 +1832,7 @@ window.saveUserSettings = function() {
   localStorage.setItem('userName', AppState.userName);
   localStorage.setItem('userRole', AppState.userRole);
 
+  updateUserProfileUI();
   showToast("✓ Profil utilisateur mis à jour !", "success");
 };
 
@@ -3118,44 +3279,7 @@ window.switchSettingsTab = function(tabName) {
   }
 };
 
-window.saveCompanySettings = function() {
-  const name = document.getElementById('setting-company-input')?.value;
-  const addr = document.getElementById('setting-address-input')?.value;
-  const phone = document.getElementById('setting-phone-input')?.value;
 
-  if (name) {
-    AppState.businessName = name;
-    localStorage.setItem('businessName', name);
-  }
-  if (addr) {
-    AppState.businessAddress = addr;
-    localStorage.setItem('businessAddress', addr);
-  }
-  if (phone) {
-    AppState.businessPhone = phone;
-    localStorage.setItem('businessPhone', phone);
-  }
-
-  showToast(AppState.lang === 'en' ? 'Business information saved!' : 'Informations du commerce sauvegardées !');
-};
-
-window.saveUserSettings = function() {
-  const user = document.getElementById('setting-username-input')?.value;
-  const role = document.getElementById('setting-role-input')?.value;
-
-  if (user) {
-    AppState.userName = user;
-    localStorage.setItem('userName', user);
-    const sbName = document.getElementById('sidebar-user-name');
-    if (sbName) sbName.textContent = user;
-  }
-  if (role) {
-    AppState.userRole = role;
-    localStorage.setItem('userRole', role);
-  }
-
-  showToast(AppState.lang === 'en' ? 'User profile saved!' : 'Profil utilisateur mis à jour !');
-};
 
 // --------------------------------------------------------------------------
 // 11. SAUVEGARDE & EXPORTS COMPLETS (JSON & CSV EXCEL)
