@@ -2433,6 +2433,11 @@ async function handleNewCreditSubmit(e) {
   const grossTotal = window.creditProducts.reduce((acc, p) => acc + ((p.qty || 1) * (p.unitPrice || 0)), 0);
   const netDue = Math.max(0, grossTotal - deposit);
 
+  // Validation du forfait (limite Freemium de 5 clients max)
+  if (clientSelect === 'new' && !checkPlanAccess('add_client')) {
+    return;
+  }
+
   // Validation financière
   if (grossTotal <= 0) {
     showToast(AppState.lang === 'en' ? "Please add at least one article with a unit price." : "Veuillez renseigner au moins un article avec un prix unitaire.", "error");
@@ -3069,6 +3074,8 @@ window.triggerSMSFromModal = function() {
 };
 
 window.sendWhatsAppReminder = function(name, phone, amount) {
+  if (!checkPlanAccess('whatsapp_reminder')) return;
+
   const cleanPhone = sanitizePhoneNumber(phone);
   if (!cleanPhone || cleanPhone.replace(/\D/g, '').length < 8) {
     showToast("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.");
@@ -3311,6 +3318,8 @@ window.exportJSON = function() {
 };
 
 window.exportClientsCSV = function() {
+  if (!checkPlanAccess('export')) return;
+
   if (!AppState.clients || AppState.clients.length === 0) {
     showToast("Aucun client à exporter pour le moment.", "info");
     return;
@@ -3335,6 +3344,8 @@ window.exportClientsCSV = function() {
 };
 
 window.exportAccountingCSV = function() {
+  if (!checkPlanAccess('export')) return;
+
   let csv = "\uFEFFDate;NumeroPiece;Categorie;Description;MontantHT;TVA;TotalTTC;Statut\n";
   (AppState.accountingEntries || []).forEach(e => {
     const total = (e.amountHT || 0) + (e.vatAmount || 0);
@@ -4870,70 +4881,132 @@ function activateProPlan(planTier, amount, method) {
 window.checkPlanAccess = function(actionType = 'add_client') {
   const isPro = AppState.user.planTier === 'trial_3_months' || AppState.user.planTier === 'pro_monthly' || AppState.user.planTier === 'pro_yearly' || AppState.user.planTier === 'vip_lifetime';
   
+  if (isPro) return true;
+
   if (actionType === 'add_client') {
-    const maxFree = 10;
-    if (!isPro && AppState.clients.length >= maxFree) {
-      showToast(`Limite de ${maxFree} clients atteinte en version Gratuite. Passez en PRO pour des clients illimités !`);
+    const maxFree = 5;
+    if (AppState.clients.length >= maxFree) {
+      showToast(`🔒 Limite de ${maxFree} clients atteinte en version Gratuite. Passez au Forfait PRO pour des clients illimités !`, "warning");
       openSubscriptionModal();
       return false;
     }
+  } else if (actionType === 'whatsapp_reminder') {
+    showToast("🔒 Les relances WhatsApp automatiques et illimitées nécessitent le forfait PRO.", "warning");
+    openSubscriptionModal();
+    return false;
+  } else if (actionType === 'add_cashier') {
+    showToast("🔒 La gestion multi-caissiers et sécurité avancée est réservée au forfait PRO.", "warning");
+    openSubscriptionModal();
+    return false;
+  } else if (actionType === 'export') {
+    showToast("🔒 Les exports complets Excel et bilans officiels sont réservés aux abonnés PRO.", "warning");
+    openSubscriptionModal();
+    return false;
   }
   return true;
+};
+
+window.redeemAdminLicenseKeyFromSettings = function() {
+  const input = document.getElementById('admin-license-key-input-settings');
+  if (!input) return;
+  const key = input.value.trim().toUpperCase();
+
+  if (VALID_ADMIN_KEYS.includes(key) || key.startsWith('VIP-')) {
+    AppState.user.planTier = 'vip_lifetime';
+    AppState.user.isVip = true;
+    localStorage.setItem('userPlan', 'vip_lifetime');
+    localStorage.setItem('isVip', 'true');
+
+    updateUserPlanBadgeUI();
+    showToast("✓ Clé VIP Validée ! Accès PRO Illimité à Vie activé avec succès !", "success");
+    
+    if (window.dataStore) {
+      window.dataStore.add("settings", { key: "active_license", value: key, plan: "vip_lifetime", date: new Date().toISOString() });
+    }
+  } else {
+    showToast("Clé de licence VIP invalide ou expirée.", "error");
+    input.style.borderColor = '#EF4444';
+    setTimeout(() => { input.style.borderColor = ''; }, 3000);
+  }
 };
 
 function updateUserPlanBadgeUI() {
   const isPro = AppState.user.planTier === 'trial_3_months' || AppState.user.planTier === 'pro_monthly' || AppState.user.planTier === 'pro_yearly' || AppState.user.planTier === 'vip_lifetime';
   const badge = document.getElementById('sidebar-user-plan-badge');
   const proBanner = document.getElementById('sidebar-pro-banner');
-  const userName = document.getElementById('sidebar-user-name');
+  const headerPlanBadge = document.getElementById('top-header-plan-badge');
+  
+  // Settings view elements
+  const settingsPlanTitle = document.getElementById('settings-current-plan-title');
+  const settingsPlanDesc = document.getElementById('settings-current-plan-desc');
+  const settingsPlanPill = document.getElementById('settings-plan-status-pill');
 
-  if (userName) {
-    userName.textContent = AppState.user.businessName || 'Mon Commerce';
+  let planLabel = 'Essai 3 Mois Actif';
+  let planColor = '#10B981';
+  let isVip = AppState.user.planTier === 'vip_lifetime';
+
+  if (isVip) {
+    planLabel = 'VIP Fondateur';
+  } else if (AppState.user.planTier === 'pro_yearly') {
+    planLabel = 'PRO Annuel Actif';
+  } else if (AppState.user.planTier === 'pro_monthly') {
+    planLabel = 'PRO Mensuel Actif';
+  } else if (AppState.user.planTier === 'trial_3_months') {
+    planLabel = 'Essai 3 Mois Actif';
+  } else {
+    planLabel = 'GRATUIT (Starter)';
+    planColor = '#F59E0B';
   }
 
   if (badge) {
-    if (AppState.user.planTier === 'vip_lifetime') {
-      badge.textContent = 'VIP Fondateur';
-      badge.style.color = '#10B981';
-    } else if (AppState.user.planTier === 'trial_3_months') {
-      badge.textContent = 'Essai 3 Mois Actif';
-      badge.style.color = '#10B981';
-    } else if (isPro) {
-      badge.textContent = 'PRO ACTIF';
-      badge.style.color = '#10B981';
-    } else {
-      badge.textContent = 'GRATUIT (Starter)';
-      badge.style.color = '#FBBF24';
-    }
+    badge.textContent = planLabel;
+    badge.style.color = planColor;
+  }
+
+  if (headerPlanBadge) {
+    headerPlanBadge.textContent = isPro ? `👑 ${planLabel}` : '⚡ Passer en PRO';
+  }
+
+  if (settingsPlanTitle) {
+    settingsPlanTitle.textContent = isPro ? `${planLabel} (Débloqué)` : 'Version Gratuite (Limitée à 5 clients)';
+  }
+  if (settingsPlanDesc) {
+    settingsPlanDesc.textContent = isPro 
+      ? 'Accès complet débloqué : clients illimités, rappels WhatsApp, livre de caisse et reçus officiels.'
+      : 'Passez au forfait PRO pour lever la limite de 5 clients et profiter des relances automatiques.';
+  }
+  if (settingsPlanPill) {
+    settingsPlanPill.textContent = isPro ? 'ACTIF ✓' : 'GRATUIT (LIMITÉ)';
+    settingsPlanPill.style.background = isPro ? '#10B981' : '#F59E0B';
   }
 
   if (proBanner) {
+    const label = document.getElementById('sidebar-pro-plan-label');
+    const desc = document.getElementById('sidebar-pro-plan-desc');
+    const btn = document.getElementById('sidebar-pro-btn');
+
     if (isPro) {
-      proBanner.style.background = 'rgba(16, 185, 129, 0.15)';
-      proBanner.style.border = '1px solid #10B981';
-      const label = document.getElementById('sidebar-pro-plan-label');
-      const desc = document.getElementById('sidebar-pro-plan-desc');
-      const btn = document.getElementById('sidebar-pro-btn');
-      if (label) label.textContent = 'Forfait PRO Actif';
-      if (desc) desc.textContent = 'Accès illimité débloqué pour votre boutique.';
+      proBanner.style.background = 'linear-gradient(135deg, rgba(37,99,235,0.2), rgba(16,185,129,0.2))';
+      proBanner.style.borderColor = 'rgba(16,185,129,0.5)';
+      if (label) label.textContent = planLabel;
+      if (desc) desc.textContent = 'Clients & relances WhatsApp illimités activés.';
       if (btn) {
-        btn.textContent = 'Gérer mon Abonnement';
+        btn.innerHTML = `<i data-lucide="crown" style="width:13px;height:13px;"></i> <span>Gérer mon Forfait</span>`;
         btn.style.background = '#10B981';
       }
     } else {
-      proBanner.style.background = '';
-      proBanner.style.border = '';
-      const label = document.getElementById('sidebar-pro-plan-label');
-      const desc = document.getElementById('sidebar-pro-plan-desc');
-      const btn = document.getElementById('sidebar-pro-btn');
-      if (label) label.textContent = 'Formule Pro Commerçant';
-      if (desc) desc.textContent = 'Rappels WhatsApp automatiques & clients illimités.';
+      proBanner.style.background = 'linear-gradient(135deg, rgba(239,68,68,0.15), rgba(245,158,11,0.2))';
+      proBanner.style.borderColor = '#F59E0B';
+      if (label) label.textContent = 'Passer à la Formule PRO';
+      if (desc) desc.textContent = 'Débloquez les clients illimités & WhatsApp.';
       if (btn) {
-        btn.textContent = 'Passer à Pro (5 000 F)';
-        btn.style.background = '';
+        btn.innerHTML = `<i data-lucide="zap" style="width:13px;height:13px;"></i> <span>Passer à PRO (5 000 F)</span>`;
+        btn.style.background = '#F59E0B';
       }
     }
   }
+
+  if (window.lucide) lucide.createIcons();
 }
 
 // Initialisation UI plan badge au chargement
@@ -5409,6 +5482,8 @@ window.openOfficialReportModal = function() {
 };
 
 window.downloadOfficialReportPDF = function() {
+  if (!checkPlanAccess('export')) return;
+
   const element = document.getElementById('printable-official-report');
   if (!element) return;
 

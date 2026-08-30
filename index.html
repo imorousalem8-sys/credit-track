@@ -68,7 +68,7 @@
 
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260830_v4.7.1_logo_alerts_fix";
+      const CURRENT_BUILD = "20260830_v4.8.0_subscription_paywall";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('caches' in window) {
@@ -94,9 +94,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260830_v4.7.1_logo_alerts_fix" defer></script>
-  <script src="app.js?v=20260830_v4.7.1_logo_alerts_fix" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260830_v4.7.1_logo_alerts_fix">
+  <script src="dataStore.js?v=20260830_v4.8.0_subscription_paywall" defer></script>
+  <script src="app.js?v=20260830_v4.8.0_subscription_paywall" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260830_v4.8.0_subscription_paywall">
 </head>
 <body class="is-landing-mode">
 
@@ -1048,6 +1048,23 @@
         <i data-lucide="chevron-right" style="width:16px;height:16px;color:#94A3B8;"></i>
       </div>
 
+      <!-- Widget Forfait PRO dans la Sidebar -->
+      <div id="sidebar-pro-banner" style="margin:10px 14px;background:linear-gradient(135deg, rgba(37,99,235,0.2), rgba(245,158,11,0.2));border:1.5px solid rgba(245,158,11,0.5);border-radius:12px;padding:12px;cursor:pointer;" onclick="openSubscriptionModal()">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <i data-lucide="crown" style="width:16px;height:16px;color:#F59E0B;"></i>
+            <strong id="sidebar-pro-plan-label" style="font-size:0.8rem;color:#FBBF24;text-transform:uppercase;">Essai PRO 3 Mois</strong>
+          </div>
+          <span style="background:#10B981;color:#fff;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:4px;">ACTIF</span>
+        </div>
+        <p id="sidebar-pro-plan-desc" style="font-size:0.72rem;color:rgba(255,255,255,0.85);margin:0 0 8px 0;line-height:1.35;">
+          Clients &amp; relances WhatsApp illimités activés.
+        </p>
+        <button type="button" id="sidebar-pro-btn" class="btn" style="background:#F59E0B;color:#0F172A;font-weight:800;font-size:0.75rem;padding:6px 10px;width:100%;border:none;border-radius:6px;display:flex;align-items:center;justify-content:center;gap:4px;">
+          <i data-lucide="crown" style="width:13px;height:13px;"></i> <span>Gérer mon Forfait</span>
+        </button>
+      </div>
+
       <div class="sidebar-user-footer">
         <div style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;" onclick="switchMenu('menu-settings')">
           <div class="user-avatar-circle" id="sidebar-avatar-initials">IS</div>
@@ -1097,6 +1114,12 @@
         </div>
 
         <div class="header-right-actions">
+          <!-- Bouton Rapide Forfait PRO -->
+          <button type="button" onclick="openSubscriptionModal()" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1px solid #F59E0B;color:#92400E;padding:6px 12px;border-radius:20px;font-size:0.78rem;font-weight:800;cursor:pointer;" title="Gérer mon abonnement">
+            <i data-lucide="crown" style="width:14px;height:14px;color:#D97706;"></i>
+            <span id="top-header-plan-badge">👑 Forfait PRO</span>
+          </button>
+
           <!-- Switcher Rapide de Langue Header -->
           <div class="header-lang-switcher" onclick="toggleLanguageQuick()" title="Changer la langue / Switch language">
             <span id="header-lang-badge">🇫🇷 FR</span>
@@ -1712,6 +1735,9 @@
                 <button class="btn btn-outline settings-tab-btn" id="tab-btn-currency" onclick="switchSettingsTab('currency')">
                   <i data-lucide="globe" style="width:16px;height:16px;"></i> <span data-i18n="tabCountry">Pays &amp; Devise</span>
                 </button>
+                <button class="btn btn-outline settings-tab-btn" id="tab-btn-subscription" onclick="switchSettingsTab('subscription')" style="background:rgba(245,158,11,0.08);border-color:#F59E0B;color:#B45309;font-weight:800;">
+                  <i data-lucide="crown" style="width:16px;height:16px;color:#F59E0B;"></i> <span>Abonnements &amp; Forfaits PRO</span>
+                </button>
                 <button class="btn btn-outline settings-tab-btn" id="tab-btn-backup" onclick="switchSettingsTab('backup')">
                   <i data-lucide="download" style="width:16px;height:16px;"></i> <span data-i18n="tabBackup">Sauvegarde &amp; Export</span>
                 </button>
@@ -1871,6 +1897,94 @@
                   </div>
                 </div>
               </div>
+            </div>
+
+            <!-- Panel 4: Abonnements & Forfaits PRO -->
+            <div class="card settings-panel" id="settings-panel-subscription" style="display:none;">
+              <div class="card-header">
+                <div>
+                  <span class="card-title" style="display:flex;align-items:center;gap:8px;">
+                    <i data-lucide="crown" style="width:20px;height:20px;color:#F59E0B;"></i>
+                    <span>Abonnements &amp; Forfaits PRO</span>
+                  </span>
+                  <p style="font-size:0.8rem;color:#64748B;margin:2px 0 0 0;">Débloquez les fonctionnalités illimitées pour développer votre commerce.</p>
+                </div>
+              </div>
+
+              <!-- Statut Actuel du Forfait -->
+              <div style="background:linear-gradient(135deg, #0F172A, #1E293B);color:#FFFFFF;border-radius:14px;padding:18px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+                <div>
+                  <span style="font-size:0.75rem;color:#FBBF24;text-transform:uppercase;font-weight:700;">Votre Forfait Actuel</span>
+                  <h3 id="settings-current-plan-title" style="margin:4px 0 2px 0;font-size:1.3rem;font-weight:800;color:#FFFFFF;">Essai Offert 3 Mois (Actif)</h3>
+                  <p id="settings-current-plan-desc" style="margin:0;font-size:0.8rem;color:rgba(255,255,255,0.75);">Accès complet à toutes les fonctionnalités inclus sans restriction.</p>
+                </div>
+                <span id="settings-plan-status-pill" style="background:#10B981;color:#FFFFFF;padding:6px 14px;border-radius:20px;font-size:0.8rem;font-weight:800;">ACTIF ✓</span>
+              </div>
+
+              <!-- Grille des 2 Forfaits PRO -->
+              <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:20px;">
+                
+                <!-- FORFAIT 1 : PRO MENSUEL -->
+                <div style="background:#F8FAFC;border:2px solid #E2E8F0;border-radius:14px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;">
+                  <div>
+                    <div style="font-size:0.78rem;font-weight:800;color:#2563EB;text-transform:uppercase;">Forfait Sans Engagement</div>
+                    <h3 style="font-size:1.25rem;font-weight:800;color:#0F172A;margin:4px 0;">PRO Mensuel</h3>
+                    <div style="display:flex;align-items:baseline;gap:4px;margin:10px 0 14px 0;">
+                      <span style="font-size:1.8rem;font-weight:800;color:#0F172A;">5 000</span>
+                      <span style="font-weight:700;color:#64748B;font-size:0.85rem;">FCFA / mois</span>
+                    </div>
+                    <ul style="list-style:none;padding:0;margin:0;font-size:0.82rem;color:#334155;line-height:1.8;">
+                      <li>✓ <strong>Clients &amp; Dettes illimités</strong></li>
+                      <li>✓ <strong>Rappels WhatsApp &amp; SMS automatiques</strong></li>
+                      <li>✓ <strong>Reçus PDF &amp; Bilans comptables complets</strong></li>
+                      <li>✓ <strong>Gestion multi-caissiers &amp; livre de caisse</strong></li>
+                    </ul>
+                  </div>
+                  <button type="button" class="btn btn-primary" style="width:100%;margin-top:16px;padding:12px;font-weight:800;" onclick="triggerSaaSPayment('pro_monthly', 5000)">
+                    Choisir PRO Mensuel (5 000 F)
+                  </button>
+                </div>
+
+                <!-- FORFAIT 2 : PRO ANNUEL -->
+                <div style="background:linear-gradient(145deg, #0F172A, #1E293B);border:2px solid #F59E0B;border-radius:14px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;box-shadow:0 10px 25px rgba(245,158,11,0.15);position:relative;">
+                  <div style="position:absolute;top:-12px;right:18px;background:#F59E0B;color:#0F172A;font-weight:800;font-size:0.7rem;padding:4px 10px;border-radius:20px;text-transform:uppercase;">
+                    Économisez 25%
+                  </div>
+                  <div>
+                    <div style="font-size:0.78rem;font-weight:700;color:#FBBF24;text-transform:uppercase;">Forfait Recommandé</div>
+                    <h3 style="font-size:1.25rem;font-weight:800;color:#fff;margin:4px 0;">PRO Annuel</h3>
+                    <div style="display:flex;align-items:baseline;gap:4px;margin:10px 0 14px 0;">
+                      <span style="font-size:1.8rem;font-weight:800;color:#fff;">45 000</span>
+                      <span style="font-weight:700;color:rgba(255,255,255,0.7);font-size:0.85rem;">FCFA / an</span>
+                    </div>
+                    <ul style="list-style:none;padding:0;margin:0;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.8;">
+                      <li>✓ <strong>Tous les avantages PRO pendant 1 an</strong></li>
+                      <li>✓ <strong>3 Mois Gratuits offerts</strong></li>
+                      <li>✓ <strong>Support VIP Prioritaire 24/7</strong></li>
+                      <li>✓ <strong>Période de grâce étendue (7 jours)</strong></li>
+                    </ul>
+                  </div>
+                  <button type="button" class="btn" style="background:#F59E0B;color:#0F172A;width:100%;margin-top:16px;padding:12px;font-weight:800;border:none;" onclick="triggerSaaSPayment('pro_yearly', 45000)">
+                    Choisir PRO Annuel (45 000 F)
+                  </button>
+                </div>
+
+              </div>
+
+              <!-- Section Clé VIP Admin / Partenaire -->
+              <div style="background:#F0FDF4;border:1px dashed #22C55E;border-radius:12px;padding:14px 16px;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <i data-lucide="key-round" style="width:16px;height:16px;color:#16A34A;"></i>
+                  <strong style="font-size:0.85rem;color:#166534;">Vous possédez une Clé de Licence Partenaire / VIP ?</strong>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <input type="text" id="admin-license-key-input-settings" class="form-control" placeholder="ex: VIP-SALEM-PRO-2026" style="background:#fff;border-color:#86EFAC;font-weight:700;text-transform:uppercase;">
+                  <button type="button" class="btn" style="background:#16A34A;color:#fff;font-weight:800;padding:0 18px;white-space:nowrap;" onclick="redeemAdminLicenseKeyFromSettings()">
+                    Activer
+                  </button>
+                </div>
+              </div>
+
             </div>
 
             <!-- Panel 5: Confidentialité & Gestion des Cookies -->
