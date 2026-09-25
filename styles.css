@@ -2284,29 +2284,38 @@ body.is-app-mode #app-workspace-layout {
 }
 
 /* ==========================================================================
-   GRILLE DES 6 CASES DE SAISIE DU CODE OTP SÉCURISÉ
+/* ==========================================================================
+   GRILLE DES 6 CASES DE SAISIE DU CODE OTP SÉCURISÉ (RESPONSIVE TOUT ÉCRAN)
    ========================================================================== */
 .otp-inputs-grid {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   justify-content: center;
   align-items: center;
-  margin: 16px 0 20px 0;
+  margin: 16px auto 20px auto;
+  width: 100%;
+  max-width: 360px;
+  box-sizing: border-box;
 }
 
 .otp-digit-input {
-  width: 46px;
-  height: 54px;
+  flex: 1 1 0;
+  width: 100%;
+  min-width: 34px;
+  max-width: 48px;
+  height: 52px;
   border: 2px solid #CBD5E1;
   border-radius: 10px;
   background: #FFFFFF;
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: #0F172A;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   outline: none;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+  padding: 0;
 }
 
 .otp-digit-input:focus {
@@ -2322,11 +2331,15 @@ body.is-app-mode #app-workspace-layout {
 }
 
 @media (max-width: 480px) {
+  .otp-inputs-grid {
+    gap: 5px;
+    max-width: 330px;
+  }
   .otp-digit-input {
-    width: 40px;
+    min-width: 32px;
     height: 48px;
-    font-size: 1.3rem;
-    gap: 6px;
+    font-size: 1.25rem;
+    border-radius: 8px;
   }
 }
 /* ==========================================================================

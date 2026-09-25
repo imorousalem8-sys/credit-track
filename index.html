@@ -8,7 +8,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.fedapay.com https://js.paystack.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://bnkwplwlfnhukevwdcen.supabase.co wss://bnkwplwlfnhukevwdcen.supabase.co https://*.supabase.co https://api.qrserver.com https://credit-track00.vercel.app https://api.paystack.co https://*.paystack.co; frame-src 'self' https://wa.me https://checkout.paystack.com; object-src 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.fedapay.com https://js.paystack.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https: blob:; connect-src 'self' https://bnkwplwlfnhukevwdcen.supabase.co wss://bnkwplwlfnhukevwdcen.supabase.co https://*.supabase.co https://api.qrserver.com https://credit-track00.vercel.app https://api.paystack.co https://*.paystack.co https://api.saspay.me https://*.saspay.me; frame-src 'self' https://wa.me https://checkout.paystack.com https://checkout.saspay.me https://*.saspay.me; object-src 'none';">
   <meta name="google-site-verification" content="google8cd72fa0966109f1">
   <title>CréditTrack PRO - Gestion Facile de Crédits, Caisses &amp; Paiements</title>
   <meta name="description" content="Application simple et puissante pour suivre vos crédits clients, encaisser par Wave / Mobile Money et envoyer des rappels WhatsApp automatiques.">
@@ -68,7 +68,7 @@
 
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20260830_v4.8.0_subscription_paywall";
+      const CURRENT_BUILD = "20260925_v4.9.0_saspay_auth_fix";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('caches' in window) {
@@ -94,9 +94,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20260830_v4.8.0_subscription_paywall" defer></script>
-  <script src="app.js?v=20260830_v4.8.0_subscription_paywall" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20260830_v4.8.0_subscription_paywall">
+  <script src="dataStore.js?v=20260925_v4.9.0_saspay_auth_fix" defer></script>
+  <script src="app.js?v=20260925_v4.9.0_saspay_auth_fix" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20260925_v4.9.0_saspay_auth_fix">
 </head>
 <body class="is-landing-mode">
 
@@ -283,12 +283,20 @@
             
             <!-- 6 CASES NUMÉRIQUES INDÉPENDANTES AVEC FOCUS AUTOMATIQUE -->
             <div class="otp-inputs-grid" id="otp-inputs-container">
-              <input type="text" id="otp-digit-1" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" autofocus required>
-              <input type="text" id="otp-digit-2" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
-              <input type="text" id="otp-digit-3" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
-              <input type="text" id="otp-digit-4" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
-              <input type="text" id="otp-digit-5" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
-              <input type="text" id="otp-digit-6" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required>
+              <input type="text" id="otp-digit-1" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code" autofocus required placeholder="•">
+              <input type="text" id="otp-digit-2" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required placeholder="•">
+              <input type="text" id="otp-digit-3" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required placeholder="•">
+              <input type="text" id="otp-digit-4" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required placeholder="•">
+              <input type="text" id="otp-digit-5" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required placeholder="•">
+              <input type="text" id="otp-digit-6" class="otp-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="off" required placeholder="•">
+            </div>
+
+            <!-- Champ de secours unifié pour copier-coller direct en 1 clic -->
+            <div style="margin-top:10px;text-align:center;">
+              <input type="text" id="otp-unified-input" class="form-control" placeholder="Ou collez ici votre code (6 chiffres)" maxlength="6" inputmode="numeric" pattern="[0-9]*" style="text-align:center;font-size:0.95rem;letter-spacing:4px;font-weight:700;background:#F8FAFC;border:1.5px dashed #94A3B8;padding:8px;max-width:280px;margin:0 auto;display:none;">
+              <button type="button" id="btn-toggle-unified-otp" onclick="toggleUnifiedOtpInput()" style="background:none;border:none;color:#2563EB;font-size:0.75rem;font-weight:600;cursor:pointer;text-decoration:underline;margin-top:6px;">
+                Vous préférez coller le code d'un seul bloc ?
+              </button>
             </div>
           </div>
 
@@ -323,6 +331,17 @@
           <p style="font-size:0.8rem;color:#64748B;margin:2px 0 0 0;">Accédez aux clients illimités, rappels automatiques et bilans comptables complets.</p>
         </div>
         <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-subscription-plans')">✕</button>
+      </div>
+
+      <!-- Bandeau Passerelle SasPay -->
+      <div style="background:#F1F5F9;border-radius:10px;padding:8px 14px;margin:12px 0 6px 0;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div style="display:flex;align-items:center;gap:6px;font-size:0.75rem;font-weight:700;color:#0F172A;">
+          <i data-lucide="shield-check" style="width:16px;height:16px;color:#10B981;"></i>
+          <span>Paiement Sécurisé Panafricain par <strong>SasPay</strong></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:0.72rem;color:#475569;font-weight:600;">
+          <span>📱 MTN MoMo</span> • <span>Moov Flooz</span> • <span>Wave</span> • <span>Orange Money</span> • <span>💳 Visa/Mastercard</span>
+        </div>
       </div>
 
       <div style="padding:20px 0 6px 0;">
@@ -813,6 +832,93 @@
           <p class="bento-text">Suivi rigoureux des flux de recettes et dépenses avec calcul dynamique de la TVA selon le référentiel fiscal SYSCOHADA.</p>
         </div>
 
+      </div>
+    </section>
+
+    <!-- ── SECTION TARIFS TRANSPARENTS AVEC PASSERELLE SASPAY ── -->
+    <section class="lp-features" id="pricing" style="padding-top:40px;padding-bottom:60px;">
+      <div class="lp-section-header">
+        <div class="lp-pill-badge" style="border:1px solid rgba(245,158,11,0.4);background:rgba(245,158,11,0.1);color:#FBBF24;display:inline-flex;margin-bottom:12px;">
+          <span>FORMULES D'ABONNEMENT SAAS</span>
+        </div>
+        <h2 class="lp-section-title">Des Tarifs Clairs, Rentabilisés dès la 1ère Créance</h2>
+        <p class="lp-section-sub">Démarrez avec <strong>3 Mois d'Essai Offerts</strong>. Encaissez et abonnez-vous en toute sérénité par Mobile Money.</p>
+      </div>
+
+      <!-- Grille des Offres -->
+      <div style="max-width:960px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:24px;padding:0 20px;">
+        
+        <!-- CARTE 1 : PRO MENSUEL -->
+        <div style="background:rgba(15,23,42,0.8);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:32px 28px;display:flex;flex-direction:column;justify-content:space-between;backdrop-filter:blur(10px);transition:transform 0.3s ease;">
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:0.8rem;font-weight:800;color:#38BDF8;text-transform:uppercase;letter-spacing:1px;">Formule Souple</span>
+              <span style="background:rgba(56,189,248,0.15);color:#38BDF8;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:20px;">Sans Engagement</span>
+            </div>
+            <h3 style="font-size:1.6rem;font-weight:900;color:#fff;margin:6px 0 12px 0;">PRO Mensuel</h3>
+            <p style="font-size:0.85rem;color:#94A3B8;margin-bottom:20px;line-height:1.5;">Idéal pour les boutiques individuelles et points de vente en phase de décollage.</p>
+            <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:24px;">
+              <span style="font-size:2.4rem;font-weight:900;color:#FFFFFF;letter-spacing:-1px;">5 000</span>
+              <span style="font-size:0.95rem;font-weight:700;color:#94A3B8;">FCFA / mois</span>
+            </div>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.88rem;color:#CBD5E1;display:flex;flex-direction:column;gap:12px;">
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#10B981;"></i> <span><strong>Clients &amp; Dettes illimités</strong></span></li>
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#10B981;"></i> <span>Relances WhatsApp automatiques en 1 clic</span></li>
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#10B981;"></i> <span>Reçus PDF et tickets certifiés sans filigrane</span></li>
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#10B981;"></i> <span>Livre de caisse et balance SYSCOHADA</span></li>
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#10B981;"></i> <span>Mode Hors-Ligne &amp; Sync Cloud automatique</span></li>
+            </ul>
+          </div>
+          <div style="margin-top:32px;">
+            <button class="lp-btn-cta" style="width:100%;padding:14px;font-size:0.95rem;font-weight:800;border-radius:12px;background:#2563EB;color:#fff;box-shadow:0 8px 20px rgba(37,99,235,0.35);cursor:pointer;border:none;" onclick="triggerSaaSPayment('pro_monthly', 5000)">
+              Choisir PRO Mensuel (5 000 F) →
+            </button>
+            <div style="text-align:center;margin-top:10px;font-size:0.72rem;color:#64748B;">Paiement sécurisé par SasPay Mobile Money</div>
+          </div>
+        </div>
+
+        <!-- CARTE 2 : PRO ANNUEL (HIGHLIGHT) -->
+        <div style="background:linear-gradient(160deg, #1E1B4B 0%, #0F172A 100%);border:2px solid #F59E0B;border-radius:20px;padding:32px 28px;display:flex;flex-direction:column;justify-content:space-between;position:relative;box-shadow:0 20px 50px rgba(245,158,11,0.2);">
+          <div style="position:absolute;top:-14px;right:24px;background:linear-gradient(135deg, #F59E0B, #D97706);color:#0F172A;font-weight:900;font-size:0.75rem;padding:5px 14px;border-radius:20px;text-transform:uppercase;letter-spacing:0.5px;box-shadow:0 4px 12px rgba(245,158,11,0.4);">
+            ★ Économisez 25% + 3 Mois Offerts
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:0.8rem;font-weight:800;color:#FBBF24;text-transform:uppercase;letter-spacing:1px;">Offre Recommandée</span>
+            </div>
+            <h3 style="font-size:1.6rem;font-weight:900;color:#fff;margin:6px 0 12px 0;">PRO Annuel</h3>
+            <p style="font-size:0.85rem;color:#CBD5E1;margin-bottom:20px;line-height:1.5;">La solution complète pour sécuriser votre trésorerie toute l'année au meilleur coût.</p>
+            <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:24px;">
+              <span style="font-size:2.4rem;font-weight:900;color:#FFFFFF;letter-spacing:-1px;">45 000</span>
+              <span style="font-size:0.95rem;font-weight:700;color:#FBBF24;">FCFA / an</span>
+            </div>
+            <ul style="list-style:none;padding:0;margin:0;font-size:0.88rem;color:#E2E8F0;display:flex;flex-direction:column;gap:12px;">
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#F59E0B;"></i> <span><strong>Tous les avantages du Forfait PRO pendant 12 mois</strong></span></li>
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#F59E0B;"></i> <span><strong>Économie de 15 000 FCFA</strong> par rapport au paiement mensuel</span></li>
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#F59E0B;"></i> <span>Gestion multi-caissiers avec rôles cloisonnés</span></li>
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#F59E0B;"></i> <span>Export comptable Excel &amp; Grand-Livre SYSCOHADA</span></li>
+              <li style="display:flex;align-items:center;gap:10px;"><i data-lucide="check-circle" style="width:18px;height:18px;color:#F59E0B;"></i> <span><strong>Support VIP Dédié WhatsApp 7j/7</strong></span></li>
+            </ul>
+          </div>
+          <div style="margin-top:32px;">
+            <button class="lp-btn-primary-glow" style="width:100%;padding:14px;font-size:0.95rem;font-weight:800;border-radius:12px;background:linear-gradient(135deg, #F59E0B, #D97706);color:#0F172A;box-shadow:0 8px 25px rgba(245,158,11,0.4);cursor:pointer;border:none;" onclick="triggerSaaSPayment('pro_yearly', 45000)">
+              Choisir PRO Annuel (45 000 F) →
+            </button>
+            <div style="text-align:center;margin-top:10px;font-size:0.72rem;color:#FBBF24;">Paiement instantané SasPay (MTN, Moov, Wave, Cartes)</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bandeau récapitulatif moyens de paiement -->
+      <div style="max-width:800px;margin:32px auto 0 auto;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;text-align:center;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:#94A3B8;font-weight:600;">
+          <i data-lucide="shield-check" style="width:18px;height:18px;color:#10B981;"></i>
+          <span>Paiements sécurisés par <strong>SasPay</strong></span>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center;font-size:0.75rem;color:#CBD5E1;flex-wrap:wrap;justify-content:center;">
+          <span>📱 MTN MoMo</span> • <span>Moov Flooz</span> • <span>Wave</span> • <span>Orange Money</span> • <span>Celtiis Cash</span> • <span>💳 Cartes Bancaires</span>
+        </div>
       </div>
     </section>
 
