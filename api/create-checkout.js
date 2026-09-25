@@ -54,7 +54,8 @@ export default async function handler(req, res) {
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'User-Agent': 'CreditTrack-SaaS/4.9.0 (Production Payment Gateway)'
       },
       body: JSON.stringify(payload)
     });
