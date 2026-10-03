@@ -3305,6 +3305,15 @@ window.openModal = function(id) {
   const m = document.getElementById(id);
   if (m) {
     m.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    // Fermeture en cliquant sur l'arrière-plan sombre
+    m.onclick = function(e) {
+      if (e.target === m) {
+        window.closeModal(id);
+      }
+    };
+
     setTimeout(() => {
       if (typeof window.restoreAllDraftInputs === 'function') {
         window.restoreAllDraftInputs();
@@ -3316,7 +3325,21 @@ window.openModal = function(id) {
 window.closeModal = function(id) {
   const m = document.getElementById(id);
   if (m) m.classList.remove('active');
+  const anyActive = document.querySelector('.modal-overlay.active');
+  if (!anyActive) {
+    document.body.style.overflow = '';
+  }
 };
+
+// Fermeture universelle des modales avec la touche Échap
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' || e.key === 'Esc') {
+    const activeModal = document.querySelector('.modal-overlay.active');
+    if (activeModal && activeModal.id) {
+      window.closeModal(activeModal.id);
+    }
+  }
+});
 
 // --------------------------------------------------------------------------
 // 11. PARAMÈTRES (MON COMMERCE, UTILISATEURS, BACKUP)

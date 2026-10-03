@@ -93,8 +93,8 @@
     })();
   </script>
   <script src="dataStore.js?v=20261003_v4.9.2_saspay_live" defer></script>
-  <script src="app.js?v=20261003_v4.9.4_prod" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20261003_v4.9.4_prod">
+  <script src="app.js?v=20261003_v4.9.5_fix" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261003_v4.9.5_fix">
 </head>
 <body class="is-landing-mode">
 
@@ -342,7 +342,13 @@
           </div>
         </div>
 
-        <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-subscription-plans')" style="border-radius:10px;padding:6px 10px;color:#64748B;">✕</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button type="button" onclick="closeModal('modal-subscription-plans'); switchMenu('menu-subscription');" class="btn btn-outline" style="border-radius:10px;padding:6px 12px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;color:#2563EB;border-color:#BFDBFE;background:#EFF6FF;cursor:pointer;" title="Ouvrir la page dédiée aux abonnements">
+            <i data-lucide="maximize-2" style="width:14px;height:14px;"></i>
+            <span>Pleine Page</span>
+          </button>
+          <button type="button" class="btn modal-close-btn" onclick="closeModal('modal-subscription-plans')" style="border-radius:10px;width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:#F1F5F9;border:1px solid #E2E8F0;color:#0F172A;font-size:1.1rem;font-weight:900;cursor:pointer;transition:all 0.2s;" title="Fermer la fenêtre (Échap)">✕</button>
+        </div>
       </div>
 
       <!-- Sélecteur de Fréquence (Toggle Mensuel / Annuel) -->

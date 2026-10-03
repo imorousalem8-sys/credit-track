@@ -1,7 +1,7 @@
 {
-  "version": "4.9.4",
-  "build": "20261003-192500",
-  "commit": "fix-toast-subscription-freeze",
-  "timestamp": "2026-10-03T19:25:00.000Z",
-  "builtAt": "2026-10-03 19:25:00"
+  "version": "4.9.5",
+  "build": "20261003-194000",
+  "commit": "fix-modal-overlay-zindex-separation",
+  "timestamp": "2026-10-03T19:40:00.000Z",
+  "builtAt": "2026-10-03 19:40:00"
 }
