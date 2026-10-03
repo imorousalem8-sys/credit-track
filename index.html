@@ -93,8 +93,8 @@
     })();
   </script>
   <script src="dataStore.js?v=20261003_v4.9.2_saspay_live" defer></script>
-  <script src="app.js?v=20261003_v4.9.5_fix" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20261003_v4.9.5_fix">
+  <script src="app.js?v=20261003_v4.9.6_split_checkout" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261003_v4.9.6_split_checkout">
 </head>
 <body class="is-landing-mode">
 
@@ -319,196 +319,201 @@
        MODALE TARIFS & ABONNEMENTS SAAS PRO (SASPAY LIVE + CLÉ VIP)
   ============================================================ -->
   <div class="modal-overlay" id="modal-subscription-plans">
-    <div class="modal-card modal-card-large" style="max-width:820px;border-radius:24px;padding:26px;box-shadow:0 25px 60px rgba(15,23,42,0.45);max-height:92vh;overflow-y:auto;">
+    <div class="modal-card checkout-split-card" style="padding:0 !important;border:none !important;max-width:880px !important;">
       
-      <!-- En-tête Modale Haute Définition -->
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #E2E8F0;padding-bottom:16px;margin-bottom:18px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg, #FEF3C7, #FDE68A);color:#D97706;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(245,158,11,0.25);flex-shrink:0;">
-            <i data-lucide="crown" style="width:26px;height:26px;color:#D97706;"></i>
-          </div>
-          <div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <h2 style="font-size:1.35rem;font-weight:900;color:#0F172A;margin:0;">
-                Abonnement CreditTrack PRO
-              </h2>
-              <span style="font-size:0.72rem;background:#ECFDF5;color:#059669;font-weight:800;padding:3px 10px;border-radius:20px;border:1px solid #A7F3D0;display:inline-flex;align-items:center;gap:4px;">
-                <i data-lucide="shield-check" style="width:12px;height:12px;"></i> SASPAY CERTIFIÉ
-              </span>
-            </div>
-            <p style="font-size:0.82rem;color:#64748B;margin:3px 0 0 0;">
-              Débloquez clients illimités, relances WhatsApp 1-clic, reçus légaux et gestion multi-caissiers.
-            </p>
-          </div>
-        </div>
-
-        <div style="display:flex;align-items:center;gap:8px;">
-          <button type="button" onclick="closeModal('modal-subscription-plans'); switchMenu('menu-subscription');" class="btn btn-outline" style="border-radius:10px;padding:6px 12px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:6px;color:#2563EB;border-color:#BFDBFE;background:#EFF6FF;cursor:pointer;" title="Ouvrir la page dédiée aux abonnements">
-            <i data-lucide="maximize-2" style="width:14px;height:14px;"></i>
-            <span>Pleine Page</span>
-          </button>
-          <button type="button" class="btn modal-close-btn" onclick="closeModal('modal-subscription-plans')" style="border-radius:10px;width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;background:#F1F5F9;border:1px solid #E2E8F0;color:#0F172A;font-size:1.1rem;font-weight:900;cursor:pointer;transition:all 0.2s;" title="Fermer la fenêtre (Échap)">✕</button>
-        </div>
-      </div>
-
-      <!-- Sélecteur de Fréquence (Toggle Mensuel / Annuel) -->
-      <div style="display:flex;justify-content:center;margin-bottom:20px;">
-        <div style="background:#F1F5F9;border-radius:30px;padding:4px;display:inline-flex;align-items:center;gap:4px;border:1px solid #E2E8F0;">
-          <button type="button" id="sub-toggle-monthly" class="sub-toggle-pill" onclick="selectSubModalPlan('pro_monthly')" style="border:none;background:transparent;padding:8px 18px;border-radius:24px;font-size:0.82rem;font-weight:800;color:#475569;cursor:pointer;transition:all 0.2s;">
-            PRO Mensuel (5 000 F)
-          </button>
-          <button type="button" id="sub-toggle-yearly" class="sub-toggle-pill active" onclick="selectSubModalPlan('pro_yearly')" style="border:none;background:#0F172A;color:#FFFFFF;padding:8px 20px;border-radius:24px;font-size:0.82rem;font-weight:800;cursor:pointer;box-shadow:0 2px 8px rgba(15,23,42,0.25);transition:all 0.2s;display:inline-flex;align-items:center;gap:6px;">
-            <span>PRO Annuel (45 000 F)</span>
-            <span style="background:#F59E0B;color:#0F172A;font-size:0.65rem;padding:2px 6px;border-radius:10px;font-weight:900;">-25% + 3 MOIS OFFERTS</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Grille des 2 Cartes Forfaits Interactives -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:16px;margin-bottom:22px;">
+      <div class="checkout-split-grid">
         
-        <!-- CARTE 1 : PRO MENSUEL -->
-        <div id="sub-plan-monthly-card" class="sub-plan-card" onclick="selectSubModalPlan('pro_monthly')" style="background:#F8FAFC;border:2px solid #E2E8F0;border-radius:18px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;position:relative;transition:all 0.2s ease;">
+        <!-- ==========================================
+             PANNEAU GAUCHE (SOMBRE LUXE) : RÉCAPITULATIF
+             ========================================== -->
+        <div class="checkout-side-panel">
           <div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:0.75rem;font-weight:800;color:#2563EB;text-transform:uppercase;letter-spacing:0.5px;">Formule Souple</span>
-              <span id="sub-check-monthly" style="display:none;background:#2563EB;color:#fff;width:20px;height:20px;border-radius:50%;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;">✓</span>
+            <!-- En-tête Produit -->
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+              <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg, #FEF3C7, #FDE68A);color:#D97706;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(245,158,11,0.3);flex-shrink:0;">
+                <i data-lucide="crown" style="width:20px;height:20px;color:#D97706;"></i>
+              </div>
+              <div>
+                <h3 style="font-size:1.15rem;font-weight:900;color:#FFFFFF;margin:0;letter-spacing:-0.3px;">CréditTrack PRO</h3>
+                <span style="font-size:0.7rem;color:#FCD34D;font-weight:700;display:inline-flex;align-items:center;gap:4px;">
+                  <i data-lucide="shield-check" style="width:12px;height:12px;"></i> Licence Officielle
+                </span>
+              </div>
             </div>
-            <h3 style="font-size:1.25rem;font-weight:900;color:#0F172A;margin:2px 0 6px 0;">PRO Mensuel</h3>
-            <div style="display:flex;align-items:baseline;gap:4px;margin:8px 0 14px 0;">
-              <span style="font-size:1.9rem;font-weight:900;color:#0F172A;">5 000</span>
-              <span style="font-weight:700;color:#64748B;font-size:0.85rem;">FCFA / mois</span>
+
+            <!-- Switcher de Forfait Compact Haute Précision -->
+            <div style="margin-bottom:20px;">
+              <div class="checkout-plan-pill-toggle">
+                <button type="button" id="sub-toggle-yearly" class="checkout-plan-pill-btn active" onclick="selectSubModalPlan('pro_yearly')">
+                  <span>PRO Annuel</span>
+                  <span style="background:#F59E0B;color:#0F172A;font-size:0.62rem;padding:2px 6px;border-radius:10px;font-weight:900;">-25%</span>
+                </button>
+                <button type="button" id="sub-toggle-monthly" class="checkout-plan-pill-btn" onclick="selectSubModalPlan('pro_monthly')">
+                  <span>PRO Mensuel</span>
+                </button>
+              </div>
             </div>
-            <ul style="list-style:none;padding:0;margin:0;font-size:0.82rem;color:#334155;line-height:1.75;display:flex;flex-direction:column;gap:6px;">
-              <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:15px;height:15px;color:#10B981;flex-shrink:0;"></i> <span><strong>Clients &amp; Dettes illimités</strong></span></li>
-              <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:15px;height:15px;color:#10B981;flex-shrink:0;"></i> <span>Rappels WhatsApp automatiques en 1 clic</span></li>
-              <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:15px;height:15px;color:#10B981;flex-shrink:0;"></i> <span>Reçus PDF &amp; Bilans sans filigrane</span></li>
-              <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:15px;height:15px;color:#10B981;flex-shrink:0;"></i> <span>Livre de caisse SYSCOHADA certifié</span></li>
+
+            <!-- Affichage du Prix & Fréquence -->
+            <div style="margin-bottom:22px;padding:16px 0;border-top:1px solid rgba(255,255,255,0.08);border-bottom:1px solid rgba(255,255,255,0.08);">
+              <div style="display:flex;align-items:baseline;gap:6px;">
+                <span id="sub-side-amount" style="font-size:2.4rem;font-weight:900;color:#FFFFFF;letter-spacing:-1px;">45 000</span>
+                <span id="sub-side-currency" style="font-size:0.85rem;color:#94A3B8;font-weight:700;">FCFA / an</span>
+              </div>
+              <div id="sub-side-discount-tag" style="margin-top:4px;font-size:0.75rem;color:#10B981;font-weight:700;display:flex;align-items:center;gap:4px;">
+                <i data-lucide="sparkles" style="width:13px;height:13px;"></i> Économisez 15 000 F (3 mois offerts)
+              </div>
+            </div>
+
+            <!-- Liste des Avantages PRO -->
+            <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;font-size:0.82rem;color:#E2E8F0;">
+              <li style="display:flex;align-items:center;gap:8px;">
+                <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#F59E0B;flex-shrink:0;"></i>
+                <span><strong>Clients &amp; Dettes illimités</strong></span>
+              </li>
+              <li style="display:flex;align-items:center;gap:8px;">
+                <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#F59E0B;flex-shrink:0;"></i>
+                <span>Relances WhatsApp automatiques en 1 clic</span>
+              </li>
+              <li style="display:flex;align-items:center;gap:8px;">
+                <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#F59E0B;flex-shrink:0;"></i>
+                <span>Reçus &amp; Bilan SYSCOHADA certifiés</span>
+              </li>
+              <li style="display:flex;align-items:center;gap:8px;">
+                <i data-lucide="check-circle-2" style="width:16px;height:16px;color:#F59E0B;flex-shrink:0;"></i>
+                <span>Support VIP WhatsApp Dédié 7j/7</span>
+              </li>
             </ul>
           </div>
-          <div style="margin-top:16px;padding-top:12px;border-top:1px solid #E2E8F0;text-align:center;">
-            <span style="font-size:0.8rem;font-weight:800;color:#2563EB;">Cliquer pour sélectionner</span>
+
+          <!-- Pied du Panneau Sombre -->
+          <div style="margin-top:24px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;font-size:0.72rem;color:#94A3B8;">
+            <span style="display:flex;align-items:center;gap:4px;">
+              <i data-lucide="lock" style="width:12px;height:12px;color:#10B981;"></i> Chiffrement 256 bits
+            </span>
+            <span style="color:#F59E0B;font-weight:700;">SasPay LIVE</span>
           </div>
         </div>
 
-        <!-- CARTE 2 : PRO ANNUEL (HIGHLIGHT) -->
-        <div id="sub-plan-yearly-card" class="sub-plan-card selected-plan-card" onclick="selectSubModalPlan('pro_yearly')" style="background:linear-gradient(155deg, #0F172A 0%, #1E293B 100%);border:2.5px solid #F59E0B;border-radius:18px;padding:20px;display:flex;flex-direction:column;justify-content:space-between;color:#FFFFFF;cursor:pointer;position:relative;box-shadow:0 12px 30px rgba(245,158,11,0.25);transition:all 0.2s ease;">
-          <div style="position:absolute;top:-12px;right:18px;background:linear-gradient(135deg, #F59E0B, #D97706);color:#0F172A;font-weight:900;font-size:0.68rem;padding:4px 12px;border-radius:20px;text-transform:uppercase;box-shadow:0 4px 10px rgba(245,158,11,0.4);">
-            ★ RECOMMANDÉ (3 MOIS GRATUITS)
-          </div>
-          <div>
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span style="font-size:0.75rem;font-weight:800;color:#FBBF24;text-transform:uppercase;letter-spacing:0.5px;">Forfait Rentabilité Maximale</span>
-              <span id="sub-check-yearly" style="display:inline-flex;background:#F59E0B;color:#0F172A;width:20px;height:20px;border-radius:50%;align-items:center;justify-content:center;font-size:0.75rem;font-weight:900;">✓</span>
+        <!-- ==========================================
+             PANNEAU DROIT (BLANC PUR) : RÈGLEMENT
+             ========================================== -->
+        <div class="checkout-main-panel">
+          
+          <!-- En-tête du Panneau Droit -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+            <div>
+              <h4 style="font-size:1.15rem;font-weight:900;color:#0F172A;margin:0;">Moyen de Règlement</h4>
+              <p style="font-size:0.78rem;color:#64748B;margin:2px 0 0 0;">Sélectionnez votre mode de paiement sécurisé :</p>
             </div>
-            <h3 style="font-size:1.25rem;font-weight:900;color:#FFFFFF;margin:2px 0 6px 0;">PRO Annuel</h3>
-            <div style="display:flex;align-items:baseline;gap:4px;margin:8px 0 14px 0;">
-              <span style="font-size:1.9rem;font-weight:900;color:#FFFFFF;">45 000</span>
-              <span style="font-weight:700;color:rgba(255,255,255,0.7);font-size:0.85rem;">FCFA / an</span>
-              <span style="font-size:0.75rem;color:#FCD34D;margin-left:6px;text-decoration:line-through;opacity:0.8;">60 000 F</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button type="button" onclick="closeModal('modal-subscription-plans'); switchMenu('menu-subscription');" class="btn btn-outline" style="border-radius:10px;padding:5px 10px;font-size:0.72rem;font-weight:700;color:#2563EB;border-color:#BFDBFE;background:#EFF6FF;" title="Ouvrir en plein écran">
+                <i data-lucide="maximize-2" style="width:13px;height:13px;"></i>
+              </button>
+              <button type="button" onclick="closeModal('modal-subscription-plans')" style="background:#F1F5F9;border:1px solid #E2E8F0;border-radius:10px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#0F172A;font-weight:900;font-size:1rem;cursor:pointer;" title="Fermer (Échap)">✕</button>
             </div>
-            <ul style="list-style:none;padding:0;margin:0;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.75;display:flex;flex-direction:column;gap:6px;">
-              <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:15px;height:15px;color:#F59E0B;flex-shrink:0;"></i> <span><strong>Tous les avantages PRO pendant 1 an complet</strong></span></li>
-              <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:15px;height:15px;color:#F59E0B;flex-shrink:0;"></i> <span><strong>Économie nette de 15 000 FCFA</strong> (3 mois offerts)</span></li>
-              <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:15px;height:15px;color:#F59E0B;flex-shrink:0;"></i> <span>Gestion multi-caissiers cloisonnée avec code PIN</span></li>
-              <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:15px;height:15px;color:#F59E0B;flex-shrink:0;"></i> <span><strong>Support VIP WhatsApp Dédié 24/7</strong></span></li>
-            </ul>
           </div>
-          <div style="margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.15);text-align:center;">
-            <span style="font-size:0.8rem;font-weight:800;color:#FBBF24;">● Forfait actuellement sélectionné</span>
-          </div>
+
+          <!-- Formulaire de Paiement -->
+          <form onsubmit="submitSubscriptionForm(event)" style="display:flex;flex-direction:column;gap:16px;">
+            
+            <!-- Sélecteur des Moyens de Paiement Disponibles -->
+            <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:8px;">
+              <div id="sub-method-wave" class="checkout-method-chip active" onclick="selectSubModalMethod('wave')">
+                <span style="font-size:1rem;">🌊</span>
+                <span>Wave (0%)</span>
+              </div>
+              <div id="sub-method-mtn" class="checkout-method-chip" onclick="selectSubModalMethod('mtn')">
+                <span style="font-size:1rem;">🟡</span>
+                <span>MTN MoMo</span>
+              </div>
+              <div id="sub-method-moov" class="checkout-method-chip" onclick="selectSubModalMethod('moov')">
+                <span style="font-size:1rem;">🟢</span>
+                <span>Moov Flooz</span>
+              </div>
+              <div id="sub-method-celtiis" class="checkout-method-chip" onclick="selectSubModalMethod('celtiis')">
+                <span style="font-size:1rem;">🔵</span>
+                <span>Celtiis Cash</span>
+              </div>
+              <div id="sub-method-card" class="checkout-method-chip" onclick="selectSubModalMethod('card')">
+                <span style="font-size:1rem;">💳</span>
+                <span>Carte Bancaire</span>
+              </div>
+              <div id="sub-method-vip" class="checkout-method-chip" onclick="selectSubModalMethod('vip')">
+                <span style="font-size:1rem;">🔑</span>
+                <span>Clé VIP</span>
+              </div>
+            </div>
+
+            <!-- ZONE 1 : NUMÉRO MOBILE MONEY -->
+            <div id="sub-phone-container">
+              <label id="sub-phone-label" style="display:block;font-size:0.78rem;font-weight:800;color:#334155;margin-bottom:6px;">
+                Numéro de compte Wave (0% de frais) :
+              </label>
+              <div style="position:relative;">
+                <i data-lucide="smartphone" style="width:18px;height:18px;position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94A3B8;"></i>
+                <input type="tel" id="sub-modal-phone" class="form-control" placeholder="ex: 0197000000 ou 07000000" style="padding-left:42px;height:46px;font-size:0.95rem;font-weight:700;border-radius:12px;border:1.5px solid #CBD5E1;">
+              </div>
+              <div id="sub-phone-error" style="display:none;color:#DC2626;font-size:0.75rem;font-weight:700;margin-top:5px;align-items:center;gap:4px;">
+                ⚠️ <span>Veuillez renseigner votre numéro Mobile Money pour recevoir la notification de débit.</span>
+              </div>
+              <small style="color:#64748B;font-size:0.72rem;margin-top:4px;display:block;">
+                Une invite de confirmation sécurisée s'affichera directement sur votre téléphone.
+              </small>
+            </div>
+
+            <!-- ZONE 2 : CARTE BANCAIRE (SUPPORT INTERNATIONAL VIP HONNÊTE ET TRANSPARENT) -->
+            <div id="sub-card-container" style="display:none;background:#F8FAFC;border:1.5px solid #CBD5E1;border-radius:14px;padding:16px;">
+              <div style="display:flex;align-items:flex-start;gap:10px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                  <i data-lucide="credit-card" style="width:18px;height:18px;"></i>
+                </div>
+                <div>
+                  <h5 style="margin:0;font-size:0.85rem;font-weight:900;color:#0F172A;">Règlement International par Carte (Visa / Mastercard)</h5>
+                  <p style="margin:4px 0 0 0;font-size:0.75rem;color:#475569;line-height:1.45;">
+                    Les opérateurs Mobile Money locaux (MTN, Moov, Wave, Celtiis) sont gérés instantanément ci-dessus.
+                    Pour un paiement par <strong>Carte Bancaire Internationale</strong> sans Mobile Money, notre support dédié vous génère un lien Stripe / Paystack direct et active votre compte en 2 minutes.
+                  </p>
+                </div>
+              </div>
+              <div style="margin-top:12px;">
+                <button type="button" onclick="contactWhatsAppSupport()" class="btn" style="width:100%;padding:10px;font-size:0.82rem;font-weight:800;border-radius:10px;background:#25D366;color:#FFFFFF;border:none;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 4px 12px rgba(37,211,102,0.3);cursor:pointer;">
+                  <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
+                  <span>Demander un Lien de Paiement Carte par WhatsApp →</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- ZONE 3 : CLÉ VIP PARTENAIRE -->
+            <div id="sub-vip-container" style="display:none;background:#F0FDF4;border:1.5px dashed #22C55E;border-radius:14px;padding:16px;">
+              <label style="display:block;font-size:0.8rem;font-weight:800;color:#166534;margin-bottom:6px;">
+                Saisissez votre Clé de Licence VIP / Code Promo :
+              </label>
+              <div style="position:relative;">
+                <i data-lucide="key-round" style="width:18px;height:18px;position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#16A34A;"></i>
+                <input type="text" id="sub-modal-vip-input" class="form-control" placeholder="ex: VIP-SALEM-PRO-2026" style="padding-left:42px;height:46px;font-size:0.95rem;font-weight:800;text-transform:uppercase;border-color:#86EFAC;border-radius:10px;">
+              </div>
+              <small style="color:#15803D;font-size:0.72rem;margin-top:4px;display:block;">
+                Activation instantanée et permanente de toutes les fonctions PRO.
+              </small>
+            </div>
+
+            <!-- BOUTON CTA PRINCIPAL D'ACTION -->
+            <button id="sub-modal-submit-btn" type="submit" class="btn" style="width:100%;height:50px;font-size:0.95rem;font-weight:900;border-radius:12px;border:none;background:linear-gradient(135deg, #F59E0B, #D97706);color:#0F172A;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;box-shadow:0 6px 20px rgba(245,158,11,0.35);transition:all 0.2s;">
+              <i data-lucide="shield-check" style="width:18px;height:18px;"></i>
+              <span>Payer 45 000 FCFA via Wave &amp; Activer PRO (1 An) →</span>
+            </button>
+
+            <!-- Réassurance Bas de Formulaire -->
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;font-size:0.7rem;color:#64748B;flex-wrap:wrap;">
+              <span>🔒 100% Sécurisé</span> • <span>⚡ Activation Immédiate</span> • <span>📄 Reçu Certifié</span>
+            </div>
+
+          </form>
+
         </div>
 
       </div>
-
-      <!-- Formulaire de Paiement & Choix du Moyen de Règlement -->
-      <form onsubmit="submitSubscriptionForm(event)" style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:18px;padding:20px;">
-        
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px;border-bottom:1px solid #E2E8F0;padding-bottom:12px;">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <i data-lucide="zap" style="width:18px;height:18px;color:#F59E0B;"></i>
-            <strong style="font-size:0.9rem;color:#0F172A;">Sélectionnez votre Moyen de Règlement :</strong>
-          </div>
-          <span style="font-size:0.75rem;color:#10B981;font-weight:700;display:flex;align-items:center;gap:4px;">
-            <i data-lucide="lock" style="width:12px;height:12px;"></i> Débit sécurisé par SasPay
-          </span>
-        </div>
-
-        <!-- Boutons des 6 Méthodes de Paiement Panafricaines -->
-        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(115px, 1fr));gap:8px;margin-bottom:16px;">
-          <button type="button" id="sub-method-wave" class="sub-method-btn active-method" onclick="selectSubModalMethod('wave')" style="padding:10px 8px;border-radius:10px;font-size:0.78rem;font-weight:800;border:1.5px solid #2563EB;background:#EFF6FF;color:#1D4ED8;cursor:pointer;text-align:center;transition:all 0.2s;">
-            🌊 Wave (0%)
-          </button>
-          <button type="button" id="sub-method-mtn" class="sub-method-btn" onclick="selectSubModalMethod('mtn')" style="padding:10px 8px;border-radius:10px;font-size:0.78rem;font-weight:800;border:1px solid #CBD5E1;background:#fff;color:#0F172A;cursor:pointer;text-align:center;transition:all 0.2s;">
-            🟡 MTN MoMo
-          </button>
-          <button type="button" id="sub-method-orange" class="sub-method-btn" onclick="selectSubModalMethod('orange')" style="padding:10px 8px;border-radius:10px;font-size:0.78rem;font-weight:800;border:1px solid #CBD5E1;background:#fff;color:#0F172A;cursor:pointer;text-align:center;transition:all 0.2s;">
-            🟠 Orange Money
-          </button>
-          <button type="button" id="sub-method-moov" class="sub-method-btn" onclick="selectSubModalMethod('moov')" style="padding:10px 8px;border-radius:10px;font-size:0.78rem;font-weight:800;border:1px solid #CBD5E1;background:#fff;color:#0F172A;cursor:pointer;text-align:center;transition:all 0.2s;">
-            🟢 Moov Flooz
-          </button>
-          <button type="button" id="sub-method-card" class="sub-method-btn" onclick="selectSubModalMethod('card')" style="padding:10px 8px;border-radius:10px;font-size:0.78rem;font-weight:800;border:1px solid #CBD5E1;background:#fff;color:#0F172A;cursor:pointer;text-align:center;transition:all 0.2s;">
-            💳 Carte Bancaire
-          </button>
-          <button type="button" id="sub-method-vip" class="sub-method-btn" onclick="selectSubModalMethod('vip')" style="padding:10px 8px;border-radius:10px;font-size:0.78rem;font-weight:800;border:1px solid #CBD5E1;background:#fff;color:#0F172A;cursor:pointer;text-align:center;transition:all 0.2s;">
-            🔑 Clé VIP Promo
-          </button>
-        </div>
-
-        <!-- Zone Saisie Mobile Money -->
-        <div id="sub-phone-container" style="margin-bottom:16px;">
-          <label id="sub-phone-label" style="display:block;font-size:0.8rem;font-weight:700;color:#334155;margin-bottom:6px;">
-            Numéro de compte Wave (0% de frais) :
-          </label>
-          <div style="position:relative;">
-            <i data-lucide="smartphone" style="width:18px;height:18px;position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94A3B8;"></i>
-            <input type="tel" id="sub-modal-phone" class="form-control" placeholder="ex: 0197000000 ou 07000000" style="padding-left:42px;height:46px;font-size:0.95rem;font-weight:700;border-radius:10px;">
-          </div>
-          <div id="sub-phone-error" style="display:none;color:#DC2626;font-size:0.75rem;font-weight:700;margin-top:5px;align-items:center;gap:4px;">
-            ⚠️ <span>Veuillez entrer votre numéro de téléphone pour valider le débit Mobile Money.</span>
-          </div>
-          <small style="color:#64748B;font-size:0.73rem;margin-top:4px;display:block;">
-            Une notification de confirmation de débit vous sera envoyée directement sur votre téléphone.
-          </small>
-        </div>
-
-        <!-- Zone Saisie Carte Bancaire (Information) -->
-        <div id="sub-card-container" style="display:none;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:0.82rem;font-weight:700;color:#1E40AF;">
-            <i data-lucide="credit-card" style="width:18px;height:18px;color:#2563EB;"></i>
-            <span>Paiement sécurisé par Visa &amp; Mastercard 3D-Secure</span>
-          </div>
-          <p style="margin:4px 0 0 0;font-size:0.75rem;color:#3B82F6;">
-            Vous serez redirigé vers la page sécurisée SasPay pour renseigner vos coordonnées bancaires en toute sérénité.
-          </p>
-        </div>
-
-        <!-- Zone Saisie Clé VIP / Code Partenaire -->
-        <div id="sub-vip-container" style="display:none;margin-bottom:16px;background:#F0FDF4;border:1.5px dashed #22C55E;border-radius:12px;padding:14px;">
-          <label style="display:block;font-size:0.82rem;font-weight:800;color:#166534;margin-bottom:6px;">
-            Saisissez votre Clé de Licence VIP / Code Partenaire :
-          </label>
-          <div style="position:relative;">
-            <i data-lucide="key-round" style="width:18px;height:18px;position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#16A34A;"></i>
-            <input type="text" id="sub-modal-vip-input" class="form-control" placeholder="ex: VIP-SALEM-PRO-2026" style="padding-left:42px;height:46px;font-size:0.95rem;font-weight:800;text-transform:uppercase;border-color:#86EFAC;">
-          </div>
-          <small style="color:#15803D;font-size:0.73rem;margin-top:4px;display:block;">
-            Activation instantanée et permanente de toutes les fonctionnalités PRO.
-          </small>
-        </div>
-
-        <!-- Grand Bouton CTA de Validation -->
-        <button id="sub-modal-submit-btn" type="submit" class="btn" style="width:100%;height:52px;font-size:1rem;font-weight:900;border-radius:12px;border:none;background:linear-gradient(135deg, #F59E0B, #D97706);color:#0F172A;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer;box-shadow:0 8px 25px rgba(245,158,11,0.35);transition:all 0.2s;">
-          <i data-lucide="shield-check" style="width:20px;height:20px;"></i>
-          <span>Payer 45 000 FCFA via Wave &amp; Activer PRO Annuel (1 An) →</span>
-        </button>
-
-        <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-top:12px;font-size:0.72rem;color:#64748B;flex-wrap:wrap;">
-          <span>🔒 Chiffrement SSL 256 bits</span> • <span>⚡ Activation Immédiate</span> • <span>📄 Facture Officielle SYSCOHADA</span>
-        </div>
-
-      </form>
 
     </div>
   </div>

@@ -4924,35 +4924,16 @@ window.selectSubModalPlan = function(planId) {
   const isYearly = (planId === 'pro_yearly' || planId === 'yearly');
   window.subModalState.amount = isYearly ? 45000 : 5000;
 
-  // Mise à jour de l'état actif des cartes (dans la modale et dans le workspace)
-  const cardMonthly = document.getElementById('sub-plan-monthly-card');
-  const cardYearly = document.getElementById('sub-plan-yearly-card');
-  const checkMonthly = document.getElementById('sub-check-monthly');
-  const checkYearly = document.getElementById('sub-check-yearly');
+  // Mise à jour du récapitulatif latéral gauche (Split Layout)
+  const amountEl = document.getElementById('sub-side-amount');
+  const currencyEl = document.getElementById('sub-side-currency');
+  const discountTagEl = document.getElementById('sub-side-discount-tag');
 
-  if (cardMonthly && cardYearly) {
-    if (isYearly) {
-      cardYearly.classList.add('selected-plan-card');
-      cardYearly.style.borderColor = '#F59E0B';
-      cardYearly.style.boxShadow = '0 12px 30px rgba(245,158,11,0.25)';
-      cardMonthly.classList.remove('selected-plan-card');
-      cardMonthly.style.borderColor = '#E2E8F0';
-      cardMonthly.style.boxShadow = 'none';
-      if (checkYearly) checkYearly.style.display = 'inline-flex';
-      if (checkMonthly) checkMonthly.style.display = 'none';
-    } else {
-      cardMonthly.classList.add('selected-plan-card');
-      cardMonthly.style.borderColor = '#2563EB';
-      cardMonthly.style.boxShadow = '0 12px 30px rgba(37,99,235,0.2)';
-      cardYearly.classList.remove('selected-plan-card');
-      cardYearly.style.borderColor = '#334155';
-      cardYearly.style.boxShadow = 'none';
-      if (checkMonthly) checkMonthly.style.display = 'inline-flex';
-      if (checkYearly) checkYearly.style.display = 'none';
-    }
-  }
+  if (amountEl) amountEl.textContent = isYearly ? '45 000' : '5 000';
+  if (currencyEl) currencyEl.textContent = isYearly ? 'FCFA / an' : 'FCFA / mois';
+  if (discountTagEl) discountTagEl.style.display = isYearly ? 'flex' : 'none';
 
-  // Mise à jour du switch toggle (si présent)
+  // Mise à jour des boutons de toggle
   const toggleBtnMonthly = document.getElementById('sub-toggle-monthly');
   const toggleBtnYearly = document.getElementById('sub-toggle-yearly');
   if (toggleBtnMonthly && toggleBtnYearly) {
@@ -4965,6 +4946,19 @@ window.selectSubModalPlan = function(planId) {
     }
   }
 
+  // Mise à jour de l'état actif des cartes (dans la page dédiée si présente)
+  const cardMonthly = document.getElementById('sub-plan-monthly-card');
+  const cardYearly = document.getElementById('sub-plan-yearly-card');
+  if (cardMonthly && cardYearly) {
+    if (isYearly) {
+      cardYearly.classList.add('selected-plan-card');
+      cardMonthly.classList.remove('selected-plan-card');
+    } else {
+      cardMonthly.classList.add('selected-plan-card');
+      cardYearly.classList.remove('selected-plan-card');
+    }
+  }
+
   // Mise à jour du bouton CTA
   window.updateSubSubmitButtonText();
 };
@@ -4972,27 +4966,22 @@ window.selectSubModalPlan = function(planId) {
 window.selectSubModalMethod = function(methodId) {
   window.subModalState.method = methodId;
 
-  // Mise à jour des boutons de méthode
-  document.querySelectorAll('.sub-method-btn').forEach(btn => {
-    btn.classList.remove('active-method');
-    btn.style.borderColor = '#E2E8F0';
-    btn.style.background = '#FFFFFF';
-    btn.style.color = '#0F172A';
+  // Mise à jour des puces de méthode (.checkout-method-chip)
+  document.querySelectorAll('.checkout-method-chip, .sub-method-btn').forEach(btn => {
+    btn.classList.remove('active', 'active-method');
   });
 
-  const activeBtn = document.getElementById(`sub-method-${methodId}`);
-  if (activeBtn) {
-    activeBtn.classList.add('active-method');
-    activeBtn.style.borderColor = '#2563EB';
-    activeBtn.style.background = '#EFF6FF';
-    activeBtn.style.color = '#1D4ED8';
+  const activeChip = document.getElementById(`sub-method-${methodId}`);
+  if (activeChip) {
+    activeChip.classList.add('active', 'active-method');
   }
 
-  // Affichage dynamique des champs selon la méthode
+  // Affichage dynamique des sections selon la méthode
   const phoneContainer = document.getElementById('sub-phone-container');
   const cardContainer = document.getElementById('sub-card-container');
   const vipContainer = document.getElementById('sub-vip-container');
   const phoneLabel = document.getElementById('sub-phone-label');
+  const submitBtn = document.getElementById('sub-modal-submit-btn');
 
   if (phoneContainer) phoneContainer.style.display = (methodId !== 'card' && methodId !== 'vip') ? 'block' : 'none';
   if (cardContainer) cardContainer.style.display = (methodId === 'card') ? 'block' : 'none';
@@ -5003,9 +4992,15 @@ window.selectSubModalMethod = function(methodId) {
       wave: 'Numéro de compte Wave (0% de frais) :',
       mtn: 'Numéro MTN Mobile Money (MoMo) :',
       orange: 'Numéro Orange Money :',
-      moov: 'Numéro Moov Money (Flooz) :'
+      moov: 'Numéro Moov Money (Flooz) :',
+      celtiis: 'Numéro Celtiis Cash :'
     };
     phoneLabel.textContent = labels[methodId] || 'Numéro Mobile Money pour validation du débit :';
+  }
+
+  // Si carte bancaire, masquer le bouton de paiement direct SasPay (puisque SasPay n'a pas activé la carte)
+  if (submitBtn) {
+    submitBtn.style.display = (methodId === 'card') ? 'none' : 'flex';
   }
 
   window.updateSubSubmitButtonText();
@@ -5023,11 +5018,9 @@ window.updateSubSubmitButtonText = function() {
   if (method === 'vip') {
     submitBtn.innerHTML = `<i data-lucide="key-round" style="width:18px;height:18px;"></i> <span>Activer ma Licence VIP Immédiatement</span>`;
     submitBtn.style.background = 'linear-gradient(135deg, #16A34A 0%, #15803D 100%)';
-  } else if (method === 'card') {
-    submitBtn.innerHTML = `<i data-lucide="credit-card" style="width:18px;height:18px;"></i> <span>Payer ${amountStr} par Carte Bancaire →</span>`;
-    submitBtn.style.background = 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)';
+    submitBtn.style.color = '#FFFFFF';
   } else {
-    const methodNames = { wave: 'Wave', mtn: 'MTN MoMo', orange: 'Orange Money', moov: 'Moov Money' };
+    const methodNames = { wave: 'Wave', mtn: 'MTN MoMo', orange: 'Orange Money', moov: 'Moov Flooz', celtiis: 'Celtiis Cash' };
     const name = methodNames[method] || 'Mobile Money';
     submitBtn.innerHTML = `<i data-lucide="shield-check" style="width:18px;height:18px;"></i> <span>Payer ${amountStr} via ${name} & Activer ${planLabel} →</span>`;
     submitBtn.style.background = isYearly 
@@ -5039,6 +5032,19 @@ window.updateSubSubmitButtonText = function() {
   if (window.lucide) {
     try { lucide.createIcons({ root: submitBtn }); } catch(e){}
   }
+};
+
+window.contactWhatsAppSupport = function(customMessage) {
+  const planTier = window.subModalState ? window.subModalState.plan : 'pro_yearly';
+  const planName = planTier === 'pro_yearly' ? 'PRO Annuel (45 000 FCFA / an)' : 'PRO Mensuel (5 000 FCFA / mois)';
+  const biz = (AppState.user && AppState.user.businessName) || 'Mon Commerce';
+  
+  const text = customMessage || `Bonjour CréditTrack PRO ! Mon entreprise est "${biz}". Je souhaite souscrire au forfait ${planName} et effectuer le paiement par Carte Bancaire Internationale (Visa / Mastercard). Merci de me transmettre un lien de paiement sécurisé.`;
+  const encoded = encodeURIComponent(text);
+  
+  // Numéro WhatsApp support officiel CréditTrack (ou configuré)
+  const phone = '22997000000'; // Standard Bénin / Afrique de l'Ouest
+  window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
 };
 
 window.submitSubscriptionForm = function(event) {

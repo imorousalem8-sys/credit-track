@@ -1,5 +1,5 @@
 // Service Worker CréditTrack PRO — Gestion de cache intelligente & Mises à jour instantanées
-const CACHE_VERSION = 'credittrack-v4.9.5-fix';
+const CACHE_VERSION = 'credittrack-v4.9.6-split-checkout';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
 
