@@ -3,6 +3,56 @@
    ========================================================================== */
 
 // --------------------------------------------------------------------------
+// 0. SYSTÈME UNIVERSEL DE NOTIFICATIONS TOAST (HAUTE DÉFINITION)
+// --------------------------------------------------------------------------
+window.showToast = function(message, type = 'info', duration = 3500) {
+  try {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'toast-container';
+      document.body.appendChild(container);
+    }
+
+    const toast = document.createElement('div');
+    toast.className = `toast-item toast-${type}`;
+
+    let iconSvg = '';
+    if (type === 'success') {
+      iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`;
+    } else if (type === 'error' || type === 'danger') {
+      iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+    } else if (type === 'warning') {
+      iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+    } else {
+      iconSvg = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+    }
+
+    toast.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;flex:1;">
+        <div style="flex-shrink:0;display:flex;align-items:center;">${iconSvg}</div>
+        <div style="font-size:0.88rem;font-weight:600;line-height:1.4;color:#0F172A;">${message}</div>
+      </div>
+      <button type="button" aria-label="Fermer" style="background:none;border:none;color:#94A3B8;cursor:pointer;font-size:1.15rem;padding:0 4px;line-height:1;margin-left:8px;" onclick="this.parentElement.remove()">✕</button>
+    `;
+
+    container.appendChild(toast);
+
+    setTimeout(() => {
+      toast.classList.add('toast-fade-out');
+      setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+      }, 320);
+    }, duration);
+  } catch (err) {
+    console.log(`[Toast ${type}]:`, message);
+  }
+};
+function showToast(message, type = 'info', duration = 3500) {
+  return window.showToast(message, type, duration);
+}
+
+// --------------------------------------------------------------------------
 // 1. LISTE DES PAYS PANAFRICAINS (54 PAYS)
 // --------------------------------------------------------------------------
 const AFRICAN_COUNTRIES = [
@@ -1543,6 +1593,7 @@ window.switchMenu = function(menuId) {
     'menu-6': AppState.lang === 'en' ? 'Payments & Receipts' : 'Encaisser & Reçus',
     'menu-8': AppState.lang === 'en' ? 'WhatsApp Reminders' : 'Rappels WhatsApp',
     'menu-settings': AppState.lang === 'en' ? 'Settings' : 'Paramètres',
+    'menu-subscription': AppState.lang === 'en' ? 'Subscription & PRO Licenses' : 'Abonnement & Licences PRO',
     'menu-5': AppState.lang === 'en' ? 'Record Credit Sale' : 'Vente à Crédit'
   };
 
@@ -1554,6 +1605,7 @@ window.switchMenu = function(menuId) {
     'menu-6': 'wallet',
     'menu-8': 'bell-ring',
     'menu-settings': 'settings',
+    'menu-subscription': 'crown',
     'menu-5': 'credit-card'
   };
 
@@ -4816,12 +4868,210 @@ window.handleSignOut = async function() {
   showToast("Déconnexion réussie. L'espace commerçant a été verrouillé.");
 };
 
-window.openSubscriptionModal = function() {
+// --------------------------------------------------------------------------
+// 15. GESTION DES ABONNEMENTS SAAS PRO & PASSERELLE SASPAY SÉCURISÉE
+// --------------------------------------------------------------------------
+window.subModalState = {
+  plan: 'pro_yearly',
+  amount: 45000,
+  method: 'wave'
+};
+
+window.openSubscriptionModal = function(defaultPlan = 'pro_yearly') {
+  if (defaultPlan === 'monthly' || defaultPlan === 'pro_monthly') {
+    window.selectSubModalPlan('pro_monthly');
+  } else {
+    window.selectSubModalPlan('pro_yearly');
+  }
+
+  // Pré-remplir le numéro de téléphone et email s'ils sont connus
+  const phoneInput = document.getElementById('sub-modal-phone');
+  if (phoneInput && !phoneInput.value) {
+    phoneInput.value = (AppState.user && AppState.user.phone) || localStorage.getItem('userPhone') || '';
+  }
+
   openModal('modal-subscription-plans');
+  if (window.lucide) {
+    setTimeout(() => { try { lucide.createIcons(); } catch(e){} }, 50);
+  }
+};
+
+window.selectSubModalPlan = function(planId) {
+  window.subModalState.plan = planId;
+  const isYearly = (planId === 'pro_yearly' || planId === 'yearly');
+  window.subModalState.amount = isYearly ? 45000 : 5000;
+
+  // Mise à jour de l'état actif des cartes (dans la modale et dans le workspace)
+  const cardMonthly = document.getElementById('sub-plan-monthly-card');
+  const cardYearly = document.getElementById('sub-plan-yearly-card');
+  const checkMonthly = document.getElementById('sub-check-monthly');
+  const checkYearly = document.getElementById('sub-check-yearly');
+
+  if (cardMonthly && cardYearly) {
+    if (isYearly) {
+      cardYearly.classList.add('selected-plan-card');
+      cardYearly.style.borderColor = '#F59E0B';
+      cardYearly.style.boxShadow = '0 12px 30px rgba(245,158,11,0.25)';
+      cardMonthly.classList.remove('selected-plan-card');
+      cardMonthly.style.borderColor = '#E2E8F0';
+      cardMonthly.style.boxShadow = 'none';
+      if (checkYearly) checkYearly.style.display = 'inline-flex';
+      if (checkMonthly) checkMonthly.style.display = 'none';
+    } else {
+      cardMonthly.classList.add('selected-plan-card');
+      cardMonthly.style.borderColor = '#2563EB';
+      cardMonthly.style.boxShadow = '0 12px 30px rgba(37,99,235,0.2)';
+      cardYearly.classList.remove('selected-plan-card');
+      cardYearly.style.borderColor = '#334155';
+      cardYearly.style.boxShadow = 'none';
+      if (checkMonthly) checkMonthly.style.display = 'inline-flex';
+      if (checkYearly) checkYearly.style.display = 'none';
+    }
+  }
+
+  // Mise à jour du switch toggle (si présent)
+  const toggleBtnMonthly = document.getElementById('sub-toggle-monthly');
+  const toggleBtnYearly = document.getElementById('sub-toggle-yearly');
+  if (toggleBtnMonthly && toggleBtnYearly) {
+    if (isYearly) {
+      toggleBtnYearly.classList.add('active');
+      toggleBtnMonthly.classList.remove('active');
+    } else {
+      toggleBtnMonthly.classList.add('active');
+      toggleBtnYearly.classList.remove('active');
+    }
+  }
+
+  // Mise à jour du bouton CTA
+  window.updateSubSubmitButtonText();
+};
+
+window.selectSubModalMethod = function(methodId) {
+  window.subModalState.method = methodId;
+
+  // Mise à jour des boutons de méthode
+  document.querySelectorAll('.sub-method-btn').forEach(btn => {
+    btn.classList.remove('active-method');
+    btn.style.borderColor = '#E2E8F0';
+    btn.style.background = '#FFFFFF';
+    btn.style.color = '#0F172A';
+  });
+
+  const activeBtn = document.getElementById(`sub-method-${methodId}`);
+  if (activeBtn) {
+    activeBtn.classList.add('active-method');
+    activeBtn.style.borderColor = '#2563EB';
+    activeBtn.style.background = '#EFF6FF';
+    activeBtn.style.color = '#1D4ED8';
+  }
+
+  // Affichage dynamique des champs selon la méthode
+  const phoneContainer = document.getElementById('sub-phone-container');
+  const cardContainer = document.getElementById('sub-card-container');
+  const vipContainer = document.getElementById('sub-vip-container');
+  const phoneLabel = document.getElementById('sub-phone-label');
+
+  if (phoneContainer) phoneContainer.style.display = (methodId !== 'card' && methodId !== 'vip') ? 'block' : 'none';
+  if (cardContainer) cardContainer.style.display = (methodId === 'card') ? 'block' : 'none';
+  if (vipContainer) vipContainer.style.display = (methodId === 'vip') ? 'block' : 'none';
+
+  if (phoneLabel) {
+    const labels = {
+      wave: 'Numéro de compte Wave (0% de frais) :',
+      mtn: 'Numéro MTN Mobile Money (MoMo) :',
+      orange: 'Numéro Orange Money :',
+      moov: 'Numéro Moov Money (Flooz) :'
+    };
+    phoneLabel.textContent = labels[methodId] || 'Numéro Mobile Money pour validation du débit :';
+  }
+
+  window.updateSubSubmitButtonText();
+};
+
+window.updateSubSubmitButtonText = function() {
+  const submitBtn = document.getElementById('sub-modal-submit-btn');
+  if (!submitBtn) return;
+
+  const isYearly = (window.subModalState.plan === 'pro_yearly' || window.subModalState.plan === 'yearly');
+  const amountStr = isYearly ? '45 000 FCFA' : '5 000 FCFA';
+  const planLabel = isYearly ? 'PRO Annuel (1 An)' : 'PRO Mensuel (1 Mois)';
+  const method = window.subModalState.method || 'wave';
+
+  if (method === 'vip') {
+    submitBtn.innerHTML = `<i data-lucide="key-round" style="width:18px;height:18px;"></i> <span>Activer ma Licence VIP Immédiatement</span>`;
+    submitBtn.style.background = 'linear-gradient(135deg, #16A34A 0%, #15803D 100%)';
+  } else if (method === 'card') {
+    submitBtn.innerHTML = `<i data-lucide="credit-card" style="width:18px;height:18px;"></i> <span>Payer ${amountStr} par Carte Bancaire →</span>`;
+    submitBtn.style.background = 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)';
+  } else {
+    const methodNames = { wave: 'Wave', mtn: 'MTN MoMo', orange: 'Orange Money', moov: 'Moov Money' };
+    const name = methodNames[method] || 'Mobile Money';
+    submitBtn.innerHTML = `<i data-lucide="shield-check" style="width:18px;height:18px;"></i> <span>Payer ${amountStr} via ${name} & Activer ${planLabel} →</span>`;
+    submitBtn.style.background = isYearly 
+      ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' 
+      : 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)';
+    submitBtn.style.color = isYearly ? '#0F172A' : '#FFFFFF';
+  }
+
+  if (window.lucide) {
+    try { lucide.createIcons({ root: submitBtn }); } catch(e){}
+  }
+};
+
+window.submitSubscriptionForm = function(event) {
+  if (event) event.preventDefault();
+
+  const method = window.subModalState.method || 'wave';
+  const planTier = window.subModalState.plan || 'pro_yearly';
+  const amount = window.subModalState.amount || (planTier === 'pro_yearly' ? 45000 : 5000);
+
+  // Si c'est une activation par Clé VIP
+  if (method === 'vip') {
+    const vipInput = document.getElementById('sub-modal-vip-input');
+    const key = vipInput ? vipInput.value.trim().toUpperCase() : '';
+    if (!key) {
+      showToast("Veuillez saisir votre clé de licence VIP ou code partenaire.", "warning");
+      if (vipInput) vipInput.focus();
+      return;
+    }
+    const adminInput = document.getElementById('admin-license-key-input');
+    if (adminInput) adminInput.value = key;
+    window.redeemAdminLicenseKey();
+    return;
+  }
+
+  // Si c'est un paiement Mobile Money, valider le numéro
+  const phoneInput = document.getElementById('sub-modal-phone');
+  const phoneError = document.getElementById('sub-phone-error');
+  const phoneVal = phoneInput ? phoneInput.value.trim() : '';
+
+  if (method !== 'card' && (!phoneVal || phoneVal.length < 6)) {
+    showToast("Veuillez renseigner votre numéro Mobile Money pour recevoir la notification de débit.", "warning");
+    if (phoneError) phoneError.style.display = 'flex';
+    if (phoneInput) {
+      phoneInput.focus();
+      phoneInput.style.borderColor = '#EF4444';
+      phoneInput.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.2)';
+      phoneInput.oninput = () => {
+        phoneInput.style.borderColor = '';
+        phoneInput.style.boxShadow = '';
+        if (phoneError) phoneError.style.display = 'none';
+      };
+      setTimeout(() => { 
+        phoneInput.style.borderColor = ''; 
+        phoneInput.style.boxShadow = '';
+      }, 4000);
+    }
+    return;
+  }
+  if (phoneError) phoneError.style.display = 'none';
+
+  const submitBtn = document.getElementById('sub-modal-submit-btn');
+  window.triggerSaaSPayment(planTier, amount, phoneVal, method, submitBtn);
 };
 
 // --------------------------------------------------------------------------
-// 15. DÉBLOCAGE VIP ADMIN & GESTION DU FORFAIT PRO
+// 16. DÉBLOCAGE VIP ADMIN & GESTION DU FORFAIT PRO
 // --------------------------------------------------------------------------
 const VALID_ADMIN_KEYS = [
   'VIP-SALEM-PRO-2026',
@@ -4831,7 +5081,9 @@ const VALID_ADMIN_KEYS = [
 ];
 
 window.redeemAdminLicenseKey = function() {
-  const input = document.getElementById('admin-license-key-input');
+  const input = document.getElementById('sub-modal-vip-input') || 
+                document.getElementById('admin-license-key-input') ||
+                document.getElementById('admin-license-key-input-settings');
   if (!input) return;
   const key = input.value.trim().toUpperCase();
 
@@ -4843,14 +5095,14 @@ window.redeemAdminLicenseKey = function() {
 
     updateUserPlanBadgeUI();
     closeModal('modal-subscription-plans');
-    showToast("Clé VIP Validée ! Accès PRO Illimité à Vie activé avec succès !");
+    showToast("✓ Clé VIP Validée ! Accès PRO Illimité à Vie activé avec succès !", "success");
     
-    // Save to local IndexedDB & Supabase
+    // Sauvegarder dans IndexedDB & Supabase
     if (window.dataStore) {
       window.dataStore.add("settings", { key: "active_license", value: key, plan: "vip_lifetime", date: new Date().toISOString() });
     }
   } else {
-    showToast("Clé de licence VIP invalide ou expirée.");
+    showToast("Clé de licence VIP invalide ou expirée.", "error");
     input.style.borderColor = '#EF4444';
     setTimeout(() => { input.style.borderColor = ''; }, 3000);
   }
@@ -4858,81 +5110,98 @@ window.redeemAdminLicenseKey = function() {
 
 window.SASPAY_SECRET_KEY = ['sk', 'live', 'tKBmx772C8jqz7uABgE3XjWBi-cHmodSae7jo7XLjO8'].join('_');
 
-window.triggerSaaSPayment = async function(planTier, amount) {
+window.triggerSaaSPayment = async function(planTier, amount, overridePhone, overrideMethod, triggerBtn) {
   const planLabel = planTier === 'pro_yearly' ? 'PRO Annuel' : (planTier === 'vip_lifetime' ? 'VIP À Vie' : 'PRO Mensuel');
   const userEmail = (AppState.user && AppState.user.email) ? AppState.user.email : (localStorage.getItem('userEmail') || 'commercant@credittrack.pro');
   const userName = (AppState.user && AppState.user.businessName) || localStorage.getItem('bizName') || 'Commerçant CreditTrack';
   const userCountry = AppState.country || localStorage.getItem('userCountry') || 'BJ';
-  const userPhone = (AppState.user && AppState.user.phone) || localStorage.getItem('userPhone') || '';
+  const userPhone = overridePhone || (AppState.user && AppState.user.phone) || localStorage.getItem('userPhone') || '';
+
+  // Animation et désactivation du bouton appelant
+  const btn = triggerBtn || document.getElementById('sub-modal-submit-btn');
+  let originalBtnHtml = '';
+  if (btn) {
+    originalBtnHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<span style="display:inline-block;width:16px;height:16px;border:2.5px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:8px;vertical-align:middle;"></span> Initialisation SasPay Sécurisé...`;
+  }
 
   showToast("⏳ Connexion à la passerelle sécurisée SasPay...", "info");
 
   try {
-    // 1. Tenter via la fonction Serverless Vercel sécurisée
-    const returnUrl = `${window.location.origin}/?payment_status=success&plan=${encodeURIComponent(planTier)}`;
-    const response = await fetch('/api/create-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount: Number(amount).toFixed(2),
-        planTier: planTier,
-        customerEmail: userEmail,
-        customerName: userName,
-        customerPhone: userPhone,
-        country: userCountry,
-        returnUrl: returnUrl
-      })
-    });
+    // 1. Détection dynamique de l'endpoint : tente d'abord l'API locale /api/create-checkout, sinon bascule sur le cloud
+    let apiEndpoint = '/api/create-checkout';
+    if (window.location.protocol === 'file:') {
+      apiEndpoint = 'https://credit-track00.vercel.app/api/create-checkout';
+    }
+
+    // 2. Assainissement strict du returnUrl
+    const validOrigin = (window.location.protocol === 'http:' || window.location.protocol === 'https:') && !window.location.origin.includes('null')
+      ? window.location.origin
+      : 'https://credit-track00.vercel.app';
+    const returnUrl = `${validOrigin}/?payment_status=success&plan=${encodeURIComponent(planTier)}`;
+
+    const checkoutPayload = {
+      amount: Number(amount).toFixed(2),
+      planTier: planTier,
+      customerEmail: userEmail,
+      customerName: userName,
+      customerPhone: userPhone,
+      country: userCountry,
+      returnUrl: returnUrl,
+      paymentMethod: overrideMethod || 'mobile_money'
+    };
+
+    let response;
+    try {
+      response = await fetch(apiEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(checkoutPayload)
+      });
+      // Si 404 sur un serveur statique externe, tenter le fallback cloud
+      if (!response.ok && response.status === 404 && apiEndpoint !== 'https://credit-track00.vercel.app/api/create-checkout') {
+        console.warn("[SasPay Gateway] 404 local détecté, bascule vers endpoint Vercel...");
+        response = await fetch('https://credit-track00.vercel.app/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(checkoutPayload)
+        });
+      }
+    } catch (networkErr) {
+      if (apiEndpoint !== 'https://credit-track00.vercel.app/api/create-checkout') {
+        console.warn("[SasPay Gateway] Erreur réseau locale, bascule vers endpoint Vercel...");
+        response = await fetch('https://credit-track00.vercel.app/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(checkoutPayload)
+        });
+      } else {
+        throw networkErr;
+      }
+    }
 
     const resData = await response.json().catch(() => null);
 
     if (response.ok && resData && resData.checkout_url) {
       showToast("✓ Session SasPay prête ! Redirection vers la page de paiement...", "success");
+      if (btn) {
+        btn.innerHTML = `✓ Redirection vers SasPay en cours...`;
+      }
       setTimeout(() => {
         window.location.href = resData.checkout_url;
-      }, 500);
+      }, 400);
       return;
     }
 
-    // 2. Fallback direct client vers SasPay si l'API serverless n'est pas accessible en local
-    console.warn("[SasPay Serverless] Tentative directe client:", resData);
-    const directPayload = {
-      amount: Number(amount).toFixed(2),
-      currency: 'XOF',
-      description: `Abonnement CreditTrack ${planLabel}`,
-      customer_email: userEmail,
-      customer_name: userName,
-      return_url: returnUrl
-    };
-    if (userPhone) directPayload.customer_phone = userPhone;
-    if (userCountry) directPayload.country = userCountry;
-
-    const directRes = await fetch('https://api.saspay.me/api/v1/checkout-sessions/', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${window.SASPAY_SECRET_KEY}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'CreditTrack-SaaS/4.9.2 (Direct Client Gateway)'
-      },
-      body: JSON.stringify(directPayload)
-    });
-
-    const directData = await directRes.json().catch(() => null);
-    const checkoutUrl = directData?.data?.checkout_url || directData?.checkout_url;
-
-    if (checkoutUrl) {
-      showToast("✓ Redirection vers la page de paiement SasPay...", "success");
-      setTimeout(() => {
-        window.location.href = checkoutUrl;
-      }, 500);
-      return;
-    }
-
-    throw new Error(directData?.message || resData?.error || "Impossible d'initialiser le paiement SasPay");
+    throw new Error(resData?.error || "La passerelle SasPay n'a pas renvoyé d'URL de paiement valide.");
   } catch (err) {
     console.error("[SasPay Exception]:", err);
-    showToast(`Erreur passerelle : ${err.message || "Veuillez réessayer dans quelques instants"}`, "error");
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+    }
+    showToast(`Erreur passerelle : ${err.message || "Vérifiez votre connexion et réessayez"}`, "error");
   }
 };
 
@@ -5139,6 +5408,17 @@ function updateUserPlanBadgeUI() {
         btn.style.background = '#F59E0B';
       }
     }
+  }
+
+  // Synchronisation avec la vue dédiée #menu-subscription
+  const subPagePlanTitle = document.getElementById('sub-page-plan-title');
+  const subPagePlanStatus = document.getElementById('sub-page-plan-status');
+  if (subPagePlanTitle) {
+    subPagePlanTitle.textContent = isPro ? planLabel : 'Version Gratuite (Starter)';
+  }
+  if (subPagePlanStatus) {
+    subPagePlanStatus.textContent = isPro ? 'ACTIF ✓' : 'GRATUIT (LIMITÉ)';
+    subPagePlanStatus.style.background = isPro ? '#10B981' : '#F59E0B';
   }
 
   if (window.lucide) lucide.createIcons();

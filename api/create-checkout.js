@@ -30,8 +30,11 @@ export default async function handler(req, res) {
     const fallbackKey = ['sk', 'live', 'tKBmx772C8jqz7uABgE3XjWBi-cHmodSae7jo7XLjO8'].join('_');
     const apiKey = process.env.SASPAY_SECRET_KEY || fallbackKey;
 
-    const baseUrl = req.headers.origin || 'https://credit-track00.vercel.app';
-    const finalReturnUrl = returnUrl || `${baseUrl}/?payment_status=success&plan=${encodeURIComponent(planTier || 'pro_monthly')}`;
+    // Assainissement strict de returnUrl pour garantir une URL valide HTTP/HTTPS
+    let finalReturnUrl = 'https://credit-track00.vercel.app/?payment_status=success&plan=' + encodeURIComponent(planTier || 'pro_monthly');
+    if (returnUrl && typeof returnUrl === 'string' && (returnUrl.startsWith('http://') || returnUrl.startsWith('https://'))) {
+      finalReturnUrl = returnUrl;
+    }
 
     const payload = {
       amount: formattedAmount,
@@ -53,7 +56,7 @@ export default async function handler(req, res) {
       payload.country = country;
     }
 
-    console.log('[SasPay Checkout] Initiation session:', { amount: formattedAmount, planTier, customerEmail });
+    console.log('[SasPay Checkout] Initiation session:', { amount: formattedAmount, planTier, customerEmail, returnUrl: finalReturnUrl });
 
     const sasPayResponse = await fetch('https://api.saspay.me/api/v1/checkout-sessions/', {
       method: 'POST',
@@ -61,7 +64,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
-        'User-Agent': 'CreditTrack-SaaS/4.9.0 (Production Payment Gateway)'
+        'User-Agent': 'CreditTrack-SaaS/4.9.2 (Production Payment Gateway)'
       },
       body: JSON.stringify(payload)
     });
