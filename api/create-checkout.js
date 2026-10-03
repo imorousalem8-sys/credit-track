@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { amount, planTier, customerEmail, customerName, returnUrl } = req.body || {};
+    const { amount, planTier, customerEmail, customerName, customerPhone, country, returnUrl } = req.body || {};
 
     if (!amount || Number(amount) <= 0) {
       return res.status(400).json({ error: 'Montant invalide.' });
@@ -39,13 +39,19 @@ export default async function handler(req, res) {
       description: `Abonnement CreditTrack - Forfait ${planLabel}`,
       customer_email: customerEmail || 'client@credittrack.pro',
       customer_name: customerName || 'Commerçant CreditTrack',
+      customer_phone: customerPhone || '',
       return_url: finalReturnUrl,
       metadata: {
         plan_tier: planTier || 'pro_monthly',
         customer_email: customerEmail || '',
+        customer_name: customerName || '',
         app_name: 'CreditTrack PRO'
       }
     };
+
+    if (country) {
+      payload.country = country;
+    }
 
     console.log('[SasPay Checkout] Initiation session:', { amount: formattedAmount, planTier, customerEmail });
 

@@ -4856,14 +4856,14 @@ window.redeemAdminLicenseKey = function() {
   }
 };
 
-window.PAYSTACK_PUBLIC_KEY = 'pk_test_ae33c8c1fafa3eb054c031cc4a1268733db70518';
-
 window.SASPAY_SECRET_KEY = ['sk', 'live', 'tKBmx772C8jqz7uABgE3XjWBi-cHmodSae7jo7XLjO8'].join('_');
 
 window.triggerSaaSPayment = async function(planTier, amount) {
   const planLabel = planTier === 'pro_yearly' ? 'PRO Annuel' : (planTier === 'vip_lifetime' ? 'VIP À Vie' : 'PRO Mensuel');
   const userEmail = (AppState.user && AppState.user.email) ? AppState.user.email : (localStorage.getItem('userEmail') || 'commercant@credittrack.pro');
   const userName = (AppState.user && AppState.user.businessName) || localStorage.getItem('bizName') || 'Commerçant CreditTrack';
+  const userCountry = AppState.country || localStorage.getItem('userCountry') || 'BJ';
+  const userPhone = (AppState.user && AppState.user.phone) || localStorage.getItem('userPhone') || '';
 
   showToast("⏳ Connexion à la passerelle sécurisée SasPay...", "info");
 
@@ -4878,6 +4878,8 @@ window.triggerSaaSPayment = async function(planTier, amount) {
         planTier: planTier,
         customerEmail: userEmail,
         customerName: userName,
+        customerPhone: userPhone,
+        country: userCountry,
         returnUrl: returnUrl
       })
     });
@@ -4894,21 +4896,26 @@ window.triggerSaaSPayment = async function(planTier, amount) {
 
     // 2. Fallback direct client vers SasPay si l'API serverless n'est pas accessible en local
     console.warn("[SasPay Serverless] Tentative directe client:", resData);
+    const directPayload = {
+      amount: Number(amount).toFixed(2),
+      currency: 'XOF',
+      description: `Abonnement CreditTrack ${planLabel}`,
+      customer_email: userEmail,
+      customer_name: userName,
+      return_url: returnUrl
+    };
+    if (userPhone) directPayload.customer_phone = userPhone;
+    if (userCountry) directPayload.country = userCountry;
+
     const directRes = await fetch('https://api.saspay.me/api/v1/checkout-sessions/', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${window.SASPAY_SECRET_KEY}`,
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Accept': 'application/json',
+        'User-Agent': 'CreditTrack-SaaS/4.9.2 (Direct Client Gateway)'
       },
-      body: JSON.stringify({
-        amount: Number(amount).toFixed(2),
-        currency: 'XOF',
-        description: `Abonnement CreditTrack ${planLabel}`,
-        customer_email: userEmail,
-        customer_name: userName,
-        return_url: returnUrl
-      })
+      body: JSON.stringify(directPayload)
     });
 
     const directData = await directRes.json().catch(() => null);
@@ -4929,11 +4936,59 @@ window.triggerSaaSPayment = async function(planTier, amount) {
   }
 };
 
-function activateProPlan(planTier, amount, method) {
+async function activateProPlan(planTier, amount = 0, method = 'SasPay') {
   AppState.user.planTier = planTier;
   localStorage.setItem('userPlan', planTier);
   updateUserPlanBadgeUI();
   closeModal('modal-subscription-plans');
+
+  // Enregistrement persistant dans Supabase si connecté
+  if (typeof supabaseClient !== 'undefined' && supabaseClient && AppState.user && AppState.user.id) {
+    try {
+      const now = new Date();
+      const periodEnd = new Date(now);
+      if (planTier === 'pro_yearly') {
+        periodEnd.setFullYear(now.getFullYear() + 1);
+      } else if (planTier === 'vip_lifetime') {
+        periodEnd.setFullYear(now.getFullYear() + 50);
+      } else {
+        periodEnd.setMonth(now.getMonth() + 1);
+      }
+
+      // Upsert dans la table merchants
+      await supabaseClient
+        .from('merchants')
+        .upsert({
+          user_id: AppState.user.id,
+          business_name: AppState.user.businessName || 'Mon Commerce',
+          owner_name: AppState.user.businessName || 'Commerçant',
+          email: AppState.user.email,
+          plan_tier: planTier,
+          subscription_status: 'active',
+          current_period_start: now.toISOString(),
+          current_period_end: periodEnd.toISOString(),
+          updated_at: now.toISOString()
+        }, { onConflict: 'user_id' });
+
+      // Insert dans saas_subscription_payments
+      await supabaseClient
+        .from('saas_subscription_payments')
+        .insert({
+          user_id: AppState.user.id,
+          amount: amount || (planTier === 'pro_yearly' ? 45000 : (planTier === 'vip_lifetime' ? 0 : 5000)),
+          currency: 'XOF',
+          plan_tier: planTier,
+          payment_method: method,
+          transaction_ref: `SAS_${Date.now()}`,
+          status: 'completed'
+        });
+
+      console.log(`[Subscription Sync] Forfait ${planTier} synchronisé avec succès sur Supabase`);
+    } catch (sbErr) {
+      console.warn("[Subscription Sync] Avertissement synchronisation distante (conservé en local):", sbErr);
+    }
+  }
+
   showToast(`🎉 Félicitations ! Votre Forfait ${planTier === 'pro_yearly' ? 'PRO Annuel' : (planTier === 'vip_lifetime' ? 'VIP À Vie' : 'PRO Mensuel')} est maintenant ACTIF ! Toutes les fonctionnalités sont débloquées !`, "success");
 }
 
@@ -4948,7 +5003,7 @@ function activateProPlan(planTier, amount, method) {
 
     if (status === 'success' || status === 'approved' || status === 'completed') {
       const planName = plan === 'pro_yearly' ? 'pro_yearly' : (plan === 'vip_lifetime' ? 'vip_lifetime' : 'pro_monthly');
-      activateProPlan(planName, 0, 'SasPay');
+      activateProPlan(planName, 0, 'SasPay Checkout');
       // Nettoyer l'URL sans recharger la page
       const cleanUrl = window.location.pathname;
       window.history.replaceState({}, document.title, cleanUrl);

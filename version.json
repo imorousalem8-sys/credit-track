@@ -1,7 +1,7 @@
 {
-  "version": "4.9.0",
-  "build": "20260925-204500",
-  "commit": "auto",
-  "timestamp": "2026-09-25T20:45:00.000Z",
-  "builtAt": "2026-09-25 20:45:00"
+  "version": "4.9.2",
+  "build": "20261003-181500",
+  "commit": "saspay-checkout-final",
+  "timestamp": "2026-10-03T18:15:00.000Z",
+  "builtAt": "2026-10-03 18:15:00"
 }
