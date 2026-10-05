@@ -3,6 +3,7 @@ import http from 'http';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import createCheckoutHandler from './api/create-checkout.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -84,8 +85,7 @@ const server = http.createServer(async (req, res) => {
           }
         };
 
-        const checkoutModule = await import('./api/create-checkout.js');
-        await checkoutModule.default(mockReq, mockRes);
+        await createCheckoutHandler(mockReq, mockRes);
       } catch (err) {
         console.error('[Local API Error]:', err);
         res.writeHead(500, { 'Content-Type': 'application/json' });
@@ -128,6 +128,13 @@ const server = http.createServer(async (req, res) => {
     });
 
     const stream = fs.createReadStream(filePath);
+    stream.on('error', (streamErr) => {
+      console.error('[Stream Error]:', streamErr);
+      if (!res.headersSent) {
+        res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('Erreur lors de la lecture du fichier.');
+      }
+    });
     stream.pipe(res);
   });
 });
