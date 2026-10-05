@@ -1,3 +1,21 @@
+
+// Nettoyage des ventes démo fictives pour garantir 100% de données réelles
+(function purgeDemoSales() {
+  try {
+    if (window.AppState && Array.isArray(AppState.sales)) {
+      AppState.sales = AppState.sales.filter(s => !s.id || !s.id.startsWith('sale_demo_'));
+    }
+    const stored = localStorage.getItem('creditTrack_sales');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed)) {
+        const cleaned = parsed.filter(s => !s.id || !s.id.startsWith('sale_demo_'));
+        localStorage.setItem('creditTrack_sales', JSON.stringify(cleaned));
+      }
+    }
+  } catch (e) {}
+})();
+
 /* ==========================================================================
    CréditTrack PRO — Moteur Applicatif Bilingue (FR / EN) & Multi-Pays
    ========================================================================== */
@@ -464,17 +482,20 @@ const translations = {
     lpNavComp: "Pourquoi nous ?",
     lpNavFeatures: "Fonctionnalités",
     lpNavHow: "Comment ça marche",
+    lpNavProblem: "Le problème",
+    lpNavPricing: "Tarifs",
+    lpNavFaq: "Questions",
     lpNavStart: "Accéder à l'Espace",
-    lpHeroPill: "GESTION DES CRÉANCES CLIENTS & RECOUVREMENT B2B",
-    lpHeroTitle1: "Zéro Créance Oubliée.",
-    lpHeroTitle2: "Recouvrez Vos Factures 3x Plus Vite.",
-    lpHeroDesc: "Remplacez les carnets manuels et sécurisez votre trésorerie. Suivez vos clients en direct, encaissez par Wave et Mobile Money et envoyez des rappels en un clic sur WhatsApp & SMS.",
-    lpHeroCta1: "Créer un Compte Commerçant",
+    lpHeroPill: "POUR LES COMMERÇANTS, GROSSISTES & BOUTIQUES",
+    lpHeroTitle1: "Zéro Crédit Oublié.",
+    lpHeroTitle2: "Récupérez l'argent qu'on vous doit.",
+    lpHeroDesc: "Chaque vente à crédit notée en quelques secondes. Vos clients relancés poliment sur WhatsApp, à votre place. Ils paient par Wave ou Mobile Money, et le reçu part tout seul.",
+    lpHeroCta1: "Essayer gratuitement 3 mois",
     lpHeroCta2: "Simulateur WhatsApp",
     lpTrustLabel: "Règlements supportés :",
-    lpCtaTitle: "Prêt à optimiser le recouvrement de vos créances ?",
-    lpCtaSub: "Activez votre espace commerçant sécurisé dès aujourd'hui.",
-    lpCtaBtn: "Démarrer Maintenant (3 Mois Gratuits)",
+    lpCtaTitle: "Combien d'argent dort dans votre cahier en ce moment ?",
+    lpCtaSub: "Notez vos crédits ce soir, relancez demain matin. Les 3 premiers mois sont offerts.",
+    lpCtaBtn: "Commencer gratuitement",
     footerText: "Solution Professionnelle de Recouvrement",
     footerBtn: "Ouvrir l'application →",
 
@@ -672,17 +693,20 @@ const translations = {
     lpNavComp: "Why us?",
     lpNavFeatures: "Features",
     lpNavHow: "How it works",
+    lpNavProblem: "The problem",
+    lpNavPricing: "Pricing",
+    lpNavFaq: "FAQ",
     lpNavStart: "Access Workspace",
-    lpHeroPill: "CLIENT DEBT TRACKING & RECOVERY PLATFORM",
-    lpHeroTitle1: "Zero Forgotten Debts.",
-    lpHeroTitle2: "Collect Cash 3x Faster.",
-    lpHeroDesc: "Say goodbye to lost debt books and overdue accounts. Track clients in real time, collect payments via Wave / Mobile Money, and send polite 1-click reminders on WhatsApp & SMS.",
-    lpHeroCta1: "Create Merchant Account",
+    lpHeroPill: "FOR SHOPKEEPERS, WHOLESALERS & RETAILERS",
+    lpHeroTitle1: "Zero Forgotten Credit.",
+    lpHeroTitle2: "Get back the money you're owed.",
+    lpHeroDesc: "Every credit sale recorded in seconds. Your customers politely reminded on WhatsApp, for you. They pay via Wave or Mobile Money, and the receipt is sent automatically.",
+    lpHeroCta1: "Try free for 3 months",
     lpHeroCta2: "WhatsApp Simulator",
     lpTrustLabel: "Compatible with all your payment methods:",
-    lpCtaTitle: "Ready to effortlessly collect all your money?",
-    lpCtaSub: "Join the merchants who stopped losing money and switch to digital today.",
-    lpCtaBtn: "Start Free Now (3 Months Free)",
+    lpCtaTitle: "How much money is sleeping in your notebook right now?",
+    lpCtaSub: "Record your credits tonight, send reminders tomorrow morning. The first 3 months are free.",
+    lpCtaBtn: "Start for free",
     footerText: "Professional Debt Recovery Solution",
     footerBtn: "Open application →",
 
@@ -1617,8 +1641,14 @@ window.switchMenu = function(menuId) {
     iconEl.setAttribute('data-lucide', pageIcons[menuId]);
   }
 
-  if (menuId === 'menu-salesbook' && typeof renderDailySalesBook === 'function') {
-    try { renderDailySalesBook(); } catch(e) {}
+  if (menuId === 'menu-salesbook') {
+    try {
+      if (typeof renderDailySalesBook === 'function') renderDailySalesBook();
+      if (typeof updatePatronBadgeStatus === 'function') updatePatronBadgeStatus();
+      if (typeof applySalesbookAutoRetention === 'function') applySalesbookAutoRetention();
+    } catch(e) {
+      console.warn("Error initializing salesbook view:", e);
+    }
   }
 
   const headerBtn = document.getElementById('top-header-btn');
@@ -2736,26 +2766,6 @@ window.renderPaymentsTable = function() {
   const tbody = document.getElementById('payments-table-body');
   const payments = AppState.payments || [];
 
-  const sigSelect = document.getElementById('signature-client-select');
-  if (sigSelect) {
-    const clientsList = (AppState.clients || []);
-    sigSelect.innerHTML = `<option value="">-- Choisir un client débiteur --</option>` +
-      clientsList.map(c => `<option value="${c.id}">${escapeHTML(c.name)} (${formatCurrency(c.totalDue || 0)})</option>`).join('');
-  }
-
-  const qrImg = document.getElementById('merchant-qr-code-img');
-  const qrBiz = document.getElementById('merchant-qr-biz-name');
-  const qrPhone = document.getElementById('merchant-qr-phone');
-  const bizName = AppState.businessName || 'Mon Commerce';
-  const bizPhone = AppState.businessPhone || '';
-
-  if (qrBiz) qrBiz.textContent = bizName;
-  if (qrPhone) qrPhone.textContent = bizPhone ? `Paiement au : ${bizPhone}` : 'Paiement Wave, MTN, Orange & Flooz';
-  if (qrImg) {
-    const qrData = encodeURIComponent(`https://credit-track00.vercel.app/pay?m=${encodeURIComponent(bizName)}&p=${encodeURIComponent(bizPhone)}`);
-    qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${qrData}`;
-  }
-
   const totalAmount = payments.reduce((acc, p) => acc + (parseFloat(p.amount) || 0), 0);
   const totalCount = payments.length;
 
@@ -2805,15 +2815,15 @@ window.renderPaymentsTable = function() {
   if (payments.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" style="text-align:center;padding:36px 16px;">
-          <div style="width:52px;height:52px;border-radius:14px;background:#EFF6FF;color:#2563EB;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;">
-            <i data-lucide="wallet" style="width:26px;height:26px;"></i>
+        <td colspan="6" style="text-align:center;padding:48px 16px;">
+          <div style="width:56px;height:56px;border-radius:16px;background:#0F294D;border:1px solid #1E3A8A;color:#38BDF8;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <i data-lucide="wallet" style="width:28px;height:28px;"></i>
           </div>
-          <h4 style="font-size:1rem;font-weight:800;color:#0F172A;margin-bottom:4px;">Aucun encaissement enregistré pour l'instant</h4>
-          <p style="font-size:0.84rem;color:#64748B;max-width:440px;margin:0 auto 16px;line-height:1.45;">
+          <h4 style="font-size:1.05rem;font-weight:800;color:#FFFFFF;margin-bottom:6px;">Aucun encaissement enregistré pour l'instant</h4>
+          <p style="font-size:0.86rem;color:#8FA0BE;max-width:460px;margin:0 auto 18px;line-height:1.5;">
             Les versements de vos clients et les reçus délivrés apparaîtront ici automatiquement avec leur date et moyen de paiement.
           </p>
-          <button type="button" class="btn btn-primary" onclick="openQuickPaymentModal()" style="padding:9px 18px;font-weight:700;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px;box-shadow:0 3px 10px rgba(37,99,235,0.25);">
+          <button type="button" class="btn btn-primary" onclick="openQuickPaymentModal()" style="background:#0066FF;color:#FFFFFF;border:none;border-radius:10px;padding:10px 20px;font-weight:800;font-size:0.85rem;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 15px rgba(0,102,255,0.4);cursor:pointer;">
             <i data-lucide="plus-circle" style="width:16px;height:16px;"></i>
             <span>Encaisser un premier règlement</span>
           </button>
@@ -2825,29 +2835,33 @@ window.renderPaymentsTable = function() {
   }
 
   tbody.innerHTML = payments.map(p => {
-    const methodBadgeColor = p.method?.toLowerCase().includes('wave') ? '#1E40AF' :
-      (p.method?.toLowerCase().includes('mtn') ? '#B45309' :
-      (p.method?.toLowerCase().includes('orange') ? '#EA580C' :
-      (p.method?.toLowerCase().includes('moov') || p.method?.toLowerCase().includes('flooz') ? '#047857' : '#475569')));
+    const isWave = p.method?.toLowerCase().includes('wave');
+    const isMtn = p.method?.toLowerCase().includes('mtn');
+    const isOrange = p.method?.toLowerCase().includes('orange');
+    const isMoov = p.method?.toLowerCase().includes('moov') || p.method?.toLowerCase().includes('flooz');
+    
+    const badgeBg = isWave ? '#0A2540' : (isMtn ? '#3D2800' : (isOrange ? '#3D1700' : (isMoov ? '#062D23' : '#142138')));
+    const badgeBorder = isWave ? '#1E40AF' : (isMtn ? '#B45309' : (isOrange ? '#EA580C' : (isMoov ? '#065F46' : '#1C2B45')));
+    const badgeColor = isWave ? '#60A5FA' : (isMtn ? '#FBBF24' : (isOrange ? '#FB923C' : (isMoov ? '#34D399' : '#94A3B8')));
 
     return `
-      <tr>
-        <td><span style="font-family:monospace;font-weight:800;color:#2563EB;background:#EFF6FF;padding:3px 7px;border-radius:6px;font-size:0.8rem;">${escapeHTML(p.ref || `PAY-${p.id.toString().slice(-6)}`)}</span></td>
-        <td><strong style="color:#0F172A;font-size:0.9rem;">${escapeHTML(p.clientName || 'Client Comptoir')}</strong></td>
-        <td><strong style="color:#10B981;font-size:0.92rem;font-weight:900;">${formatCurrency(p.amount || 0)}</strong></td>
-        <td>
-          <span style="display:inline-flex;align-items:center;gap:6px;background:${methodBadgeColor}15;color:${methodBadgeColor};padding:4px 10px;border-radius:8px;font-size:0.78rem;font-weight:800;">
+      <tr style="border-bottom:1px solid #142138;transition:background 0.15s;" onmouseover="this.style.background='#0F1D33'" onmouseout="this.style.background='transparent'">
+        <td style="padding:14px 16px;"><span style="font-family:'JetBrains Mono',monospace;font-weight:800;color:#38BDF8;background:#0F294D;border:1px solid #1E3A8A;padding:4px 8px;border-radius:6px;font-size:0.8rem;">${escapeHTML(p.ref || `PAY-${p.id.toString().slice(-6)}`)}</span></td>
+        <td style="padding:14px 16px;"><strong style="color:#FFFFFF;font-size:0.92rem;">${escapeHTML(p.clientName || 'Client Comptoir')}</strong></td>
+        <td style="padding:14px 16px;"><strong style="color:#10B981;font-size:0.96rem;font-weight:900;font-family:'JetBrains Mono',monospace;">${formatCurrency(p.amount || 0)}</strong></td>
+        <td style="padding:14px 16px;">
+          <span style="display:inline-flex;align-items:center;gap:6px;background:${badgeBg};border:1px solid ${badgeBorder};color:${badgeColor};padding:4px 10px;border-radius:8px;font-size:0.78rem;font-weight:800;">
             <i data-lucide="credit-card" style="width:13px;height:13px;"></i>
             ${escapeHTML(p.method || 'Espèces')}
           </span>
         </td>
-        <td style="color:#64748B;font-size:0.82rem;">${escapeHTML(p.date || 'Aujourd\'hui')}</td>
-        <td style="text-align:right;">
+        <td style="padding:14px 16px;color:#8FA0BE;font-size:0.84rem;">${escapeHTML(p.date || 'Aujourd\'hui')}</td>
+        <td style="padding:14px 16px;text-align:right;">
           <div style="display:flex;gap:6px;justify-content:flex-end;">
-            <button type="button" class="btn btn-outline" style="padding:5px 9px;font-size:0.76rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName || 'Client')}', '', '${escapeHTML(p.method || 'Règlement')}', ${parseFloat(p.amount) || 0})" title="Imprimer ou voir le reçu">
-              <i data-lucide="printer" style="width:13px;height:13px;"></i> Reçu PDF
+            <button type="button" style="background:#0D1627;border:1px solid #1C2B45;color:#FFFFFF;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#38BDF8'" onmouseout="this.style.borderColor='#1C2B45'" onclick="openReceiptPreviewModalWithData('${escapeHTML(p.clientName || 'Client')}', '', '${escapeHTML(p.method || 'Règlement')}', ${parseFloat(p.amount) || 0})" title="Imprimer ou voir le reçu">
+              <i data-lucide="printer" style="width:13px;height:13px;color:#38BDF8;"></i> Reçu PDF
             </button>
-            <button type="button" class="btn btn-outline" style="padding:5px 9px;font-size:0.76rem;font-weight:700;display:inline-flex;align-items:center;gap:4px;border-color:#25D366;color:#15803D;" onclick="sendWhatsAppPaymentReceipt('${escapeHTML(p.clientName || 'Client')}', ${parseFloat(p.amount) || 0}, '${escapeHTML(p.ref || '')}')" title="Envoyer par WhatsApp">
+            <button type="button" style="background:#062D23;border:1px solid #065F46;color:#34D399;border-radius:8px;padding:6px 10px;font-size:0.78rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.borderColor='#10B981'" onmouseout="this.style.borderColor='#065F46'" onclick="sendWhatsAppPaymentReceipt('${escapeHTML(p.clientName || 'Client')}', ${parseFloat(p.amount) || 0}, '${escapeHTML(p.ref || '')}')" title="Envoyer par WhatsApp">
               <i data-lucide="message-circle" style="width:13px;height:13px;"></i> WhatsApp
             </button>
           </div>
@@ -3683,7 +3697,15 @@ function renderAccountingJournal() {
   if (!tbody) return;
 
   if (AppState.accountingEntries.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#94A3B8;padding:20px;">${AppState.lang === 'en' ? 'No accounting entries recorded.' : 'Aucune écriture enregistrée.'}</td></tr>`;
+    tbody.innerHTML = `<tr>
+        <td colspan="8" style="text-align:center;padding:44px 20px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:#0F294D;border:1px solid #1E3A8A;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;color:#38BDF8;">
+            <i data-lucide="book-open" style="width:24px;height:24px;"></i>
+          </div>
+          <div style="font-size:0.98rem;font-weight:800;color:#FFFFFF;margin-bottom:4px;">Aucune vente enregistrée pour cette sélection</div>
+          <div style="font-size:0.82rem;color:#8FA0BE;max-width:420px;margin:0 auto;line-height:1.45;">Saisissez directement votre première transaction sur le terminal ci-dessus.</div>
+        </td>
+      </tr>`;
     return;
   }
 
@@ -4933,16 +4955,32 @@ window.selectSubModalPlan = function(planId) {
   if (currencyEl) currencyEl.textContent = isYearly ? 'FCFA / an' : 'FCFA / mois';
   if (discountTagEl) discountTagEl.style.display = isYearly ? 'flex' : 'none';
 
-  // Mise à jour des boutons de toggle
+  // Mise à jour des boutons de toggle avec styles inline directs (fail-safe)
   const toggleBtnMonthly = document.getElementById('sub-toggle-monthly');
   const toggleBtnYearly = document.getElementById('sub-toggle-yearly');
   if (toggleBtnMonthly && toggleBtnYearly) {
     if (isYearly) {
       toggleBtnYearly.classList.add('active');
       toggleBtnMonthly.classList.remove('active');
+      toggleBtnYearly.style.background = '#FFFFFF';
+      toggleBtnYearly.style.color = '#0F172A';
+      toggleBtnYearly.style.fontWeight = '800';
+      toggleBtnYearly.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)';
+      toggleBtnMonthly.style.background = 'transparent';
+      toggleBtnMonthly.style.color = '#94A3B8';
+      toggleBtnMonthly.style.fontWeight = '700';
+      toggleBtnMonthly.style.boxShadow = 'none';
     } else {
       toggleBtnMonthly.classList.add('active');
       toggleBtnYearly.classList.remove('active');
+      toggleBtnMonthly.style.background = '#FFFFFF';
+      toggleBtnMonthly.style.color = '#0F172A';
+      toggleBtnMonthly.style.fontWeight = '800';
+      toggleBtnMonthly.style.boxShadow = '0 4px 12px rgba(0,0,0,0.25)';
+      toggleBtnYearly.style.background = 'transparent';
+      toggleBtnYearly.style.color = '#94A3B8';
+      toggleBtnYearly.style.fontWeight = '700';
+      toggleBtnYearly.style.boxShadow = 'none';
     }
   }
 
@@ -4966,14 +5004,24 @@ window.selectSubModalPlan = function(planId) {
 window.selectSubModalMethod = function(methodId) {
   window.subModalState.method = methodId;
 
-  // Mise à jour des puces de méthode (.checkout-method-chip)
-  document.querySelectorAll('.checkout-method-chip, .sub-method-btn').forEach(btn => {
-    btn.classList.remove('active', 'active-method');
+  // Mise à jour des puces de méthode (.checkout-method-chip) avec styles inline directs (fail-safe)
+  document.querySelectorAll('.checkout-method-chip').forEach(btn => {
+    btn.classList.remove('active');
+    btn.style.border = '1.5px solid #E2E8F0';
+    btn.style.background = '#F8FAFC';
+    btn.style.color = '#1E293B';
+    btn.style.boxShadow = 'none';
+    btn.style.fontWeight = '700';
   });
 
   const activeChip = document.getElementById(`sub-method-${methodId}`);
   if (activeChip) {
-    activeChip.classList.add('active', 'active-method');
+    activeChip.classList.add('active');
+    activeChip.style.border = '2px solid #2563EB';
+    activeChip.style.background = '#EFF6FF';
+    activeChip.style.color = '#1D4ED8';
+    activeChip.style.boxShadow = '0 2px 8px rgba(37,99,235,0.18)';
+    activeChip.style.fontWeight = '800';
   }
 
   // Affichage dynamique des sections selon la méthode
@@ -4998,7 +5046,7 @@ window.selectSubModalMethod = function(methodId) {
     phoneLabel.textContent = labels[methodId] || 'Numéro Mobile Money pour validation du débit :';
   }
 
-  // Si carte bancaire, masquer le bouton de paiement direct SasPay (puisque SasPay n'a pas activé la carte)
+  // Si carte bancaire, masquer le bouton de paiement direct SasPay (SasPay n'a pas activé la carte)
   if (submitBtn) {
     submitBtn.style.display = (methodId === 'card') ? 'none' : 'flex';
   }
@@ -6182,7 +6230,8 @@ window.submitSalesbookSale = function(source = 'inline_row') {
   const now = new Date();
   const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')}`;
   const datePicker = document.getElementById('salesbook-date-picker');
-  const dateStr = datePicker?.value || '2026-08-23';
+  const todayStr = new Date().toISOString().split('T')[0];
+  const dateStr = datePicker?.value || todayStr;
   const total = qty * unitPrice;
 
   const newSale = {
@@ -6267,6 +6316,7 @@ window.toggleSalesbookExpand = function() {
 
 // Rendu complet du cahier des ventes (8 colonnes exactes de la maquette)
 window.renderDailySalesBook = function() {
+
   const tableBody = document.getElementById('daily-sales-table-body');
   if (!tableBody) return;
 
@@ -6323,6 +6373,53 @@ window.renderDailySalesBook = function() {
   if (kpiCount) kpiCount.textContent = totalSalesCount.toLocaleString('fr-FR');
   if (kpiItems) kpiItems.textContent = `Articles vendus : ${totalItems}`;
 
+  // Mise à jour de la barre récapitulative sous le tableau
+  const sumCount = document.getElementById('salesbook-sum-count');
+  const sumTotal = document.getElementById('salesbook-sum-total');
+  const sumClients = document.getElementById('salesbook-sum-clients');
+  const sumItems = document.getElementById('salesbook-sum-items');
+  if (sumCount) sumCount.textContent = `${totalSalesCount} vente${totalSalesCount > 1 ? 's' : ''} aujourd'hui`;
+  if (sumTotal) sumTotal.textContent = `${Number(totalRevenue).toLocaleString('fr-FR')} FCFA total`;
+  if (sumClients) {
+    const uniqueClients = new Set(filteredSales.filter(s => s.client && s.client !== '—').map(s => s.client)).size;
+    sumClients.textContent = `${uniqueClients} client${uniqueClients > 1 ? 's' : ''} enregistré${uniqueClients > 1 ? 's' : ''}`;
+  }
+  if (sumItems) sumItems.textContent = `${totalItems} article${totalItems > 1 ? 's' : ''} vendu${totalItems > 1 ? 's' : ''}`;
+
+  // Barres de progression et pourcentages
+  const cashBar = document.getElementById('salesbook-cash-bar');
+  const cashNum = document.getElementById('salesbook-cash-pct-num');
+  if (cashBar) cashBar.style.width = `${cashPct}%`;
+  if (cashNum) cashNum.textContent = `${Math.round(cashPct)}%`;
+
+  const elecBar = document.getElementById('salesbook-elec-bar');
+  const elecNum = document.getElementById('salesbook-elec-pct-num');
+  if (elecBar) elecBar.style.width = `${elecPct}%`;
+  if (elecNum) elecNum.textContent = `${Math.round(elecPct)}%`;
+
+  // Mise à jour du bloc "Dernières activités" (strictement basé sur les ventes réelles)
+  const recentActivitiesEl = document.getElementById('salesbook-recent-activities-list');
+  if (recentActivitiesEl) {
+    if (filteredSales.length === 0) {
+      recentActivitiesEl.innerHTML = '<div style="color:#8FA0BE;font-size:0.84rem;text-align:center;padding:24px 0;font-weight:500;">Aucune activité enregistrée pour le moment</div>';
+    } else {
+      const recent = filteredSales.slice(-4).reverse();
+      recentActivitiesEl.innerHTML = recent.map((s, i) => {
+        const dotColor = i === 0 ? '#F59E0B' : '#10B981';
+        return `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;">
+            <div style="display:flex;align-items:center;gap:8px;color:#E2E8F0;">
+              <span style="width:6px;height:6px;border-radius:50%;background:${dotColor};display:inline-block;"></span>
+              <span>Vente enregistrée - ${escapeHTML(s.time || '12:00')}</span>
+            </div>
+            <span style="font-weight:700;color:#FFFFFF;font-family:'JetBrains Mono',monospace;">${Number(s.total || 0).toLocaleString('fr-FR')} FCFA</span>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+
   // Filtrer par terme de recherche si présent
   let displayedSales = filteredSales;
   if (window.salesbookSearchQuery) {
@@ -6352,10 +6449,12 @@ window.renderDailySalesBook = function() {
   if (displayedSales.length === 0) {
     tableBody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align:center;padding:32px 16px;color:#94A3B8;font-weight:600;">
-          <i data-lucide="book-open" style="width:32px;height:32px;color:#CBD5E1;margin-bottom:8px;display:inline-block;"></i>
-          <div>Aucune vente enregistrée pour cette sélection</div>
-          <div style="font-size:0.78rem;color:#94A3B8;margin-top:4px;">Saisissez directement votre première vente sur la ligne bleue ci-dessous.</div>
+        <td colspan="8" style="text-align:center;padding:46px 20px;">
+          <div style="width:48px;height:48px;border-radius:12px;background:#0F294D;border:1px solid #1E3A8A;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;color:#38BDF8;">
+            <i data-lucide="book-open" style="width:24px;height:24px;"></i>
+          </div>
+          <div style="font-size:1rem;font-weight:800;color:#FFFFFF;margin-bottom:4px;">Aucune vente enregistrée pour cette sélection</div>
+          <div style="font-size:0.84rem;color:#8FA0BE;max-width:420px;margin:0 auto;line-height:1.45;">Saisissez directement votre première transaction sur le terminal ci-dessus.</div>
         </td>
       </tr>
     `;
@@ -6363,47 +6462,46 @@ window.renderDailySalesBook = function() {
     tableBody.innerHTML = displayedSales.map((s, idx) => {
       let badgeHtml = '';
       if (s.method === 'Wave Direct' || s.method === 'Wave' || s.method.includes('Wave')) {
-        badgeHtml = `<span style="background:#F5F3FF;color:#7C3AED;border:1px solid #DDD6FE;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;display:inline-flex;align-items:center;gap:4px;">📱 Wave</span>`;
+        badgeHtml = `<span style="background:rgba(0,119,182,0.2);border:1px solid #0077B6;color:#00B4D8;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">📱 Wave</span>`;
       } else if (s.method.includes('Orange') || s.method === 'Mobile Money' || s.method.includes('MoMo') || s.method.includes('Moov')) {
-        badgeHtml = `<span style="background:#EFF6FF;color:#2563EB;border:1px solid #BFDBFE;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;display:inline-flex;align-items:center;gap:4px;">📱 ${escapeHTML(s.method)}</span>`;
+        badgeHtml = `<span style="background:rgba(245,158,11,0.15);border:1px solid #F59E0B;color:#FBBF24;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">📱 ${escapeHTML(s.method)}</span>`;
       } else {
-        badgeHtml = `<span style="background:#ECFDF5;color:#065F46;border:1px solid #A7F3D0;padding:3px 8px;border-radius:6px;font-size:0.75rem;font-weight:800;display:inline-flex;align-items:center;gap:4px;">💵 Espèces</span>`;
+        badgeHtml = `<span style="background:rgba(16,185,129,0.15);border:1px solid #10B981;color:#10B981;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">💵 Espèces</span>`;
       }
 
       const isEven = idx % 2 === 0;
+      const rowBg = isEven ? 'rgba(15, 23, 42, 0.45)' : 'rgba(21, 31, 50, 0.25)';
 
       return `
-        <tr style="background:${isEven ? '#FFFFFF' : '#F8FAFC'};border-bottom:1px solid #F1F5F9;transition:background 0.15s;" onmouseover="this.style.background='#EFF6FF'" onmouseout="this.style.background='${isEven ? '#FFFFFF' : '#F8FAFC'}'">
-          <td style="color:#64748B;font-family:monospace;font-size:0.8rem;font-weight:700;text-align:center;padding:12px 14px;">
-            ${escapeHTML(s.time || '12:00:00')}
+        <tr style="background:#0D1627;border-bottom:1px solid #162238;transition:background 0.15s ease;" onmouseover="this.style.background='#111E36'" onmouseout="this.style.background='#0D1627'">
+          <td style="color:#FFFFFF;font-family:'JetBrains Mono',monospace;font-size:0.84rem;font-weight:600;padding:12px 16px;">
+            ${escapeHTML(s.time || '12:00')}
           </td>
-          <td style="font-weight:800;color:#0F172A;font-size:0.9rem;padding:12px 16px;line-height:1.4;word-break:break-word;">
-            ${escapeHTML(s.item)}
+          <td style="font-weight:700;color:#FFFFFF;font-size:0.88rem;padding:12px 16px;line-height:1.4;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:1.1rem;">${(s.item.toLowerCase().includes('eau') || s.item.toLowerCase().includes('coca') || s.item.toLowerCase().includes('jus') || s.item.toLowerCase().includes('boisson')) ? '🥤' : (s.item.toLowerCase().includes('pain') ? '🍞' : (s.item.toLowerCase().includes('huile') ? '🫒' : (s.item.toLowerCase().includes('riz') ? '🍚' : '📦')))}</span>
+              <span>${escapeHTML(s.item)}</span>
+            </div>
           </td>
-          <td style="text-align:center;font-weight:800;color:#334155;font-size:0.88rem;padding:12px 8px;">
+          <td style="text-align:center;font-weight:700;color:#FFFFFF;font-size:0.88rem;padding:12px 8px;">
             ${s.qty || 1}
           </td>
-          <td style="text-align:right;font-weight:700;color:#64748B;font-size:0.88rem;padding:12px 12px;font-family:monospace;">
+          <td style="text-align:right;font-weight:600;color:#8FA0BE;font-size:0.86rem;padding:12px 14px;font-family:'JetBrains Mono',monospace;">
             ${Number(s.unitPrice || (s.total / (s.qty || 1)) || 0).toLocaleString('fr-FR')}
           </td>
-          <td style="text-align:right;font-weight:900;color:#0F172A;font-size:0.92rem;padding:12px 14px;font-family:monospace;">
+          <td style="text-align:right;font-weight:700;color:#FFFFFF;font-size:0.9rem;padding:12px 14px;font-family:'JetBrains Mono',monospace;">
             ${Number(s.total || 0).toLocaleString('fr-FR')}
           </td>
           <td style="text-align:center;padding:12px 12px;">
             ${badgeHtml}
           </td>
-          <td style="font-size:0.82rem;font-weight:600;color:#64748B;padding:12px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px;">
-            ${escapeHTML(s.client || 'Client comptoir')}
+          <td style="font-size:0.84rem;font-weight:600;color:#8FA0BE;padding:12px 14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;">
+            ${escapeHTML(s.client || '—')}
           </td>
           <td style="text-align:center;padding:12px 10px;">
-            <div style="display:flex;gap:6px;justify-content:center;align-items:center;">
-              <button type="button" onclick="editSaleItem('${s.id}')" title="Modifier" style="color:#2563EB;border:none;background:transparent;cursor:pointer;padding:4px;border-radius:4px;">
-                <i data-lucide="edit-3" style="width:15px;height:15px;"></i>
-              </button>
-              <button type="button" onclick="deleteSaleItem('${s.id}')" title="Supprimer" style="color:#EF4444;border:none;background:transparent;cursor:pointer;padding:4px;border-radius:4px;">
-                <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
-              </button>
-            </div>
+            <button type="button" onclick="editSaleItem('${s.id}')" title="Actions" style="background:#070D1B;border:1px solid #1C2B45;color:#8FA0BE;border-radius:6px;padding:4px 8px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.color='#FFFFFF';this.style.borderColor='#38BDF8'" onmouseout="this.style.color='#8FA0BE';this.style.borderColor='#1C2B45'">
+              •••
+            </button>
           </td>
         </tr>
       `;
@@ -6413,20 +6511,298 @@ window.renderDailySalesBook = function() {
   if (window.lucide) lucide.createIcons();
 };
 
-window.openDailyClosingModal = function() {
-  const totalRevenue = AppState.sales.reduce((sum, s) => sum + (s.total || 0), 0);
-  const totalCash = AppState.sales.filter(s => s.method === 'Espèces').reduce((sum, s) => sum + (s.total || 0), 0);
-  const totalMobile = totalRevenue - totalCash;
+// Switcher Double Espace (Caisse en Direct vs Historique des Ventes)
+window.switchSalesbookTab = function(tab) {
+  const liveBtn = document.getElementById('sb-tab-live-btn');
+  const historyBtn = document.getElementById('sb-tab-history-btn');
+  const dockContainer = document.getElementById('sb-quick-dock-container');
+  const titleSpan = document.getElementById('sb-table-view-title');
+  const datePicker = document.getElementById('salesbook-date-picker');
+  const todayStr = new Date().toISOString().split('T')[0];
 
-  alert(`📊 BILAN DE CLÔTURE DU CAHIER :\n\n• Total Recettes du Jour : ${Number(totalRevenue).toLocaleString('fr-FR')} FCFA (${AppState.sales.length} ventes)\n• Espèces en Caisse : ${Number(totalCash).toLocaleString('fr-FR')} FCFA\n• Mobile Money & Wave : ${Number(totalMobile).toLocaleString('fr-FR')} FCFA\n\nLe rapport est prêt pour impression ou transmission.`);
+  if (tab === 'live') {
+    if (liveBtn) liveBtn.classList.add('active');
+    if (historyBtn) historyBtn.classList.remove('active');
+    if (dockContainer) dockContainer.style.display = 'block';
+    if (titleSpan) titleSpan.innerHTML = `Journal des Ventes en Direct <span style="font-size:0.85rem;color:#CBD5E1;font-weight:500;">(Chaque vente validée s'ajoute ici en bas)</span>`;
+    if (datePicker && datePicker.value !== todayStr) {
+      datePicker.value = todayStr;
+    }
+  } else {
+    if (historyBtn) historyBtn.classList.add('active');
+    if (liveBtn) liveBtn.classList.remove('active');
+    if (dockContainer) dockContainer.style.display = 'none';
+    if (titleSpan) titleSpan.innerHTML = `Archives &amp; Historique des Ventes <span style="font-size:0.85rem;color:#CBD5E1;font-weight:500;">(Consultez n'importe quelle date passée)</span>`;
+  }
+  renderDailySalesBook();
 };
 
+// Gestion Rapide du Contact WhatsApp Patron
+window.savePatronPhoneQuick = function(val) {
+  localStorage.setItem('creditTrack_patronWhatsApp', (val || '').trim());
+  updatePatronBadgeStatus();
+};
+
+window.savePatronPhoneQuickBtn = function() {
+  const input = document.getElementById('closing-patron-phone');
+  const val = (input?.value || '').trim();
+  if (!val || val.length < 8) {
+    showToast("Veuillez saisir un numéro WhatsApp valide (ex: +229 97 00 00 00).", "error");
+    return;
+  }
+  localStorage.setItem('creditTrack_patronWhatsApp', val);
+  updatePatronBadgeStatus();
+  showToast("Numéro du patron mémorisé avec succès !", "success");
+};
+
+window.updatePatronBadgeStatus = function() {
+  const phone = localStorage.getItem('creditTrack_patronWhatsApp') || AppState.businessPhone || '';
+  const displayEl = document.getElementById('sb-patron-number-display');
+  if (displayEl) {
+    if (phone) {
+      displayEl.textContent = `Patron : ${phone}`;
+      displayEl.style.color = '#34D399';
+    } else {
+      displayEl.textContent = '⚠️ WhatsApp Patron à configurer';
+      displayEl.style.color = '#FBBF24';
+    }
+  }
+};
+
+// Modale de Clôture & Transmission WhatsApp au Patron
+window.openDailyClosingModal = function() {
+  const datePicker = document.getElementById('salesbook-date-picker');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const selectedDate = datePicker?.value || todayStr;
+
+  let filteredSales = AppState.sales.filter(s => s.date === selectedDate || !s.date);
+  if (AppState.selectedBranch && AppState.selectedBranch !== 'all') {
+    filteredSales = filteredSales.filter(s => s.branch === AppState.selectedBranch);
+  }
+
+  let totalSales = 0;
+  let totalItems = 0;
+  let totalCash = 0;
+  let totalWave = 0;
+  let totalMoMo = 0;
+
+  filteredSales.forEach(s => {
+    totalSales += (s.total || 0);
+    totalItems += (s.qty || 1);
+    if (s.method === 'Espèces') totalCash += (s.total || 0);
+    else if (s.method === 'Wave Direct' || s.method.includes('Wave')) totalWave += (s.total || 0);
+    else totalMoMo += (s.total || 0);
+  });
+
+  const totalEl = document.getElementById('closing-modal-total-amount');
+  const countEl = document.getElementById('closing-modal-total-count');
+  const cashEl = document.getElementById('closing-modal-cash');
+  const waveEl = document.getElementById('closing-modal-wave');
+  const momoEl = document.getElementById('closing-modal-momo');
+  const dateEl = document.getElementById('closing-modal-date');
+  const patronInput = document.getElementById('closing-patron-phone');
+
+  if (totalEl) totalEl.textContent = `${Number(totalSales).toLocaleString('fr-FR')} FCFA`;
+  if (countEl) countEl.textContent = `${totalItems} article${totalItems > 1 ? 's' : ''} (${filteredSales.length} ventes)`;
+  if (cashEl) cashEl.textContent = `${Number(totalCash).toLocaleString('fr-FR')} FCFA`;
+  if (waveEl) waveEl.textContent = `${Number(totalWave).toLocaleString('fr-FR')} FCFA`;
+  if (momoEl) momoEl.textContent = `${Number(totalMoMo).toLocaleString('fr-FR')} FCFA`;
+  if (dateEl) {
+    const formatted = new Date(selectedDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    dateEl.textContent = `Bilan du ${formatted}`;
+  }
+
+  const savedPatronPhone = localStorage.getItem('creditTrack_patronWhatsApp') || AppState.businessPhone || '';
+  if (patronInput) {
+    patronInput.value = savedPatronPhone;
+  }
+
+  openModal('modal-daily-closing-summary');
+  if (window.lucide) lucide.createIcons();
+};
+
+// Envoi officiel du bilan au patron sur WhatsApp
+window.sendDailyClosingWhatsApp = function() {
+  const patronInput = document.getElementById('closing-patron-phone');
+  let patronPhone = (patronInput?.value || localStorage.getItem('creditTrack_patronWhatsApp') || AppState.businessPhone || '').trim();
+
+  if (!patronPhone || patronPhone.replace(/[^0-9]/g, '').length < 8) {
+    showToast("Veuillez saisir le numéro WhatsApp du patron dans le champ prévu ci-dessus.", "error");
+    if (patronInput) {
+      patronInput.focus();
+      patronInput.style.borderColor = '#EF4444';
+      patronInput.style.boxShadow = '0 0 12px rgba(239,68,68,0.4)';
+    }
+    return;
+  }
+
+  // Sauvegarder pour les prochaines fois
+  localStorage.setItem('creditTrack_patronWhatsApp', patronPhone);
+  updatePatronBadgeStatus();
+
+  const datePicker = document.getElementById('salesbook-date-picker');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const selectedDate = datePicker?.value || todayStr;
+  const formattedDate = new Date(selectedDate).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  let totalSales = 0;
+  let totalItems = 0;
+  let totalCash = 0;
+  let totalWave = 0;
+  let totalMoMo = 0;
+
+  const filteredSales = AppState.sales.filter(s => s.date === selectedDate || !s.date);
+  filteredSales.forEach(s => {
+    totalSales += (s.total || 0);
+    totalItems += (s.qty || 1);
+    if (s.method === 'Espèces') totalCash += (s.total || 0);
+    else if (s.method === 'Wave Direct' || s.method.includes('Wave')) totalWave += (s.total || 0);
+    else totalMoMo += (s.total || 0);
+  });
+
+  const now = new Date();
+  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  const storeName = AppState.businessName || 'Boutique Principale';
+  const cashierName = AppState.activeCashierName || 'Responsable Caisse';
+
+  const text = `📊 *CLÔTURE DU CAHIER DES VENTES (24H)*\n` +
+    `🏢 *Entreprise :* ${storeName}\n` +
+    `📅 *Date :* ${formattedDate} à ${timeStr}\n` +
+    `👤 *Caissier / Agent :* ${cashierName}\n\n` +
+    `💰 *TOTAL RECETTES DU JOUR :* *${Number(totalSales).toLocaleString('fr-FR')} FCFA*\n` +
+    `📦 *Articles vendus :* ${totalItems} (${filteredSales.length} transactions)\n\n` +
+    `💵 *DÉTAIL DES ENCAISSEMENTS :*\n` +
+    `• Espèces en Caisse : *${Number(totalCash).toLocaleString('fr-FR')} FCFA*\n` +
+    `• Wave Money : *${Number(totalWave).toLocaleString('fr-FR')} FCFA*\n` +
+    `• Mobile Money (Orange/MTN/Moov) : *${Number(totalMoMo).toLocaleString('fr-FR')} FCFA*\n\n` +
+    `✅ _Caisse arrêtée, vérifiée et synchronisée sur CreditTrack._`;
+
+  const cleanPhone = patronPhone.replace(/[^0-9]/g, '');
+  const url = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(text)}`;
+
+  window.open(url, '_blank');
+  showToast("Bilan journalier transmis au Patron sur WhatsApp !", "success");
+  closeModal('modal-daily-closing-summary');
+};
+
+// Modale des Paramètres du Cahier & Rétention
 window.openSalesbookSettingsModal = function() {
-  if (confirm("Options du Cahier des Ventes :\n\nVoulez-vous vider toutes les ventes enregistrées aujourd'hui pour repartir à zéro ?")) {
-    AppState.sales = [];
+  const patronPhoneInput = document.getElementById('sb-settings-patron-phone');
+  const patronNameInput = document.getElementById('sb-settings-patron-name');
+  const retentionSelect = document.getElementById('sb-settings-retention-select');
+  const purgeDateInput = document.getElementById('sb-purge-target-date');
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  if (patronPhoneInput) {
+    patronPhoneInput.value = localStorage.getItem('creditTrack_patronWhatsApp') || AppState.businessPhone || '';
+  }
+  if (patronNameInput) {
+    patronNameInput.value = localStorage.getItem('creditTrack_patronName') || 'Patron / Gérant';
+  }
+  if (retentionSelect) {
+    retentionSelect.value = localStorage.getItem('creditTrack_salesRetentionDays') || '30';
+  }
+  if (purgeDateInput) {
+    purgeDateInput.value = todayStr;
+  }
+
+  const statusMsg = document.getElementById('sb-retention-status-msg');
+  if (statusMsg) {
+    const days = localStorage.getItem('creditTrack_salesRetentionDays') || '30';
+    statusMsg.textContent = `Rétention active : les ventes de plus de ${days} jours sont automatiquement nettoyées.`;
+  }
+
+  openModal('modal-salesbook-settings');
+  if (window.lucide) lucide.createIcons();
+};
+
+// Enregistrement des coordonnées du patron
+window.saveSalesbookSettingsContact = function() {
+  const phone = (document.getElementById('sb-settings-patron-phone')?.value || '').trim();
+  const name = (document.getElementById('sb-settings-patron-name')?.value || '').trim();
+
+  if (!phone || phone.replace(/[^0-9]/g, '').length < 8) {
+    showToast("Veuillez saisir un numéro de téléphone valide avec indicatif (ex: +229...).", "error");
+    return;
+  }
+
+  localStorage.setItem('creditTrack_patronWhatsApp', phone);
+  if (name) localStorage.setItem('creditTrack_patronName', name);
+  updatePatronBadgeStatus();
+  showToast("Contact WhatsApp du patron enregistré avec succès !", "success");
+};
+
+// Sauvegarde et application de la durée de rétention choisie
+window.applySalesbookRetentionSetting = function() {
+  const select = document.getElementById('sb-settings-retention-select');
+  const days = parseInt(select?.value || '30', 10);
+  localStorage.setItem('creditTrack_salesRetentionDays', days);
+
+  const purgedCount = applySalesbookAutoRetention();
+  const statusMsg = document.getElementById('sb-retention-status-msg');
+  if (statusMsg) {
+    statusMsg.textContent = `Rétention appliquée (${days} jours). ${purgedCount} vente(s) ancienne(s) nettoyée(s).`;
+  }
+  showToast(`Rétention configurée sur ${days} jours. Historique allégé !`, "success");
+};
+
+// Nettoyage automatique en fonction de la durée de rétention
+window.applySalesbookAutoRetention = function() {
+  const days = parseInt(localStorage.getItem('creditTrack_salesRetentionDays') || '30', 10);
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+  const cutoffStr = cutoffDate.toISOString().split('T')[0];
+
+  const initialCount = AppState.sales.length;
+  AppState.sales = AppState.sales.filter(s => {
+    if (!s.date) return true;
+    return s.date >= cutoffStr;
+  });
+
+  const purgedCount = initialCount - AppState.sales.length;
+  if (purgedCount > 0) {
     saveSalesToStorage();
     renderDailySalesBook();
-    showToast("Le cahier des ventes a été réinitialisé à zéro.", "info");
+  }
+  return purgedCount;
+};
+
+// Purge manuelle par date
+window.purgeSalesbookDate = function(mode) {
+  const dateInput = document.getElementById('sb-purge-target-date');
+  const targetDate = dateInput?.value;
+  if (!targetDate) {
+    showToast("Veuillez sélectionner une date cible pour la purge.", "error");
+    return;
+  }
+
+  if (mode === 'single') {
+    if (confirm(`Confirmez-vous la suppression de toutes les ventes du ${targetDate} ?`)) {
+      const initialCount = AppState.sales.length;
+      AppState.sales = AppState.sales.filter(s => s.date !== targetDate);
+      saveSalesToStorage();
+      renderDailySalesBook();
+      showToast(`${initialCount - AppState.sales.length} vente(s) supprimée(s) pour le ${targetDate}.`, "info");
+    }
+  } else if (mode === 'before') {
+    if (confirm(`Confirmez-vous la suppression de tout l'historique antérieur au ${targetDate} ?`)) {
+      const initialCount = AppState.sales.length;
+      AppState.sales = AppState.sales.filter(s => !s.date || s.date >= targetDate);
+      saveSalesToStorage();
+      renderDailySalesBook();
+      showToast(`${initialCount - AppState.sales.length} vente(s) antérieure(s) purgée(s).`, "info");
+    }
+  }
+};
+
+// Vider les ventes d'aujourd'hui uniquement
+window.resetTodaySalesbook = function() {
+  const todayStr = new Date().toISOString().split('T')[0];
+  if (confirm("Voulez-vous réinitialiser à zéro les ventes enregistrées aujourd'hui ?")) {
+    AppState.sales = AppState.sales.filter(s => s.date !== todayStr);
+    saveSalesToStorage();
+    renderDailySalesBook();
+    showToast("Les ventes d'aujourd'hui ont été remises à zéro.", "info");
   }
 };
 
@@ -6595,41 +6971,40 @@ window.renderCreditProductsTable = function() {
   tbody.innerHTML = window.creditProducts.map((item) => {
     const subtotal = (item.quantity || 0) * (item.unitPrice || 0);
     return `
-      <tr style="border-bottom:1px solid #F1F5F9;transition:background 0.15s ease;">
+      <tr style="border-bottom:1px solid #162238;background:#0D1627;transition:background 0.15s ease;" onmouseover="this.style.background='#111E36'" onmouseout="this.style.background='#0D1627'">
         <td style="padding:10px 12px;">
           <input type="text" 
-            class="form-control" 
             placeholder="Désignation article (ex: Sac de Riz 50kg)" 
             value="${escapeHTML(item.name || '')}" 
             oninput="updateCreditProduct('${item.id}', 'name', this.value)" 
-            style="height:38px;font-size:0.85rem;border-radius:8px;">
+            style="width:100%;height:38px;padding:0 12px;background:#070D1B;border:1px solid #1C2B45;border-radius:8px;font-size:0.88rem;color:#FFFFFF;outline:none;box-sizing:border-box;">
         </td>
         <td style="padding:10px 12px;text-align:center;">
           <input type="number" 
-            class="form-control" 
             min="1" 
             value="${item.quantity || 1}" 
             oninput="updateCreditProduct('${item.id}', 'quantity', this.value)" 
-            style="height:38px;font-size:0.85rem;text-align:center;border-radius:8px;max-width:90px;margin:0 auto;">
+            style="width:80px;height:38px;text-align:center;background:#070D1B;border:1px solid #1C2B45;border-radius:8px;font-size:0.88rem;color:#FFFFFF;outline:none;margin:0 auto;box-sizing:border-box;">
         </td>
         <td style="padding:10px 12px;text-align:right;">
           <input type="number" 
-            class="form-control" 
             min="0" 
             placeholder="0" 
             value="${item.unitPrice || ''}" 
             oninput="updateCreditProduct('${item.id}', 'unitPrice', this.value)" 
-            style="height:38px;font-size:0.85rem;text-align:right;border-radius:8px;max-width:140px;margin-left:auto;">
+            style="width:130px;height:38px;text-align:right;padding:0 10px;background:#070D1B;border:1px solid #1C2B45;border-radius:8px;font-size:0.88rem;color:#FFFFFF;outline:none;margin-left:auto;box-sizing:border-box;">
         </td>
-        <td style="padding:10px 12px;text-align:right;font-weight:800;color:#2563EB;font-size:0.92rem;">
+        <td style="padding:10px 12px;text-align:right;font-weight:900;color:#00B4D8;font-size:0.95rem;font-family:'JetBrains Mono',monospace;">
           ${formatCurrency(subtotal)}
         </td>
         <td style="padding:10px 12px;text-align:center;">
           <button type="button" 
             onclick="removeCreditProductRow('${item.id}')" 
             title="Supprimer la ligne" 
-            style="background:transparent;border:none;color:#EF4444;cursor:pointer;padding:6px;border-radius:6px;display:flex;align-items:center;justify-content:center;margin:0 auto;">
-            <i data-lucide="trash-2" style="width:16px;height:16px;"></i>
+            style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);color:#F87171;cursor:pointer;padding:6px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto;transition:all 0.15s;"
+            onmouseover="this.style.background='rgba(239,68,68,0.25)'"
+            onmouseout="this.style.background='rgba(239,68,68,0.12)'">
+            <i data-lucide="trash-2" style="width:15px;height:15px;"></i>
           </button>
         </td>
       </tr>
@@ -6867,6 +7242,420 @@ if (window.location.hash.includes('type=recovery') || window.location.hash.inclu
   }, 500);
 }
 
+// Déclencheur direct d'ouverture du Checkout Abonnement PRO par paramètre d'URL (test instantané 1 clic)
+(function checkAutoOpenSubscription() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const hash = window.location.hash;
+  if (urlParams.get('abonnement') === 'pro' || urlParams.get('modal') === 'subscription' || hash.includes('abonnement=pro')) {
+    const plan = urlParams.get('plan') || 'pro_yearly';
+    setTimeout(() => {
+      if (typeof window.openSubscriptionModal === 'function') {
+        window.openSubscriptionModal(plan);
+      }
+    }, 300);
+  }
+})();
+
+// Déclencheur direct d'ouverture du Cahier des Ventes par URL (#salesbook ou ?tab=salesbook)
+(function checkAutoOpenSalesbook() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const hash = window.location.hash || '';
+  if (hash.includes('salesbook') || hash.includes('ventes') || urlParams.get('tab') === 'salesbook') {
+    setTimeout(() => {
+      if (typeof window.switchMenu === 'function') {
+        window.switchMenu('menu-salesbook');
+      }
+    }, 350);
+  }
+})();
 
 
 
+// ============================================================
+// HELPER FONCTIONNALITÉ EXACTE REPRODUCTION DU CLIENT
+// ============================================================
+window.salesbookChangeQty = function(delta) {
+  const qtyInput = document.getElementById('inline-row-qty');
+  if (!qtyInput) return;
+  let val = parseFloat(qtyInput.value) || 1;
+  val = Math.max(1, val + delta);
+  qtyInput.value = val;
+  if (typeof updateInlineRowTotalPreview === 'function') {
+    updateInlineRowTotalPreview();
+  }
+};
+
+// Raccourcis Clavier F2, F3, F4, F5
+if (!window._salesbookShortcutsBound) {
+  window._salesbookShortcutsBound = true;
+  window.addEventListener('keydown', function(e) {
+    // Si on n'est pas sur la vue salesbook, ignorer
+    const sb = document.getElementById('menu-salesbook');
+    if (!sb || sb.classList.contains('hidden') || sb.style.display === 'none') return;
+
+    if (e.key === 'F2') {
+      e.preventDefault();
+      document.getElementById('inline-row-item')?.focus();
+    } else if (e.key === 'F3') {
+      e.preventDefault();
+      if (typeof openInventoryModal === 'function') openInventoryModal();
+    } else if (e.key === 'F4') {
+      e.preventDefault();
+      document.getElementById('inline-row-client')?.focus();
+    } else if (e.key === 'F5') {
+      e.preventDefault();
+      if (typeof exportSalesbookCSV === 'function') exportSalesbookCSV();
+    }
+  });
+}
+
+// Mise à jour de l'horloge live et de la date du Cahier des Ventes
+setInterval(() => {
+  const timeEl = document.getElementById('salesbook-live-time');
+  const dateEl = document.getElementById('salesbook-live-date-str');
+  const now = new Date();
+  if (timeEl) {
+    timeEl.textContent = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  }
+  if (dateEl) {
+    try {
+      const rawDate = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(now);
+      dateEl.textContent = rawDate.charAt(0).toUpperCase() + rawDate.slice(1);
+    } catch (e) {}
+  }
+}, 1000);
+
+
+// ==========================================================================
+// MOTEUR CINÉMATIQUE TUTORIEL : CRÉATION CAISSIER & SÉCURITÉ PATRON (VOIX NEURALE RÉALISTE)
+// ==========================================================================
+const cashierTutorialTimeline = [
+  {
+    step: 1,
+    title: "1. L'Enjeu de l'Étanchéité & Sérénité du Patron",
+    scene: 'patron',
+    audioFile: 'tut_audio_step1.mp3',
+    narrator: "Conseil Gérant & Patron",
+    sub: "🛡️ <strong>Sécurité Absolue :</strong> Vos caissiers notent les ventes et encaissent, mais vos bénéfices restent 100% invisibles.",
+    voice: "Bonjour cher confrère chef d'entreprise. Déléguer la caisse à un employé ou un vendeur ne doit plus être une source d'inquiétude. Grâce à CréditTrack PRO, vous profitez d'une étanchéité absolue : vos employés disposent de leur propre espace pour encaisser, mais vos bénéfices réels, vos marges et votre trésorerie leur sont strictement masqués et inaccessibles.",
+    floatingCard: {
+      badge: "PROTECTION PATRON ACTIVÉE",
+      title: "Bénéfices & Trésorerie Sécurisés",
+      desc: "🔒 Chiffre d'Affaires global invisible au caissier<br>🔒 Marges bénéficiaires confidentielles<br>🔒 Suppression de données verrouillée"
+    },
+    uiMockup: null
+  },
+  {
+    step: 2,
+    title: "2. Étape 1 : Coordonnées & Identité de l'Employé",
+    scene: 'ui',
+    audioFile: 'tut_audio_step2.mp3',
+    narrator: "Étape 1 : Formulaire Express",
+    sub: "👤 <strong>Étape 1 :</strong> Ouvrez l'onglet Équipe & Caissiers, puis indiquez le prénom et le numéro WhatsApp de l'employé.",
+    voice: "Pour créer un caissier, rendez-vous simplement dans le menu Paramètres, onglet Équipe et Caissiers, puis cliquez sur Ajouter un Caissier. Vous indiquez son prénom, son nom et son numéro WhatsApp. Rien de compliqué, aucun jargon : l'assistant vous guide en quatre étapes claires.",
+    floatingCard: {
+      badge: "ÉTAPE 1 SUR 4",
+      title: "Fiche Caissier Définie",
+      desc: "👤 Moussa Traoré<br>📞 WhatsApp : +229 97 00 11 22<br>🛒 Rôle : Caissier Boutique"
+    },
+    uiMockup: `
+      <div style="font-size:0.75rem;color:#38BDF8;font-weight:800;text-transform:uppercase;margin-bottom:6px;">Étape 1 sur 4 : Identité</div>
+      <h4 style="color:#FFFFFF;margin:0 0 10px 0;font-size:1.05rem;">Qui est votre nouvel employé ?</h4>
+      <div style="background:#070D1B;border:1px solid #1C2B45;border-radius:10px;padding:12px;margin-bottom:10px;">
+        <label style="font-size:0.72rem;color:#8FA0BE;display:block;margin-bottom:4px;">Nom du Caissier :</label>
+        <div style="font-weight:800;color:#FFFFFF;font-size:0.95rem;">Moussa Traoré</div>
+      </div>
+      <div style="background:#070D1B;border:1px solid #1C2B45;border-radius:10px;padding:12px;">
+        <label style="font-size:0.72rem;color:#8FA0BE;display:block;margin-bottom:4px;">Téléphone / WhatsApp :</label>
+        <div style="font-weight:800;color:#38BDF8;font-size:0.95rem;">+229 97 00 11 22</div>
+      </div>
+    `
+  },
+  {
+    step: 3,
+    title: "3. Étape 2 & 3 : Emplacement & Code PIN Secret",
+    scene: 'ui',
+    audioFile: 'tut_audio_step3.mp3',
+    narrator: "Étape 2 & 3 : Sécurité & Caisse",
+    sub: "🔑 <strong>Étape 2 & 3 :</strong> Attribuez sa caisse et définissez son code secret à 4 chiffres (ex: 1 2 3 4).",
+    voice: "Attribuez-lui ensuite son magasin ou sa caisse, puis choisissez un code PIN secret à quatre chiffres, par exemple 1 2 3 4. C'est ce code qui lui permettra d'ouvrir sa session. Dès cet instant, le système bloque automatiquement tout accès à vos bilans financiers. Le caissier ne peut ni voir vos marges, ni effacer vos données.",
+    floatingCard: {
+      badge: "VERROUILLAGE SÉCURISÉ",
+      title: "Code Secret Caissier : 1 2 3 4",
+      desc: "✓ Autorisé : Noter les ventes & Encaisser<br>🔒 Verrouillé : Bénéfices masqués<br>🔒 Verrouillé : Comptabilité patron bloquée"
+    },
+    uiMockup: `
+      <div style="font-size:0.75rem;color:#10B981;font-weight:800;text-transform:uppercase;margin-bottom:6px;">Étape 3 sur 4 : Code PIN Secret</div>
+      <h4 style="color:#FFFFFF;margin:0 0 10px 0;font-size:1.05rem;">Définition du Code PIN &amp; Protections</h4>
+      <div style="background:#070D1B;border:1.5px solid #00F5FF;border-radius:12px;padding:14px;text-align:center;margin-bottom:12px;">
+        <span style="font-size:0.72rem;color:#8FA0BE;display:block;margin-bottom:4px;">Code secret d'accès attribué à Moussa :</span>
+        <div style="font-size:1.8rem;font-weight:900;color:#00F5FF;font-family:monospace;letter-spacing:6px;">1 2 3 4</div>
+      </div>
+      <div style="background:#062D23;border:1px solid #065F46;border-radius:10px;padding:10px 14px;font-size:0.76rem;color:#34D399;">
+        ✓ Isolation stricte activée : Zéro accès au Dashboard gérant
+      </div>
+    `
+  },
+  {
+    step: 4,
+    title: "4. Étape 4 : Transmission WhatsApp Instantanée",
+    scene: 'caissier',
+    audioFile: 'tut_audio_step4.mp3',
+    narrator: "Étape 4 : Prise en main par l'Employé",
+    sub: "📲 <strong>Étape 4 :</strong> Cliquez sur « Envoyer les Identifiants par WhatsApp ». L'employé accède aussitôt depuis son téléphone !",
+    voice: "À la quatrième étape, un bouton vert vous permet d'envoyer la fiche d'accès directement sur le WhatsApp de votre employé. Il clique simplement sur le lien depuis son propre smartphone ou la tablette de la boutique, saisit son code secret, et commence à encaisser immédiatement. Pas besoin de télécharger d'application lourde.",
+    floatingCard: {
+      badge: "ZÉRO INSTALLATION",
+      title: "Accès Instantané Mobile",
+      desc: "📲 Message WhatsApp reçu en direct<br>⚡ Connexion par lien sécurisé<br>🧾 Émission immédiate de reçus clients"
+    },
+    uiMockup: null
+  },
+  {
+    step: 5,
+    title: "5. Sérénité Quotidienne & Clôture Automatique",
+    scene: 'patron',
+    audioFile: 'tut_audio_step5.mp3',
+    narrator: "Suivi & Clôture Journalière",
+    sub: "👑 <strong>Tranquillité d'Esprit :</strong> Vos ventes tournent au magasin et chaque soir, vous recevez le récapitulatif certifié sur WhatsApp.",
+    voice: "Pendant la journée, vous gardez l'esprit serein. Votre employé enregistre chaque vente sur le Cahier du Jour, encaisse par Wave ou Mobile Money, et délivre des reçus officiels. Et chaque soir, vous recevez la clôture de caisse complète sur votre propre WhatsApp. Vous gardez le contrôle total de votre entreprise, où que vous soyez.",
+    floatingCard: {
+      badge: "CLÔTURE DU JOUR CERTIFIÉE",
+      title: "Contrôle à Distance Total",
+      desc: "📊 Bilan des encaissements en direct<br>🔔 Alertes des crédits clients échus<br>🏆 Zéro litige de caisse en fin de journée"
+    },
+    uiMockup: null
+  }
+];
+
+let tutCurrentIndex = 0;
+let tutIsPlaying = false;
+let tutAudioElement = null;
+
+window.openCashierTutorialModal = function() {
+  openModal('modal-cashier-tutorial');
+  tutCurrentIndex = 0;
+  applyTutorialScene(tutCurrentIndex);
+  window.toggleTutorialPlay(true);
+};
+
+window.closeCashierTutorialModal = function() {
+  window.pauseTutorial();
+  closeModal('modal-cashier-tutorial');
+};
+
+function applyTutorialScene(index) {
+  if (index < 0) index = 0;
+  if (index >= cashierTutorialTimeline.length) index = cashierTutorialTimeline.length - 1;
+  tutCurrentIndex = index;
+
+  const data = cashierTutorialTimeline[index];
+
+  // Update pills
+  for (let i = 0; i < cashierTutorialTimeline.length; i++) {
+    const pill = document.getElementById(`tut-pill-${i}`);
+    if (pill) {
+      if (i === index) {
+        pill.style.background = '#0F294D';
+        pill.style.borderColor = '#00F5FF';
+        pill.style.color = '#00F5FF';
+      } else {
+        pill.style.background = '#0D1627';
+        pill.style.borderColor = '#1C2B45';
+        pill.style.color = '#8FA0BE';
+      }
+    }
+  }
+
+  // Update step number
+  const stepNum = document.getElementById('tut-step-num');
+  if (stepNum) stepNum.textContent = index + 1;
+
+  // Update narrator badge
+  const narrBadge = document.getElementById('tut-narrator-title');
+  if (narrBadge) narrBadge.textContent = data.narrator;
+
+  // Update subtitles
+  const subBox = document.getElementById('tut-subtitles');
+  if (subBox) subBox.innerHTML = data.sub;
+
+  // Update scenes
+  const scenePatron = document.getElementById('tut-scene-patron');
+  const sceneCaissier = document.getElementById('tut-scene-caissier');
+  const sceneUi = document.getElementById('tut-scene-ui');
+  const uiContent = document.getElementById('tut-ui-mockup-content');
+
+  if (scenePatron) scenePatron.style.opacity = (data.scene === 'patron') ? '1' : '0';
+  if (sceneCaissier) sceneCaissier.style.opacity = (data.scene === 'caissier') ? '1' : '0';
+  if (sceneUi) {
+    sceneUi.style.opacity = (data.scene === 'ui') ? '1' : '0';
+    if (data.uiMockup && uiContent) {
+      uiContent.innerHTML = data.uiMockup;
+    }
+  }
+
+  // Floating card
+  const floatCard = document.getElementById('tut-floating-card');
+  if (floatCard && data.floatingCard) {
+    floatCard.style.display = 'block';
+    floatCard.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:0.68rem;font-weight:900;color:#00F5FF;letter-spacing:0.5px;">${data.floatingCard.badge}</span>
+        <span style="width:7px;height:7px;border-radius:50%;background:#10B981;box-shadow:0 0 6px #10B981;"></span>
+      </div>
+      <strong style="display:block;font-size:0.92rem;color:#FFFFFF;margin-bottom:6px;">${data.floatingCard.title}</strong>
+      <div style="font-size:0.78rem;color:#8FA0BE;line-height:1.45;">${data.floatingCard.desc}</div>
+    `;
+  }
+
+  // Update progress bar
+  const pBar = document.getElementById('tut-progress-bar');
+  if (pBar) {
+    const pct = ((index + 1) / cashierTutorialTimeline.length) * 100;
+    pBar.style.width = `${pct}%`;
+  }
+
+  // Play natural neural voice audio
+  if (tutIsPlaying) {
+    playTutorialAudio(data.audioFile, data.voice);
+  }
+}
+
+function playTutorialAudio(audioFile, fallbackText) {
+  // Stop existing audio
+  if (tutAudioElement) {
+    tutAudioElement.pause();
+    tutAudioElement.currentTime = 0;
+    tutAudioElement = null;
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+
+  if (audioFile) {
+    tutAudioElement = new Audio(audioFile + '?v=vivienne_hd_' + Date.now());
+    tutAudioElement.volume = 1.0;
+
+    tutAudioElement.onended = function() {
+      if (tutIsPlaying && tutCurrentIndex < cashierTutorialTimeline.length - 1) {
+        setTimeout(() => {
+          if (tutIsPlaying) {
+            window.nextTutorialScene();
+          }
+        }, 700);
+      } else if (tutCurrentIndex >= cashierTutorialTimeline.length - 1) {
+        window.pauseTutorial();
+      }
+    };
+
+    const p = tutAudioElement.play();
+    if (p !== undefined) {
+      p.catch(err => {
+        console.warn('Audio play error, falling back to speech synthesis:', err);
+        fallbackSpeechSynthesis(fallbackText);
+      });
+    }
+  } else {
+    fallbackSpeechSynthesis(fallbackText);
+  }
+}
+
+function fallbackSpeechSynthesis(text) {
+  try {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'fr-FR';
+      u.rate = 0.95;
+      u.pitch = 1.0;
+      u.volume = 1.0;
+
+      const voices = window.speechSynthesis.getVoices();
+      const frVoice = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
+      if (frVoice) u.voice = frVoice;
+
+      u.onend = function() {
+        if (tutIsPlaying && tutCurrentIndex < cashierTutorialTimeline.length - 1) {
+          setTimeout(() => {
+            if (tutIsPlaying) {
+              window.nextTutorialScene();
+            }
+          }, 800);
+        } else if (tutCurrentIndex >= cashierTutorialTimeline.length - 1) {
+          window.pauseTutorial();
+        }
+      };
+
+      window.speechSynthesis.speak(u);
+    }
+  } catch (e) {}
+}
+
+window.toggleTutorialPlay = function(forcePlay) {
+  const playBtnText = document.getElementById('tut-play-text');
+  const playIcon = document.getElementById('tut-play-icon');
+  const playCenter = document.getElementById('tut-play-center-btn');
+
+  if (forcePlay === true || !tutIsPlaying) {
+    tutIsPlaying = true;
+    if (playBtnText) playBtnText.textContent = 'Pause';
+    if (playIcon) playIcon.setAttribute('data-lucide', 'pause');
+    if (playCenter) playCenter.style.display = 'none';
+
+    const curData = cashierTutorialTimeline[tutCurrentIndex];
+    playTutorialAudio(curData.audioFile, curData.voice);
+  } else {
+    window.pauseTutorial();
+  }
+  if (window.lucide) lucide.createIcons();
+};
+
+window.pauseTutorial = function() {
+  tutIsPlaying = false;
+  if (tutAudioElement) {
+    tutAudioElement.pause();
+  }
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  const playBtnText = document.getElementById('tut-play-text');
+  const playIcon = document.getElementById('tut-play-icon');
+  const playCenter = document.getElementById('tut-play-center-btn');
+
+  if (playBtnText) playBtnText.textContent = 'Lecture';
+  if (playIcon) playIcon.setAttribute('data-lucide', 'play');
+  if (playCenter) playCenter.style.display = 'flex';
+  if (window.lucide) lucide.createIcons();
+};
+
+window.nextTutorialScene = function() {
+  if (tutCurrentIndex < cashierTutorialTimeline.length - 1) {
+    applyTutorialScene(tutCurrentIndex + 1);
+  } else {
+    window.pauseTutorial();
+  }
+};
+
+window.prevTutorialScene = function() {
+  if (tutCurrentIndex > 0) {
+    applyTutorialScene(tutCurrentIndex - 1);
+  }
+};
+
+window.jumpToTutorialScene = function(idx) {
+  applyTutorialScene(idx);
+};
+
+window.restartTutorial = function() {
+  applyTutorialScene(0);
+  window.toggleTutorialPlay(true);
+};
+
+window.handleTutorialTimelineClick = function(event) {
+  const rect = event.currentTarget.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const pct = clickX / rect.width;
+  const targetIdx = Math.min(Math.floor(pct * cashierTutorialTimeline.length), cashierTutorialTimeline.length - 1);
+  window.jumpToTutorialScene(targetIdx);
+};

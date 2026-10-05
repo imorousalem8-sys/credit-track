@@ -39,3 +39,7 @@ dist-ssr
 .next/
 out/
 build/
+
+# Temporary files & Large video files
+Untitled*
+*.mp4

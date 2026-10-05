@@ -3,268 +3,441 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Présentation Vidéo Officielle — CréditTrack PRO</title>
+  <title>CréditTrack PRO • Vidéo & Studio Publicitaire Officiel</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     
+    :root {
+      --primary: #2563EB;
+      --primary-light: #60A5FA;
+      --accent: #10B981;
+      --gold: #FACC15;
+      --bg-dark: #070B14;
+      --card-bg: rgba(15, 23, 42, 0.94);
+      --border-color: rgba(255, 255, 255, 0.14);
+    }
+
     body {
-      background: #060912;
+      background: var(--bg-dark);
       font-family: 'Plus Jakarta Sans', sans-serif;
       color: #FFFFFF;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 16px;
+      padding: 20px 16px 60px;
     }
 
+    /* HEADER */
     .header-box {
       text-align: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
       width: 100%;
-      max-width: 960px;
+      max-width: 1080px;
     }
     .badge-status {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 5px 14px;
+      gap: 8px;
+      padding: 6px 16px;
       background: rgba(37, 99, 235, 0.18);
       border: 1px solid rgba(37, 99, 235, 0.45);
-      border-radius: 20px;
-      font-size: 0.76rem;
+      border-radius: 30px;
+      font-size: 0.78rem;
       font-weight: 800;
       color: #60A5FA;
       text-transform: uppercase;
-      margin-bottom: 6px;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
     }
     .pulse-dot {
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       background: #10B981;
       border-radius: 50%;
-      box-shadow: 0 0 8px #10B981;
+      box-shadow: 0 0 10px #10B981;
+      animation: pulseAnim 1.6s infinite ease-in-out;
+    }
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
     }
     h1 {
-      font-size: 1.4rem;
+      font-size: 1.7rem;
       font-weight: 900;
       color: #F8FAFC;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+    .subtitle-header {
+      font-size: 0.92rem;
+      color: #94A3B8;
+      max-width: 680px;
+      margin: 0 auto;
     }
 
-    .toolbar-top {
+    /* MODE SWITCHER & TOOLBAR */
+    .toolbar-container {
       display: flex;
+      flex-direction: column;
       align-items: center;
       gap: 12px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .btn-play-hero {
-      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-      color: #FFFFFF;
-      border: none;
-      padding: 14px 36px;
-      border-radius: 12px;
-      font-size: 1.1rem;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 0 4px 22px rgba(37,99,235,0.5);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      transition: all 0.2s;
-    }
-    .btn-play-hero:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 28px rgba(37,99,235,0.7);
-    }
-    .btn-nav-step {
-      background: rgba(255, 255, 255, 0.12);
-      color: #FFFFFF;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 10px 16px;
-      border-radius: 10px;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor: pointer;
+      margin-bottom: 18px;
+      width: 100%;
+      max-width: 1080px;
     }
 
-    /* CONTENEUR CINÉMATIQUE 16:9 PC */
+    .mode-switcher {
+      display: inline-flex;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      padding: 4px;
+      border-radius: 12px;
+      gap: 4px;
+    }
+    .mode-btn {
+      background: transparent;
+      border: none;
+      color: #94A3B8;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+    .mode-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.45);
+    }
+
+    /* NAVIGATION DES 7 SCÈNES */
+    .scenes-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      width: 100%;
+    }
+    .scene-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #CBD5E1;
+      padding: 7px 13px;
+      border-radius: 9px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .scene-pill:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: #FFFFFF;
+    }
+    .scene-pill.active {
+      background: rgba(37, 99, 235, 0.35);
+      border-color: #3B82F6;
+      color: #60A5FA;
+      font-weight: 800;
+    }
+
+    /* LECTEUR CINÉMATIQUE 16:9 */
     .cinema-viewport {
       position: relative;
       width: 100%;
-      max-width: 960px;
+      max-width: 1080px;
       aspect-ratio: 16 / 9;
       background: #000000;
       border-radius: 20px;
       overflow: hidden;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95), 0 0 40px rgba(37, 99, 235, 0.3);
-      border: 2px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95), 0 0 45px rgba(37, 99, 235, 0.35);
+      border: 2px solid rgba(255, 255, 255, 0.14);
     }
 
-    /* SCÈNES DE FOND */
-    .scene-background {
+    /* SCÈNES DE FOND AVEC ANIMATION VIVANTE (ZOOM & BREATHING) */
+    .scene-bg {
       position: absolute;
       inset: 0;
       background-size: cover;
       background-position: center;
       opacity: 0;
       transform: scale(1);
-      transition: opacity 0.8s ease-in-out;
+      transition: opacity 0.8s ease-in-out, transform 8s ease-out;
       pointer-events: none;
     }
-    .scene-background.active {
+    .scene-bg.active {
       opacity: 1;
+      transform: scale(1.06);
     }
 
+    /* VIGNETTE OMBRÉE */
     .vignette-overlay {
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at center, rgba(0,0,0,0.1) 30%, rgba(0,0,0,0.75) 100%),
-                  linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, transparent 20%, transparent 60%, rgba(0,0,0,0.92) 100%);
+      background: radial-gradient(circle at center, rgba(0,0,0,0.1) 35%, rgba(0,0,0,0.8) 100%),
+                  linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 25%, transparent 60%, rgba(0,0,0,0.92) 100%);
       pointer-events: none;
+      z-index: 10;
     }
 
-    /* BRAND BADGE */
+    /* BADGE OFFICIEL HAUT GAUCHE */
     .brand-top-badge {
       position: absolute;
-      top: 16px;
-      left: 18px;
+      top: 18px;
+      left: 20px;
       display: flex;
       align-items: center;
       gap: 10px;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(10px);
-      padding: 6px 14px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      padding: 6px 16px;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.2);
-      z-index: 20;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 30;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
     }
     .brand-top-badge img {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+    }
+    .brand-top-badge .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .brand-top-badge strong {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #60A5FA;
+      letter-spacing: -0.2px;
     }
     .brand-top-badge span {
-      font-weight: 900;
-      font-size: 0.92rem;
-      color: #60A5FA;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #94A3B8;
+      text-transform: uppercase;
     }
 
-    /* CARTES FLOTTANTES */
-    .floating-card-salesbook {
+    /* INDICATEUR AUDIO & DIRECT */
+    .live-top-badge {
       position: absolute;
-      top: 60px;
+      top: 18px;
       right: 20px;
-      width: 340px;
-      max-width: calc(100% - 40px);
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(14px);
-      border: 1.5px solid #3B82F6;
-      border-radius: 14px;
-      padding: 14px 18px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(12px);
+      padding: 6px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
       z-index: 30;
-      display: none;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #10B981;
     }
-    .floating-card-salesbook.show {
-      display: block;
+    .voice-waves {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      height: 14px;
+    }
+    .voice-bar {
+      width: 3px;
+      height: 100%;
+      background: #10B981;
+      border-radius: 2px;
+      animation: waveBars 0.8s ease-in-out infinite alternate;
+    }
+    .voice-bar:nth-child(2) { animation-delay: 0.2s; height: 70%; }
+    .voice-bar:nth-child(3) { animation-delay: 0.4s; height: 40%; }
+    @keyframes waveBars {
+      0% { transform: scaleY(0.3); }
+      100% { transform: scaleY(1); }
     }
 
-    .floating-card-wa {
+    /* CARTES FLOTTANTES GLASSMORPHISM INTERACTIVES */
+    .floating-card {
       position: absolute;
-      top: 60px;
-      right: 20px;
-      width: 330px;
-      max-width: calc(100% - 40px);
-      background: #FFFFFF;
-      color: #0F172A;
-      border-radius: 14px;
-      padding: 14px 16px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.75);
-      z-index: 30;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 20px 45px rgba(0,0,0,0.8), 0 0 30px rgba(37,99,235,0.25);
+      border: 1.5px solid rgba(59, 130, 246, 0.6);
+      z-index: 35;
       display: none;
+      animation: cardSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      max-width: calc(100% - 40px);
     }
-    .floating-card-wa.show {
+    .floating-card.show {
       display: block;
+    }
+    @keyframes cardSlideIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    .floating-card-boss {
+    /* PERSONNAGE ANIMÉ FLOTTANT AVEC EFFET VIVANT */
+    .character-avatar-bubble {
       position: absolute;
-      top: 60px;
-      left: 20px;
-      width: 350px;
-      max-width: calc(100% - 40px);
-      background: rgba(15, 23, 42, 0.95);
+      bottom: 85px;
+      left: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(15, 23, 42, 0.92);
+      border: 1.5px solid rgba(255, 255, 255, 0.22);
+      border-radius: 40px;
+      padding: 6px 18px 6px 6px;
       backdrop-filter: blur(14px);
-      border: 1.5px solid #10B981;
-      border-radius: 14px;
-      padding: 14px 18px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.7);
-      z-index: 30;
-      display: none;
+      z-index: 32;
+      animation: characterBreathe 4s ease-in-out infinite alternate;
     }
-    .floating-card-boss.show {
+    @keyframes characterBreathe {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-6px) rotate(0.5deg); }
+    }
+    .char-img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid #38BDF8;
+      object-fit: cover;
+    }
+    .char-info strong {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #FFFFFF;
       display: block;
+    }
+    .char-info span {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #38BDF8;
+      text-transform: uppercase;
     }
 
     /* SOUS-TITRES DYNAMIQUES */
     .subtitles-layer {
       position: absolute;
       bottom: 24px;
-      left: 3%;
-      right: 3%;
+      left: 4%;
+      right: 4%;
       text-align: center;
-      z-index: 40;
+      z-index: 45;
       pointer-events: none;
     }
-    .sub-badge {
+    .sub-box {
       display: inline-block;
-      background: rgba(0, 0, 0, 0.92);
-      border: 2px solid #FACC15;
+      background: rgba(6, 10, 20, 0.94);
+      border: 2px solid var(--gold);
       color: #FFFFFF;
-      padding: 10px 20px;
-      border-radius: 12px;
+      padding: 10px 24px;
+      border-radius: 14px;
       font-size: 1.05rem;
       font-weight: 800;
-      line-height: 1.4;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.8);
+      line-height: 1.45;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.85);
       max-width: 95%;
+      transition: all 0.3s;
     }
-    .sub-badge .gold {
-      color: #FACC15;
+    .sub-box .gold {
+      color: var(--gold);
+      text-shadow: 0 0 12px rgba(250, 204, 21, 0.4);
+    }
+    .sub-box .highlight {
+      color: #38BDF8;
+      font-weight: 900;
     }
 
+    /* CURSEUR DE SOURIS VIRTUEL ANIMÉ */
+    .virtual-cursor {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      pointer-events: none;
+      z-index: 60;
+      display: none;
+      transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .virtual-cursor svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.7));
+    }
+    .click-ripple {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border: 2px solid #38BDF8;
+      border-radius: 50%;
+      transform: translate(-10px, -10px) scale(0);
+      opacity: 0;
+      animation: rippleClick 0.6s ease-out;
+    }
+    @keyframes rippleClick {
+      0% { transform: translate(-10px, -10px) scale(0); opacity: 1; }
+      100% { transform: translate(-10px, -10px) scale(2.2); opacity: 0; }
+    }
+
+    /* TIMELINE */
     .timeline-bar {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
       height: 6px;
-      background: rgba(255,255,255,0.2);
+      background: rgba(255, 255, 255, 0.15);
+      z-index: 50;
     }
     .timeline-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #2563EB, #60A5FA);
-      transition: width 0.4s ease;
+      background: linear-gradient(90deg, #2563EB, #38BDF8, #10B981);
+      transition: width 0.3s linear;
     }
 
-    .cta-container {
-      margin-top: 16px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      width: 100%;
-      max-width: 960px;
+    /* LECTEUR VIDÉO MP4 OFFICIEL */
+    .native-video-wrapper {
+      position: absolute;
+      inset: 0;
+      display: none;
+      z-index: 40;
+      background: #000;
     }
-    .btn-download-official {
-      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    .native-video-wrapper.show {
+      display: block;
+    }
+    .native-video-player {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* CONTRÔLES PRINCIPAUX DU BAS */
+    .controls-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+      width: 100%;
+      max-width: 1080px;
+    }
+    .btn-main-play {
+      background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
       color: #FFFFFF;
       border: none;
       padding: 14px 34px;
@@ -272,73 +445,246 @@
       font-size: 1.05rem;
       font-weight: 900;
       cursor: pointer;
-      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.45);
-      text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 10px;
+      box-shadow: 0 6px 25px rgba(37, 99, 235, 0.5);
       transition: all 0.2s;
+    }
+    .btn-main-play:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(37, 99, 235, 0.7);
+    }
+    .btn-sec-nav {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .btn-sec-nav:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .btn-download-mp4 {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #FFFFFF;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 900;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      box-shadow: 0 6px 25px rgba(16, 185, 129, 0.45);
+      transition: all 0.2s;
+    }
+    .btn-download-mp4:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.65);
+    }
+
+    /* KIT RÉSEAUX SOCIAUX (ACCORDÉON) */
+    .social-kit-box {
+      width: 100%;
+      max-width: 1080px;
+      margin-top: 30px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .social-kit-header {
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .social-kit-header h3 {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #F8FAFC;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .social-kit-content {
+      padding: 20px 22px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .social-post-card {
+      background: rgba(6, 10, 20, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .social-post-card h4 {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #60A5FA;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .btn-copy-text {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: #FFFFFF;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-copy-text:hover {
+      background: var(--primary);
+    }
+    .social-textarea {
+      width: 100%;
+      height: 120px;
+      background: transparent;
+      border: none;
+      color: #CBD5E1;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      resize: none;
+      font-family: inherit;
     }
 
     @media (max-width: 768px) {
-      body { padding: 12px 10px; }
-      h1 { font-size: 1.15rem; }
-      .floating-card-salesbook, .floating-card-wa, .floating-card-boss {
-        top: 45px;
-        left: 10px;
-        right: 10px;
-        width: auto;
-        padding: 8px 12px;
-      }
-      .sub-badge {
-        font-size: 0.82rem;
-        padding: 6px 12px;
-      }
-      .subtitles-layer {
-        bottom: 12px;
-      }
+      body { padding: 12px 10px 40px; }
+      h1 { font-size: 1.25rem; }
+      .sub-box { font-size: 0.82rem; padding: 8px 14px; }
+      .character-avatar-bubble { display: none; }
+      .floating-card { top: 60px !important; left: 10px !important; right: 10px !important; width: auto !important; }
+      .social-kit-content { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
+  <!-- EN-TÊTE -->
   <div class="header-box">
     <div class="badge-status">
       <span class="pulse-dot"></span>
-      Démonstration Vidéo avec Synthèse Vocale &amp; Bruitages
+      Studio Vidéo Promotionnelle • Voix Neuronale HD (Denise Neural)
     </div>
-    <h1>CréditTrack PRO • Présentation Officielle</h1>
+    <h1>CréditTrack PRO • Vidéo Publicitaire Officielle</h1>
+    <p class="subtitle-header">
+      Présentation complète de toutes les fonctionnalités et interfaces de l'application, prête pour Instagram, Facebook, YouTube et TikTok.
+    </p>
   </div>
 
-  <div class="toolbar-top">
-    <button class="btn-nav-step" onclick="prevStep()">⬅ Précédent</button>
-    <button class="btn-play-hero" id="btnPlay" onclick="togglePlay()">
-      ▶ Lancer la Présentation
-    </button>
-    <button class="btn-nav-step" onclick="nextStep()">Suivant ➔</button>
+  <!-- BARRE D'OUTILS & PILULES DE NAVIGATION -->
+  <div class="toolbar-container">
+    <div class="mode-switcher">
+      <button class="mode-btn active" id="btnModeStudio" onclick="switchMode('studio')">
+        🎬 Mode Studio Interactif Animé
+      </button>
+      <button class="mode-btn" id="btnModeNative" onclick="switchMode('native')">
+        ▶ Mode Vidéo MP4 Officielle (1080p)
+      </button>
+    </div>
+
+    <div class="scenes-pills">
+      <button class="scene-pill active" onclick="jumpToScene(0)">1. 🚀 Accueil &amp; PWA</button>
+      <button class="scene-pill" onclick="jumpToScene(1)">2. 📊 Dashboard PRO</button>
+      <button class="scene-pill" onclick="jumpToScene(2)">3. 📖 Cahier du Jour</button>
+      <button class="scene-pill" onclick="jumpToScene(3)">4. 📲 Relances WhatsApp</button>
+      <button class="scene-pill" onclick="jumpToScene(4)">5. 💰 Dépenses &amp; Marges</button>
+      <button class="scene-pill" onclick="jumpToScene(5)">6. 👑 Clôture &amp; Sécurité</button>
+      <button class="scene-pill" onclick="jumpToScene(6)">7. 🎯 Démarrer Maintenant</button>
+    </div>
   </div>
 
-  <!-- LECTEUR CINÉMATIQUE -->
-  <div class="cinema-viewport" id="viewport">
+  <!-- LECTEUR CINÉMATIQUE 16:9 -->
+  <div class="cinema-viewport" id="cinemaViewport">
     
-    <!-- Scène 1 : La Caissière en boutique (img_caissier_officiel.jpg) -->
-    <div class="scene-background active" id="sceneCashier" style="background-image: url('img_caissier_officiel.jpg');"></div>
-
-    <!-- Scène 2 : Le Patron dans son bureau (img_patron_officiel.jpg) -->
-    <div class="scene-background" id="sceneBoss" style="background-image: url('img_patron_officiel.jpg');"></div>
+    <!-- 7 SCÈNES DE FOND ANIMÉES (ZOOM & BREATHING EFFECTS) -->
+    <div class="scene-bg active" id="bgScene0" style="background-image: url('landing_hero_full.png');"></div>
+    <div class="scene-bg" id="bgScene1" style="background-image: url('hero_dashboard_pro.jpg');"></div>
+    <div class="scene-bg" id="bgScene2" style="background-image: url('img_caissier_officiel.jpg');"></div>
+    <div class="scene-bg" id="bgScene3" style="background-image: url('scene_mobile_money.jpg');"></div>
+    <div class="scene-bg" id="bgScene4" style="background-image: url('scene_stock_marges.jpg');"></div>
+    <div class="scene-bg" id="bgScene5" style="background-image: url('img_patron_officiel.jpg');"></div>
+    <div class="scene-bg" id="bgScene6" style="background-image: url('maquette_fusion_hybride.jpg');"></div>
 
     <div class="vignette-overlay"></div>
 
+    <!-- BADGE OFFICIEL HAUT GAUCHE -->
     <div class="brand-top-badge">
-      <img src="logo_3d.png" alt="Logo">
-      <span>CréditTrack PRO</span>
+      <img src="logo_3d.png" alt="Logo CréditTrack">
+      <div class="brand-text">
+        <strong>CréditTrack PRO</strong>
+        <span>Gestion Commerciale Universelle</span>
+      </div>
     </div>
 
-    <!-- 1. CARTE FLOTTANTE : CAHIER DU JOUR -->
-    <div class="floating-card-salesbook" id="cardSalesbook">
+    <!-- INDICATEUR AUDIO EN DIRECT HAUT DROITE -->
+    <div class="live-top-badge">
+      <div class="voice-waves" id="voiceWaves">
+        <span class="voice-bar"></span>
+        <span class="voice-bar"></span>
+        <span class="voice-bar"></span>
+      </div>
+      <span id="audioStatusText">Voix HD Active</span>
+    </div>
+
+    <!-- CURSEUR VIRTUEL ANIMÉ DYNAMIQUE -->
+    <div class="virtual-cursor" id="virtualCursor">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 3L11.5 20.5L14.5 13.5L21.5 10.5L4 3Z" fill="#38BDF8" stroke="#FFFFFF" stroke-width="2" stroke-linejoin="round"/>
+      </svg>
+      <div class="click-ripple" id="clickRipple"></div>
+    </div>
+
+    <!-- 1. CARTE FLOTTANTE : ACCUEIL & PWA (SCÈNE 0) -->
+    <div class="floating-card" id="cardScene0" style="top: 70px; right: 24px; width: 360px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:0.75rem;font-weight:800;color:#38BDF8;text-transform:uppercase;">⚡ Installation PWA 1-Clic</span>
+        <span style="background:#10B981;color:#FFF;font-size:0.65rem;font-weight:800;padding:2px 8px;border-radius:6px;">Zéro Téléchargement</span>
+      </div>
+      <div style="background:rgba(255,255,255,0.08);padding:10px;border-radius:10px;margin-bottom:8px;font-size:0.82rem;">
+        Directement accessible depuis Chrome, Safari ou Edge sur <strong>Smartphone, Tablette et Ordinateur</strong>.
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:rgba(37,99,235,0.25);border:1px solid #3B82F6;padding:8px 12px;border-radius:8px;font-size:0.78rem;font-weight:800;color:#93C5FD;">
+        <span>✓ Synchronisation Cloud en Temps Réel</span>
+      </div>
+    </div>
+
+    <!-- 2. CARTE FLOTTANTE : DASHBOARD PRO (SCÈNE 1) -->
+    <div class="floating-card" id="cardScene1" style="top: 70px; left: 24px; width: 380px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="font-size:0.75rem;font-weight:800;color:#34D399;text-transform:uppercase;">📊 Tableau de Bord Gérant</span>
+        <span style="color:#60A5FA;font-size:0.7rem;font-weight:700;">En direct</span>
+      </div>
+      <div style="font-size:0.7rem;color:#94A3B8;">Chiffre d'Affaires Encaissé Aujourd'hui :</div>
+      <div style="font-size:1.5rem;font-weight:900;color:#38BDF8;margin-bottom:8px;">2 276 977 FCFA</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;background:rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;font-size:0.75rem;">
+        <div>Taux Recouvrement: <strong style="color:#10B981;">95.4%</strong></div>
+        <div>Crédits Dehors: <strong style="color:#F59E0B;">145 000 FCFA</strong></div>
+      </div>
+    </div>
+
+    <!-- 3. CARTE FLOTTANTE : CAHIER DU JOUR & CAISSIER (SCÈNE 2) -->
+    <div class="floating-card" id="cardScene2" style="top: 70px; right: 24px; width: 360px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
         <span style="font-size:0.75rem;font-weight:800;color:#38BDF8;text-transform:uppercase;">📖 Cahier du Jour des Ventes</span>
-        <span style="background:#2563EB;color:#FFF;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:6px;">En direct</span>
+        <span style="background:#2563EB;color:#FFF;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:6px;">5s chrono</span>
       </div>
       <div style="background:rgba(255,255,255,0.08);padding:8px 10px;border-radius:8px;margin-bottom:6px;font-size:0.8rem;">
         <span style="color:#94A3B8;">Client :</span> <strong style="color:#FFF;">Koffi Mensah (Sac de Riz 25kg)</strong>
@@ -347,229 +693,423 @@
         <span>Mode : À Crédit (Vendredi)</span>
         <span>25 000 FCFA</span>
       </div>
-      <div style="margin-top:6px;font-size:0.7rem;color:#10B981;font-weight:700;text-align:center;">
-        ✓ Reçu digital QR Code généré en 5 secondes
+      <div style="margin-top:6px;font-size:0.72rem;color:#10B981;font-weight:700;text-align:center;">
+        ✓ Reçu digital certifié QR Code généré
       </div>
     </div>
 
-    <!-- 2. BULLE WHATSAPP FLOTTANTE -->
-    <div class="floating-card-wa" id="cardWhatsApp">
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
-        <span style="background:#25D366;color:#FFF;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:6px;">WhatsApp Business</span>
-        <span style="font-size:0.78rem;font-weight:800;">CréditTrack • Relance</span>
+    <!-- 4. CARTE FLOTTANTE : RAPPELS WHATSAPP & MOBILE MONEY (SCÈNE 3) -->
+    <div class="floating-card" id="cardScene3" style="top: 70px; left: 24px; width: 360px; background:#FFFFFF; color:#0F172A; border-color:#25D366;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="background:#25D366;color:#FFF;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:6px;">WhatsApp Automatique</span>
+        <span style="font-size:0.8rem;font-weight:800;color:#0F172A;">CréditTrack • Rappel Échéance</span>
       </div>
-      <div style="font-size:0.78rem;color:#334155;line-height:1.35;margin-bottom:8px;">
+      <div style="font-size:0.8rem;color:#334155;line-height:1.4;margin-bottom:10px;">
         Bonjour M. Koffi, votre facture N°204 de <strong>25 000 FCFA</strong> arrive à échéance aujourd'hui.
       </div>
-      <div style="background:#EFF6FF;color:#2563EB;font-size:0.72rem;font-weight:800;padding:6px 8px;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="background:#EFF6FF;color:#2563EB;font-size:0.75rem;font-weight:800;padding:8px 10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;">
         <span>Payer par Wave / MoMo</span>
-        <span style="background:#10B981;color:#FFF;padding:2px 6px;border-radius:4px;font-size:0.65rem;" id="badgeSoldéWa">SOLDÉ ✓</span>
+        <span style="background:#10B981;color:#FFF;padding:2px 8px;border-radius:4px;font-size:0.7rem;">SOLDÉ ✓</span>
       </div>
     </div>
 
-    <!-- 3. CARTE FLOTTANTE : DASHBOARD PATRON -->
-    <div class="floating-card-boss" id="cardBoss">
+    <!-- 5. CARTE FLOTTANTE : DÉPENSES & MARGES (SCÈNE 4) -->
+    <div class="floating-card" id="cardScene4" style="top: 70px; right: 24px; width: 370px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+        <span style="font-size:0.75rem;font-weight:800;color:#F59E0B;text-transform:uppercase;">💰 Dépenses &amp; Rentabilité Nette</span>
+        <span style="background:#059669;color:#FFF;font-size:0.65rem;font-weight:800;padding:2px 6px;border-radius:6px;">Calcul Auto</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;font-size:0.76rem;">
+        <div style="background:rgba(255,255,255,0.06);padding:8px;border-radius:8px;">
+          <div style="color:#94A3B8;">Charges &amp; Achats :</div>
+          <div style="color:#F87171;font-weight:800;font-size:0.95rem;">-450 000 FCFA</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);padding:8px;border-radius:8px;">
+          <div style="color:#94A3B8;">Marge Nette Réelle :</div>
+          <div style="color:#10B981;font-weight:800;font-size:0.95rem;">+38.5% Net</div>
+        </div>
+      </div>
+      <div style="font-size:0.72rem;color:#38BDF8;font-weight:700;text-align:center;">
+        ✓ Maîtrise totale des dépenses d'exploitation
+      </div>
+    </div>
+
+    <!-- 6. CARTE FLOTTANTE : CLÔTURE & SÉCURITÉ PATRON (SCÈNE 5) -->
+    <div class="floating-card" id="cardScene5" style="top: 70px; left: 24px; width: 370px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-size:0.75rem;font-weight:800;color:#34D399;text-transform:uppercase;">👑 Clôture de Caisse du Jour</span>
-        <span style="color:#60A5FA;font-size:0.7rem;font-weight:700;">Reçu à 19h00</span>
+        <span style="font-size:0.75rem;font-weight:800;color:#38BDF8;text-transform:uppercase;">👑 Clôture du Soir Certifiée</span>
+        <span style="color:#10B981;font-size:0.7rem;font-weight:800;">19h00 sur WhatsApp</span>
       </div>
-      <div style="font-size:0.7rem;color:#94A3B8;">Chiffre d'Affaires Encaissé :</div>
-      <div style="font-size:1.4rem;font-weight:900;color:#38BDF8;margin-bottom:6px;">2 276 977 FCFA</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:rgba(255,255,255,0.08);padding:6px;border-radius:6px;font-size:0.7rem;">
-        <div>Taux: <strong style="color:#10B981;">95.4%</strong></div>
-        <div>Dehors: <strong style="color:#F59E0B;">145 000 F</strong></div>
+      <div style="background:rgba(16,185,129,0.15);border:1px solid #10B981;border-radius:8px;padding:8px 10px;margin-bottom:8px;font-size:0.78rem;color:#D1FAE5;">
+        ✓ Bilan complet journalier envoyé en direct au patron.
       </div>
-      <div style="margin-top:6px;font-size:0.7rem;color:#38BDF8;font-weight:700;text-align:center;">
-        ● Synchronisé en direct depuis toutes vos boutiques
+      <div style="background:rgba(255,255,255,0.06);padding:8px 10px;border-radius:8px;font-size:0.74rem;">
+        🔒 <strong>Étanchéité Caissier :</strong> Marges réelles et trésorerie globale 100% masquées aux vendeurs.
+      </div>
+    </div>
+
+    <!-- 7. CARTE FLOTTANTE : APPEL À L'ACTION (SCÈNE 6) -->
+    <div class="floating-card" id="cardScene6" style="top: 70px; right: 24px; width: 370px; text-align:center;">
+      <div style="font-size:0.75rem;font-weight:800;color:#FACC15;text-transform:uppercase;margin-bottom:6px;">
+        🚀 Passez à la Vitesse Supérieure
+      </div>
+      <div style="font-size:1.15rem;font-weight:900;color:#FFFFFF;margin-bottom:10px;">
+        Testez CréditTrack PRO Gratuitement
+      </div>
+      <a href="https://credit-track00.vercel.app/" target="_blank" style="display:inline-block;background:linear-gradient(135deg,#10B981,#059669);color:#FFF;padding:10px 20px;border-radius:10px;text-decoration:none;font-weight:900;font-size:0.85rem;box-shadow:0 4px 15px rgba(16,185,129,0.4);">
+        Ouvrir l'Application en 1 Clic ➔
+      </a>
+      <div style="margin-top:8px;font-size:0.72rem;color:#94A3B8;">
+        Fonctionne sur Smartphone, Tablette &amp; PC
+      </div>
+    </div>
+
+    <!-- BULLE PERSONNAGE ANIMÉ AVEC EFFET VIVANT -->
+    <div class="character-avatar-bubble" id="charBubble">
+      <img src="img_patron_officiel.jpg" class="char-img" id="charImg" alt="Narrateur">
+      <div class="char-info">
+        <strong id="charName">Gérant &amp; Patron</strong>
+        <span id="charRole">CréditTrack PRO</span>
       </div>
     </div>
 
     <!-- SOUS-TITRES DYNAMIQUES -->
     <div class="subtitles-layer">
-      <div class="sub-badge" id="subtitlesBox">
-        Cliquez sur <span class="gold">Lancer la Présentation</span> pour démarrer
+      <div class="sub-box" id="subtitlesBox">
+        Cliquez sur <span class="gold">Lancer la Présentation Vidéo</span> pour démarrer
       </div>
     </div>
 
-    <!-- TIMELINE -->
+    <!-- TIMELINE PROGRESSION -->
     <div class="timeline-bar">
       <div class="timeline-fill" id="timelineProgress"></div>
     </div>
+
+    <!-- LECTEUR VIDÉO NATIVE MP4 OFFICIEL (POUR MODE 2) -->
+    <div class="native-video-wrapper" id="nativeVideoWrapper">
+      <video class="native-video-player" id="nativePlayer" controls preload="metadata">
+        <source src="publicite_credittrack_officielle.mp4" type="video/mp4">
+        Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
+      </video>
+    </div>
+
   </div>
 
-  <!-- BOUTON OFFICIEL -->
-  <div class="cta-container">
-    <a href="https://credit-track00.vercel.app/" target="_blank" class="btn-download-official">
-      🚀 Ouvrir &amp; Installer CréditTrack PRO Maintenant
+  <!-- CONTRÔLES INFÉRIEURS -->
+  <div class="controls-bottom">
+    <button class="btn-sec-nav" onclick="prevScene()">
+      ⬅ Précédent
+    </button>
+    
+    <button class="btn-main-play" id="btnMainPlay" onclick="togglePlayStudio()">
+      ▶ Lancer la Présentation Vidéo
+    </button>
+    
+    <button class="btn-sec-nav" onclick="nextScene()">
+      Suivant ➔
+    </button>
+
+    <a href="publicite_credittrack_officielle.mp4" download="publicite_credittrack_officielle.mp4" class="btn-download-mp4">
+      📥 Télécharger la Vidéo MP4 (10 Mo)
     </a>
   </div>
 
+  <!-- ACCORDÉON DU KIT RÉSEAUX SOCIAUX -->
+  <div class="social-kit-box">
+    <div class="social-kit-header" onclick="toggleSocialKit()">
+      <h3>
+        <span>📱 Kit Prêt pour vos Publications (Instagram, Facebook, YouTube, TikTok)</span>
+      </h3>
+      <span id="arrowKit">▼</span>
+    </div>
+    <div class="social-kit-content" id="socialKitContent">
+      <div class="social-post-card">
+        <h4>
+          <span>Instagram &amp; Facebook (Post / Reel)</span>
+          <button class="btn-copy-text" onclick="copyPost('postMeta')">Copier</button>
+        </h4>
+        <textarea class="social-textarea" id="postMeta" readonly>🚀 Commerçant, gérant de boutique, chef d'entreprise : marre des pertes de caisse, des vieux cahiers raturés et des clients qui ne remboursent jamais à temps ?
+
+Découvrez CréditTrack PRO, l'application tout-en-un qui révolutionne votre gestion commerciale !
+✅ Cahier du Jour digital : enregistrez vos ventes en 5 secondes chrono
+✅ Reçus certifiés avec QR Code vérifiable
+✅ Rappels WhatsApp automatiques avec lien direct Wave & Mobile Money
+✅ Clôture de caisse du soir reçue à 19h00 sur votre téléphone
+✅ Marges réelles et bénéfices 100% masqués aux caissiers
+
+👉 Ouvrez et testez gratuitement sans téléchargement lourd sur : https://credit-track00.vercel.app/
+
+#CreditTrack #CommerceAfrique #MobileMoney #Wave #GestionCaisse #PME #BusinessAfrique #Entrepreneuriat</textarea>
+      </div>
+
+      <div class="social-post-card">
+        <h4>
+          <span>YouTube (Titre &amp; Description)</span>
+          <button class="btn-copy-text" onclick="copyPost('postYt')">Copier</button>
+        </h4>
+        <textarea class="social-textarea" id="postYt" readonly>Titre : Comment gérer sa caisse et récupérer ses crédits clients sans stress ? Présentation CréditTrack PRO
+
+Description :
+Marre des trous de caisse et des impayés ? Dans cette vidéo, découvrez l'outil qui accompagne les commerçants modernes en Afrique.
+0:00 - Introduction & Accès PWA 1-clic
+0:22 - Tableau de bord et suivi du chiffre d'affaires
+0:42 - Cahier du Jour des ventes & reçus QR Code
+1:01 - Rappels automatiques WhatsApp & Wave / MoMo
+1:20 - Maîtrise des dépenses et du bénéfice net
+1:38 - Clôture de caisse certifiée et sécurité patron
+2:00 - Comment démarrer dès aujourd'hui
+
+Lien officiel : https://credit-track00.vercel.app/</textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT DU MOTEUR CINÉMATIQUE INTERACTIF -->
   <script>
-    const videoTimeline = [
+    const promoScenes = [
       {
-        scene: 'cashier',
-        sub: "🚀 <span class='gold'>CréditTrack PRO</span> s'installe en 1 clic directement depuis votre navigateur !",
-        voice: "Bienvenue sur CréditTrack PRO. Plus besoin de téléchargement compliqué : l'application s'installe en un clic sur votre téléphone ou votre ordinateur, directement depuis votre navigateur web.",
-        salesbook: false,
-        wa: false,
-        boss: false
+        idx: 0,
+        title: "1. 🚀 Accueil & PWA",
+        audioFile: "pub_audio_scene1.mp3",
+        charImg: "img_patron_officiel.jpg",
+        charName: "Chef d'Entreprise & Gérant",
+        charRole: "Vision Stratégique",
+        sub: "🚀 <span class='gold'>CréditTrack PRO</span> : Fini les pertes de caisse, accédez instantanément sur Smartphone &amp; PC !",
+        cursorPos: { x: 75, y: 35 }
       },
       {
-        scene: 'cashier',
-        sub: "🏪 En boutique : La caissière saisit les ventes et crédits sur le <span class='gold'>Cahier du Jour</span> en 5s !",
-        voice: "Au comptoir de la boutique, la caissière enregistre chaque vente et chaque crédit client sur le Cahier du Jour digital en cinq secondes chrono. Fini les vieux cahiers papier raturés ou perdus.",
-        salesbook: true,
-        wa: false,
-        boss: false
+        idx: 1,
+        title: "2. 📊 Dashboard PRO",
+        audioFile: "pub_audio_scene2.mp3",
+        charImg: "img_patron_officiel.jpg",
+        charName: "Contrôle Financier Gérant",
+        charRole: "Dashboard Direct",
+        sub: "📊 Suivez en direct votre <span class='gold'>Chiffre d'Affaires</span>, vos créances dehors et votre taux de recouvrement de <span class='gold'>95.4%</span> !",
+        cursorPos: { x: 30, y: 40 }
       },
       {
-        scene: 'cashier',
-        sub: "📲 Un rappel <span class='gold'>WhatsApp automatique</span> part avec le reçu et le lien Wave / MoMo !",
-        voice: "À l'échéance convenue, un rappel WhatsApp poli et personnalisé part automatiquement au client avec son reçu officiel et le lien de paiement direct par Wave ou Mobile Money.",
-        salesbook: false,
-        wa: true,
-        boss: false
+        idx: 2,
+        title: "3. 📖 Cahier du Jour",
+        audioFile: "pub_audio_scene3.mp3",
+        charImg: "img_caissier_officiel.jpg",
+        charName: "Caissière & Comptoir",
+        charRole: "Saisie en 5s",
+        sub: "📖 Au comptoir : Enregistrement express des ventes comptant &amp; crédit avec <span class='gold'>Reçus QR Code</span> certifiés !",
+        cursorPos: { x: 70, y: 45 }
       },
       {
-        scene: 'boss',
-        sub: "👑 En fin de journée : Le patron reçoit la <span class='gold'>Clôture de Caisse</span> et suit ses <span class='gold'>2 276 977 FCFA</span> !",
-        voice: "En fin de journée, l'application compile la clôture de caisse et l'envoie automatiquement au patron. Même depuis chez vous, à l'hôtel ou en voyage, vous recevez le journal complet et contrôlez vos deux millions deux cent soixante-seize mille francs CFA en direct.",
-        salesbook: false,
-        wa: false,
-        boss: true
+        idx: 3,
+        title: "4. 📲 Relances WhatsApp",
+        audioFile: "pub_audio_scene4.mp3",
+        charImg: "scene_mobile_money.jpg",
+        charName: "Commerçant Florissant",
+        charRole: "Recouvrement Wave / MoMo",
+        sub: "📲 <span class='gold'>Rappels WhatsApp automatiques</span> avec lien de paiement direct Wave ou Mobile Money !",
+        cursorPos: { x: 35, y: 50 }
       },
       {
-        scene: 'boss',
-        sub: "👉 Cliquez sur le bouton vert ci-dessous pour <span class='gold'>ouvrir &amp; tester CréditTrack PRO</span> !",
-        voice: "Ne laissez plus vos bénéfices dehors. Cliquez sur le bouton vert juste en dessous de la vidéo pour ouvrir et installer CréditTrack PRO gratuitement dès aujourd'hui.",
-        salesbook: false,
-        wa: false,
-        boss: true
+        idx: 4,
+        title: "5. 💰 Dépenses & Marges",
+        audioFile: "pub_audio_scene5.mp3",
+        charImg: "scene_stock_marges.jpg",
+        charName: "Gestionnaire Stock & Marges",
+        charRole: "Calcul Marge Nette",
+        sub: "💰 Suivi rigoureux des dépenses, des achats fournisseurs et <span class='gold'>calcul automatique du bénéfice net réel</span> !",
+        cursorPos: { x: 68, y: 42 }
+      },
+      {
+        idx: 5,
+        title: "6. 👑 Clôture & Sécurité",
+        audioFile: "pub_audio_scene6.mp3",
+        charImg: "img_patron_officiel.jpg",
+        charName: "Gérant Serein",
+        charRole: "Sécurité & Clôture 19h00",
+        sub: "👑 Chaque soir à 19h00 : <span class='gold'>Clôture de Caisse certifiée</span> sur WhatsApp. Bénéfices 100% masqués aux caissiers !",
+        cursorPos: { x: 32, y: 46 }
+      },
+      {
+        idx: 6,
+        title: "7. 🎯 Démarrer Maintenant",
+        audioFile: "pub_audio_scene7.mp3",
+        charImg: "img_patron_officiel.jpg",
+        charName: "Rejoignez CréditTrack",
+        charRole: "Succès Garanti",
+        sub: "👉 Ouvrez et testez gratuitement dès maintenant sur <span class='gold'>credit-track00.vercel.app</span> !",
+        cursorPos: { x: 72, y: 55 }
       }
     ];
 
-    let currentIdx = 0;
-    let isPlaying = false;
-    let autoTimer = null;
-    const SECONDS_PER_SCENE = 9;
+    let currentSceneIdx = 0;
+    let isStudioPlaying = false;
+    let currentAudio = null;
+    let currentMode = 'studio'; // 'studio' ou 'native'
 
-    // AUDIO CONTEXT & SYNTHÈSE VOCALE FIABLE
-    let audioCtx = null;
-    function initAudio() {
-      try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-      } catch (e) {}
-    }
-
-    function playTone(freq = 600, duration = 0.2) {
-      try {
-        initAudio();
-        if (!audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
-    }
-
-    function playVoiceRobust(text) {
-      playTone(520, 0.15); // Bip sonore confirmant la lecture audio
-      try {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.resume();
-          const u = new SpeechSynthesisUtterance(text);
-          u.lang = 'fr-FR';
-          u.rate = 0.95;
-          u.volume = 1.0;
-
-          // Détection voix FR
-          const voices = window.speechSynthesis.getVoices();
-          const fr = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('fr'));
-          if (fr) u.voice = fr;
-
-          window.speechSynthesis.speak(u);
-        }
-      } catch (e) {}
-    }
-
-    function togglePlay() {
-      initAudio();
-      if (isPlaying) {
-        pauseDemo();
+    // GESTION DU MODE STUDIO VS VIDÉO NATIVE
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById('btnModeStudio').classList.toggle('active', mode === 'studio');
+      document.getElementById('btnModeNative').classList.toggle('active', mode === 'native');
+      
+      const nativeWrapper = document.getElementById('nativeVideoWrapper');
+      const nativePlayer = document.getElementById('nativePlayer');
+      
+      if (mode === 'native') {
+        pauseStudio();
+        nativeWrapper.classList.add('show');
+        nativePlayer.play().catch(() => {});
+        document.getElementById('btnMainPlay').textContent = '❚❚ Pause Vidéo';
       } else {
-        startDemo();
+        nativePlayer.pause();
+        nativeWrapper.classList.remove('show');
+        document.getElementById('btnMainPlay').textContent = isStudioPlaying ? '❚❚ Mettre en Pause' : '▶ Lancer la Présentation Vidéo';
       }
     }
 
-    function startDemo() {
-      isPlaying = true;
-      document.getElementById('btnPlay').textContent = '❚❚ Pause';
-      renderStep(currentIdx);
-      startTimer();
-    }
-
-    function pauseDemo() {
-      isPlaying = false;
-      document.getElementById('btnPlay').textContent = '▶ Reprendre la Présentation';
-      clearInterval(autoTimer);
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-    }
-
-    function startTimer() {
-      clearInterval(autoTimer);
-      autoTimer = setInterval(() => {
-        if (currentIdx < videoTimeline.length - 1) {
-          currentIdx++;
-          renderStep(currentIdx);
+    // LECTURE & CONTRÔLE STUDIO INTERACTIF
+    function togglePlayStudio() {
+      if (currentMode === 'native') {
+        const p = document.getElementById('nativePlayer');
+        if (p.paused) {
+          p.play();
+          document.getElementById('btnMainPlay').textContent = '❚❚ Pause Vidéo';
         } else {
-          pauseDemo();
-          document.getElementById('btnPlay').textContent = '🔄 Revoir la Présentation';
-          currentIdx = 0;
+          p.pause();
+          document.getElementById('btnMainPlay').textContent = '▶ Reprendre la Vidéo';
         }
-      }, SECONDS_PER_SCENE * 1000);
-    }
+        return;
+      }
 
-    function nextStep() {
-      if (currentIdx < videoTimeline.length - 1) {
-        currentIdx++;
-        renderStep(currentIdx);
-        if (isPlaying) startTimer();
+      if (isStudioPlaying) {
+        pauseStudio();
+      } else {
+        startStudio();
       }
     }
 
-    function prevStep() {
-      if (currentIdx > 0) {
-        currentIdx--;
-        renderStep(currentIdx);
-        if (isPlaying) startTimer();
+    function startStudio() {
+      isStudioPlaying = true;
+      document.getElementById('btnMainPlay').textContent = '❚❚ Mettre en Pause';
+      playScene(currentSceneIdx);
+    }
+
+    function pauseStudio() {
+      isStudioPlaying = false;
+      document.getElementById('btnMainPlay').textContent = '▶ Reprendre la Présentation';
+      if (currentAudio) {
+        currentAudio.pause();
+      }
+      document.getElementById('voiceWaves').style.opacity = '0.3';
+    }
+
+    function playScene(idx) {
+      if (idx < 0) idx = 0;
+      if (idx >= promoScenes.length) {
+        // Fin de la vidéo
+        pauseStudio();
+        document.getElementById('btnMainPlay').textContent = '🔄 Revoir la Présentation';
+        currentSceneIdx = 0;
+        return;
+      }
+      currentSceneIdx = idx;
+      const s = promoScenes[idx];
+
+      // Mise à jour des pilules actives
+      document.querySelectorAll('.scene-pill').forEach((el, i) => {
+        el.classList.toggle('active', i === idx);
+      });
+
+      // Affichage du background correspondant
+      for (let i = 0; i < promoScenes.length; i++) {
+        const bg = document.getElementById('bgScene' + i);
+        if (bg) bg.classList.toggle('active', i === idx);
+        
+        const card = document.getElementById('cardScene' + i);
+        if (card) card.classList.toggle('show', i === idx);
+      }
+
+      // Personnage
+      document.getElementById('charImg').src = s.charImg;
+      document.getElementById('charName').textContent = s.charName;
+      document.getElementById('charRole').textContent = s.charRole;
+
+      // Sous-titres
+      document.getElementById('subtitlesBox').innerHTML = s.sub;
+
+      // Curseur virtuel animé
+      const cur = document.getElementById('virtualCursor');
+      cur.style.display = 'block';
+      cur.style.left = s.cursorPos.x + '%';
+      cur.style.top = s.cursorPos.y + '%';
+      
+      const rip = document.getElementById('clickRipple');
+      rip.style.animation = 'none';
+      setTimeout(() => { rip.style.animation = 'rippleClick 0.6s ease-out'; }, 400);
+
+      // Gestion Audio MP3 Denise Neural
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
+
+      currentAudio = new Audio(s.audioFile);
+      document.getElementById('voiceWaves').style.opacity = '1';
+      document.getElementById('audioStatusText').textContent = 'Denise Neural HD';
+
+      // Synchronisation de la barre de progression
+      currentAudio.ontimeupdate = () => {
+        if (!currentAudio.duration) return;
+        const scenePct = currentAudio.currentTime / currentAudio.duration;
+        const totalPct = ((idx + scenePct) / promoScenes.length) * 100;
+        document.getElementById('timelineProgress').style.width = totalPct + '%';
+      };
+
+      currentAudio.onended = () => {
+        if (isStudioPlaying) {
+          playScene(idx + 1);
+        }
+      };
+
+      currentAudio.play().catch(e => {
+        console.warn("Autoplay audio waiting for user interaction:", e);
+      });
+    }
+
+    function jumpToScene(idx) {
+      if (currentMode === 'native') switchMode('studio');
+      playScene(idx);
+      if (!isStudioPlaying) startStudio();
+    }
+
+    function nextScene() {
+      if (currentSceneIdx < promoScenes.length - 1) {
+        jumpToScene(currentSceneIdx + 1);
       }
     }
 
-    function renderStep(idx) {
-      currentIdx = idx;
-      const item = videoTimeline[idx];
+    function prevScene() {
+      if (currentSceneIdx > 0) {
+        jumpToScene(currentSceneIdx - 1);
+      }
+    }
 
-      const pct = ((idx + 1) / videoTimeline.length) * 100;
-      document.getElementById('timelineProgress').style.width = pct + '%';
+    function toggleSocialKit() {
+      const c = document.getElementById('socialKitContent');
+      const arrow = document.getElementById('arrowKit');
+      if (c.style.display === 'none') {
+        c.style.display = 'grid';
+        arrow.textContent = '▼';
+      } else {
+        c.style.display = 'none';
+        arrow.textContent = '▶';
+      }
+    }
 
-      document.getElementById('sceneCashier').classList.toggle('active', item.scene === 'cashier');
-      document.getElementById('sceneBoss').classList.toggle('active', item.scene === 'boss');
-
-      document.getElementById('cardSalesbook').classList.toggle('show', item.salesbook);
-      document.getElementById('cardWhatsApp').classList.toggle('show', item.wa);
-      document.getElementById('cardBoss').classList.toggle('show', item.boss);
-
-      document.getElementById('subtitlesBox').innerHTML = item.sub;
-
-      playVoiceRobust(item.voice);
+    function copyPost(id) {
+      const ta = document.getElementById(id);
+      ta.select();
+      navigator.clipboard.writeText(ta.value).then(() => {
+        alert("✓ Texte de publication copié dans le presse-papiers ! Prêt à être collé.");
+      });
     }
   </script>
 </body>

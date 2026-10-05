@@ -20,7 +20,9 @@ const MIME_TYPES = {
   '.gif': 'image/gif',
   '.svg': 'image/svg+xml',
   '.ico': 'image/x-icon',
-  '.webp': 'image/webp'
+  '.webp': 'image/webp',
+  '.mp3': 'audio/mpeg',
+  '.mp4': 'video/mp4'
 };
 
 const server = http.createServer(async (req, res) => {

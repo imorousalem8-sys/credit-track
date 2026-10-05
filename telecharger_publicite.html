@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Télécharger la Vidéo Publicitaire Officielle — CréditTrack PRO</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #070B14;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #FFFFFF;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px 16px 80px;
+    }
+    .container {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: rgba(16, 185, 129, 0.18);
+      border: 1px solid rgba(16, 185, 129, 0.45);
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #34D399;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      text-align: center;
+      color: #F8FAFC;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 0.95rem;
+      color: #94A3B8;
+      text-align: center;
+      max-width: 700px;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+    
+    /* LECTEUR VIDÉO */
+    .video-card {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.9), 0 0 40px rgba(37, 99, 235, 0.35);
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      margin-bottom: 24px;
+    }
+    video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ACTION DOWNLOAD BAR */
+    .download-card {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1.5px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .download-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .btn-download-big {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      color: #FFFFFF;
+      text-decoration: none;
+      font-size: 1.15rem;
+      font-weight: 900;
+      padding: 16px 36px;
+      border-radius: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+      transition: all 0.2s;
+    }
+    .btn-download-big:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 35px rgba(16, 185, 129, 0.7);
+    }
+    .specs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      width: 100%;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .spec-item {
+      background: rgba(255,255,255,0.04);
+      padding: 10px 14px;
+      border-radius: 10px;
+    }
+    .spec-item span {
+      display: block;
+      font-size: 0.7rem;
+      color: #94A3B8;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+    .spec-item strong {
+      font-size: 0.92rem;
+      color: #38BDF8;
+      font-weight: 800;
+    }
+
+    .path-box {
+      background: rgba(0, 0, 0, 0.6);
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 0.8rem;
+      color: #CBD5E1;
+      font-family: monospace;
+      word-break: break-all;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+    .btn-copy-path {
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      color: #FFF;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .btn-copy-path:hover {
+      background: #2563EB;
+    }
+
+    /* TEXTES PRÊTS À PUBLIER */
+    .kit-section {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .kit-card {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .kit-card h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #60A5FA;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    textarea {
+      width: 100%;
+      height: 140px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      color: #E2E8F0;
+      padding: 10px;
+      font-size: 0.8rem;
+      line-height: 1.45;
+      resize: vertical;
+      font-family: inherit;
+    }
+
+    @media (max-width: 768px) {
+      .kit-section { grid-template-columns: 1fr; }
+      .download-row { flex-direction: column; align-items: stretch; }
+      .btn-download-big { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="badge-top">
+      ✓ Vidéo Officielle Prête au Téléchargement
+    </div>
+    <h1>Téléchargement de la Vidéo Publicitaire CréditTrack PRO</h1>
+    <p class="subtitle">
+      Fichier vidéo MP4 haute définition avec Motion Design dynamique (dame gérante dans son bureau, au comptoir de vente, application CréditTrack PRO en action, travelling cinématographique, plans rythmés et voix complice naturelle). Prêt à être publié sur YouTube, Facebook, Instagram et TikTok.
+    </p>
+
+    <!-- LECTEUR DE PRÉVISUALISATION DIRECTE -->
+    <div class="video-card">
+      <video controls poster="dame_gerante_bureau.jpg">
+        <source src="publicite_credittrack_officielle.mp4" type="video/mp4">
+        Votre navigateur ne gère pas la vidéo HTML5.
+      </video>
+    </div>
+
+    <!-- CARTE DE TÉLÉCHARGEMENT & SPÉCIFICATIONS -->
+    <div class="download-card">
+      <div class="download-row">
+        <div>
+          <h2 style="font-size:1.25rem;font-weight:900;color:#FFF;margin-bottom:4px;">
+            publicite_credittrack_officielle.mp4
+          </h2>
+          <p style="font-size:0.85rem;color:#94A3B8;">
+            Format universel 100% compatible YouTube, Facebook, Instagram Reels, TikTok &amp; WhatsApp.
+          </p>
+        </div>
+        <a href="publicite_credittrack_officielle.mp4" download="publicite_credittrack_officielle.mp4" class="btn-download-big">
+          📥 Télécharger la Vidéo MP4 (1m31s)
+        </a>
+      </div>
+
+      <div class="specs-grid">
+        <div class="spec-item">
+          <span>Durée</span>
+          <strong>1 min 31 s</strong>
+        </div>
+        <div class="spec-item">
+          <span>Résolution</span>
+          <strong>1280 × 720 HD</strong>
+        </div>
+        <div class="spec-item">
+          <span>Animation</span>
+          <strong>23 plans rythmés (3s)</strong>
+        </div>
+        <div class="spec-item">
+          <span>Voix Off</span>
+          <strong>Denise Neural (Complice)</strong>
+        </div>
+        <div class="spec-item">
+          <span>Format</span>
+          <strong>MP4 (H.264 / AAC)</strong>
+        </div>
+      </div>
+
+      <div>
+        <div style="font-size:0.75rem;color:#94A3B8;margin-bottom:6px;font-weight:700;">
+          Emplacement direct sur votre disque dur :
+        </div>
+        <div class="path-box">
+          <span id="filePath">c:\Users\Utilisateur\Desktop\2e_projet\publicite_credittrack_officielle.mp4</span>
+          <button class="btn-copy-path" onclick="copyPath()">Copier le chemin</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TEXTES DE PUBLICATION -->
+    <div class="kit-section">
+      <div class="kit-card">
+        <h3>
+          <span>Instagram &amp; Facebook (Post / Reel)</span>
+          <button class="btn-copy-path" onclick="copyText('postFb')">Copier</button>
+        </h3>
+        <textarea id="postFb" readonly>🚀 Chers commerçants et chefs d'entreprise : marre des bénéfices qui dorment dehors et des carnets de dettes raturés ?
+
+Découvrez CréditTrack PRO, l'outil tout-en-un qui révolutionne votre quotidien :
+✅ Saisie express des ventes et crédits en 5 secondes chrono
+✅ Reçus digitaux officiels certifiés avec QR Code
+✅ Rappels WhatsApp automatiques avec lien direct Wave & Mobile Money
+✅ Clôture de caisse certifiée envoyée chaque soir à 19h00 sur votre téléphone
+✅ Marges réelles et trésorerie 100% masquées aux vendeurs
+
+👉 Ouvrez et testez gratuitement sans téléchargement compliqué : https://credit-track00.vercel.app/
+
+#CreditTrack #CommerceAfrique #MobileMoney #Wave #GestionCaisse #PME #BusinessAfrique #Entrepreneuriat</textarea>
+      </div>
+
+      <div class="kit-card">
+        <h3>
+          <span>YouTube (Titre &amp; Description)</span>
+          <button class="btn-copy-path" onclick="copyText('postYt')">Copier</button>
+        </h3>
+        <textarea id="postYt" readonly>Titre : Comment gérer sa boutique et récupérer ses crédits clients sans dispute ? (CréditTrack PRO)
+
+Description :
+Marre des trous de caisse et des clients qui ne remboursent jamais à temps ?
+Découvrez comment CréditTrack PRO vous aide à piloter votre commerce en toute sérénité.
+0:00 - Introduction & Le problème des vieux carnets
+0:16 - Le Tableau de Bord chirurgical du patron
+0:33 - Au comptoir : saisie en 5 secondes et reçus QR Code
+0:48 - Rappels WhatsApp automatiques & paiements Wave / MoMo
+1:04 - Clôture certifiée à 19h00 et sécurité patron
+1:19 - Comment ouvrir l'application gratuitement
+
+👉 Lien officiel : https://credit-track00.vercel.app/</textarea>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function copyPath() {
+      const p = document.getElementById('filePath').textContent;
+      navigator.clipboard.writeText(p).then(() => {
+        alert("✓ Chemin du fichier copié ! Vous pouvez le coller directement dans votre explorateur ou outil d'upload.");
+      });
+    }
+    function copyText(id) {
+      const ta = document.getElementById(id);
+      ta.select();
+      navigator.clipboard.writeText(ta.value).then(() => {
+        alert("✓ Texte prêt à publier copié dans le presse-papiers !");
+      });
+    }
+  </script>
+</body>
+</html>
