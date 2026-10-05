@@ -1135,6 +1135,15 @@ window.toggleLanguageQuick = function() {
   showToast(newLang === 'en' ? 'Language switched to English' : 'Langue changée en Français');
 };
 
+window.handleBranchFilterChange = function(branchValue) {
+  AppState.currentBranchFilter = branchValue;
+  localStorage.setItem('selectedBranchFilter', branchValue);
+  if (typeof renderDashboardView === 'function') renderDashboardView();
+  if (typeof renderSalesbookJournal === 'function') renderSalesbookJournal();
+  if (typeof renderCreditsList === 'function') renderCreditsList();
+  showToast(branchValue === 'all' ? 'Vue consolidée : Toutes les boutiques' : 'Boutique filtrée : ' + branchValue);
+};
+
 // --------------------------------------------------------------------------
 // 6. INITIALISATION AU CHARGEMENT DU DOM & CALLBACK AUTH SUPABASE
 // --------------------------------------------------------------------------

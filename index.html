@@ -1353,39 +1353,43 @@
     <div class="main-workspace">
 
       <header class="top-workspace-header">
-        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="header-left-group">
           <!-- Bouton Hamburger Mobile -->
           <button class="btn-hamburger-menu" onclick="toggleMobileSidebar()" aria-label="Menu Mobile">
-            <i data-lucide="menu" style="width:22px;height:22px;"></i>
+            <i data-lucide="menu" style="width:20px;height:20px;"></i>
           </button>
           
           <div class="header-left-title">
-            <i data-lucide="layout-grid" style="color:#2563EB;" id="header-page-icon"></i>
+            <i data-lucide="layout-grid" style="color:#38BDF8;" id="header-page-icon"></i>
             <span id="page-desktop-title" data-i18n="dashboard">Tableau de Bord</span>
           </div>
 
-          <!-- SÉLECTEUR MULTI-BOUTIQUES EN DIRECT -->
-          <div class="header-branch-pill">
-            <i data-lucide="store" style="width:16px;height:16px;color:#2563EB;"></i>
+          <div class="header-v-divider"></div>
+
+          <!-- SÉLECTEUR MULTI-BOUTIQUES EN DIRECT (SLIM PILULE RESPONSIVE) -->
+          <div class="header-branch-pill" title="Filtrer par boutique ou caisse">
+            <i data-lucide="store" style="width:15px;height:15px;color:#38BDF8;flex-shrink:0;"></i>
             <select id="top-branch-selector" class="header-branch-select" onchange="handleBranchFilterChange(this.value)">
-              <option value="all">🏢 Toutes les Boutiques (Consolidé)</option>
-              <option value="Boutique Principale (Siège)">📍 Boutique Principale (Siège)</option>
+              <option value="all">🏢 Toutes les Boutiques</option>
+              <option value="Boutique Principale (Siège)" selected>📍 Boutique Principale (Siège)</option>
               <option value="Boutique 2 (Succursale)">📍 Boutique 2 (Succursale)</option>
               <option value="Point de Vente Marché">📍 Point de Vente Marché</option>
             </select>
+            <i data-lucide="chevron-down" style="width:13px;height:13px;color:#94A3B8;flex-shrink:0;pointer-events:none;"></i>
           </div>
         </div>
 
         <div class="header-right-actions">
           <!-- Bouton Rapide Forfait PRO -->
-          <button type="button" onclick="openSubscriptionModal()" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FEF3C7,#FDE68A);border:1px solid #F59E0B;color:#92400E;padding:6px 12px;border-radius:20px;font-size:0.78rem;font-weight:800;cursor:pointer;" title="Gérer mon abonnement">
+          <button type="button" class="header-plan-badge-btn" onclick="openSubscriptionModal()" title="Gérer mon abonnement">
             <i data-lucide="crown" style="width:14px;height:14px;color:#D97706;"></i>
             <span id="top-header-plan-badge">👑 Forfait PRO</span>
           </button>
 
           <!-- Switcher Rapide de Langue Header -->
           <div class="header-lang-switcher" onclick="toggleLanguageQuick()" title="Changer la langue / Switch language">
-            <span id="header-lang-badge">🇫🇷 FR</span>
+            <i data-lucide="globe" style="width:14px;height:14px;color:#38BDF8;"></i>
+            <span id="header-lang-badge">FR</span>
           </div>
 
           <button class="btn-header-primary" id="top-header-btn" onclick="switchMenu('menu-5')">
@@ -2296,216 +2300,190 @@
              VUE DÉDIÉE : GESTION DES ABONNEMENTS & FORFAITS PRO (#menu-subscription)
              ARCHITECTURE STYLE A — GRILLE PLEINE LARGEUR & KPIS METIER
         ============================================================ -->
-        <section id="menu-subscription" class="view-container" style="max-width:1250px;margin:0 auto;padding-bottom:50px;">
+        <section id="menu-subscription" class="view-container" style="max-width:1200px;margin:0 auto;padding-bottom:50px;">
           
-          <!-- En-tête de la Page Abonnement -->
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:24px;">
-            <div>
-              <div style="display:flex;align-items:center;gap:10px;">
-                <div style="width:38px;height:38px;border-radius:10px;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;">
-                  <i data-lucide="crown" style="width:22px;height:22px;"></i>
-                </div>
-                <div>
-                  <h1 style="font-size:1.45rem;font-weight:900;color:#0F172A;margin:0;">Abonnements &amp; Licences PRO</h1>
-                  <p style="font-size:0.82rem;color:#64748B;margin:2px 0 0 0;">Gérez votre statut, vos fonctionnalités illimitées et renouvelez par Mobile Money ou Carte.</p>
-                </div>
+          <!-- En-tête de la Page Abonnement Executive -->
+          <div class="sub-page-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div class="sub-header-crown-icon">
+                <i data-lucide="crown" style="width:24px;height:24px;color:#F59E0B;"></i>
+              </div>
+              <div>
+                <h1 style="font-size:1.6rem;font-weight:900;color:#FFFFFF;margin:0;letter-spacing:-0.5px;">Abonnements &amp; Licences PRO</h1>
+                <p style="font-size:0.86rem;color:#94A3B8;margin:3px 0 0 0;">Accédez à toutes les fonctionnalités illimitées, certifiées SYSCOHADA et connectées aux passerelles Mobile Money &amp; Cartes.</p>
               </div>
             </div>
 
             <div style="display:flex;align-items:center;gap:10px;">
-              <button type="button" class="btn btn-primary" onclick="openSubscriptionModal('pro_yearly')" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#0F172A;border:none;font-weight:900;padding:10px 18px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 15px rgba(245,158,11,0.3);">
+              <button type="button" class="btn" onclick="openSubscriptionModal('pro_yearly')" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#0F172A;border:none;font-weight:900;padding:10px 18px;border-radius:12px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 15px rgba(245,158,11,0.35);cursor:pointer;">
                 <i data-lucide="zap" style="width:16px;height:16px;"></i>
                 <span>S'abonner / Renouveler PRO</span>
               </button>
             </div>
           </div>
 
-          <!-- RANGÉE 1 : 4 CARTES KPI PLEINE LARGEUR (STYLE A) -->
-          <div class="kpi-grid-4" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));gap:16px;margin-bottom:24px;">
+          <!-- BANDEAU STATUT & GARANTIES LUXE (Remplace les 4 tableaux encombrants) -->
+          <div class="sub-banner-vip">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);">
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div style="width:40px;height:40px;border-radius:10px;background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);color:#10B981;display:flex;align-items:center;justify-content:center;">
+                  <i data-lucide="shield-check" style="width:20px;height:20px;"></i>
+                </div>
+                <div>
+                  <div style="font-size:0.75rem;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Statut Actuel du Compte</div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:2px;">
+                    <span id="sub-page-plan-title" style="font-size:1.3rem;font-weight:900;color:#FBBF24;">Essai PRO 3 Mois</span>
+                    <span id="sub-page-plan-status" class="sub-badge-active">ACTIF ✓</span>
+                  </div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,0.08);font-size:0.78rem;color:#38BDF8;font-weight:700;">
+                <i data-lucide="lock" style="width:13px;height:13px;"></i>
+                <span>Passerelle SasPay LIVE Active • Chiffrement Bancaire 256 bits</span>
+              </div>
+            </div>
+
+            <!-- Grille des 4 piliers de valeur en pilules nettes -->
+            <div class="sub-pillars-grid">
+              <div class="sub-pillar-item">
+                <i data-lucide="users" style="width:16px;height:16px;color:#38BDF8;"></i>
+                <span><strong>Clients &amp; Dettes 100% Illimités</strong></span>
+              </div>
+              <div class="sub-pillar-item">
+                <i data-lucide="message-circle" style="width:16px;height:16px;color:#22C55E;"></i>
+                <span><strong>Relances WhatsApp automatiques</strong> en 1 clic</span>
+              </div>
+              <div class="sub-pillar-item">
+                <i data-lucide="file-check" style="width:16px;height:16px;color:#F59E0B;"></i>
+                <span><strong>Reçus PDF &amp; Livre SYSCOHADA</strong> certifié</span>
+              </div>
+              <div class="sub-pillar-item">
+                <i data-lucide="store" style="width:16px;height:16px;color:#A855F7;"></i>
+                <span><strong>Multi-Boutiques &amp; Multi-Caissiers</strong> protégés</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- GRILLE DES 2 OFFRES D'ABONNEMENT (100% STYLE A DARK LUXE) -->
+          <div class="sub-pricing-grid">
             
-            <div class="card kpi-card" style="padding:18px;border-left:4px solid #10B981;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <span style="font-size:0.75rem;color:#64748B;font-weight:700;text-transform:uppercase;">Forfait Actuel</span>
-                  <div id="sub-page-plan-title" style="font-size:1.25rem;font-weight:900;color:#0F172A;margin-top:4px;">Essai PRO 3 Mois</div>
+            <!-- Carte 1 : PRO Mensuel -->
+            <div class="sub-plan-card">
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <span class="sub-tag-blue">FLEXIBILITÉ SANS ENGAGEMENT</span>
                 </div>
-                <div style="width:36px;height:36px;border-radius:10px;background:#ECFDF5;color:#10B981;display:flex;align-items:center;justify-content:center;">
-                  <i data-lucide="crown" style="width:18px;height:18px;"></i>
+                <h3 style="font-size:1.4rem;font-weight:900;color:#FFFFFF;margin:0 0 10px 0;">PRO Mensuel</h3>
+                <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #1C2B45;">
+                  <span style="font-size:2.3rem;font-weight:900;color:#FFFFFF;letter-spacing:-0.5px;">5 000</span>
+                  <span style="font-size:0.88rem;color:#94A3B8;font-weight:700;">FCFA / mois</span>
                 </div>
+                <ul class="sub-plan-features">
+                  <li><i data-lucide="check" style="color:#38BDF8;"></i> <span>Clients &amp; Dettes illimités</span></li>
+                  <li><i data-lucide="check" style="color:#38BDF8;"></i> <span>Rappels WhatsApp automatiques en 1 clic</span></li>
+                  <li><i data-lucide="check" style="color:#38BDF8;"></i> <span>Reçus PDF &amp; Bilans financiers certifiés</span></li>
+                  <li><i data-lucide="check" style="color:#38BDF8;"></i> <span>Livre de caisse conforme SYSCOHADA</span></li>
+                  <li><i data-lucide="check" style="color:#38BDF8;"></i> <span>Accès Mobile, Tablette &amp; PC</span></li>
+                </ul>
               </div>
-              <div style="margin-top:10px;">
-                <span id="sub-page-plan-status" style="background:#10B981;color:#FFFFFF;padding:3px 10px;border-radius:20px;font-size:0.72rem;font-weight:800;">ACTIF ✓</span>
-              </div>
+              <button type="button" class="btn-sub-monthly" onclick="openSubscriptionModal('pro_monthly')">
+                <i data-lucide="shield-check" style="width:18px;height:18px;"></i>
+                <span>S'abonner à PRO Mensuel (5 000 F) →</span>
+              </button>
             </div>
 
-            <div class="card kpi-card" style="padding:18px;border-left:4px solid #3B82F6;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <span style="font-size:0.75rem;color:#64748B;font-weight:700;text-transform:uppercase;">Passerelle Officielle</span>
-                  <div style="font-size:1.25rem;font-weight:900;color:#0F172A;margin-top:4px;">SasPay LIVE</div>
-                </div>
-                <div style="width:36px;height:36px;border-radius:10px;background:#EFF6FF;color:#3B82F6;display:flex;align-items:center;justify-content:center;">
-                  <i data-lucide="shield-check" style="width:18px;height:18px;"></i>
-                </div>
+            <!-- Carte 2 : PRO Annuel (Star / Rentabilité Maximale) -->
+            <div class="sub-plan-card sub-plan-featured">
+              <div class="sub-badge-top-gold">
+                ★ LE PLUS POPULAIRE • 3 MOIS OFFERTS (-25%)
               </div>
-              <div style="margin-top:10px;font-size:0.75rem;color:#2563EB;font-weight:700;">
-                Wave • MoMo • Flooz • Cartes
-              </div>
-            </div>
-
-            <div class="card kpi-card" style="padding:18px;border-left:4px solid #8B5CF6;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <span style="font-size:0.75rem;color:#64748B;font-weight:700;text-transform:uppercase;">Carnet &amp; Créances</span>
-                  <div style="font-size:1.25rem;font-weight:900;color:#0F172A;margin-top:4px;">Illimités</div>
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <span class="sub-tag-gold">RENTABILITÉ MAXIMALE</span>
                 </div>
-                <div style="width:36px;height:36px;border-radius:10px;background:#F5F3FF;color:#8B5CF6;display:flex;align-items:center;justify-content:center;">
-                  <i data-lucide="users" style="width:18px;height:18px;"></i>
+                <h3 style="font-size:1.4rem;font-weight:900;color:#FFFFFF;margin:0 0 10px 0;">PRO Annuel</h3>
+                <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid rgba(245,158,11,0.25);">
+                  <span style="font-size:2.3rem;font-weight:900;color:#FBBF24;letter-spacing:-0.5px;">45 000</span>
+                  <span style="font-size:0.88rem;color:#FDE68A;font-weight:700;">FCFA / an</span>
+                  <span style="font-size:0.85rem;color:#94A3B8;text-decoration:line-through;margin-left:6px;">60 000 F</span>
                 </div>
+                <ul class="sub-plan-features">
+                  <li><i data-lucide="check" style="color:#F59E0B;"></i> <span><strong style="color:#FFFFFF;">Tous les avantages PRO pendant 1 an complet</strong></span></li>
+                  <li><i data-lucide="check" style="color:#F59E0B;"></i> <span><strong style="color:#FDE68A;">Économie directe de 15 000 FCFA</strong> (3 mois gratuits)</span></li>
+                  <li><i data-lucide="check" style="color:#F59E0B;"></i> <span>Gestion multi-caissiers &amp; code PIN secret</span></li>
+                  <li><i data-lucide="check" style="color:#F59E0B;"></i> <span>Sauvegarde Cloud automatique sécurisée</span></li>
+                  <li><i data-lucide="check" style="color:#F59E0B;"></i> <span><strong style="color:#FFFFFF;">Support VIP Dédié WhatsApp 7j/7 direct</strong></span></li>
+                </ul>
               </div>
-              <div style="margin-top:10px;font-size:0.75rem;color:#6D28D9;font-weight:700;">
-                Zéro restriction de clients
-              </div>
-            </div>
-
-            <div class="card kpi-card" style="padding:18px;border-left:4px solid #F59E0B;">
-              <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-                <div>
-                  <span style="font-size:0.75rem;color:#64748B;font-weight:700;text-transform:uppercase;">Comptabilité &amp; Caisses</span>
-                  <div style="font-size:1.25rem;font-weight:900;color:#0F172A;margin-top:4px;">SYSCOHADA</div>
-                </div>
-                <div style="width:36px;height:36px;border-radius:10px;background:#FEF3C7;color:#D97706;display:flex;align-items:center;justify-content:center;">
-                  <i data-lucide="file-text" style="width:18px;height:18px;"></i>
-                </div>
-              </div>
-              <div style="margin-top:10px;font-size:0.75rem;color:#B45309;font-weight:700;">
-                Reçus &amp; Factures certifiés
-              </div>
+              <button type="button" class="btn-sub-yearly" onclick="openSubscriptionModal('pro_yearly')">
+                <i data-lucide="zap" style="width:18px;height:18px;"></i>
+                <span>S'abonner à PRO Annuel (45 000 F) →</span>
+              </button>
             </div>
 
           </div>
 
-          <!-- RANGÉE 2 : SECTION 2 COLONNES (65% OFFRES / 35% CLÉ VIP & SUPPORT) -->
-          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:20px;align-items:start;">
+          <!-- SECTION INFÉRIEURE : CLÉ VIP & CONCIERGERIE WHATSAPP -->
+          <div class="sub-bottom-grid">
             
-            <!-- Colonne Gauche (65%) : Grille des 2 Formules d'Abonnement -->
-            <div style="grid-column: span 2;">
-              <div class="card" style="padding:24px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;border-bottom:1px solid #E2E8F0;padding-bottom:14px;">
-                  <div>
-                    <h3 style="font-size:1.15rem;font-weight:900;color:#0F172A;margin:0;">Formules Disponibles</h3>
-                    <p style="font-size:0.8rem;color:#64748B;margin:2px 0 0 0;">Payez instantanément par Wave, MTN Mobile Money, Orange Money, Moov ou Carte Bancaire.</p>
-                  </div>
-                  <span style="font-size:0.75rem;color:#10B981;font-weight:800;background:#ECFDF5;padding:4px 10px;border-radius:20px;">SasPay 100% Sécurisé</span>
+            <!-- Carte Clé VIP Partenaire -->
+            <div class="sub-tool-card sub-border-emerald">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:rgba(34,197,94,0.15);color:#22C55E;display:flex;align-items:center;justify-content:center;">
+                  <i data-lucide="key-round" style="width:18px;height:18px;"></i>
                 </div>
-
-                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:18px;">
-                  
-                  <!-- Formule 1 : PRO Mensuel -->
-                  <div style="background:#F8FAFC;border:2px solid #E2E8F0;border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;">
-                    <div>
-                      <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:0.75rem;font-weight:800;color:#2563EB;text-transform:uppercase;">Sans Engagement</span>
-                      </div>
-                      <h4 style="font-size:1.3rem;font-weight:900;color:#0F172A;margin:4px 0 8px 0;">PRO Mensuel</h4>
-                      <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:16px;">
-                        <span style="font-size:2rem;font-weight:900;color:#0F172A;">5 000</span>
-                        <span style="font-size:0.85rem;color:#64748B;font-weight:700;">FCFA / mois</span>
-                      </div>
-                      <ul style="list-style:none;padding:0;margin:0;font-size:0.84rem;color:#334155;line-height:1.8;display:flex;flex-direction:column;gap:6px;">
-                        <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:16px;height:16px;color:#10B981;"></i> <span>Clients &amp; Dettes illimités</span></li>
-                        <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:16px;height:16px;color:#10B981;"></i> <span>Rappels WhatsApp automatiques en 1 clic</span></li>
-                        <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:16px;height:16px;color:#10B981;"></i> <span>Reçus PDF &amp; Bilans sans filigrane</span></li>
-                        <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:16px;height:16px;color:#10B981;"></i> <span>Livre de caisse SYSCOHADA certifié</span></li>
-                      </ul>
-                    </div>
-                    <button type="button" class="btn btn-primary" onclick="openSubscriptionModal('pro_monthly')" style="width:100%;margin-top:20px;padding:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:8px;">
-                      <i data-lucide="shield-check" style="width:18px;height:18px;"></i>
-                      <span>S'abonner à PRO Mensuel (5 000 F) →</span>
-                    </button>
-                  </div>
-
-                  <!-- Formule 2 : PRO Annuel (Recommandé) -->
-                  <div style="background:linear-gradient(155deg, #0F172A 0%, #1E293B 100%);border:2.5px solid #F59E0B;border-radius:18px;padding:22px;display:flex;flex-direction:column;justify-content:space-between;color:#fff;box-shadow:0 12px 30px rgba(245,158,11,0.2);position:relative;">
-                    <div style="position:absolute;top:-12px;right:18px;background:linear-gradient(135deg, #F59E0B, #D97706);color:#0F172A;font-weight:900;font-size:0.7rem;padding:4px 12px;border-radius:20px;text-transform:uppercase;">
-                      ★ ÉCONOMISEZ 25% + 3 MOIS OFFERTS
-                    </div>
-                    <div>
-                      <div style="display:flex;justify-content:space-between;align-items:center;">
-                        <span style="font-size:0.75rem;font-weight:800;color:#FBBF24;text-transform:uppercase;">Offre Rentabilité Maximale</span>
-                      </div>
-                      <h4 style="font-size:1.3rem;font-weight:900;color:#fff;margin:4px 0 8px 0;">PRO Annuel</h4>
-                      <div style="display:flex;align-items:baseline;gap:4px;margin-bottom:16px;">
-                        <span style="font-size:2rem;font-weight:900;color:#fff;">45 000</span>
-                        <span style="font-size:0.85rem;color:rgba(255,255,255,0.7);font-weight:700;">FCFA / an</span>
-                        <span style="font-size:0.8rem;color:#FCD34D;margin-left:6px;text-decoration:line-through;opacity:0.8;">60 000 F</span>
-                      </div>
-                      <ul style="list-style:none;padding:0;margin:0;font-size:0.84rem;color:rgba(255,255,255,0.9);line-height:1.8;display:flex;flex-direction:column;gap:6px;">
-                        <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:16px;height:16px;color:#F59E0B;"></i> <span><strong>Tous les avantages PRO pendant 1 an complet</strong></span></li>
-                        <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:16px;height:16px;color:#F59E0B;"></i> <span><strong>Économie de 15 000 FCFA</strong> (3 mois gratuits)</span></li>
-                        <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:16px;height:16px;color:#F59E0B;"></i> <span>Gestion multi-caissiers &amp; code PIN</span></li>
-                        <li style="display:flex;align-items:center;gap:8px;"><i data-lucide="check" style="width:16px;height:16px;color:#F59E0B;"></i> <span><strong>Support VIP Dédié WhatsApp 7j/7</strong></span></li>
-                      </ul>
-                    </div>
-                    <button type="button" class="btn" onclick="openSubscriptionModal('pro_yearly')" style="background:linear-gradient(135deg, #F59E0B, #D97706);color:#0F172A;width:100%;margin-top:20px;padding:12px;font-weight:900;border:none;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 6px 20px rgba(245,158,11,0.35);">
-                      <i data-lucide="zap" style="width:18px;height:18px;"></i>
-                      <span>S'abonner à PRO Annuel (45 000 F) →</span>
-                    </button>
-                  </div>
-
-                </div>
-
+                <h4 style="font-size:1.02rem;font-weight:900;color:#FFFFFF;margin:0;">Activer une Clé Partenaire</h4>
+              </div>
+              <p style="font-size:0.8rem;color:#94A3B8;margin:0 0 14px 0;line-height:1.5;">
+                Vous possédez un code de licence officielle ou promotionnelle ? Entrez-le pour activer l'accès PRO instantanément.
+              </p>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="admin-license-key-input-direct" class="form-control" placeholder="ex: VIP-SALEM-PRO-2026" style="background:#070D1B;border-color:#1C2B45;color:#FFFFFF;font-weight:800;text-transform:uppercase;font-size:0.85rem;border-radius:10px;">
+                <button type="button" class="btn" style="background:#16A34A;color:#FFFFFF;font-weight:800;padding:0 18px;border-radius:10px;white-space:nowrap;cursor:pointer;border:none;" onclick="const inp = document.getElementById('admin-license-key-input-direct'); if(inp){ const val=inp.value; document.getElementById('sub-modal-vip-input').value = val; redeemAdminLicenseKey(); }">
+                  Activer
+                </button>
               </div>
             </div>
 
-            <!-- Colonne Droite (35%) : Clé VIP & Support Dédié -->
-            <div style="display:flex;flex-direction:column;gap:18px;">
-              
-              <!-- Carte Clé VIP Partenaire -->
-              <div class="card" style="padding:20px;background:#F0FDF4;border:1.5px dashed #22C55E;">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                  <i data-lucide="key-round" style="width:20px;height:20px;color:#16A34A;"></i>
-                  <h4 style="font-size:0.95rem;font-weight:900;color:#166534;margin:0;">Activer une Clé VIP Partenaire</h4>
+            <!-- Carte Support & Conciergerie VIP -->
+            <div class="sub-tool-card sub-border-cyan">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div style="width:34px;height:34px;border-radius:10px;background:rgba(56,189,248,0.15);color:#38BDF8;display:flex;align-items:center;justify-content:center;">
+                  <i data-lucide="headset" style="width:18px;height:18px;"></i>
                 </div>
-                <p style="font-size:0.78rem;color:#15803D;margin:0 0 12px 0;">
-                  Vous avez reçu un code promotionnel ou une clé de licence officielle ? Entrez-la pour débloquer l'accès PRO instantanément.
-                </p>
-                <div style="display:flex;gap:8px;">
-                  <input type="text" id="admin-license-key-input-direct" class="form-control" placeholder="ex: VIP-SALEM-PRO-2026" style="background:#fff;border-color:#86EFAC;font-weight:800;text-transform:uppercase;font-size:0.85rem;">
-                  <button type="button" class="btn" style="background:#16A34A;color:#fff;font-weight:800;padding:0 14px;white-space:nowrap;" onclick="const inp = document.getElementById('admin-license-key-input-direct'); if(inp){ const val=inp.value; document.getElementById('sub-modal-vip-input').value = val; redeemAdminLicenseKey(); }">
-                    Activer
-                  </button>
-                </div>
+                <h4 style="font-size:1.02rem;font-weight:900;color:#FFFFFF;margin:0;">Conciergerie Commerciale VIP</h4>
               </div>
-
-              <!-- Carte Support & Conciergerie VIP -->
-              <div class="card" style="padding:20px;background:#0F172A;color:#FFFFFF;border-radius:16px;">
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                  <i data-lucide="headset" style="width:20px;height:20px;color:#38BDF8;"></i>
-                  <h4 style="font-size:0.95rem;font-weight:900;color:#FFFFFF;margin:0;">Conciergerie Commerciale VIP</h4>
-                </div>
-                <p style="font-size:0.78rem;color:#94A3B8;margin:0 0 14px 0;line-height:1.5;">
-                  Besoin d'aide pour régler par Mobile Money, d'une facture proforma d'entreprise ou d'un pack multi-succursales ?
-                </p>
-                <a href="https://wa.me/22997000000?text=Bonjour%20Salem,%20je%20souhaite%20des%20informations%20sur%20l'abonnement%20CreditTrack%20PRO" target="_blank" class="btn" style="background:#25D366;color:#FFFFFF;font-weight:900;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;">
-                  <i data-lucide="message-circle" style="width:16px;height:16px;"></i>
-                  <span>Contacter Salem Fondateur (WhatsApp)</span>
-                </a>
-              </div>
-
-              <!-- Badge Réassurance Sécurité -->
-              <div style="background:#FFFFFF;border:1px solid #E2E8F0;border-radius:14px;padding:16px;text-align:center;">
-                <div style="font-size:0.78rem;font-weight:800;color:#0F172A;display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px;">
-                  <i data-lucide="shield-check" style="width:16px;height:16px;color:#10B981;"></i>
-                  <span>Paiements Certifiés SasPay</span>
-                </div>
-                <div style="font-size:0.72rem;color:#64748B;">
-                  Toutes les transactions sont chiffrées de bout en bout et protégées selon les normes bancaires internationales.
-                </div>
-              </div>
-
+              <p style="font-size:0.8rem;color:#94A3B8;margin:0 0 14px 0;line-height:1.5;">
+                Besoin d'aide pour régler par Mobile Money, d'une facture proforma d'entreprise ou d'une offre multi-boutiques ?
+              </p>
+              <a href="https://wa.me/22997000000?text=Bonjour%20Salem,%20je%20souhaite%20des%20informations%20sur%20l'abonnement%20CreditTrack%20PRO" target="_blank" class="btn-whatsapp-vip">
+                <i data-lucide="message-circle" style="width:18px;height:18px;"></i>
+                <span>Contacter l'Assistance WhatsApp 7j/7</span>
+              </a>
             </div>
 
+          </div>
+
+          <!-- BANDEAU DE RÉASSURANCE OFFICIEL SASPAY -->
+          <div class="sub-security-footer">
+            <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.84rem;font-weight:800;color:#FFFFFF;margin-bottom:6px;">
+              <i data-lucide="shield-check" style="width:18px;height:18px;color:#10B981;"></i>
+              <span>Paiements Certifiés &amp; Chiffrés SasPay LIVE</span>
+            </div>
+            <p style="font-size:0.76rem;color:#64748B;margin:0 0 10px 0;">
+              Transactions protégées selon les normes bancaires internationales. Canaux acceptés : Wave, MTN Mobile Money, Orange Money, Moov Money, Celtiis Cash et Cartes Bancaires Visa / Mastercard.
+            </p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:12px;font-size:0.75rem;color:#94A3B8;font-weight:700;">
+              <span>🌊 Wave (0% frais)</span>
+              <span>•</span>
+              <span>🟡 MTN MoMo</span>
+              <span>•</span>
+              <span>🟠 Orange Money</span>
+              <span>•</span>
+              <span>🟢 Moov Flooz</span>
+              <span>•</span>
+              <span>💳 Carte Visa / Mastercard</span>
+            </div>
           </div>
 
         </section>
