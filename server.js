@@ -89,7 +89,7 @@ const server = http.createServer(async (req, res) => {
       } catch (err) {
         console.error('[Local API Error]:', err);
         res.writeHead(500, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: err.message }));
+        res.end(JSON.stringify({ error: 'Erreur interne lors du traitement de la requête.' }));
       }
     });
     return;
@@ -103,10 +103,21 @@ const server = http.createServer(async (req, res) => {
 
   const filePath = path.join(__dirname, reqPath);
 
-  // Sécurité traversée de dossier
+  // Sécurité traversée de dossier (Path Traversal)
   if (!filePath.startsWith(__dirname)) {
-    res.writeHead(403, { 'Content-Type': 'text/plain' });
-    res.end('Accès interdit');
+    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Accès interdit : tentative de traversée de dossier.');
+    return;
+  }
+
+  // Sécurité anti-fuite de secrets : interdiction absolue d'accéder à .env, .git ou fichiers cachés/système
+  const isDotfile = reqPath.split('/').some(part => part.startsWith('.')) || path.basename(filePath).startsWith('.');
+  const forbiddenExts = ['.env', '.sql', '.py', '.sh', '.key', '.pem', '.cert', '.crt'];
+  const ext = path.extname(filePath).toLowerCase();
+
+  if (isDotfile || forbiddenExts.includes(ext)) {
+    res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+    res.end('Accès strictement interdit aux fichiers système et de configuration.');
     return;
   }
 
