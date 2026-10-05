@@ -1,12 +1,20 @@
 // api/create-checkout.js - Vercel Serverless Function pour initier le paiement SasPay de manière sécurisée
 export default async function handler(req, res) {
-  // Activer les en-têtes CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  // 1. En-têtes CORS restreints et sécurisés
+  const allowedOrigins = [
+    'https://credit-track00.vercel.app',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ];
+  const origin = req.headers.origin;
+  if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app'))) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,POST');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
   );
 
   if (req.method === 'OPTIONS') {
@@ -25,15 +33,35 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Montant invalide.' });
     }
 
+    // 2. Validation du format email si fourni
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (customerEmail && !emailRegex.test(customerEmail)) {
+      return res.status(400).json({ error: 'Adresse email client invalide.' });
+    }
+
+    // 3. Récupération stricte de la clé secrète via variable d'environnement (zéro clé en dur)
+    const apiKey = process.env.SASPAY_SECRET_KEY;
+    if (!apiKey) {
+      console.error('[SasPay Security Alert] SASPAY_SECRET_KEY manquante dans process.env.');
+      return res.status(500).json({
+        error: 'Configuration serveur incomplète. La clé secrète SasPay n\'est pas configurée.'
+      });
+    }
+
     const formattedAmount = Number(amount).toFixed(2);
     const planLabel = planTier === 'pro_yearly' ? 'PRO Annuel' : (planTier === 'vip_lifetime' ? 'VIP À Vie' : 'PRO Mensuel');
-    const fallbackKey = ['sk', 'live', 'tKBmx772C8jqz7uABgE3XjWBi-cHmodSae7jo7XLjO8'].join('_');
-    const apiKey = process.env.SASPAY_SECRET_KEY || fallbackKey;
 
-    // Assainissement strict de returnUrl pour garantir une URL valide HTTP/HTTPS
+    // 4. Assainissement strict de returnUrl avec le parseur URL natif
     let finalReturnUrl = 'https://credit-track00.vercel.app/?payment_status=success&plan=' + encodeURIComponent(planTier || 'pro_monthly');
-    if (returnUrl && typeof returnUrl === 'string' && (returnUrl.startsWith('http://') || returnUrl.startsWith('https://'))) {
-      finalReturnUrl = returnUrl;
+    if (returnUrl && typeof returnUrl === 'string') {
+      try {
+        const parsed = new URL(returnUrl);
+        if (parsed.protocol === 'https:' || parsed.protocol === 'http:') {
+          finalReturnUrl = returnUrl;
+        }
+      } catch {
+        // En cas d'URL invalide, on conserve l'URL de retour par défaut officielle
+      }
     }
 
     const payload = {
@@ -58,16 +86,33 @@ export default async function handler(req, res) {
 
     console.log('[SasPay Checkout] Initiation session:', { amount: formattedAmount, planTier, customerEmail, returnUrl: finalReturnUrl });
 
-    const sasPayResponse = await fetch('https://api.saspay.me/api/v1/checkout-sessions/', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'User-Agent': 'CreditTrack-SaaS/4.9.2 (Production Payment Gateway)'
-      },
-      body: JSON.stringify(payload)
-    });
+    // 5. Appel SasPay avec timeout 10 secondes (AbortController)
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    let sasPayResponse;
+    try {
+      sasPayResponse = await fetch('https://api.saspay.me/api/v1/checkout-sessions/', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'User-Agent': 'CreditTrack-SaaS/4.9.8 (Production Payment Gateway)'
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal
+      });
+    } catch (fetchErr) {
+      if (fetchErr.name === 'AbortError') {
+        return res.status(504).json({
+          error: 'Délai d’attente dépassé (timeout 10s) lors de la communication avec SasPay.'
+        });
+      }
+      throw fetchErr;
+    } finally {
+      clearTimeout(timeout);
+    }
 
     const data = await sasPayResponse.json().catch(() => null);
 
