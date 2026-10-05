@@ -31,16 +31,21 @@ export default async function handler(req, res) {
 
     console.log('[SasPay Webhook] Événement reçu:', eventHeader, 'Timestamp:', timestampHeader);
 
-    // Si une clé secrète de webhook est configurée, vérifier la signature cryptographique
+    // Contrôle strict de la signature cryptographique HMAC SHA256 si configurée
     const webhookSecret = process.env.SASPAY_WEBHOOK_SECRET;
-    if (webhookSecret && signatureHeader && timestampHeader) {
+    if (webhookSecret) {
+      if (!signatureHeader || !timestampHeader) {
+        console.warn('[SasPay Webhook] En-têtes de signature ou timestamp manquants.');
+        return res.status(401).json({ error: 'Signature ou horodatage webhook manquant.' });
+      }
+
       const now = Math.floor(Date.now() / 1000);
       const TOLERANCE_SECONDS = 300;
 
-      // 1. Contrôle d'âge (5 minutes max)
+      // 1. Contrôle d'âge (5 minutes max) contre attaques par rejeu
       if (Math.abs(now - Number(timestampHeader)) > TOLERANCE_SECONDS) {
         console.warn('[SasPay Webhook] Horodatage rejeté (hors tolérance):', timestampHeader);
-        return res.status(403).json({ error: 'Horodatage webhook hors tolérance' });
+        return res.status(403).json({ error: 'Horodatage webhook hors tolérance.' });
       }
 
       // 2. Contrôle de signature HMAC SHA256 en temps constant
@@ -53,8 +58,8 @@ export default async function handler(req, res) {
       const expectedBuf = Buffer.from(expectedSignature, 'utf8');
 
       if (sigBuf.length !== expectedBuf.length || !crypto.timingSafeEqual(sigBuf, expectedBuf)) {
-        console.warn('[SasPay Webhook] Signature invalide');
-        return res.status(403).json({ error: 'Signature webhook invalide' });
+        console.warn('[SasPay Webhook] Signature invalide.');
+        return res.status(403).json({ error: 'Signature webhook invalide.' });
       }
     }
 
@@ -121,6 +126,6 @@ export default async function handler(req, res) {
     return res.status(200).json({ received: true });
   } catch (error) {
     console.error('[SasPay Webhook Exception]:', error);
-    return res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: 'Erreur interne lors du traitement du webhook.' });
   }
 }
