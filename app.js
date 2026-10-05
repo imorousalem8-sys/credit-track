@@ -5092,16 +5092,13 @@ window.updateSubSubmitButtonText = function() {
 };
 
 window.contactWhatsAppSupport = function(customMessage) {
-  const planTier = window.subModalState ? window.subModalState.plan : 'pro_yearly';
-  const planName = planTier === 'pro_yearly' ? 'PRO Annuel (45 000 FCFA / an)' : 'PRO Mensuel (5 000 FCFA / mois)';
-  const biz = (AppState.user && AppState.user.businessName) || 'Mon Commerce';
-  
-  const text = customMessage || `Bonjour CréditTrack PRO ! Mon entreprise est "${biz}". Je souhaite souscrire au forfait ${planName} et effectuer le paiement par Carte Bancaire Internationale (Visa / Mastercard). Merci de me transmettre un lien de paiement sécurisé.`;
-  const encoded = encodeURIComponent(text);
-  
-  // Numéro WhatsApp support officiel CréditTrack (ou configuré)
-  const phone = '22997000000'; // Standard Bénin / Afrique de l'Ouest
-  window.open(`https://wa.me/${phone}?text=${encoded}`, '_blank');
+  const supportPhone = (AppState.user && AppState.user.supportPhone) || localStorage.getItem('officialSupportPhone');
+  if (supportPhone && /^\d{8,15}$/.test(supportPhone)) {
+    const text = customMessage || 'Bonjour CréditTrack PRO ! Je souhaite des informations sur l’abonnement.';
+    window.open(`https://wa.me/${supportPhone}?text=${encodeURIComponent(text)}`, '_blank');
+  } else {
+    showToast("Pour toute assistance ou facture proforma, utilisez le paiement SasPay 100% sécurisé en ligne.", "info");
+  }
 };
 
 window.submitSubscriptionForm = function(event) {
