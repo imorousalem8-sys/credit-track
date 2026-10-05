@@ -408,14 +408,45 @@ function updateCountryPaymentMethods(countryCode) {
 
   const optionsHTML = methods.map(m => `<option value="${m.label}">${m.label}</option>`).join('');
 
+  // 1. SYNCHRONISATION INSTANTANÉE DU TERMINAL DU CAHIER DU JOUR (#inline-row-method)
+  const salesbookMethodSelect = document.getElementById('inline-row-method');
+  if (salesbookMethodSelect) {
+    salesbookMethodSelect.innerHTML = methods.map(m => {
+      let icon = '📱';
+      const l = m.label.toLowerCase();
+      if (l.includes('cash') || l.includes('espèce')) icon = '💵';
+      else if (l.includes('opay') || l.includes('mpesa')) icon = '🟢';
+      else if (l.includes('palmpay') || l.includes('kuda')) icon = '🟣';
+      else if (l.includes('moniepoint') || l.includes('moov')) icon = '🔵';
+      else if (l.includes('orange')) icon = '🟠';
+      else if (l.includes('mtn')) icon = '🟡';
+      else if (l.includes('bank') || l.includes('virement') || l.includes('nip')) icon = '🏦';
+      else if (l.includes('ussd')) icon = '🔢';
+      return `<option value="${m.label}" style="background:#0D1627;color:#FFFFFF;">${icon} ${m.label}</option>`;
+    }).join('');
+    salesbookMethodSelect.value = methods[0]?.label || '';
+  }
+
+  // 2. SYNCHRONISATION MODALE D'ENCAISSEMENT CLIENT (#modal-pay-method-select)
+  const modalPaySelect = document.getElementById('modal-pay-method-select');
+  if (modalPaySelect) {
+    modalPaySelect.innerHTML = optionsHTML;
+    modalPaySelect.value = methods[0]?.label || '';
+  }
+  const modalPayBtnText = document.getElementById('modal-pay-method-btn-text');
+  if (modalPayBtnText) modalPayBtnText.textContent = methods[0]?.label || (AppState.lang === 'en' ? 'Cash' : 'Espèces');
+  const modalPayBtnLogo = document.getElementById('modal-pay-method-btn-logo');
+  if (modalPayBtnLogo) modalPayBtnLogo.innerHTML = getPaymentMethodLogo(methods[0]?.label || '');
+
+  // 3. SYNCHRONISATION MODALE CRÉDITS (#credit-payment-method-pref)
   const prefSelect = document.getElementById('credit-payment-method-pref');
   if (prefSelect) {
     prefSelect.innerHTML = optionsHTML;
     prefSelect.value = methods[0]?.label || '';
   }
 
-  // Synchroniser le bouton sélecteur avec le premier moyen du pays
-  const firstMethod = methods[0]?.label || 'Espèces';
+  // 4. Synchroniser le bouton sélecteur principal avec le premier moyen du pays
+  const firstMethod = methods[0]?.label || (AppState.lang === 'en' ? 'Cash' : 'Espèces');
   const btnText = document.getElementById('credit-pay-method-btn-text');
   if (btnText) btnText.textContent = firstMethod;
 
@@ -424,8 +455,8 @@ function updateCountryPaymentMethods(countryCode) {
 
   const accountInput = document.getElementById('credit-transfer-account');
   if (accountInput) {
-    const firstBrand = firstMethod.split(' ')[0] || 'Wave';
-    accountInput.placeholder = `Numéro ${firstBrand} ou compte de paiement`;
+    const firstBrand = firstMethod.split(' ')[0] || 'Cash';
+    accountInput.placeholder = AppState.lang === 'en' ? `Number for ${firstBrand} or payment account` : `Numéro ${firstBrand} ou compte de paiement`;
   }
 }
 
@@ -1467,6 +1498,7 @@ function restoreSavedState() {
   const countrySelect = document.getElementById('country-select');
   if (countrySelect) countrySelect.value = savedCountry;
   switchCountry(savedCountry, false);
+  updateCountryPaymentMethods(savedCountry);
 
   switchAppMode('credit', false);
 
@@ -1766,6 +1798,7 @@ window.switchMenu = function(menuId) {
   }
 
   if (menuId === 'menu-salesbook') {
+      if (typeof updateCountryPaymentMethods === 'function') updateCountryPaymentMethods(AppState.country);
     try {
       if (typeof renderDailySalesBook === 'function') renderDailySalesBook();
       if (typeof updatePatronBadgeStatus === 'function') updatePatronBadgeStatus();
@@ -6589,12 +6622,31 @@ window.renderDailySalesBook = function() {
   } else {
     tableBody.innerHTML = displayedSales.map((s, idx) => {
       let badgeHtml = '';
-      if (s.method === 'Wave Direct' || s.method === 'Wave' || s.method.includes('Wave')) {
+      const mLower = (s.method || '').toLowerCase();
+      if (mLower.includes('wave')) {
         badgeHtml = `<span style="background:rgba(0,119,182,0.2);border:1px solid #0077B6;color:#00B4D8;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">📱 Wave</span>`;
-      } else if (s.method.includes('Orange') || s.method === 'Mobile Money' || s.method.includes('MoMo') || s.method.includes('Moov')) {
-        badgeHtml = `<span style="background:rgba(245,158,11,0.15);border:1px solid #F59E0B;color:#FBBF24;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">📱 ${escapeHTML(s.method)}</span>`;
+      } else if (mLower.includes('opay')) {
+        badgeHtml = `<span style="background:rgba(17,195,128,0.2);border:1px solid #11C380;color:#11C380;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🟢 OPay</span>`;
+      } else if (mLower.includes('palmpay')) {
+        badgeHtml = `<span style="background:rgba(108,46,185,0.2);border:1px solid #6C2EB9;color:#C084FC;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🟣 PalmPay</span>`;
+      } else if (mLower.includes('moniepoint')) {
+        badgeHtml = `<span style="background:rgba(3,78,162,0.2);border:1px solid #034EA2;color:#60A5FA;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🔵 Moniepoint</span>`;
+      } else if (mLower.includes('kuda')) {
+        badgeHtml = `<span style="background:rgba(64,25,109,0.2);border:1px solid #40196D;color:#A78BFA;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🟣 Kuda</span>`;
+      } else if (mLower.includes('mpesa') || mLower.includes('m-pesa')) {
+        badgeHtml = `<span style="background:rgba(0,128,0,0.2);border:1px solid #008000;color:#4ADE80;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🟢 M-Pesa</span>`;
+      } else if (mLower.includes('orange')) {
+        badgeHtml = `<span style="background:rgba(255,121,0,0.2);border:1px solid #FF7900;color:#FB923C;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🟠 Orange</span>`;
+      } else if (mLower.includes('mtn') || mLower.includes('momo')) {
+        badgeHtml = `<span style="background:rgba(255,204,0,0.2);border:1px solid #FFCC00;color:#FDE047;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🟡 MTN MoMo</span>`;
+      } else if (mLower.includes('moov') || mLower.includes('flooz')) {
+        badgeHtml = `<span style="background:rgba(0,91,166,0.2);border:1px solid #005BA6;color:#60A5FA;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🔵 Moov</span>`;
+      } else if (mLower.includes('bank') || mLower.includes('virement') || mLower.includes('nip')) {
+        badgeHtml = `<span style="background:rgba(30,41,59,0.6);border:1px solid #475569;color:#E2E8F0;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">🏦 ${escapeHTML(s.method)}</span>`;
+      } else if (mLower.includes('cash') || mLower.includes('espèce')) {
+        badgeHtml = `<span style="background:rgba(16,185,129,0.15);border:1px solid #10B981;color:#10B981;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">💵 ${escapeHTML(s.method)}</span>`;
       } else {
-        badgeHtml = `<span style="background:rgba(16,185,129,0.15);border:1px solid #10B981;color:#10B981;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">💵 ${AppState.lang === 'en' ? 'Cash' : 'Espèces'}</span>`;
+        badgeHtml = `<span style="background:rgba(56,189,248,0.15);border:1px solid #38BDF8;color:#38BDF8;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">💳 ${escapeHTML(s.method)}</span>`;
       }
 
       const isEven = idx % 2 === 0;
