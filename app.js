@@ -451,6 +451,53 @@ window.updateCountryPaymentMethods = updateCountryPaymentMethods;
 // --------------------------------------------------------------------------
 const translations = {
   fr: {
+    panafricanMgmt: "Gestion Panafricaine",
+    menuDashboard: "Tableau de Bord",
+    menuSalesbook: "Cahier des Ventes (24h)",
+    menuCreditSales: "Ventes à Crédit",
+    menuClients: "Clients & Dettes",
+    menuPayments: "Paiements & Reçus",
+    menuReminders: "Rappels WhatsApp",
+    menuAccounting: "Caisse & Dépenses",
+    menuSubscription: "Abonnements PRO",
+    menuSettings: "Paramètres",
+    menuHomeSite: "Page d'Accueil",
+    sbTitle: "Cahier des Ventes du Jour",
+    sbSubtitle: "Suivez vos ventes en temps réel et gérez votre activité facilement.",
+    sbToday: "Aujourd'hui",
+    sbLive: "24h Actif (LIVE)",
+    sbBtnSettings: "Paramètres",
+    sbBtnReports: "Rapports",
+    sbBtnCloseDay: "Clôturer & Envoyer au Patron",
+    sbBtnHistory: "Historique des Ventes & Archives",
+    sbLiveTerminal: "Caisse en Direct (Saisie Rapide)",
+    sbLiveTerminalSub: "Enregistrez une vente en quelques secondes.",
+    sbKpiRevenue: "REVENU TOTAL",
+    sbKpiCash: "TIROIR CAISSE",
+    sbKpiElectronic: "VENTES ÉLECTRONIQUES",
+    sbKpiCount: "VENTES AUJOURD'HUI",
+    sbTerminalTitle: "Terminal de Caisse Rapide",
+    sbTerminalSub: "Vendez rapidement avec une interface simple et intuitive.",
+    sbArticleLabel: "Description de l'Article",
+    sbArticlePlaceholder: "Ex : Boisson, Sac de riz 50kg, Huile, Pain...",
+    sbQtyLabel: "Quantité",
+    sbUnitPriceLabel: "Prix Unitaire",
+    sbClientLabel: "Client (Optionnel)",
+    sbBtnValidate: "Valider l'Encaissement",
+    sbShortcutsTitle: "Raccourcis Rapides",
+    sbShortcutNew: "Nouvelle vente",
+    sbShortcutItems: "Articles",
+    sbShortcutClients: "Clients",
+    sbShortcutReports: "Rapports",
+    thTime: "HEURE",
+    thItem: "ARTICLE / DÉSIGNATION VENDUE",
+    thQty: "QTÉ",
+    thUnitPrice: "PRIX UNIT.",
+    thTotal: "TOTAL",
+    thPayment: "PAIEMENT",
+    thClient: "CLIENT (OPTIONNEL)",
+    thAction: "ACTION",
+
     // Nav & Sidebar
     dashboard: "Tableau de Bord",
     clients: "Clients & Dettes",
@@ -662,6 +709,53 @@ const translations = {
     quickReminder: "Rappel WhatsApp"
   },
   en: {
+    panafricanMgmt: "Pan-African Management",
+    menuDashboard: "Dashboard",
+    menuSalesbook: "24h Sales Book",
+    menuCreditSales: "Credit Sales",
+    menuClients: "Customers & Debts",
+    menuPayments: "Payments & Receipts",
+    menuReminders: "WhatsApp Reminders",
+    menuAccounting: "Cash & Expenses",
+    menuSubscription: "PRO Subscriptions",
+    menuSettings: "Settings",
+    menuHomeSite: "Homepage",
+    sbTitle: "Daily Sales Book",
+    sbSubtitle: "Track your sales in real time and manage your business easily.",
+    sbToday: "Today",
+    sbLive: "24h Active (LIVE)",
+    sbBtnSettings: "Settings",
+    sbBtnReports: "Reports",
+    sbBtnCloseDay: "Close Day & Send to Owner",
+    sbBtnHistory: "Sales History & Archives",
+    sbLiveTerminal: "Live Checkout (Quick Entry)",
+    sbLiveTerminalSub: "Record a sale in seconds.",
+    sbKpiRevenue: "TOTAL REVENUE",
+    sbKpiCash: "CASH DRAWER",
+    sbKpiElectronic: "DIGITAL / MOBILE SALES",
+    sbKpiCount: "TODAY'S SALES",
+    sbTerminalTitle: "POS Quick-Entry Terminal",
+    sbTerminalSub: "Sell quickly with a fast, intuitive interface.",
+    sbArticleLabel: "Item Description",
+    sbArticlePlaceholder: "E.g.: 50kg Rice Bag, Cooking Oil, Drinks, Bread...",
+    sbQtyLabel: "Quantity",
+    sbUnitPriceLabel: "Unit Price",
+    sbClientLabel: "Customer (Optional)",
+    sbBtnValidate: "Confirm & Record Sale",
+    sbShortcutsTitle: "Quick Shortcuts",
+    sbShortcutNew: "New Sale",
+    sbShortcutItems: "Items",
+    sbShortcutClients: "Customers",
+    sbShortcutReports: "Reports",
+    thTime: "TIME",
+    thItem: "ITEM / DESCRIPTION SOLD",
+    thQty: "QTY",
+    thUnitPrice: "UNIT PRICE",
+    thTotal: "TOTAL",
+    thPayment: "PAYMENT",
+    thClient: "CUSTOMER (OPTIONAL)",
+    thAction: "ACTION",
+
     // Nav & Sidebar
     dashboard: "Dashboard",
     clients: "Clients & Debts",
@@ -1084,24 +1178,33 @@ window.clearDraftFields = function(fieldIds = []) {
   });
 };
 
-window.switchLanguage = function(lang) {
+window.switchLanguage = function(lang, notify = false) {
   if (!translations[lang]) lang = 'fr';
   AppState.lang = lang;
   localStorage.setItem('lang', lang);
+  document.documentElement.lang = lang;
 
-  const dict = translations[lang];
+  const dict = translations[lang] || translations.fr;
 
   // 1. Traduire tous les éléments avec data-i18n
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (dict[key]) {
-      if (el.tagName === 'INPUT' && el.getAttribute('placeholder')) {
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
         el.placeholder = dict[key];
       } else if (el.tagName === 'OPTION') {
         el.textContent = dict[key];
       } else {
         el.textContent = dict[key];
       }
+    }
+  });
+
+  // 1.b Traduire les placeholders dédiés
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (dict[key]) {
+      el.placeholder = dict[key];
     }
   });
 
@@ -1119,12 +1222,49 @@ window.switchLanguage = function(lang) {
     else { lpBtnEn.classList.add('active'); lpBtnFr.classList.remove('active'); }
   }
 
-  // 3. Mettre à jour les vues dynamiques
-  renderClientDirectory();
-  renderPaymentsTable();
-  renderAccountingKPIs();
-  renderAccountingJournal();
-  renderCreditKPIs();
+  // 3. Mettre à jour toutes les vues dynamiques
+  try {
+    if (typeof renderClientDirectory === 'function') renderClientDirectory();
+    if (typeof renderPaymentsTable === 'function') renderPaymentsTable();
+    if (typeof renderAccountingKPIs === 'function') renderAccountingKPIs();
+    if (typeof renderAccountingJournal === 'function') renderAccountingJournal();
+    if (typeof renderCreditKPIs === 'function') renderCreditKPIs();
+    if (typeof renderDashboardDebtsTable === 'function') renderDashboardDebtsTable();
+    if (typeof renderDailySalesBook === 'function') renderDailySalesBook();
+    if (typeof renderCashiersList === 'function') renderCashiersList();
+    if (typeof populateCreditClientSelect === 'function') populateCreditClientSelect();
+    if (typeof window.renderCreditProductsTable === 'function') window.renderCreditProductsTable();
+  } catch(e) {
+    console.warn('[switchLanguage] Error updating views:', e);
+  }
+
+  // 4. Mettre à jour les titres de page dynamiques
+  const titleEl = document.getElementById('page-desktop-title');
+  if (titleEl && typeof pageTitles !== 'undefined') {
+    const activeMenu = AppState.activeMenu || 'menu-2';
+    const pageTitlesMap = {
+      'menu-2': lang === 'en' ? 'Dashboard' : 'Tableau de Bord',
+      'menu-salesbook': lang === 'en' ? 'Daily Salesbook (24h)' : 'Cahier des Ventes (24h)',
+      'menu-accounting': lang === 'en' ? 'Cash & Expenses' : 'Caisse & Dépenses',
+      'menu-4-directory': lang === 'en' ? 'Clients & Debts' : 'Clients & Dettes',
+      'menu-6': lang === 'en' ? 'Payments & Receipts' : 'Encaisser & Reçus',
+      'menu-8': lang === 'en' ? 'WhatsApp Reminders' : 'Rappels WhatsApp',
+      'menu-settings': lang === 'en' ? 'Settings' : 'Paramètres',
+      'menu-subscription': lang === 'en' ? 'Subscription & PRO Licenses' : 'Abonnement & Licences PRO',
+      'menu-5': lang === 'en' ? 'Record Credit Sale' : 'Vente à Crédit'
+    };
+    if (pageTitlesMap[activeMenu]) titleEl.textContent = pageTitlesMap[activeMenu];
+  }
+
+  const headerBtn = document.getElementById('top-header-btn');
+  if (headerBtn) {
+    const activeMenu = AppState.activeMenu || 'menu-2';
+    if (activeMenu === 'menu-accounting') {
+      headerBtn.innerHTML = '<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>' + (lang === 'en' ? '+ New Entry' : '+ Noter Dépense') + '</span>';
+    } else {
+      headerBtn.innerHTML = '<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>' + (lang === 'en' ? '+ New Credit' : '+ Noter un Crédit') + '</span>';
+    }
+  }
 
   if (window.lucide) lucide.createIcons();
 };
@@ -1392,17 +1532,15 @@ function switchCountry(code, notify = true) {
   AppState.countryConfig = config;
   localStorage.setItem('country', code);
 
-  // Basculement automatique et intelligent de la langue officielle du pays
-  if (config.lang && config.lang !== AppState.lang) {
-    window.switchLanguage(config.lang);
-  }
+  // Synchronisation de la devise officielle du pays
+  AppState.currency = config.currency;
+  localStorage.setItem('appCurrency', config.currency);
+  const currSelect = document.getElementById('settings-currency-dropdown');
+  if (currSelect) currSelect.value = config.currency;
 
-  // Sync default currency with country unless user chose a custom one
-  if (!localStorage.getItem('appCurrency')) {
-    AppState.currency = config.currency;
-    const currSelect = document.getElementById('settings-currency-dropdown');
-    if (currSelect) currSelect.value = config.currency;
-  }
+  // BASCULEMENT SYSTÉMATIQUE ET INSTANTANÉ DE LA LANGUE NATIONALE DU PAYS
+  const targetLang = config.lang || 'fr';
+  window.switchLanguage(targetLang, false);
 
   const sel1 = document.getElementById('country-select');
   const sel2 = document.getElementById('settings-country-dropdown');
@@ -1426,11 +1564,16 @@ function switchCountry(code, notify = true) {
   renderCreditKPIs();
   renderClientDirectory();
   renderPaymentsTable();
-  updateCountryPaymentMethods(code);
+  if (typeof updateCountryPaymentMethods === 'function') updateCountryPaymentMethods(code);
   if (typeof renderDailySalesBook === 'function') renderDailySalesBook();
 
-  const countryDisplayName = AppState.lang === 'en' ? (config.nameEn || config.nameFr) : config.nameFr;
-  if (notify) showToast(`${AppState.lang === 'en' ? 'Selected country' : 'Pays sélectionné'} : ${config.flag} ${countryDisplayName} (${config.currency})`);
+  const countryDisplayName = targetLang === 'en' ? (config.nameEn || config.nameFr) : config.nameFr;
+  if (notify) {
+    const msg = targetLang === 'en'
+      ? `Country updated to ${config.flag} ${countryDisplayName} (${config.currency}) — English activated`
+      : `Pays sélectionné : ${config.flag} ${countryDisplayName} (${config.currency}) — Français activé`;
+    showToast(msg);
+  }
 }
 window.switchCountry = switchCountry;
 
@@ -3159,7 +3302,7 @@ window.sendWhatsAppReminder = function(name, phone, amount) {
 
   const cleanPhone = sanitizePhoneNumber(phone);
   if (!cleanPhone || cleanPhone.replace(/\D/g, '').length < 8) {
-    showToast("Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.");
+    showToast(AppState.lang === 'en' ? "Please provide a valid WhatsApp phone number for this customer." : "Veuillez renseigner un numéro WhatsApp valide pour ce client avant d'envoyer le rappel.");
     return;
   }
   const client = AppState.clients.find(c => c.name === name || c.phone === phone);
@@ -3172,28 +3315,34 @@ window.sendWhatsAppReminder = function(name, phone, amount) {
     itemsSummary = txsToUse.map(t => `• ${t.desc} (${formatCurrency(t.amount)})`).join('\n');
   }
 
-  const template = localStorage.getItem('whatsappTemplate') || 
-    (AppState.lang === 'en' ? 
-      "Bonjour {nom_client}, nous vous rappelons amicalement que votre solde de {montant} chez {nom_commerce} est à régler. Merci pour votre confiance !" : 
-      "Bonjour {nom_client}, nous vous rappelons amicalement que votre solde de {montant} chez {nom_commerce} est à régler. Merci pour votre confiance !");
+  const defaultTemplateFr = "Bonjour {nom_client}, nous vous rappelons amicalement que votre solde de {montant} chez {nom_commerce} est à régler. Merci pour votre confiance !";
+  const defaultTemplateEn = "Hello {nom_client}, this is a friendly reminder that your outstanding balance of {montant} at {nom_commerce} is due. Thank you for your continued trust!";
+
+  const template = (AppState.lang === 'en')
+    ? (localStorage.getItem('whatsappTemplate_en') || defaultTemplateEn)
+    : (localStorage.getItem('whatsappTemplate_fr') || defaultTemplateFr);
   
   let msg = template
     .replace(/{nom_client}/g, name)
     .replace(/{montant}/g, formatCurrency(amount))
-    .replace(/{nom_commerce}/g, AppState.businessName || 'notre établissement');
+    .replace(/{nom_commerce}/g, AppState.businessName || (AppState.lang === 'en' ? 'our store' : 'notre établissement'));
 
   if (itemsSummary) {
-    msg += `\n\nDétail de vos achats à régler :\n${itemsSummary}`;
+    msg += (AppState.lang === 'en' ? '\n\nDetails of items to settle:\n' : '\n\nDétail de vos achats à régler :\n') + itemsSummary;
   }
 
   if (AppState.businessPhone && AppState.businessPhone.trim().length >= 8) {
-    msg += `\n\nRèglement possible en espèces ou par Mobile Money / Wave au : ${AppState.businessPhone.trim()}`;
+    msg += (AppState.lang === 'en'
+      ? `\n\nPayment accepted via Cash, Mobile Money or Bank Transfer at: ${AppState.businessPhone.trim()}`
+      : `\n\nRèglement possible en espèces ou par Mobile Money / Wave au : ${AppState.businessPhone.trim()}`);
   }
 
   // Ouvre directement WhatsApp avec le numéro de téléphone et le message propre
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
-  showToast(`WhatsApp ouvert avec le détail des achats pour ${name} (+${cleanPhone}).`);
+  showToast(AppState.lang === 'en' 
+    ? `WhatsApp opened with purchase details for ${name} (+${cleanPhone}).`
+    : `WhatsApp ouvert avec le détail des achats pour ${name} (+${cleanPhone}).`);
 };
 
 window.sendSMSReminder = function(name, phone, amount) {
@@ -6376,22 +6525,22 @@ window.renderDailySalesBook = function() {
   const kpiCount = document.getElementById('salesbook-kpi-salescount');
   const kpiItems = document.getElementById('salesbook-kpi-items');
 
-  if (kpiRevenue) kpiRevenue.textContent = `${Number(totalRevenue).toLocaleString('fr-FR')} FCFA`;
-  if (kpiSalesSub) kpiSalesSub.textContent = `${totalSalesCount} vente${totalSalesCount > 1 ? 's' : ''}`;
-  if (kpiCash) kpiCash.textContent = `${Number(totalCash).toLocaleString('fr-FR')} FCFA`;
-  if (kpiCashPct) kpiCashPct.textContent = `${cashPct}% du total`;
-  if (kpiElectronic) kpiElectronic.textContent = `${Number(totalElectronic).toLocaleString('fr-FR')} FCFA`;
-  if (kpiElectronicPct) kpiElectronicPct.textContent = `${elecPct}% du total`;
+  if (kpiRevenue) kpiRevenue.textContent = formatCurrency(totalRevenue);
+  if (kpiSalesSub) kpiSalesSub.textContent = `${totalSalesCount} ${AppState.lang === 'en' ? 'sale' + (totalSalesCount > 1 ? 's' : '') : 'vente' + (totalSalesCount > 1 ? 's' : '')};`;
+  if (kpiCash) kpiCash.textContent = formatCurrency(totalCash);
+  if (kpiCashPct) kpiCashPct.textContent = `${cashPct}% ${AppState.lang === 'en' ? 'of total' : 'du total'};`;
+  if (kpiElectronic) kpiElectronic.textContent = formatCurrency(totalElectronic);
+  if (kpiElectronicPct) kpiElectronicPct.textContent = `${elecPct}% ${AppState.lang === 'en' ? 'of total' : 'du total'};`;
   if (kpiCount) kpiCount.textContent = totalSalesCount.toLocaleString('fr-FR');
-  if (kpiItems) kpiItems.textContent = `Articles vendus : ${totalItems}`;
+  if (kpiItems) kpiItems.textContent = `${AppState.lang === 'en' ? 'Items sold' : 'Articles vendus'} : ${totalItems};`;
 
   // Mise à jour de la barre récapitulative sous le tableau
   const sumCount = document.getElementById('salesbook-sum-count');
   const sumTotal = document.getElementById('salesbook-sum-total');
   const sumClients = document.getElementById('salesbook-sum-clients');
   const sumItems = document.getElementById('salesbook-sum-items');
-  if (sumCount) sumCount.textContent = `${totalSalesCount} vente${totalSalesCount > 1 ? 's' : ''} aujourd'hui`;
-  if (sumTotal) sumTotal.textContent = `${Number(totalRevenue).toLocaleString('fr-FR')} FCFA total`;
+  if (sumCount) sumCount.textContent = `${totalSalesCount} ${AppState.lang === 'en' ? 'sale' + (totalSalesCount > 1 ? 's' : '') + ' today' : 'vente' + (totalSalesCount > 1 ? 's' : '') + ' aujourd\'hui'};`;
+  if (sumTotal) sumTotal.textContent = `${formatCurrency(totalRevenue)} total`;
   if (sumClients) {
     const uniqueClients = new Set(filteredSales.filter(s => s.client && s.client !== '—').map(s => s.client)).size;
     sumClients.textContent = `${uniqueClients} client${uniqueClients > 1 ? 's' : ''} enregistré${uniqueClients > 1 ? 's' : ''}`;
@@ -6465,8 +6614,8 @@ window.renderDailySalesBook = function() {
           <div style="width:48px;height:48px;border-radius:12px;background:#0F294D;border:1px solid #1E3A8A;display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px;color:#38BDF8;">
             <i data-lucide="book-open" style="width:24px;height:24px;"></i>
           </div>
-          <div style="font-size:1rem;font-weight:800;color:#FFFFFF;margin-bottom:4px;">Aucune vente enregistrée pour cette sélection</div>
-          <div style="font-size:0.84rem;color:#8FA0BE;max-width:420px;margin:0 auto;line-height:1.45;">Saisissez directement votre première transaction sur le terminal ci-dessus.</div>
+          <div style="font-size:1rem;font-weight:800;color:#FFFFFF;margin-bottom:4px;">${AppState.lang === 'en' ? 'No sales recorded for this selection' : 'Aucune vente enregistrée pour cette sélection'}</div>
+          <div style="font-size:0.84rem;color:#8FA0BE;max-width:420px;margin:0 auto;line-height:1.45;">${AppState.lang === 'en' ? 'Record your first transaction directly using the terminal above.' : 'Saisissez directement votre première transaction sur le terminal ci-dessus.'}</div>
         </td>
       </tr>
     `;
@@ -6478,7 +6627,7 @@ window.renderDailySalesBook = function() {
       } else if (s.method.includes('Orange') || s.method === 'Mobile Money' || s.method.includes('MoMo') || s.method.includes('Moov')) {
         badgeHtml = `<span style="background:rgba(245,158,11,0.15);border:1px solid #F59E0B;color:#FBBF24;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">📱 ${escapeHTML(s.method)}</span>`;
       } else {
-        badgeHtml = `<span style="background:rgba(16,185,129,0.15);border:1px solid #10B981;color:#10B981;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">💵 Espèces</span>`;
+        badgeHtml = `<span style="background:rgba(16,185,129,0.15);border:1px solid #10B981;color:#10B981;padding:3px 12px;border-radius:99px;font-size:0.75rem;font-weight:700;display:inline-flex;align-items:center;gap:5px;">💵 ${AppState.lang === 'en' ? 'Cash' : 'Espèces'}</span>`;
       }
 
       const isEven = idx % 2 === 0;

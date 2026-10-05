@@ -92,9 +92,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20261005_v17.0_prod" defer></script>
-  <script src="app.js?v=20261005_v17.0_prod" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20261005_v17.0_prod">
+  <script src="dataStore.js?v=20261005_v18.0_prod" defer></script>
+  <script src="app.js?v=20261005_v18.0_prod" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261005_v18.0_prod">
 </head>
 <body class="is-landing-mode">
 
@@ -1167,7 +1167,7 @@
             <img src="logo_3d.png" alt="Logo CréditTrack PRO" style="width:40px;height:40px;object-fit:contain;border-radius:10px;filter:drop-shadow(0 4px 10px rgba(37,99,235,0.45));flex-shrink:0;">
             <div>
               <div class="brand-title" style="font-size:1.05rem;font-weight:900;line-height:1.15;color:#FFFFFF;letter-spacing:-0.3px;">CréditTrack <span style="color:#38BDF8;font-size:0.78rem;">PRO</span></div>
-              <div style="font-size:0.62rem;color:#94A3B8;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Gestion Panafricaine</div>
+              <div data-i18n="panafricanMgmt" style="font-size:0.62rem;color:#94A3B8;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Gestion Panafricaine</div>
             </div>
           </div>
           <!-- Close button on Mobile Sidebar -->
@@ -1213,7 +1213,7 @@
         <button class="nav-link active credit-menu-item" id="nav-menu-2" onclick="switchMenu('menu-2')">
           <div class="nav-link-left">
             <i data-lucide="layout-grid"></i>
-            <span>Tableau de bord</span>
+            <span data-i18n="menuDashboard">Tableau de bord</span>
           </div>
         </button>
 
@@ -1221,7 +1221,7 @@
         <button class="nav-link credit-menu-item" id="nav-menu-salesbook" onclick="switchMenu('menu-salesbook')">
           <div class="nav-link-left">
             <i data-lucide="book-open"></i>
-            <span>Cahier des Ventes (24h)</span>
+            <span data-i18n="menuSalesbook">Cahier des Ventes (24h)</span>
           </div>
         </button>
 
@@ -1229,7 +1229,7 @@
         <button class="nav-link" id="nav-menu-5" onclick="switchMenu('menu-5')">
           <div class="nav-link-left">
             <i data-lucide="credit-card"></i>
-            <span>Ventes à crédit</span>
+            <span data-i18n="menuCreditSales">Ventes à crédit</span>
           </div>
         </button>
 
@@ -1237,7 +1237,7 @@
         <button class="nav-link" id="nav-menu-4-directory" onclick="switchMenu('menu-4-directory')">
           <div class="nav-link-left">
             <i data-lucide="users"></i>
-            <span>Clients &amp; Dettes</span>
+            <span data-i18n="menuClients">Clients &amp; Dettes</span>
           </div>
         </button>
 
@@ -1245,7 +1245,7 @@
         <button class="nav-link" id="nav-menu-6" onclick="switchMenu('menu-6')">
           <div class="nav-link-left">
             <i data-lucide="wallet"></i>
-            <span>Paiements &amp; Reçus</span>
+            <span data-i18n="menuPayments">Paiements &amp; Reçus</span>
           </div>
         </button>
 
@@ -1253,7 +1253,7 @@
         <button class="nav-link" id="nav-menu-8" onclick="switchMenu('menu-8')">
           <div class="nav-link-left">
             <i data-lucide="bell-ring"></i>
-            <span>Rappels WhatsApp</span>
+            <span data-i18n="menuReminders">Rappels WhatsApp</span>
           </div>
         </button>
 
@@ -1261,7 +1261,7 @@
         <button class="nav-link" id="nav-menu-accounting" onclick="switchMenu('menu-accounting')">
           <div class="nav-link-left">
             <i data-lucide="trending-up"></i>
-            <span>Caisse &amp; Dépenses</span>
+            <span data-i18n="menuAccounting">Caisse &amp; Dépenses</span>
           </div>
         </button>
         
@@ -1269,7 +1269,7 @@
         <button class="nav-link" id="nav-menu-subscription" onclick="switchMenu('menu-subscription')">
           <div class="nav-link-left">
             <i data-lucide="crown" style="color:#F59E0B;"></i>
-            <span>Abonnements PRO</span>
+            <span data-i18n="menuSubscription">Abonnements PRO</span>
           </div>
           <span style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#0F172A;font-weight:900;font-size:0.65rem;padding:2px 7px;border-radius:12px;">PRO</span>
         </button>
@@ -1278,7 +1278,7 @@
         <button class="nav-link" id="nav-menu-settings" onclick="switchMenu('menu-settings')">
           <div class="nav-link-left">
             <i data-lucide="settings"></i>
-            <span>Paramètres</span>
+            <span data-i18n="menuSettings">Paramètres</span>
           </div>
         </button>
 
@@ -1286,7 +1286,7 @@
         <button class="nav-link" id="nav-menu-landing" onclick="openPublicLanding()" style="margin-top:4px;border-top:1px solid rgba(255,255,255,0.08);padding-top:10px;">
           <div class="nav-link-left">
             <i data-lucide="external-link" style="color:#60A5FA;"></i>
-            <span style="color:#93C5FD;">Page d'Accueil</span>
+            <span data-i18n="menuHomeSite" style="color:#93C5FD;">Page d'Accueil</span>
           </div>
         </button>
       </nav>
@@ -3045,12 +3045,8 @@
           <!-- EN-TÊTE : Titre "Cahier des Ventes du Jour", Date & Horloge Digitale Bleue Ciel -->
           <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:18px;margin-bottom:20px;">
             <div>
-              <h1 style="font-size:2rem;font-weight:800;margin:0 0 6px 0;color:#FFFFFF;letter-spacing:-0.5px;font-family:'Outfit',-apple-system,sans-serif;">
-                Cahier des Ventes du Jour
-              </h1>
-              <div style="font-size:0.88rem;color:#8FA0BE;margin-bottom:14px;">
-                Suivez vos ventes en temps réel et gérez votre activité facilement.
-              </div>
+              <h1 style="font-size:2rem;font-weight:800;margin:0 0 6px 0;color:#FFFFFF;letter-spacing:-0.5px;font-family:'Outfit',-apple-system,sans-serif;" data-i18n="sbTitle">Cahier des Ventes du Jour</h1>
+              <div style="font-size:0.88rem;color:#8FA0BE;margin-bottom:14px;" data-i18n="sbSubtitle">Suivez vos ventes en temps réel et gérez votre activité facilement.</div>
 
               <!-- Ligne Contrôles Date : Sélecteur sombre, Bouton Aujourd'hui, Badge 24h Actif (LIVE) -->
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:0.85rem;">
@@ -3059,9 +3055,7 @@
                   <input type="date" id="salesbook-date-picker" onchange="renderDailySalesBook()" style="border:none;outline:none;font-weight:700;font-size:0.84rem;color:#FFFFFF;background:transparent;cursor:pointer;color-scheme:dark;">
                   <i data-lucide="chevron-down" style="width:13px;height:13px;color:#8FA0BE;"></i>
                 </div>
-                <button type="button" onclick="setSalesbookTodayDate()" style="font-weight:700;padding:7px 16px;font-size:0.82rem;background:#0D2144;color:#60A5FA;border:1px solid #1E3A8A;border-radius:10px;cursor:pointer;transition:all 0.2s;">
-                  Aujourd'hui
-                </button>
+                <button type="button" onclick="setSalesbookTodayDate()" style="font-weight:700;padding:7px 16px;font-size:0.82rem;background:#0D2144;color:#60A5FA;border:1px solid #1E3A8A;border-radius:10px;cursor:pointer;transition:all 0.2s;" data-i18n="sbToday">Aujourd'hui</button>
                 <span style="font-size:0.78rem;padding:5px 12px;border-radius:999px;display:inline-flex;align-items:center;gap:6px;font-weight:700;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.35);color:#10B981;">
                   <span class="sb-live-dot-green"></span>
                   24h Actif (LIVE)
@@ -3082,19 +3076,19 @@
           <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px;">
             <button type="button" class="sb-action-btn-dark" onclick="openSalesbookSettingsModal()">
               <i data-lucide="settings" style="width:15px;height:15px;color:#8FA0BE;"></i>
-              <span>Paramètres</span>
+              <span data-i18n="sbBtnSettings">Paramètres</span>
             </button>
             <button type="button" class="sb-action-btn-dark" onclick="exportSalesbookCSV()">
               <i data-lucide="bar-chart-2" style="width:15px;height:15px;color:#8FA0BE;"></i>
-              <span>Rapports</span>
+              <span data-i18n="sbBtnReports">Rapports</span>
             </button>
             <button type="button" class="sb-action-btn-primary" onclick="openDailyClosingModal()">
               <i data-lucide="send" style="width:15px;height:15px;"></i>
-              <span>Clôturer &amp; Envoyer au Patron</span>
+              <span data-i18n="sbBtnCloseDay">Clôturer &amp; Envoyer au Patron</span>
             </button>
             <button type="button" class="sb-action-btn-dark" id="sb-tab-history-btn" onclick="switchSalesbookTab('history')">
               <i data-lucide="folder" style="width:15px;height:15px;color:#8FA0BE;"></i>
-              <span>Historique des Ventes &amp; Archives</span>
+              <span data-i18n="sbBtnHistory">Historique des Ventes &amp; Archives</span>
             </button>
           </div>
 
@@ -3213,12 +3207,8 @@
                     <i data-lucide="terminal" style="width:16px;height:16px;"></i>
                   </div>
                   <div>
-                    <div style="font-size:0.96rem;font-weight:800;color:#FFFFFF;">
-                      POS Quick-Entry Terminal
-                    </div>
-                    <div style="font-size:0.76rem;color:#8FA0BE;">
-                      Vendez rapidement avec une interface simple et intuitive.
-                    </div>
+                    <div style="font-size:0.96rem;font-weight:800;color:#FFFFFF;" data-i18n="sbTerminalTitle">POS Quick-Entry Terminal</div>
+                    <div style="font-size:0.76rem;color:#8FA0BE;" data-i18n="sbTerminalSub">Vendez rapidement avec une interface simple et intuitive.</div>
                   </div>
                 </div>
                 <span style="font-size:0.75rem;padding:4px 10px;border-radius:99px;background:rgba(16,185,129,0.12);border:1px solid #10B981;color:#10B981;font-weight:700;display:inline-flex;align-items:center;gap:5px;">
@@ -3238,9 +3228,7 @@
                   <i data-lucide="mic" style="width:26px;height:26px;"></i>
                 </button>
                 <div style="flex:1;">
-                  <label for="inline-row-item" style="display:block;font-size:0.76rem;font-weight:700;color:#8FA0BE;margin-bottom:6px;">
-                    Article Description
-                  </label>
+                  <label for="inline-row-item" style="display:block;font-size:0.76rem;font-weight:700;color:#8FA0BE;margin-bottom:6px;" data-i18n="sbArticleLabel">Article Description</label>
                   <input 
                     type="text" 
                     id="inline-row-item" 
@@ -3258,9 +3246,7 @@
                 
                 <!-- Quantité avec sélecteur - 1 + -->
                 <div>
-                  <label for="inline-row-qty" style="display:block;font-size:0.76rem;font-weight:700;color:#8FA0BE;margin-bottom:6px;">
-                    Quantité
-                  </label>
+                  <label for="inline-row-qty" style="display:block;font-size:0.76rem;font-weight:700;color:#8FA0BE;margin-bottom:6px;" data-i18n="sbQtyLabel">Quantité</label>
                   <div style="display:flex;align-items:center;justify-content:space-between;background:#070D1B;border:1px solid #1C2B45;border-radius:10px;height:44px;padding:0 8px;box-sizing:border-box;">
                     <button type="button" onclick="salesbookChangeQty(-1)" style="background:transparent;border:none;color:#8FA0BE;font-size:1.2rem;font-weight:700;cursor:pointer;padding:0 6px;transition:color 0.2s;" onmouseover="this.style.color='#FFFFFF'" onmouseout="this.style.color='#8FA0BE'">
                       –
@@ -3445,14 +3431,14 @@
               <table class="sb-table-exact">
                 <thead class="sb-thead-exact">
                   <tr>
-                    <th style="width:80px;text-align:left;">HEURE</th>
-                    <th style="min-width:260px;text-align:left;">ARTICLE / DÉSIGNATION VENDUE</th>
-                    <th style="width:60px;text-align:center;">QTÉ</th>
-                    <th style="width:130px;text-align:right;">PRIX UNIT. (FCFA)</th>
-                    <th style="width:130px;text-align:right;">TOTAL (FCFA)</th>
-                    <th style="width:130px;text-align:center;">PAIEMENT</th>
-                    <th style="width:150px;text-align:left;">CLIENT (OPTIONNEL)</th>
-                    <th style="width:80px;text-align:center;">ACTION</th>
+                    <th style="width:80px;text-align:left;" data-i18n="thTime">HEURE</th>
+                    <th style="min-width:260px;text-align:left;" data-i18n="thItem">ARTICLE / DÉSIGNATION VENDUE</th>
+                    <th style="width:60px;text-align:center;" data-i18n="thQty">QTÉ</th>
+                    <th style="width:130px;text-align:right;" data-i18n="thUnitPrice">PRIX UNIT.</th>
+                    <th style="width:130px;text-align:right;" data-i18n="thTotal">TOTAL</th>
+                    <th style="width:130px;text-align:center;" data-i18n="thPayment">PAIEMENT</th>
+                    <th style="width:150px;text-align:left;" data-i18n="thClient">CLIENT (OPTIONNEL)</th>
+                    <th style="width:80px;text-align:center;" data-i18n="thAction">ACTION</th>
                   </tr>
                 </thead>
                 <tbody id="daily-sales-table-body">
