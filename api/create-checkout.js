@@ -29,15 +29,20 @@ export default async function handler(req, res) {
   try {
     const { amount, planTier, customerEmail, customerName, customerPhone, country, returnUrl } = req.body || {};
 
-    if (!amount || Number(amount) <= 0) {
-      return res.status(400).json({ error: 'Montant invalide.' });
+    const numAmount = Number(amount);
+    if (!amount || isNaN(numAmount) || !Number.isFinite(numAmount) || numAmount <= 0 || numAmount > 10000000) {
+      return res.status(400).json({ error: 'Montant invalide ou hors limites autorisées (1 - 10 000 000 FCFA).' });
     }
 
     // 2. Validation du format email si fourni
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (customerEmail && !emailRegex.test(customerEmail)) {
+    if (customerEmail && (!emailRegex.test(customerEmail) || customerEmail.length > 120)) {
       return res.status(400).json({ error: 'Adresse email client invalide.' });
     }
+
+    // Assainissement strict contre injection XSS et normalisation
+    const cleanCustomerName = (typeof customerName === 'string' ? customerName.slice(0, 100).replace(/[<>]/g, '').trim() : '') || 'Commerçant CreditTrack';
+    const cleanCustomerPhone = (typeof customerPhone === 'string' ? customerPhone.slice(0, 25).replace(/[^\d+]/g, '').trim() : '');
 
     // 3. Récupération stricte de la clé secrète via variable d'environnement (zéro clé en dur)
     const rawApiKey = process.env.SASPAY_SECRET_KEY;
@@ -76,13 +81,13 @@ export default async function handler(req, res) {
       currency: 'XOF',
       description: `Abonnement CreditTrack - Forfait ${planLabel}`,
       customer_email: customerEmail || 'client@credittrack.pro',
-      customer_name: customerName || 'Commerçant CreditTrack',
-      customer_phone: customerPhone || '',
+      customer_name: cleanCustomerName,
+      customer_phone: cleanCustomerPhone,
       return_url: finalReturnUrl,
       metadata: {
         plan_tier: planTier || 'pro_monthly',
         customer_email: customerEmail || '',
-        customer_name: customerName || '',
+        customer_name: cleanCustomerName,
         app_name: 'CreditTrack PRO'
       }
     };
@@ -147,8 +152,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('[API Checkout Exception]:', error);
     return res.status(500).json({
-      error: 'Erreur interne du serveur lors de l’initiation du paiement.',
-      details: error.message
+      error: 'Erreur interne du serveur lors de l’initiation du paiement.'
     });
   }
 }
