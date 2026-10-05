@@ -92,9 +92,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20261005_v18.0_prod" defer></script>
-  <script src="app.js?v=20261005_v18.0_prod" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20261005_v18.0_prod">
+  <script src="dataStore.js?v=20261005_v19.0_prod" defer></script>
+  <script src="app.js?v=20261005_v19.0_prod" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261005_v19.0_prod">
 </head>
 <body class="is-landing-mode">
 
@@ -1174,7 +1174,7 @@
           <button class="sidebar-mobile-close" onclick="toggleMobileSidebar()">✕</button>
         </div>
 
-        <!-- Controls: Pays + Langue + Mode -->
+        <!-- Controls: Pays + Langue (Localisation Automatique) -->
         <div class="sidebar-controls-card">
           <div class="sidebar-control-row">
             <i data-lucide="globe" style="width:15px;height:15px;color:#38BDF8;flex-shrink:0;"></i>
@@ -1183,28 +1183,13 @@
             </select>
           </div>
 
-          <div style="display:grid;grid-template-columns:1fr 1.35fr;gap:6px;">
-            <div class="sidebar-control-row" style="padding:5px 8px;">
-              <i data-lucide="languages" style="width:13px;height:13px;color:#38BDF8;flex-shrink:0;"></i>
-              <select id="lang-select" onchange="switchLanguage(this.value)" class="sidebar-select" title="Langue">
-                <option value="fr">🇫🇷 FR</option>
-                <option value="en">🇬🇧 EN</option>
-              </select>
-            </div>
-
-            <div class="sidebar-control-row" style="padding:5px 8px;">
-              <i data-lucide="layers" style="width:13px;height:13px;color:#38BDF8;flex-shrink:0;"></i>
-              <select id="mode-select" onchange="switchAppMode(this.value)" class="sidebar-select" title="Mode de travail">
-                <option value="credit" data-i18n="modeCredit">Crédit</option>
-                <option value="accounting" data-i18n="modeAccounting">Caisse / Compta</option>
-              </select>
-            </div>
+          <div class="sidebar-control-row">
+            <i data-lucide="languages" style="width:14px;height:14px;color:#38BDF8;flex-shrink:0;"></i>
+            <select id="lang-select" onchange="switchLanguage(this.value, true)" class="sidebar-select" title="Langue">
+              <option value="fr">🇫🇷 Français (FR)</option>
+              <option value="en">🇬🇧 English (EN)</option>
+            </select>
           </div>
-        </div>
-
-        <!-- Mode Indicator Banner -->
-        <div id="banner" class="banner" style="width:100%;padding:8px 10px;border-radius:8px;font-size:0.75rem;font-weight:700;text-align:center;color:#fff;background:#2563EB;">
-          <span id="banner-text" data-i18n="bannerCredit">Mode Crédits &amp; Clients actif</span>
         </div>
       </div>
 
@@ -1254,14 +1239,6 @@
           <div class="nav-link-left">
             <i data-lucide="bell-ring"></i>
             <span data-i18n="menuReminders">Rappels WhatsApp</span>
-          </div>
-        </button>
-
-        <!-- 6. Caisse & Rapports -->
-        <button class="nav-link" id="nav-menu-accounting" onclick="switchMenu('menu-accounting')">
-          <div class="nav-link-left">
-            <i data-lucide="trending-up"></i>
-            <span data-i18n="menuAccounting">Caisse &amp; Dépenses</span>
           </div>
         </button>
         

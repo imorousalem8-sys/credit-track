@@ -1462,15 +1462,13 @@ function restoreSavedState() {
   }
 
   const savedCountry = localStorage.getItem('country') || 'CI';
-  const savedMode = localStorage.getItem('mode') || 'credit';
+  const savedMode = 'credit'; localStorage.setItem('mode', 'credit');
 
   const countrySelect = document.getElementById('country-select');
   if (countrySelect) countrySelect.value = savedCountry;
   switchCountry(savedCountry, false);
 
-  const modeSelect = document.getElementById('mode-select');
-  if (modeSelect) modeSelect.value = savedMode;
-  switchAppMode(savedMode, false);
+  switchAppMode('credit', false);
 
   // Valeurs dans Paramètres
   const compInp = document.getElementById('setting-company-input');
@@ -1597,39 +1595,13 @@ function switchCurrency(currCode, notify = true) {
 window.switchCurrency = switchCurrency;
 
 
-function switchAppMode(mode, notify = true) {
-  AppState.mode = mode;
-  localStorage.setItem('mode', mode);
-
-  const banner = document.getElementById('banner');
-  const bannerText = document.getElementById('banner-text');
+function switchAppMode(mode, notify = false) {
+  AppState.mode = 'credit';
+  localStorage.setItem('mode', 'credit');
   const creditItems = document.querySelectorAll('.credit-menu-item');
-  const accItems = document.querySelectorAll('.accounting-menu-item');
-
-  if (mode === 'accounting') {
-    if (banner) {
-      banner.style.background = '#10B981';
-      if (bannerText) bannerText.textContent = AppState.lang === 'en' ? 'Cash & Accounting Mode Active' : 'Mode Caisse & Compta actif';
-    }
-    creditItems.forEach(el => el.style.display = 'none');
-    accItems.forEach(el => el.style.display = 'flex');
-    switchMenu('menu-accounting');
-  } else {
-    if (banner) {
-      banner.style.background = '#2563EB';
-      if (bannerText) bannerText.textContent = AppState.lang === 'en' ? 'Credits & Clients Mode Active' : 'Mode Crédits & Clients actif';
-    }
-    creditItems.forEach(el => el.style.display = 'flex');
-    accItems.forEach(el => el.style.display = 'none');
-    switchMenu('menu-2');
-  }
-
-  if (notify) {
-    showToast(mode === 'accounting' ? 
-      (AppState.lang === 'en' ? 'Switched to Cash & Expenses Mode' : 'Basculé en Mode Caisse & Compta') : 
-      (AppState.lang === 'en' ? 'Switched to Credit Sales Mode' : 'Basculé en Mode Ventes à Crédit'));
-  }
+  creditItems.forEach(el => el.style.display = 'flex');
 }
+window.switchAppMode = switchAppMode;
 
 // --------------------------------------------------------------------------
 // 7. NAVIGATION & GESTION DE LA SIDEBAR MOBILE
@@ -1805,13 +1777,8 @@ window.switchMenu = function(menuId) {
 
   const headerBtn = document.getElementById('top-header-btn');
   if (headerBtn) {
-    if (menuId === 'menu-accounting') {
-      headerBtn.setAttribute('onclick', "openModal('modal-accounting-entry')");
-      headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Entry' : '+ Noter Dépense'}</span>`;
-    } else {
-      headerBtn.setAttribute('onclick', "switchMenu('menu-5')");
-      headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Credit' : '+ Noter un Crédit'}</span>`;
-    }
+    headerBtn.setAttribute('onclick', "switchMenu('menu-5')");
+    headerBtn.innerHTML = `<i data-lucide="plus-circle" style="width:16px;height:16px;"></i><span>${AppState.lang === 'en' ? '+ New Credit' : '+ Noter un Crédit'}</span>`;
   }
 
   window.scrollTo(0, 0);
