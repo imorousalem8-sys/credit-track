@@ -40,12 +40,19 @@ export default async function handler(req, res) {
     }
 
     // 3. Récupération stricte de la clé secrète via variable d'environnement (zéro clé en dur)
-    const apiKey = process.env.SASPAY_SECRET_KEY;
-    if (!apiKey) {
+    const rawApiKey = process.env.SASPAY_SECRET_KEY;
+    if (!rawApiKey) {
       console.error('[SasPay Security Alert] SASPAY_SECRET_KEY manquante dans process.env.');
       return res.status(500).json({
         error: 'Configuration serveur incomplète. La clé secrète SasPay n\'est pas configurée.'
       });
+    }
+
+    // Assainissement défensif (suppression des retours à la ligne, espaces et doublons accidentels de collage)
+    let apiKey = rawApiKey.trim();
+    if (apiKey.includes('sk_live_')) {
+      const lastIdx = apiKey.lastIndexOf('sk_live_');
+      apiKey = apiKey.substring(lastIdx).split(/[\r\n\s]+/)[0];
     }
 
     const formattedAmount = Number(amount).toFixed(2);
