@@ -5240,3 +5240,346 @@ body, html {
 #modal-client-history-body tr:hover td {
   background-color: rgba(255, 255, 255, 0.04) !important;
 }
+
+
+/* ============================================================
+   TUTORIEL CINÉMA RESPONSIVE : CAISSIER & SÉCURITÉ PATRON
+   ============================================================ */
+.tut-cinema-wrapper {
+  position: relative;
+  width: 100%;
+  background: #000000;
+  overflow: hidden;
+}
+
+.tut-cinema-screen {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #000000;
+  overflow: hidden;
+}
+
+.tut-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.85) 100%), linear-gradient(to bottom, rgba(5,9,20,0.3) 0%, transparent 30%, transparent 60%, rgba(5,9,20,0.95) 100%);
+  pointer-events: none;
+}
+
+.tut-narrator-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: rgba(7,13,27,0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid #1C2B45;
+  border-radius: 8px;
+  padding: 5px 10px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  z-index: 10;
+}
+
+.tut-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #10B981;
+  box-shadow: 0 0 8px #10B981;
+  display: inline-block;
+}
+
+.tut-center-play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: rgba(0,102,255,0.9);
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(0,102,255,0.8);
+  transition: all 0.2s;
+  z-index: 20;
+}
+
+.tut-subtitles-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 20px;
+  background: linear-gradient(to top, rgba(4,8,18,0.98) 0%, rgba(4,8,18,0.75) 75%, transparent 100%);
+  z-index: 15;
+}
+
+#tut-subtitles {
+  font-size: 1rem;
+  line-height: 1.4;
+  font-weight: 700;
+  color: #FFFFFF;
+  text-align: center;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.9);
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Carte Flottante Desktop (Top Right Overlay) */
+.tut-floating-card {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 310px;
+  max-width: calc(100% - 28px);
+  background: rgba(13,22,39,0.92);
+  backdrop-filter: blur(12px);
+  border: 1px solid #1E3A8A;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.8);
+  z-index: 11;
+  display: none;
+}
+
+/* Barre de Contrôles & Puces */
+.tut-controls-bar {
+  background: #070D1B;
+  padding: 12px 16px;
+  border-top: 1px solid #1C2B45;
+}
+
+.tut-progress-track {
+  position: relative;
+  width: 100%;
+  height: 6px;
+  background: #142138;
+  border-radius: 99px;
+  cursor: pointer;
+  margin-bottom: 12px;
+}
+
+.tut-progress-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  background: linear-gradient(90deg, #0066FF, #00F5FF);
+  border-radius: 99px;
+  transition: width 0.25s linear;
+}
+
+.tut-controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tut-playback-btns {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tut-play-btn {
+  background: #0066FF;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-weight: 800;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.tut-nav-btn {
+  background: #0D1627;
+  border: 1px solid #1C2B45;
+  color: #8FA0BE;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.tut-nav-btn-next {
+  color: #FFFFFF;
+}
+
+.tut-pills-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+}
+
+.tut-pills-row .tut-step-pill {
+  flex-shrink: 0;
+  background: #0D1627;
+  border: 1px solid #1C2B45;
+  color: #8FA0BE;
+  padding: 5px 9px;
+  border-radius: 7px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tut-pills-row .tut-step-pill.active {
+  background: #0F294D;
+  border: 1px solid #00F5FF;
+  color: #00F5FF;
+}
+
+.tut-btn-create-cashier {
+  background: #10B981;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 900;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(16,185,129,0.3);
+}
+
+/* GRILLES & TABLEAUX RESPONSIVES GLOBAUX */
+.sb-sum-counters-grid {
+  background: #0A1120;
+  border-top: 1px solid #1C2B45;
+  padding: 12px 20px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  font-size: 0.8rem;
+}
+
+/* ADAPTATION SPÉCIFIQUE SMARTPHONES & REDMI (< 768px) */
+@media (max-width: 768px) {
+  #modal-cashier-tutorial .modal-card {
+    max-height: 94vh !important;
+    overflow-y: auto !important;
+    border-radius: 16px !important;
+    padding: 0 !important;
+    width: 95vw !important;
+    max-width: 95vw !important;
+  }
+
+  .tut-cinema-screen {
+    aspect-ratio: 16/10 !important;
+    min-height: 210px !important;
+    max-height: 250px !important;
+  }
+
+  /* Sur mobile, la carte d'information se place SOUS la vidéo pour ne JAMAIS la masquer */
+  .tut-floating-card {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    border-top: 1px solid #1C2B45 !important;
+    border-bottom: 1px solid #1C2B45 !important;
+    background: #08101E !important;
+    padding: 10px 14px !important;
+    box-shadow: none !important;
+  }
+
+  .tut-subtitles-bar {
+    padding: 8px 12px !important;
+  }
+
+  #tut-subtitles {
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
+    min-height: 36px !important;
+  }
+
+  .tut-narrator-badge {
+    top: 8px !important;
+    left: 8px !important;
+    padding: 4px 8px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .tut-center-play-btn {
+    width: 54px !important;
+    height: 54px !important;
+  }
+  .tut-center-play-btn svg, .tut-center-play-btn i {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .tut-controls-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .tut-playback-btns {
+    justify-content: space-between !important;
+    width: 100% !important;
+  }
+
+  .tut-pills-row {
+    width: 100% !important;
+    justify-content: flex-start !important;
+  }
+
+  .tut-action-wrap {
+    width: 100% !important;
+  }
+
+  .tut-btn-create-cashier {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .sb-sum-counters-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    padding: 12px 14px !important;
+  }
+
+  .sb-terminal-row-2col {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .sb-terminal-validate-btn {
+    width: 100% !important;
+    justify-content: center !important;
+    margin-top: 6px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sb-sum-counters-grid {
+    grid-template-columns: 1fr !important;
+  }
+}

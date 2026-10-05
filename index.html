@@ -66,7 +66,7 @@
 
     // SYNCHRONISATION & PURGE FORCÉE DU CACHE & DES DONNÉES SAAS RÉSIDUELLES (MOBILE / PWA / DESKTOP)
     (function() {
-      const CURRENT_BUILD = "20261005_v16.0_prod";
+      const CURRENT_BUILD = "20261005_v21.0_prod";
       const lastBuild = localStorage.getItem('ct_last_build');
       if (lastBuild !== CURRENT_BUILD) {
         if ('caches' in window) {
@@ -92,9 +92,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20261005_v20.0_prod" defer></script>
-  <script src="app.js?v=20261005_v20.0_prod" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20261005_v20.0_prod">
+  <script src="dataStore.js?v=20261005_v21.0_prod" defer></script>
+  <script src="app.js?v=20261005_v21.0_prod" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261005_v21.0_prod">
 </head>
 <body class="is-landing-mode">
 
@@ -2578,8 +2578,8 @@
                   <span>Articles de la vente à crédit</span>
                 </div>
 
-                <div style="margin-bottom:12px;border:1px solid #1C2B45;border-radius:12px;overflow:hidden;background:#0D1627;">
-                  <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+                <div class="table-responsive" style="margin-bottom:12px;border:1px solid #1C2B45;border-radius:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;background:#0D1627;">
+                  <table style="width:100%;border-collapse:collapse;font-size:0.88rem;min-width:440px;">
                     <thead style="background:#0A1120;border-bottom:1px solid #1C2B45;">
                       <tr style="color:#8FA0BE;">
                         <th style="text-align:left;padding:12px 14px;font-weight:800;font-size:0.74rem;width:40%;text-transform:uppercase;letter-spacing:0.5px;">Article</th>
@@ -3219,7 +3219,7 @@
               </div>
 
               <!-- Ligne 2 : Quantité (- 1 +) & Prix Unitaire (FCFA) -->
-              <div style="display:grid;grid-template-columns:180px 1fr;gap:14px;margin-bottom:14px;">
+              <div class="sb-terminal-row-2col" style="display:grid;grid-template-columns:180px 1fr;gap:14px;margin-bottom:14px;">
                 
                 <!-- Quantité avec sélecteur - 1 + -->
                 <div>
@@ -3269,7 +3269,7 @@
               </div>
 
               <!-- Ligne 3 : Mode de paiement & Client (optionnel) -->
-              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+              <div class="sb-terminal-row-2col" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
                 
                 <!-- Sélecteur de Paiement -->
                 <div>
@@ -3318,7 +3318,7 @@
                 
                 <button 
                   type="button" 
-                  id="salesbook-validate-btn"
+                  id="salesbook-validate-btn" class="sb-terminal-validate-btn"
                   onclick="submitSalesbookSale('inline_row')" 
                   title="Enregistrer cette vente (Entrée)"
                   style="background:#0066FF;border:none;border-radius:10px;padding:12px 28px;color:#FFFFFF;font-weight:800;font-size:0.96rem;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 4px 14px rgba(0,102,255,0.4);transition:all 0.2s;"
@@ -3420,7 +3420,7 @@
             </div>
 
             <!-- Bandeau de Synthèse Comptable sous le Tableau (4 mini compteurs) -->
-            <div style="background:#0A1120;border-top:1px solid #1C2B45;padding:12px 20px;display:grid;grid-template-columns:repeat(4, 1fr);gap:14px;font-size:0.8rem;">
+            <div class="sb-sum-counters-grid">
               <div style="display:flex;align-items:center;gap:8px;color:#8FA0BE;">
                 <div style="width:28px;height:28px;border-radius:6px;background:#0F294D;display:flex;align-items:center;justify-content:center;color:#38BDF8;">
                   <i data-lucide="trending-up" style="width:14px;height:14px;"></i>
@@ -4095,7 +4095,8 @@
         <!-- Tableau des 5 plus grands comptes débiteurs -->
         <div style="margin-bottom:20px;">
           <div style="font-weight:800;font-size:0.88rem;color:#0F172A;margin-bottom:8px;text-transform:uppercase;">État des Créances Clients</div>
-          <table style="width:100%;border-collapse:collapse;font-size:0.82rem;">
+              <div class="table-responsive" style="overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid #CBD5E1;border-radius:8px;">
+                <table style="width:100%;border-collapse:collapse;font-size:0.82rem;min-width:480px;">
             <thead>
               <tr style="background:#F1F5F9;border-bottom:1px solid #CBD5E1;">
                 <th style="padding:8px 10px;text-align:left;color:#475569;">Client</th>
@@ -4409,9 +4410,9 @@
     <div class="modal-card" style="max-width:920px;width:95vw;padding:0;overflow:hidden;background:#050914 !important;border:1.5px solid #1C2B45 !important;border-radius:22px !important;box-shadow:0 30px 80px rgba(0,0,0,0.9), 0 0 40px rgba(0,102,255,0.2) !important;">
       
       <!-- En-tête du Lecteur Tutoriel -->
-      <div style="background:#0A1224;padding:16px 22px;border-bottom:1px solid #1C2B45;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+      <div style="background:#0A1224;padding:14px 20px;border-bottom:1px solid #1C2B45;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <div style="width:36px;height:36px;border-radius:10px;background:#0F294D;border:1px solid #1E3A8A;color:#00F5FF;display:flex;align-items:center;justify-content:center;">
+          <div style="width:36px;height:36px;border-radius:10px;background:#0F294D;border:1px solid #1E3A8A;color:#00F5FF;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             <i data-lucide="video" style="width:20px;height:20px;"></i>
           </div>
           <div>
@@ -4419,97 +4420,102 @@
               <span style="background:rgba(0,245,255,0.15);border:1px solid rgba(0,245,255,0.4);color:#00F5FF;font-size:0.68rem;font-weight:900;padding:2px 8px;border-radius:4px;text-transform:uppercase;">Tutoriel Guidé 100% Humain</span>
               <span id="tut-duration-pill" style="font-size:0.75rem;color:#8FA0BE;font-weight:700;">Étape <span id="tut-step-num">1</span> / 5</span>
             </div>
-            <h3 style="margin:2px 0 0 0;font-size:1.05rem;font-weight:900;color:#FFFFFF;font-family:'Outfit',sans-serif;">
+            <h3 style="margin:2px 0 0 0;font-size:1.02rem;font-weight:900;color:#FFFFFF;font-family:'Outfit',sans-serif;">
               Comment Créer un Caissier &amp; Verrouiller vos Bénéfices
             </h3>
           </div>
         </div>
-        <button class="btn btn-outline modal-close-btn" onclick="closeCashierTutorialModal()" style="border-color:#1C2B45;color:#8FA0BE;padding:6px 12px;border-radius:8px;">✕ Fermer</button>
+        <button class="btn btn-outline modal-close-btn" onclick="closeCashierTutorialModal()" style="border-color:#1C2B45;color:#8FA0BE;padding:6px 12px;border-radius:8px;font-size:0.8rem;">✕ Fermer</button>
       </div>
 
-      <!-- ÉCRAN CINÉMATIQUE 16:9 -->
-      <div style="position:relative;width:100%;aspect-ratio:16/9;background:#000000;overflow:hidden;">
+      <!-- CONTENEUR CINÉMATIQUE AVEC CARTE ADAPTATIVE (SURVOL DESKTOP / FLUIDE MOBILE) -->
+      <div class="tut-cinema-wrapper">
         
-        <!-- Scène 1 & 5 : Bureau du Patron -->
-        <div id="tut-scene-patron" style="position:absolute;inset:0;background:url('tutoriel_patron_bureau.jpg') center/cover no-repeat;transition:opacity 0.8s ease-in-out;opacity:1;"></div>
-        
-        <!-- Scène 4 : Caissier Boutique -->
-        <div id="tut-scene-caissier" style="position:absolute;inset:0;background:url('tutoriel_caissier_boutique.jpg') center/cover no-repeat;transition:opacity 0.8s ease-in-out;opacity:0;"></div>
-        
-        <!-- Scène 2 & 3 : Interface Logiciel & PIN -->
-        <div id="tut-scene-ui" style="position:absolute;inset:0;background:linear-gradient(135deg, #070D1B 0%, #0D1627 100%);transition:opacity 0.8s ease-in-out;opacity:0;display:flex;align-items:center;justify-content:center;padding:20px;">
-          <div id="tut-ui-mockup-content" style="width:100%;max-width:540px;background:#0D1627;border:1.5px solid #1C2B45;border-radius:16px;padding:20px;box-shadow:0 20px 50px rgba(0,0,0,0.8);">
-            <!-- Injecté dynamiquement selon l'étape -->
+        <!-- ÉCRAN CINÉMATIQUE 16:9 -->
+        <div class="tut-cinema-screen">
+          
+          <!-- Scène 1 & 5 : Bureau du Patron -->
+          <div id="tut-scene-patron" style="position:absolute;inset:0;background:url('tutoriel_patron_bureau.jpg') center/cover no-repeat;transition:opacity 0.8s ease-in-out;opacity:1;"></div>
+          
+          <!-- Scène 4 : Caissier Boutique -->
+          <div id="tut-scene-caissier" style="position:absolute;inset:0;background:url('tutoriel_caissier_boutique.jpg') center/cover no-repeat;transition:opacity 0.8s ease-in-out;opacity:0;"></div>
+          
+          <!-- Scène 2 & 3 : Interface Logiciel & PIN -->
+          <div id="tut-scene-ui" style="position:absolute;inset:0;background:linear-gradient(135deg, #070D1B 0%, #0D1627 100%);transition:opacity 0.8s ease-in-out;opacity:0;display:flex;align-items:center;justify-content:center;padding:16px;">
+            <div id="tut-ui-mockup-content" style="width:100%;max-width:540px;background:#0D1627;border:1.5px solid #1C2B45;border-radius:16px;padding:16px;box-shadow:0 20px 50px rgba(0,0,0,0.8);">
+              <!-- Injecté dynamiquement selon l'étape -->
+            </div>
           </div>
-        </div>
 
-        <!-- Dégradé Cinéma & Vignette -->
-        <div style="position:absolute;inset:0;background:radial-gradient(circle at center, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.85) 100%), linear-gradient(to bottom, rgba(5,9,20,0.3) 0%, transparent 30%, transparent 60%, rgba(5,9,20,0.95) 100%);pointer-events:none;"></div>
+          <!-- Dégradé Cinéma & Vignette -->
+          <div class="tut-vignette"></div>
 
-        <!-- Badge Live Narrateur -->
-        <div style="position:absolute;top:16px;left:18px;background:rgba(7,13,27,0.85);backdrop-filter:blur(8px);border:1px solid #1C2B45;border-radius:10px;padding:6px 12px;display:flex;align-items:center;gap:8px;z-index:10;">
-          <span style="width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 8px #10B981;display:inline-block;"></span>
-          <span id="tut-narrator-title" style="font-size:0.75rem;font-weight:800;color:#FFFFFF;">Conseil Gérant &amp; Patron</span>
-        </div>
-
-        <!-- Carte Flottante Contextuelle Dynamique -->
-        <div id="tut-floating-card" style="position:absolute;top:18px;right:18px;width:320px;max-width:calc(100% - 36px);background:rgba(13,22,39,0.95);backdrop-filter:blur(12px);border:1px solid #1E3A8A;border-radius:14px;padding:14px 16px;box-shadow:0 15px 35px rgba(0,0,0,0.8);z-index:10;display:none;">
-          <!-- Dynamically populated -->
-        </div>
-
-        <!-- Grand Bouton Play Central (quand en pause) -->
-        <div id="tut-play-center-btn" onclick="toggleTutorialPlay()" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:72px;height:72px;border-radius:50%;background:rgba(0,102,255,0.9);color:#FFFFFF;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 30px rgba(0,102,255,0.8);transition:all 0.2s;z-index:20;">
-          <i data-lucide="play" style="width:34px;height:34px;margin-left:4px;"></i>
-        </div>
-
-        <!-- Zone de Sous-titres Karaoké Humain -->
-        <div style="position:absolute;bottom:0;left:0;right:0;padding:18px 24px;background:linear-gradient(to top, rgba(4,8,18,0.98) 0%, rgba(4,8,18,0.8) 70%, transparent 100%);z-index:15;">
-          <div id="tut-subtitles" style="font-size:1.05rem;line-height:1.45;font-weight:700;color:#FFFFFF;text-align:center;text-shadow:0 2px 8px rgba(0,0,0,0.9);min-height:48px;display:flex;align-items:center;justify-content:center;">
-            Cliquez sur « Lecture » pour lancer le tutoriel audio et vidéo sur la création sécurisée d'un caissier.
+          <!-- Badge Live Narrateur -->
+          <div id="tut-narrator-badge" class="tut-narrator-badge">
+            <span class="tut-live-dot"></span>
+            <span id="tut-narrator-title" style="font-size:0.75rem;font-weight:800;color:#FFFFFF;">Conseil Gérant &amp; Patron</span>
           </div>
+
+          <!-- Grand Bouton Play Central (quand en pause) -->
+          <div id="tut-play-center-btn" onclick="toggleTutorialPlay()" class="tut-center-play-btn">
+            <i data-lucide="play" style="width:34px;height:34px;margin-left:4px;"></i>
+          </div>
+
+          <!-- Zone de Sous-titres Karaoké Humain -->
+          <div class="tut-subtitles-bar">
+            <div id="tut-subtitles">
+              Cliquez sur « Lecture » pour lancer le tutoriel audio et vidéo sur la création sécurisée d'un caissier.
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Carte Flottante Contextuelle Dynamique (Overlay desktop / barre claire sous vidéo sur mobile) -->
+        <div id="tut-floating-card" class="tut-floating-card">
+          <!-- Dynamically populated par applyTutorialScene() -->
         </div>
 
       </div>
 
       <!-- BARRE DE CONTRÔLES CINÉMA & ÉTAPES -->
-      <div style="background:#070D1B;padding:14px 20px;border-top:1px solid #1C2B45;">
+      <div class="tut-controls-bar">
         
         <!-- Barre de progression -->
-        <div style="position:relative;width:100%;height:6px;background:#142138;border-radius:99px;cursor:pointer;margin-bottom:12px;" onclick="handleTutorialTimelineClick(event)">
-          <div id="tut-progress-bar" style="position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(90deg, #0066FF, #00F5FF);border-radius:99px;transition:width 0.25s linear;"></div>
+        <div class="tut-progress-track" onclick="handleTutorialTimelineClick(event)">
+          <div id="tut-progress-bar" class="tut-progress-fill"></div>
         </div>
 
-        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div class="tut-controls-row">
           
           <!-- Contrôles Principaux (Play, Étape Précédente, Suivante) -->
-          <div style="display:flex;align-items:center;gap:10px;">
-            <button type="button" id="tut-btn-play" onclick="toggleTutorialPlay()" style="background:#0066FF;color:#FFFFFF;border:none;border-radius:10px;padding:8px 18px;font-weight:800;font-size:0.85rem;display:flex;align-items:center;gap:6px;cursor:pointer;">
+          <div class="tut-playback-btns">
+            <button type="button" id="tut-btn-play" onclick="toggleTutorialPlay()" class="tut-play-btn">
               <i data-lucide="play" id="tut-play-icon" style="width:16px;height:16px;"></i>
               <span id="tut-play-text">Lecture</span>
             </button>
-            <button type="button" onclick="prevTutorialScene()" style="background:#0D1627;border:1px solid #1C2B45;color:#8FA0BE;border-radius:8px;padding:8px 12px;font-size:0.8rem;cursor:pointer;" title="Étape précédente">
+            <button type="button" onclick="prevTutorialScene()" class="tut-nav-btn" title="Étape précédente">
               ⏮ Précédent
             </button>
-            <button type="button" onclick="nextTutorialScene()" style="background:#0D1627;border:1px solid #1C2B45;color:#FFFFFF;border-radius:8px;padding:8px 12px;font-size:0.8rem;cursor:pointer;" title="Étape suivante">
+            <button type="button" onclick="nextTutorialScene()" class="tut-nav-btn tut-nav-btn-next" title="Étape suivante">
               Suivant ⏭
             </button>
-            <button type="button" onclick="restartTutorial()" style="background:#0D1627;border:1px solid #1C2B45;color:#8FA0BE;border-radius:8px;padding:8px 12px;font-size:0.8rem;cursor:pointer;" title="Recommencer">
+            <button type="button" onclick="restartTutorial()" class="tut-nav-btn" title="Recommencer">
               ↺
             </button>
           </div>
 
-          <!-- Puces des 5 Étapes du Scénario -->
-          <div style="display:flex;gap:6px;align-items:center;">
-            <button class="tut-step-pill active" onclick="jumpToTutorialScene(0)" id="tut-pill-0" style="background:#0F294D;border:1px solid #00F5FF;color:#00F5FF;padding:5px 10px;border-radius:8px;font-size:0.74rem;font-weight:800;cursor:pointer;">1. L'Enjeu Patron</button>
-            <button class="tut-step-pill" onclick="jumpToTutorialScene(1)" id="tut-pill-1" style="background:#0D1627;border:1px solid #1C2B45;color:#8FA0BE;padding:5px 10px;border-radius:8px;font-size:0.74rem;font-weight:800;cursor:pointer;">2. Identité</button>
-            <button class="tut-step-pill" onclick="jumpToTutorialScene(2)" id="tut-pill-2" style="background:#0D1627;border:1px solid #1C2B45;color:#8FA0BE;padding:5px 10px;border-radius:8px;font-size:0.74rem;font-weight:800;cursor:pointer;">3. Code PIN Secret</button>
-            <button class="tut-step-pill" onclick="jumpToTutorialScene(3)" id="tut-pill-3" style="background:#0D1627;border:1px solid #1C2B45;color:#8FA0BE;padding:5px 10px;border-radius:8px;font-size:0.74rem;font-weight:800;cursor:pointer;">4. Envoi WhatsApp</button>
-            <button class="tut-step-pill" onclick="jumpToTutorialScene(4)" id="tut-pill-4" style="background:#0D1627;border:1px solid #1C2B45;color:#8FA0BE;padding:5px 10px;border-radius:8px;font-size:0.74rem;font-weight:800;cursor:pointer;">5. Contrôle Quotidien</button>
+          <!-- Puces des 5 Étapes du Scénario avec Défilement Tactile Fluide -->
+          <div class="tut-pills-row">
+            <button class="tut-step-pill active" onclick="jumpToTutorialScene(0)" id="tut-pill-0">1. L'Enjeu Patron</button>
+            <button class="tut-step-pill" onclick="jumpToTutorialScene(1)" id="tut-pill-1">2. Identité</button>
+            <button class="tut-step-pill" onclick="jumpToTutorialScene(2)" id="tut-pill-2">3. Code PIN Secret</button>
+            <button class="tut-step-pill" onclick="jumpToTutorialScene(3)" id="tut-pill-3">4. Envoi WhatsApp</button>
+            <button class="tut-step-pill" onclick="jumpToTutorialScene(4)" id="tut-pill-4">5. Contrôle Quotidien</button>
           </div>
 
           <!-- Bouton Action Directe -->
-          <div>
-            <button type="button" onclick="closeCashierTutorialModal(); openModal('modal-add-cashier'); goToCashierStep(1);" style="background:#10B981;color:#FFFFFF;border:none;border-radius:10px;padding:9px 18px;font-weight:900;font-size:0.84rem;display:flex;align-items:center;gap:6px;cursor:pointer;box-shadow:0 3px 12px rgba(16,185,129,0.35);">
+          <div class="tut-action-wrap">
+            <button type="button" onclick="closeCashierTutorialModal(); openModal('modal-add-cashier'); goToCashierStep(1);" class="tut-btn-create-cashier">
               <i data-lucide="user-plus" style="width:15px;height:15px;"></i>
               <span>+ Créer un Caissier</span>
             </button>

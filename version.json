@@ -1,7 +1,7 @@
 {
-  "version": "4.9.13",
-  "build": "20261005-212000",
-  "commit": "official-release-v4.9.13-dynamic-country-payment-methods-salesbook",
-  "timestamp": "2026-10-05T19:15:39.219Z",
-  "builtAt": "2026-10-05 21:20:00"
+  "version": "4.9.14",
+  "build": "20261005-213000",
+  "commit": "official-release-v4.9.14-mobile-tutorial-clean-unobstructed-view-responsive-tables",
+  "timestamp": "2026-10-05T19:30:00.000Z",
+  "builtAt": "2026-10-05 21:30:00"
 }

@@ -7676,16 +7676,21 @@ function applyTutorialScene(index) {
 
   // Floating card
   const floatCard = document.getElementById('tut-floating-card');
-  if (floatCard && data.floatingCard) {
-    floatCard.style.display = 'block';
-    floatCard.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-size:0.68rem;font-weight:900;color:#00F5FF;letter-spacing:0.5px;">${data.floatingCard.badge}</span>
-        <span style="width:7px;height:7px;border-radius:50%;background:#10B981;box-shadow:0 0 6px #10B981;"></span>
-      </div>
-      <strong style="display:block;font-size:0.92rem;color:#FFFFFF;margin-bottom:6px;">${data.floatingCard.title}</strong>
-      <div style="font-size:0.78rem;color:#8FA0BE;line-height:1.45;">${data.floatingCard.desc}</div>
-    `;
+  if (floatCard) {
+    if (data.floatingCard) {
+      floatCard.style.display = 'block';
+      floatCard.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <span style="font-size:0.68rem;font-weight:900;color:#00F5FF;letter-spacing:0.5px;">${data.floatingCard.badge}</span>
+          <span style="width:7px;height:7px;border-radius:50%;background:#10B981;box-shadow:0 0 6px #10B981;"></span>
+        </div>
+        <strong style="display:block;font-size:0.92rem;color:#FFFFFF;margin-bottom:6px;">${data.floatingCard.title}</strong>
+        <div style="font-size:0.78rem;color:#8FA0BE;line-height:1.45;">${data.floatingCard.desc}</div>
+      `;
+    } else {
+      floatCard.style.display = 'none';
+      floatCard.innerHTML = '';
+    }
   }
 
   // Update progress bar
