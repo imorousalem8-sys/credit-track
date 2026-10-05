@@ -2050,10 +2050,16 @@ window.renderCashiersList = function() {
         <p style="font-size:0.82rem;color:#64748B;max-width:440px;margin:0 auto 16px;line-height:1.45;">
           Créez un profil pour vos employés afin qu'ils puissent encaisser des règlements sans jamais voir vos bénéfices ni vos marges.
         </p>
-        <button type="button" class="btn btn-primary" onclick="openModal('modal-add-cashier'); goToCashierStep(1);" style="padding:9px 18px;font-weight:800;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px;">
-          <i data-lucide="user-plus" style="width:16px;height:16px;"></i>
-          <span>+ Créer mon Premier Caissier</span>
-        </button>
+        <div style="display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn btn-outline" onclick="openCashierTutorialModal()" style="padding:9px 18px;font-weight:800;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px;border:1px solid #1E3A8A;background:#070D1B;color:#00F5FF;border-radius:10px;cursor:pointer;">
+            <i data-lucide="play-circle" style="width:16px;height:16px;color:#00F5FF;"></i>
+            <span>Tutoriel Vidéo (Sécurité)</span>
+          </button>
+          <button type="button" class="btn btn-primary" onclick="openModal('modal-add-cashier'); goToCashierStep(1);" style="padding:9px 18px;font-weight:800;font-size:0.84rem;display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+            <i data-lucide="user-plus" style="width:16px;height:16px;"></i>
+            <span>+ Créer mon Premier Caissier</span>
+          </button>
+        </div>
       </div>
     `;
     if (window.lucide) lucide.createIcons();
@@ -3038,10 +3044,10 @@ window.viewClientDetails = function(clientId) {
                   (t.status === 'overdue' ? (AppState.lang === 'en' ? 'Overdue' : 'En Retard') : (AppState.lang === 'en' ? 'Pending' : 'En Attente'));
       return `
         <tr>
-          <td style="color:#64748B;">${t.date}</td>
-          <td style="font-weight:700;">${escapeHTML(t.desc)}</td>
-          <td style="font-weight:800;">${formatCurrency(t.amount)}</td>
-          <td><span style="background:${bColor}22; color:${bColor}; padding:2px 6px; border-radius:4px; font-size:0.72rem; font-weight:700;">${bText}</span></td>
+          <td style="color:#94A3B8; font-size:0.82rem; font-weight:600;">${t.date}</td>
+          <td style="color:#FFFFFF; font-weight:700; font-size:0.88rem;">${escapeHTML(t.desc)}</td>
+          <td style="color:#38BDF8; font-weight:900; font-size:0.92rem; letter-spacing:0.3px;">${formatCurrency(t.amount)}</td>
+          <td><span style="background:${bColor}22; color:${bColor}; border:1px solid ${bColor}44; padding:3px 8px; border-radius:6px; font-size:0.72rem; font-weight:800; display:inline-block;">${bText}</span></td>
         </tr>
       `;
     }).join('');

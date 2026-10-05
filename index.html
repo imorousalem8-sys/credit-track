@@ -92,9 +92,9 @@
       }
     })();
   </script>
-  <script src="dataStore.js?v=20261005_v16.0_prod" defer></script>
-  <script src="app.js?v=20261005_v16.0_prod" defer></script>
-  <link rel="stylesheet" href="styles.css?v=20261005_v16.0_prod">
+  <script src="dataStore.js?v=20261005_v17.0_prod" defer></script>
+  <script src="app.js?v=20261005_v17.0_prod" defer></script>
+  <link rel="stylesheet" href="styles.css?v=20261005_v17.0_prod">
 </head>
 <body class="is-landing-mode">
 
@@ -1164,9 +1164,7 @@
       <div class="sidebar-brand">
         <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
           <div class="brand-left" onclick="switchMenu('menu-2')" style="cursor:pointer;display:flex;align-items:center;gap:10px;">
-            <div style="width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);display:flex;align-items:center;justify-content:center;color:#FFFFFF;box-shadow:0 4px 12px rgba(37,99,235,0.35);flex-shrink:0;">
-              <i data-lucide="shield-check" style="width:22px;height:22px;"></i>
-            </div>
+            <img src="logo_3d.png" alt="Logo CréditTrack PRO" style="width:40px;height:40px;object-fit:contain;border-radius:10px;filter:drop-shadow(0 4px 10px rgba(37,99,235,0.45));flex-shrink:0;">
             <div>
               <div class="brand-title" style="font-size:1.05rem;font-weight:900;line-height:1.15;color:#FFFFFF;letter-spacing:-0.3px;">CréditTrack <span style="color:#38BDF8;font-size:0.78rem;">PRO</span></div>
               <div style="font-size:0.62rem;color:#94A3B8;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;">Gestion Panafricaine</div>
@@ -1178,24 +1176,24 @@
 
         <!-- Controls: Pays + Langue + Mode -->
         <div class="sidebar-controls-card">
-          <div style="display:flex;align-items:center;gap:6px;">
-            <i data-lucide="globe" style="width:14px;height:14px;color:#93C5FD;"></i>
+          <div class="sidebar-control-row">
+            <i data-lucide="globe" style="width:15px;height:15px;color:#38BDF8;flex-shrink:0;"></i>
             <select id="country-select" onchange="switchCountry(this.value)" class="sidebar-select" title="Pays">
               <!-- Dynamic populated from AFRICAN_COUNTRIES -->
             </select>
           </div>
 
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:4px;">
-            <div style="display:flex;align-items:center;gap:4px;">
-              <i data-lucide="languages" style="width:14px;height:14px;color:#93C5FD;"></i>
+          <div style="display:grid;grid-template-columns:1fr 1.35fr;gap:6px;">
+            <div class="sidebar-control-row" style="padding:5px 8px;">
+              <i data-lucide="languages" style="width:13px;height:13px;color:#38BDF8;flex-shrink:0;"></i>
               <select id="lang-select" onchange="switchLanguage(this.value)" class="sidebar-select" title="Langue">
                 <option value="fr">🇫🇷 FR</option>
                 <option value="en">🇬🇧 EN</option>
               </select>
             </div>
 
-            <div style="display:flex;align-items:center;gap:4px;">
-              <i data-lucide="layers" style="width:14px;height:14px;color:#93C5FD;"></i>
+            <div class="sidebar-control-row" style="padding:5px 8px;">
+              <i data-lucide="layers" style="width:13px;height:13px;color:#38BDF8;flex-shrink:0;"></i>
               <select id="mode-select" onchange="switchAppMode(this.value)" class="sidebar-select" title="Mode de travail">
                 <option value="credit" data-i18n="modeCredit">Crédit</option>
                 <option value="accounting" data-i18n="modeAccounting">Caisse / Compta</option>
@@ -1282,15 +1280,6 @@
             <i data-lucide="settings"></i>
             <span>Paramètres</span>
           </div>
-        </button>
-
-        <!-- Tutoriel Vidéo : Créer un Caissier & Sécurité -->
-        <button class="nav-link" id="nav-menu-tutorial" onclick="openCashierTutorialModal()" style="margin-top:6px;background:linear-gradient(135deg, rgba(15,41,77,0.7) 0%, rgba(7,13,27,0.9) 100%);border:1px solid #1E3A8A;border-radius:12px;transition:all 0.2s;">
-          <div class="nav-link-left">
-            <i data-lucide="play-circle" style="color:#00F5FF;width:18px;height:18px;"></i>
-            <span style="color:#FFFFFF;font-weight:700;">Tuto Caissier &amp; Sécurité</span>
-          </div>
-          <span style="background:linear-gradient(135deg,#0066FF,#00F5FF);color:#FFFFFF;font-size:0.65rem;font-weight:900;padding:2px 7px;border-radius:6px;letter-spacing:0.5px;box-shadow:0 2px 6px rgba(0,245,255,0.4);">VIDÉO</span>
         </button>
 
         <!-- 8. Page d'Accueil (Site Public) -->
@@ -3899,7 +3888,12 @@
               <p style="margin:2px 0 0 0;font-size:0.75rem;color:#94A3B8;">Assistant de configuration sécurisée en 4 étapes</p>
             </div>
           </div>
-          <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-add-cashier')" style="color:#94A3B8;border-color:#334155;background:transparent;">✕</button>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <button type="button" onclick="openCashierTutorialModal()" style="background:rgba(0,245,255,0.12);border:1px solid #00F5FF;color:#00F5FF;padding:5px 12px;border-radius:8px;font-size:0.76rem;font-weight:800;display:inline-flex;align-items:center;gap:6px;cursor:pointer;">
+              <i data-lucide="play-circle" style="width:14px;height:14px;color:#00F5FF;"></i> Guide Vidéo
+            </button>
+            <button class="btn btn-outline modal-close-btn" onclick="closeModal('modal-add-cashier')" style="color:#94A3B8;border-color:#334155;background:transparent;">✕</button>
+          </div>
         </div>
 
         <!-- Stepper Visuel 4 Étapes -->

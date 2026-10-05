@@ -1460,21 +1460,49 @@ body.is-app-mode #app-workspace-layout {
 }
 
 .sidebar-controls-card {
-  background: rgba(0,0,0,0.22);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: linear-gradient(180deg, rgba(13, 22, 39, 0.85) 0%, rgba(7, 13, 27, 0.95) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.2);
   padding: 8px 10px;
-  border-radius: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sidebar-control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 8px;
+  padding: 6px 10px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-control-row:hover, .sidebar-control-row:focus-within {
+  border-color: #38BDF8;
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
 }
 
 .sidebar-select {
-  background: none;
+  background: transparent;
   border: none;
-  color: #fff;
+  color: #FFFFFF;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   cursor: pointer;
   width: 100%;
   outline: none;
+  font-family: inherit;
+}
+
+.sidebar-select option {
+  background: #0B132B;
+  color: #FFFFFF;
+  padding: 8px;
 }
 
 .sidebar-nav {
@@ -5184,4 +5212,31 @@ body, html {
   .header-plan-badge-btn span {
     display: none !important;
   }
+}
+
+/* Styles Exécutifs Sombre pour les Modales et Tables d'Historique */
+.modal-card .custom-table {
+  background: #070D1B !important;
+}
+
+.modal-card .custom-table thead th {
+  background-color: #0F172A !important;
+  color: #94A3B8 !important;
+  border-bottom: 1px solid #1C2B45 !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.5px !important;
+}
+
+.modal-card .custom-table tbody td,
+#modal-client-history-body td {
+  background-color: transparent !important;
+  color: #FFFFFF !important;
+  border-bottom: 1px solid #1C2B45 !important;
+  font-size: 0.85rem !important;
+}
+
+.modal-card .custom-table tbody tr:hover td,
+#modal-client-history-body tr:hover td {
+  background-color: rgba(255, 255, 255, 0.04) !important;
 }
